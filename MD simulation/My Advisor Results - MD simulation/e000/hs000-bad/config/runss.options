@@ -1,0 +1,112 @@
+-r
+C:\Users\user\Desktop\MD simulation\MD simulation\MD simulation\My Advisor Results - MD simulation\e000\hs000
+-type
+cpu:stack
+--mrte-mode=auto
+--follow-child
+--strategy=ld-linux.so.2:notrace:notrace,ld-linux-x86-64.so.2:notrace:notrace
+--interval=10
+--data-limit-mb=100
+--stack-stitching
+--stackwalk=offline
+--mrte-type=java,dotnet
+--search-dir
+sym=C:\Users\user\Desktop\MD simulation\MD simulation\Release
+--search-dir
+sym=C:\Users\user\Desktop\MD simulation\MD simulation
+--search-dir
+sym=srv*C:\Users\user\AppData\Local\Temp\SymbolCache
+--search-dir
+sym=srv*https://msdl.microsoft.com/download/symbols
+--search-dir
+bin=C:\Users\user\Desktop\MD simulation\MD simulation\Release
+--search-dir
+bin=C:\Users\user\Desktop\MD simulation\MD simulation
+--search-dir
+bin=C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2017\windows\bin\intel64
+--search-dir
+bin=C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64_x86
+--search-dir
+bin=C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64
+--search-dir
+bin=C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\tools
+--search-dir
+bin=C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\ide
+--search-dir
+bin=C:\Program Files (x86)\HTML Help Workshop
+--search-dir
+bin=C:\Program Files (x86)\Windows Kits\8.1\bin\x64
+--search-dir
+bin=C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.6.1 Tools\x64
+--search-dir
+bin=C:\WINDOWS\SysWow64
+--search-dir
+bin=C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\wy12adzo.ezz\NativeBinaries\x86
+--search-dir
+bin=C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2017.1.143\windows\mpi\intel64\bin
+--search-dir
+bin=C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2017.0.109\windows\mpi\intel64\bin
+--search-dir
+bin=C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\intel64_win\mpirt
+--search-dir
+bin=C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\ia32_win\mpirt
+--search-dir
+bin=C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\intel64_win\compiler
+--search-dir
+bin=C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\ia32_win\compiler
+--search-dir
+bin=C:\ProgramData\Oracle\Java\javapath
+--search-dir
+bin=C:\WINDOWS\system32
+--search-dir
+bin=C:\WINDOWS
+--search-dir
+bin=C:\WINDOWS\System32\Wbem
+--search-dir
+bin=C:\WINDOWS\System32\WindowsPowerShell\v1.0
+--search-dir
+bin=C:\Program Files (x86)\Skype\Phone
+--search-dir
+bin=C:\Program Files\Microsoft SQL Server\120\Tools\Binn
+--search-dir
+bin=C:\Program Files\Microsoft SQL Server\130\Tools\Binn
+--search-dir
+bin=C:\Program Files (x86)\nodejs
+--search-dir
+bin=C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit
+--search-dir
+bin=C:\Program Files (x86)\Microsoft SQL Server\110\DTS\Binn
+--search-dir
+bin=C:\Program Files (x86)\Microsoft SQL Server\120\DTS\Binn
+--search-dir
+bin=C:\Program Files (x86)\Microsoft SQL Server\130\DTS\Binn
+--search-dir
+bin=C:\Program Files\Microsoft\Web Platform Installer
+--search-dir
+bin=C:\Program Files\dotnet
+--search-dir
+bin=C:\WINDOWS\system32\config\systemprofile\.dnx\bin
+--search-dir
+bin=C:\Program Files\Microsoft DNX\Dnvm
+--search-dir
+bin=C:\Program Files (x86)\Microsoft Emulator Manager\1.0
+--search-dir
+bin=C:\Program Files\Git\cmd
+--search-dir
+bin=C:\Anaconda2
+--search-dir
+bin=C:\Anaconda2\Scripts
+--search-dir
+bin=C:\Anaconda2\Library\bin
+--search-dir
+bin=c:\users\user\appdata\local\enthought\canopy\user\scripts
+--search-dir
+bin=C:\Users\user\AppData\Local\Enthought\Canopy\User
+--search-dir
+bin=C:\Users\user\AppData\Local\Programs\MiKTeX 2.9\miktex\bin\x64
+--search-dir
+bin=C:\Users\user\AppData\Roaming\npm
+--search-dir
+bin=C:/Users\user\Desktop\MD simulation\MD simulation\MD simulation\%USERPROFILE%\AppData\Local\Microsoft\WindowsApps
+--
+C:\Users\user\Desktop\MD simulation\MD simulation\Release\MD simulation.exe

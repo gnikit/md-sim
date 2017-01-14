@@ -1,0 +1,75 @@
+Diffusion coef:  4.05989793752 
+y-intercept:  -8.03098979272 
+R value:  0.998371935283 
+P value:  0.0 
+Fit Error:  0.00231974463302
+Diffusion coef:  6.64933622769 
+y-intercept:  -14.2731742092 
+R value:  0.99779253545 
+P value:  0.0 
+Fit Error:  0.00442591979014
+Diffusion coef:  12.5018427894 
+y-intercept:  -14.1413614568 
+R value:  0.999839010397 
+P value:  0.0 
+Fit Error:  0.00224379834252
+Diffusion coef:  39.1769752011 
+y-intercept:  -142.225245519 
+R value:  0.998171887364 
+P value:  0.0 
+Fit Error:  0.0237239444715
+Diffusion coef:  93.9529831901 
+y-intercept:  -549.400526156 
+R value:  0.991695286172 
+P value:  0.0 
+Fit Error:  0.121856736482
+Diffusion coef:  146.007357902 
+y-intercept:  -1056.85473587 
+R value:  0.981156427116 
+P value:  0.0 
+Fit Error:  0.287555006059
+Diffusion coef:  179.305253971 
+y-intercept:  -1413.9217501 
+R value:  0.974040153449 
+P value:  0.0 
+Fit Error:  0.416762505611
+Diffusion coef:  194.814234727 
+y-intercept:  -1578.96505825 
+R value:  0.971387123459 
+P value:  0.0 
+Fit Error:  0.476363520972
+Diffusion coef:  201.836107016 
+y-intercept:  -1656.94832353 
+R value:  0.96994196236 
+P value:  0.0 
+Fit Error:  0.506411516884
+Diffusion coef:  205.5861986 
+y-intercept:  -1699.06473491 
+R value:  0.96916305061 
+P value:  0.0 
+Fit Error:  0.522777737447
+Diffusion coef:  207.243508337 
+y-intercept:  -1717.15846757 
+R value:  0.968864985282 
+P value:  0.0 
+Fit Error:  0.52965565567
+Diffusion coef:  208.42367005 
+y-intercept:  -1730.26724232 
+R value:  0.968637932437 
+P value:  0.0 
+Fit Error:  0.534705028091
+Diffusion coef:  208.983231276 
+y-intercept:  -1736.71175307 
+R value:  0.968509574415 
+P value:  0.0 
+Fit Error:  0.537290282653
+Diffusion coef:  209.595669081 
+y-intercept:  -1743.47422991 
+R value:  0.968395705715 
+P value:  0.0 
+Fit Error:  0.539886087765
+Diffusion coef:  209.848467254 
+y-intercept:  -1746.34862371 
+R value:  0.96834207223 
+P value:  0.0 
+Fit Error:  0.541018310091

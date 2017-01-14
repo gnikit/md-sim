@@ -1,0 +1,76 @@
+C:\Anaconda2\python.exe "C:/Users/user/Dropbox/University/3.1/PH 3110 Project/MD Sim (class)/MD Sim (class)/PlotAnalysis/FileLoadingPlotting.py"
+Diffusion coef:  3.75278030631 
+y-intercept:  -3.03472111849 
+R value:  0.998863707607 
+P value:  0.0 
+Fit Error:  0.00253270974866
+Diffusion coef:  5.81282228689 
+y-intercept:  -4.31496174004 
+R value:  0.999562771057 
+P value:  0.0 
+Fit Error:  0.0024322086004
+Diffusion coef:  12.8137817496 
+y-intercept:  -17.0012963535 
+R value:  0.99912453174 
+P value:  0.0 
+Fit Error:  0.00758926471307
+Diffusion coef:  34.109027881 
+y-intercept:  -85.5811806928 
+R value:  0.994184818018 
+P value:  0.0 
+Fit Error:  0.0522598847018
+Diffusion coef:  67.396443338 
+y-intercept:  -236.237640532 
+R value:  0.983028329018 
+P value:  0.0 
+Fit Error:  0.177909680654
+Diffusion coef:  87.586845694 
+y-intercept:  -340.702771823 
+R value:  0.975476758226 
+P value:  0.0 
+Fit Error:  0.279543073713
+Diffusion coef:  96.8658258525 
+y-intercept:  -391.389158818 
+R value:  0.971637152946 
+P value:  0.0 
+Fit Error:  0.333469988843
+Diffusion coef:  101.317522341 
+y-intercept:  -415.805415389 
+R value:  0.969917276551 
+P value:  0.0 
+Fit Error:  0.359694924624
+Diffusion coef:  103.086340228 
+y-intercept:  -425.662647126 
+R value:  0.969206602689 
+P value:  0.0 
+Fit Error:  0.370476850502
+Diffusion coef:  103.986269267 
+y-intercept:  -430.842551662 
+R value:  0.96879075541 
+P value:  0.0 
+Fit Error:  0.376347724507
+Diffusion coef:  104.438937204 
+y-intercept:  -433.363773326 
+R value:  0.968616404335 
+P value:  0.0 
+Fit Error:  0.379091806296
+Diffusion coef:  104.728843679 
+y-intercept:  -434.976520121 
+R value:  0.968496555041 
+P value:  0.0 
+Fit Error:  0.380904808781
+Diffusion coef:  104.847340758 
+y-intercept:  -435.662443804 
+R value:  0.968440961317 
+P value:  0.0 
+Fit Error:  0.38168863047
+Diffusion coef:  105.00216152 
+y-intercept:  -436.509714756 
+R value:  0.968385413832 
+P value:  0.0 
+Fit Error:  0.382605046358
+Diffusion coef:  105.061030588 
+y-intercept:  -436.852391039 
+R value:  0.968361997082 
+P value:  0.0 
+Fit Error:  0.382968285067

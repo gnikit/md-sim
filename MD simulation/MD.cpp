@@ -322,8 +322,8 @@ void MD::Simulation()
 		PC = PC / (3 * Vol);
 
 		// Isothermal Calibration
-		//scale_v = sqrt(T0 / T);														 // using T & KE from prev timestep
-		scale_v = 1;
+		scale_v = sqrt(T0 / T);														 // using T & KE from prev timestep
+		//scale_v = 1;
 		KE = 0;																		 // set 0 for each step
 
 		// Verlet Algorithm

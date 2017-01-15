@@ -339,7 +339,7 @@ void MD::Simulation()
 		KE /= N;
 
 		WriteToFiles();  // writes data to open streams
-		//ShowRun(500);  // shows every 500 steps 
+		ShowRun(500);  // shows every 500 steps 
 
 	}
 	// Saving Last Position

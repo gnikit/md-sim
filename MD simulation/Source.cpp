@@ -24,21 +24,37 @@ int main()
 	cerr << "Log file of the MD simulation" << endl;
 	cerr << "Power:\tA:\tsteps:" << endl;
 	size_t num = 1;
-	char full = 'n';
+	char full = 'y';
 	//cout << "Run full simulation?"; cin >> full;
 	// Currently this code is not executing
-	if (full == 'y')
+	//if (full == 'y')
+	//{
+	//	for (size_t n = 0; n < power.size(); n++)
+	//	{
+	//		for (size_t a = 0; a < A_parameter.size(); a++)
+	//		{
+	//			cout << "run: " << num << endl;
+	//			MD run(power.at(n), A_parameter.at(a), steps);
+	//			run.Simulation();
+	//			cerr << power.at(n) << "\t" << A_parameter.at(a) << "\t" << steps << endl;
+	//			num++;
+
+	//		}
+	//	}
+	//}
+	vector<size_t> step = { /*2500, 12500, 15000,*/ 20000 };
+
+	if (full == 'yn')
 	{
-		for (size_t n = 0; n < power.size(); n++)
+		for (size_t n = 0; n < step.size(); n++)
 		{
 			for (size_t a = 0; a < A_parameter.size(); a++)
 			{
 				cout << "run: " << num << endl;
-				MD run(power.at(n), A_parameter.at(a), steps);
+				MD run(6, A_parameter.at(a), step.at(n));
 				run.Simulation();
-				cerr << power.at(n) << "\t" << A_parameter.at(a) << "\t" << steps << endl;
+				cerr << 6 << '\t' << A_parameter.at(a) << '\t' << step.at(n) << endl;
 				num++;
-
 			}
 		}
 	}
@@ -50,9 +66,9 @@ int main()
 	//	run.Simulation();
 	//}
 
-	MD run(6, 0, steps);
-	run.Simulation(); cerr << "U: 6\tA:0" << endl;
-	
+	//MD run(6, 0, steps);
+	//run.Simulation(); cerr << "U: 6\tA:0" << endl;
+	//
 	//MD run1(6, 0.5, steps);
 	//run1.Simulation(); cerr << "U: 6\tA:0.5" << endl;
 	//

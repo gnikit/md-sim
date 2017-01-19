@@ -42,10 +42,10 @@ int main()
 	//		}
 	//	}
 	//}
-	vector<size_t> step = { /*2500, 12500, 15000,*/ 20000 };
+	vector<size_t> step = { 15000 };
 
-	if (full == 'yn')
-	{
+	if (full == 'y')
+{
 		for (size_t n = 0; n < step.size(); n++)
 		{
 			for (size_t a = 0; a < A_parameter.size(); a++)
@@ -58,6 +58,7 @@ int main()
 			}
 		}
 	}
+	StaticDataProcessing(6);
 
 
 	//for (size_t j = 0; j < A_parameter.size(); j++)

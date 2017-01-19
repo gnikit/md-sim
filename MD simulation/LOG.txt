@@ -462,3 +462,61 @@ Power:	A:	steps:
 6	4	20000
 Log file of the MD simulation
 Power:	A:	steps:
+Log file of the MD simulation
+Power:	A:	steps:
+Log file of the MD simulation
+Power:	A:	steps:
+6	0	2500
+6	0.25	2500
+6	0.5	2500
+6	0.75	2500
+6	1	2500
+6	1.25	2500
+6	1.5	2500
+6	1.75	2500
+6	2	2500
+6	2.25	2500
+6	2.5	2500
+6	2.75	2500
+6	3	2500
+6	3.5	2500
+6	4	2500
+Log file of the MD simulation
+Power:	A:	steps:
+Log file of the MD simulation
+Power:	A:	steps:
+Assertion failed: read_file.is_open(), file Source.cpp, line 110
+Log file of the MD simulation
+Power:	A:	steps:
+6	0	12500
+6	0.25	12500
+6	0.5	12500
+6	0.75	12500
+6	1	12500
+6	1.25	12500
+6	1.5	12500
+6	1.75	12500
+6	2	12500
+6	2.25	12500
+6	2.5	12500
+6	2.75	12500
+6	3	12500
+6	3.5	12500
+6	4	12500
+Log file of the MD simulation
+Power:	A:	steps:
+6	0	15000
+6	0.25	15000
+6	0.5	15000
+6	0.75	15000
+6	1	15000
+6	1.25	15000
+6	1.5	15000
+6	1.75	15000
+6	2	15000
+6	2.25	15000
+6	2.5	15000
+6	2.75	15000
+6	3	15000
+6	3.5	15000
+6	4	15000

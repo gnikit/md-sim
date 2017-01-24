@@ -18,7 +18,7 @@ int main()
 {
 	//freopen("LOG.txt", "a+", stderr);
 	freopen_s(&stream, "LOG.txt", "a+", stderr);
-	size_t steps = 5001;
+	size_t steps = 500;
 	vector<double> A_parameter = { 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.50, 1.75, 2.0, 2.25, 2.50, 2.75, 3.0, 3.5, 4.0 };
 	vector<size_t> power = { 6,7,8,9,10,12 };
 	cerr << "Log file of the MD simulation" << endl;
@@ -36,29 +36,29 @@ int main()
 	//			cout << "run: " << num << endl;
 	//			MD run(power.at(n), A_parameter.at(a), steps);
 	//			run.Simulation();
-	//			cerr << power.at(n) << "\t" << A_parameter.at(a) << "\t" << steps << endl;
+	//			cerr << power.at(n) << "\t" << A_parameter.at(a) << "\t" << steps << "rho = 0.8" << endl;
 	//			num++;
-
 	//		}
 	//	}
 	//}
-	vector<size_t> step = { 15000 };
 
-	if (full == 'y')
-{
-		for (size_t n = 0; n < step.size(); n++)
-		{
-			for (size_t a = 0; a < A_parameter.size(); a++)
-			{
-				cout << "run: " << num << endl;
-				MD run(6, A_parameter.at(a), step.at(n));
-				run.Simulation();
-				cerr << 6 << '\t' << A_parameter.at(a) << '\t' << step.at(n) << endl;
-				num++;
-			}
-		}
-	}
-	StaticDataProcessing(6);
+	//vector<size_t> step = { 15000 };
+	//
+	//if (full == 'y')
+	//{
+	//	for (size_t n = 0; n < step.size(); n++)
+	//	{
+	//		for (size_t a = 0; a < A_parameter.size(); a++)
+	//		{
+	//			cout << "run: " << num << endl;
+	//			MD run(6, A_parameter.at(a), step.at(n));
+	//			run.Simulation();
+	//			cerr << 6 << '\t' << A_parameter.at(a) << '\t' << step.at(n) << endl;
+	//			num++;
+	//		}
+	//	}
+	//}
+	//StaticDataProcessing(6);
 
 
 	//for (size_t j = 0; j < A_parameter.size(); j++)
@@ -67,8 +67,8 @@ int main()
 	//	run.Simulation();
 	//}
 
-	//MD run(6, 0, steps);
-	//run.Simulation(); cerr << "U: 6\tA:0" << endl;
+	MD run(6, 0, steps);
+	run.Simulation();
 	//
 	//MD run1(6, 0.5, steps);
 	//run1.Simulation(); cerr << "U: 6\tA:0.5" << endl;

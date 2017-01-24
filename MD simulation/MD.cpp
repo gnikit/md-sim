@@ -51,7 +51,7 @@ MD::MD(int POWER, double A_cst, size_t run_number)
 	stream << std::fixed << std::setprecision(2) << A;
 	A_par = stream.str();
 
-	path = "C:/Users/user/Dropbox/University/3.1/PH 3110 Project/sim v2.1/sim v2.1";
+	path = "../../Archives of Data/Density 0.8/";
 	file_type = ".txt";
 	KIN = "KinEn"; POT = "PotEn"; TOT = "TotEn";
 	PRESSUREC = "PressureC"; PRESSUREK = "PressureK"; PCKTOT = "PCK"; TEMPERATURE = "Temperature";
@@ -312,7 +312,7 @@ void MD::Simulation()
 
 																					// Radial Distribution 
 					igr = Nhist* r / rg;
-					gr[igr] = gr[igr] + 1; // goes out of bounds here. igr not a linear index
+					gr[igr] = gr[igr] + 1;
 					rn = (igr - 0.5)*dr;
 				}
 			}

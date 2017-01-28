@@ -51,7 +51,7 @@ MD::MD(int POWER, double A_cst, size_t run_number)
 	stream << std::fixed << std::setprecision(2) << A;
 	A_par = stream.str();
 
-	path = "../../Archives of Data/Density 0.8/";
+	path = "../../Archives of Data/Constant Force/";
 	file_type = ".txt";
 	KIN = "KinEn"; POT = "PotEn"; TOT = "TotEn";
 	PRESSUREC = "PressureC"; PRESSUREK = "PressureK"; PCKTOT = "PCK"; TEMPERATURE = "Temperature";
@@ -261,10 +261,7 @@ void MD::Simulation()
 		std::fill(fx.begin(), fx.end(), 0);
 		std::fill(fy.begin(), fy.end(), 0);
 		std::fill(fz.begin(), fz.end(), 0);
-		//for (size_t l = 0; l < fx.size(); l++)
-		//{
-		//	fx[l] = 0; fy[l] = 0; fz[l] = 0;
-		//}
+
 
 		U = 0; // seting Potential U to 0
 		PC = 0;

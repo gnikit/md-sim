@@ -31,7 +31,7 @@ protected:
 	double dt = 0.005;								 // time step dt = 0.005/sqrt(T0)
 	double x, y, z;								     // distance between particle i and j
 	double r;										 // distance in polar
-	double rho = 0.8;								 // density
+	double rho = 0.5;								 // density
 	double scale;
 	double KE = 0.0;								 // Kinetic Energy
 	double T;									   	 // Temperature

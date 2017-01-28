@@ -29,7 +29,7 @@ MD::MD(int POWER, double A_cst, size_t run_number)
 	Nx = Ny = Nz = 8;
 	N = Nx*Ny*Nz;
 	scale = pow((N / rho), (1.0 / 3.0)) / Nx; // scalling factor for length of box
-	L = pow((N / rho), 1.0 / 3.0);
+	L = pow((N / rho), 1.0 / 3.0);			  // L depends on rho
 	Vol = N / rho;
 
 	cut_off = L / 2;
@@ -57,6 +57,11 @@ MD::MD(int POWER, double A_cst, size_t run_number)
 	PRESSUREC = "PressureC"; PRESSUREK = "PressureK"; PCKTOT = "PCK"; TEMPERATURE = "Temperature";
 	HIST = "Hist"; _VAF = "VAF"; _MSD = "MSD"; data = "data";
 	Ldrx = "Loadrx"; Ldry = "Loadry"; Ldrz = "Loadrz"; Ldvx = "Loadvx"; Ldvy = "Loadvy"; Ldvz = "Loadvz";
+
+	// Path addition
+	KIN = path + KIN; POT = path + POT; TOT = path + TOT; PRESSUREC = path + PRESSUREC; PRESSUREK = path + PRESSUREK; PCKTOT = path + PCKTOT;
+	TEMPERATURE = path + TEMPERATURE; HIST = path + HIST; _VAF = path + _VAF; _MSD = path + _MSD; data = path + data;
+	Ldrx = path + Ldrx; Ldry = path + Ldry; Ldrz = path + Ldrz; Ldvx = path + Ldvx; Ldvy = path + Ldvy; Ldvz = path + Ldvz;
 
 	KIN = KIN + run + separator + A_par + file_type;
 	POT += run +separator + A_par + file_type;

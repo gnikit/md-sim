@@ -71,6 +71,8 @@ public:
 	MD(int POWER, double A_cst, size_t run_number);
 	~MD();
 
+	void Simulation();
+
 protected:
 	void Initialise(std::vector<double> &x, std::vector<double> &y, std::vector<double> &z,
 					std::vector<double> &vx, std::vector<double> &vy, std::vector<double> &vz);
@@ -80,10 +82,7 @@ protected:
 	void VelocityAutocorrelationFunction(std::vector<double> &Cvx, std::vector<double> &Cvy, std::vector<double> &Cvz);
 	void RadialDistributionFunction();
 	void MeanSquareDisplacement(std::vector<double> &MSDx, std::vector<double> &MSDy, std::vector<double> &MSDz);
-public:
-	void Simulation();
 
-protected:
 	void OpenFiles();
 	void WriteToFiles();
 	void ShowRun(size_t step_size_show);

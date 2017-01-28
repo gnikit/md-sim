@@ -16,13 +16,12 @@ void StaticDataProcessing(size_t n);
 
 int main()
 {
-	//freopen("LOG.txt", "a+", stderr);
-	freopen_s(&stream, "LOG.txt", "a+", stderr);
-	size_t steps = 500;
+	//freopen_s(&stream, "LOG.txt", "a+", stderr);
+	size_t steps = 5001;
 	vector<double> A_parameter = { 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.50, 1.75, 2.0, 2.25, 2.50, 2.75, 3.0, 3.5, 4.0 };
 	vector<size_t> power = { 6,7,8,9,10,12 };
-	cerr << "Log file of the MD simulation" << endl;
-	cerr << "Power:\tA:\tsteps:" << endl;
+	//cerr << "Log file of the MD simulation" << endl;
+	//cerr << "Power:\tA:\tsteps:" << endl;
 	size_t num = 1;
 	char full = 'y';
 	//cout << "Run full simulation?"; cin >> full;
@@ -36,7 +35,7 @@ int main()
 	//			cout << "run: " << num << endl;
 	//			MD run(power.at(n), A_parameter.at(a), steps);
 	//			run.Simulation();
-	//			cerr << power.at(n) << "\t" << A_parameter.at(a) << "\t" << steps << "rho = 0.8" << endl;
+	//			//cerr << power.at(n) << "\t" << A_parameter.at(a) << "\t" << steps << "rho = 0.8" << endl;
 	//			num++;
 	//		}
 	//	}
@@ -67,8 +66,8 @@ int main()
 	//	run.Simulation();
 	//}
 
-	MD run(6, 0, steps);
-	run.Simulation();
+	//MD run(6, 0, steps);
+	//run.Simulation();
 	//
 	//MD run1(6, 0.5, steps);
 	//run1.Simulation(); cerr << "U: 6\tA:0.5" << endl;
@@ -139,10 +138,10 @@ void StaticDataProcessing(size_t n)
 
 	ofstream data;
 	string K, U, Tot, Pc, path, sep, power, a, txt;
-	/*path = "C:\\Users\\user\\Desktop\\MD Sim (class)\\MD Sim (class)\\Archives of Data\\";*/ sep = "~"; txt = ".txt";
-	path = "\0";
+	path = "../../Archives of Data/Density 0.8/Isothermal~step 5000/"; sep = "~"; txt = ".txt";
+	//path = "\0";
 	power = std::to_string(n);
-	string name = "data" + power + txt;
+	string name = path + "data" + power + txt;
 	data.open(name, std::ios::out | std::ios::trunc);
 
 	//data << "Power:\t" << n << endl;

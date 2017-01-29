@@ -26,7 +26,7 @@ MD::MD(int POWER, double A_cst, size_t run_number)
 	A = A_cst;
 	N_max = run_number; 
 
-	Nx = Ny = Nz = 8;
+	Nx = Ny = Nz = 14;
 	N = Nx*Ny*Nz;
 	scale = pow((N / rho), (1.0 / 3.0)) / Nx; // scalling factor for length of box
 	L = pow((N / rho), 1.0 / 3.0);			  // L depends on rho
@@ -51,7 +51,7 @@ MD::MD(int POWER, double A_cst, size_t run_number)
 	stream << std::fixed << std::setprecision(2) << A;
 	A_par = stream.str();
 
-	path = "../../Archives of Data/Constant Force/";
+	path = "../../Archives of Data/Particles 2,744k/Isothermal~step 5000/";
 	file_type = ".txt";
 	KIN = "KinEn"; POT = "PotEn"; TOT = "TotEn";
 	PRESSUREC = "PressureC"; PRESSUREK = "PressureK"; PCKTOT = "PCK"; TEMPERATURE = "Temperature";

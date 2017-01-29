@@ -70,16 +70,16 @@ int main()
 	//run.Simulation();
 	//
 	//MD run1(6, 0.5, steps);
-	//run1.Simulation(); cerr << "U: 6\tA:0.5" << endl;
+	//run1.Simulation();
 	//
 	//MD run2(6, 0.75, steps);
 	//run2.Simulation(); cerr << "U: 6\tA:0.75" << endl;
 	//
-	//MD run3(6, 1, steps);
-	//run3.Simulation(); cerr << "U: 6\tA:1" << endl;
+	MD run3(6, 1, steps);
+	run3.Simulation();
 	//
-	//MD run4(6, 1.25, steps);
-	//run4.Simulation(); cerr << "U: 6\tA:1.25" << endl;
+	MD run4(6, 4.0, steps);
+	run4.Simulation();
 	//
 	//MD run5(6, 1.5, steps);
 	//run5.Simulation(); cerr << "U: 6\tA:1.5" << endl;

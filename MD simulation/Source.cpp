@@ -66,8 +66,8 @@ int main()
 	//	run.Simulation();
 	//}
 
-	//MD run(6, 0, steps);
-	//run.Simulation();
+	MD run(6, 0, steps);
+	run.Simulation();
 	//
 	//MD run1(6, 0.5, steps);
 	//run1.Simulation(); cerr << "U: 6\tA:0.5" << endl;

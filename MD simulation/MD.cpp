@@ -51,7 +51,7 @@ MD::MD(int POWER, double A_cst, size_t run_number)
 	stream << std::fixed << std::setprecision(2) << A;
 	A_par = stream.str();
 
-	path = "../../Archives of Data/Denstity 0.5/";
+	path = "../../Archives of Data/Density 0.5/Isothermal~step 5000/";
 	file_type = ".txt";
 	KIN = "KinEn"; POT = "PotEn"; TOT = "TotEn";
 	PRESSUREC = "PressureC"; PRESSUREK = "PressureK"; PCKTOT = "PCK"; TEMPERATURE = "Temperature";

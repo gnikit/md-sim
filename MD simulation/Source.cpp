@@ -60,14 +60,15 @@ int main()
 	//StaticDataProcessing(6);
 
 
-	//for (size_t j = 0; j < A_parameter.size(); j++)
-	//{
-	//	MD run(6, A_parameter.at(j), 5001);
-	//	run.Simulation();
-	//}
+	for (size_t j = 0; j < A_parameter.size(); j++)
+	{
+		MD run(11, A_parameter.at(j), 5001);
+		run.Simulation();
+	}
+	StaticDataProcessing(11);
 
-	MD run(6, 0, steps);
-	run.Simulation();
+	//MD run(6, 0, steps);
+	//run.Simulation();
 	//
 	//MD run1(6, 0.5, steps);
 	//run1.Simulation(); cerr << "U: 6\tA:0.5" << endl;
@@ -138,7 +139,7 @@ void StaticDataProcessing(size_t n)
 
 	ofstream data;
 	string K, U, Tot, Pc, path, sep, power, a, txt;
-	path = "../../Archives of Data/Density 0.8/Isothermal~step 5000/"; sep = "~"; txt = ".txt";
+	path = "../../Archives of Data/Density 0.5/Isothermal~step 5000/"; sep = "~"; txt = ".txt";
 	//path = "\0";
 	power = std::to_string(n);
 	string name = path + "data" + power + txt;

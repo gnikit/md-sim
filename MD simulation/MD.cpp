@@ -222,7 +222,7 @@ void MD::RadialDistributionFunction()
 	double dem;
 	for (int i = 0; i < Nhist + 1; i++)
 	{
-		R = rg * i / Nhist;
+		R = rg * i / Nhist; // dr = rg*Nhist
 		dem = (rho * 2 * pi*R*R*N*N_step*dr);
 		gr[i] = gr[i] / dem;
 		Hist << gr[i] << std::endl;
@@ -315,7 +315,7 @@ void MD::Simulation()
 																					// Radial Distribution 
 					igr = Nhist* r / rg;
 					gr[igr] = gr[igr] + 1;
-					rn = (igr - 0.5)*dr;
+					//rn = (igr - 0.5)*dr;
 				}
 			}
 		}

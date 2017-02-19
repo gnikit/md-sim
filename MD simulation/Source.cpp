@@ -60,15 +60,17 @@ int main()
 	//StaticDataProcessing(6);
 
 
-	for (size_t j = 0; j < A_parameter.size(); j++)
-	{
-		MD run(11, A_parameter.at(j), 5001);
-		run.Simulation();
-	}
-	StaticDataProcessing(11);
+	//for (size_t j = 0; j < power.size(); j++)
+	//{
+	//	MD run(power.at(j), 1.1, 5001);
+	//	run.Simulation();
+	//}
+	//StaticDataProcessing(11);
 
-	//MD run(6, 0, steps);
+	//MD run(20, 1.0001, steps);
 	//run.Simulation();
+	//MD run1(11, 1.1, steps);
+	//run1.Simulation();
 	//
 	//MD run1(6, 0.5, steps);
 	//run1.Simulation(); cerr << "U: 6\tA:0.5" << endl;
@@ -89,10 +91,7 @@ int main()
 	//for (size_t i = 6; i < 13; i++)
 	//{	
 	//	if (i == 11)
-	//	{
-	//		++i;
-	//		StaticDataProcessing(i);
-	//	}
+	//	{	i++;	}
 	//	StaticDataProcessing(i);
 	//}
 
@@ -151,6 +150,7 @@ void StaticDataProcessing(size_t n)
 	for (size_t i = 0; i < A.size(); i++)
 	{
 		K.clear(); U.clear();  Tot.clear(); Pc.clear();
+		temp1.clear(); temp2.clear(); temp3.clear(); temp4.clear();
 		K = "KinEn"; U = "PotEn"; Tot = "TotEn"; Pc = "PressureC";
 		std::stringstream stream;
 		stream << fixed << setprecision(2) << A.at(i);

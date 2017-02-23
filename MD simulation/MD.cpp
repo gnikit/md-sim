@@ -33,6 +33,7 @@ MD::MD(int POWER, double A_cst, size_t run_number)
 	Vol = N / rho;
 
 	cut_off = L / 2;
+	//dt /= sqrt(T0);								 // scalling it for different T0
 
 	rg = cut_off;
 	Nhist = 100;		    // might change # of part in bin

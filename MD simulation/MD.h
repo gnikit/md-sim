@@ -1,3 +1,29 @@
+//////////////////////////////////////////////////////////////////////
+// Ioannis Nikiteas 23/2/2017										//
+//																	//			
+// BSc Dissertation:												//
+//  Investigating the transition from Molecular Dynamics to			//
+//	Smoothed Particle Hydrodynamics									//	
+//																	//
+//	University: Royal Holloway University of London					//	
+//																	//
+//	A program meant to simulate a MD fluid with an only				//
+//	repulsive pair-potential. Increasing the parameter A			//
+//	creates a coarse-graining effect for the system allowing it		//	
+//	to transition to SPH											//
+//																	//		
+//	Usage: Change string path to the required directory and			//
+//		   create folders to store systems with same number of		//
+//		   steps.													//					
+//																	//		
+//	Written for Windows												//	
+//		+ Master: is a non-isothermal fluid system					//
+//		+ Isothermal: Isothermal fluid								//
+//		+ Particle Tracking: saves all the x,y,z, and vx,vy,vz		//
+//							coordinates of the particles			//	
+//		+ Force_Interaction: applies constant x-force to the		//
+//				centre particle of the fluid						//
+//////////////////////////////////////////////////////////////////////
 #pragma once
 #include <iostream>
 #include <cmath>

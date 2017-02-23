@@ -25,8 +25,7 @@ int main()
 	cerr << "Power:\tA:\tsteps:" << endl;
 	size_t num = 1;
 	char full = 'n';
-	//cout << "Run full simulation?"; cin >> full;
-	// Currently this code is not executing
+	cout << "Run full simulation?"; cin >> full;
 	if (full == 'y')
 	{
 		for (size_t n = 0; n < power.size(); n++)
@@ -49,10 +48,10 @@ int main()
 	//	MD run(6, A_parameter.at(j), 5001);
 	//	run.Simulation();
 	//}
-
-	MD run(6, 0, steps);
-	run.Simulation(); cerr << "U: 6\tA:0" << endl;
-	
+	//
+	//MD run(6, 0, steps);
+	//run.Simulation(); cerr << "U: 6\tA:0" << endl;
+	//
 	//MD run1(6, 0.5, steps);
 	//run1.Simulation(); cerr << "U: 6\tA:0.5" << endl;
 	//

@@ -1,3 +1,25 @@
+//////////////////////////////////////////////////////////////////////
+// Ioannis Nikiteas 23/2/2017										//
+//																	//			
+// BSc Dissertation:												//
+//  Investigating the transition from Molecular Dynamics to			//
+//	Smoothed Particle Hydrodynamics									//	
+//																	//
+//	University: Royal Holloway University of London					//	
+//																	//
+//	A program meant to simulate a MD fluid with an only				//
+//	repulsive pair-potential. Increasing the parameter A			//
+//	creates a coarse-graining effect for the system allowing it		//	
+//	to transition to SPH											//
+//																	//		
+//	Usage: Change string path to the required directory and			//
+//		   create folders to store systems with same number of		//
+//		   steps.													//					
+//																	//		
+//	Written for Windows												//	
+//																	//
+//																	//
+//////////////////////////////////////////////////////////////////////
 #pragma once
 #include <iostream>
 #include <cmath>
@@ -36,7 +58,6 @@ protected:
 	double KE = 0.0;								 // Kinetic Energy
 	double T;									   	 // Temperature
 	double T0 = 1.4;								 // Target Temperature. Desired T for the system to operate
-	//dt /= sqrt(T0);								 // scalling it for different T0
 	double L;										 // Length of the box after scaling
 													 //std::cout << "Box side length: " << L << std::endl;
 	double Vol;
@@ -55,7 +76,7 @@ protected:
 private:
 	const long double pi = acos(-1.0);
 	std::string run; std::string A_par; std::string separator;
-	std::string path = "C:/Users/user/Dropbox/University/3.1/PH 3110 Project/sim v2.1/sim v2.1";
+	std::string path;
 	std::string file_type;
 	std::string KIN; std::string POT; std::string TOT;
 	std::string PRESSUREC; std::string PRESSUREK; std::string PCKTOT; std::string TEMPERATURE;

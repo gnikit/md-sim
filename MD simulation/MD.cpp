@@ -68,6 +68,7 @@ MD::MD(int POWER, double A_cst, size_t run_number)
 	HIST += run + separator + A_par + file_type;
 	_VAF += run + separator + A_par + file_type;
 	_MSD += run + separator + A_par + file_type;
+	//data += run + separator + A_par + file_type;		// for future use
 	Ldrx += run + separator + A_par + file_type;
 	Ldry += run + separator + A_par + file_type;
 	Ldrz += run + separator + A_par + file_type;
@@ -321,8 +322,8 @@ void MD::Simulation()
 		PC = PC / (3 * Vol);
 
 		// Isothermal Calibration
-		scale_v = sqrt(T0 / T);														 // using T & KE from prev timestep
-		//scale_v = 1;
+		//scale_v = sqrt(T0 / T);														 // using T & KE from prev timestep
+		scale_v = 1;
 		KE = 0;																		 // set 0 for each step
 
 		// Verlet Algorithm

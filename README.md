@@ -61,4 +61,3 @@ Snapshot of the fluid in 2D
 
 <!-- 2D Animation of the fluid with time
 ![vid]() -->
-The full report for the results of this program can be found [here](https://github.com/GiannisNikiteas/MD-simulation/blob/master/Dissertation.pdf).

@@ -1,22 +1,22 @@
 //////////////////////////////////////////////////////////////////////
 // Ioannis Nikiteas 23/2/2017										//
-//																	//			
+//																	//
 // BSc Dissertation:												//
 //  Investigating the transition from Molecular Dynamics to			//
-//	Smoothed Particle Hydrodynamics									//	
+//	Smoothed Particle Hydrodynamics									//
 //																	//
-//	University: Royal Holloway University of London					//	
+//	University: Royal Holloway University of London					//
 //																	//
 //	A program meant to simulate a MD fluid with an only				//
 //	repulsive pair-potential. Increasing the parameter A			//
-//	creates a coarse-graining effect for the system allowing it		//	
+//	creates a coarse-graining effect for the system allowing it		//
 //	to transition to SPH											//
-//																	//		
+//																	//
 //	Usage: Change string path to the required directory and			//
 //		   create folders to store systems with same number of		//
-//		   steps.													//					
-//																	//		
-//	Written for Windows												//	
+//		   steps.													//
+//																	//
+//	Written for Windows												//
 //																	//
 //																	//
 //////////////////////////////////////////////////////////////////////
@@ -27,7 +27,7 @@
 #include <vector>
 #include <chrono>   // CPU run-time
 #include <fstream>  // file writing
-#include <iterator> 
+#include <iterator>
 #include <cassert>
 #include <sstream>
 //#include "tbb/tbb.h"
@@ -63,13 +63,13 @@ protected:
 	double Vol;
 	double cut_off = 2.5;							 // Cut off radius for the analysis
 	double U = 0;									 // Potential Energy
-	double PC = 0;									 // Config Pressure 
+	double PC = 0;									 // Config Pressure
 	double PK;
 	double scale_v;
 
 	// HISTOGRAM VARIABLES
-	int igr;										 // Index of Hist
-	double Nhist, rg, den, rn;
+	size_t Nhist, igr;										 // Index of Hist
+	double rg, den, rn;
 	double dr;
 	std::vector<double> gr;
 
@@ -82,12 +82,12 @@ private:
 	std::string PRESSUREC; std::string PRESSUREK; std::string PCKTOT; std::string TEMPERATURE;
 	std::string HIST; std::string _VAF; std::string _MSD; std::string data;
 	std::string Ldrx, Ldry, Ldrz, Ldvx, Ldvy, Ldvz;
-	
+
 	std::ofstream Temperature, KinEn, PotEn, TotEn, PressureC, PressureK, PCK, Hist, VAF, MSD, DATA;
 	std::ofstream Loadrx, Loadry, Loadrz, Loadvx, Loadvy, Loadvz;
 
 public:
-	
+
 	MD();
 	MD(int POWER, double A_cst, size_t run_number);
 	~MD();
@@ -97,7 +97,7 @@ public:
 protected:
 	void Initialise(std::vector<double> &x, std::vector<double> &y, std::vector<double> &z,
 					std::vector<double> &vx, std::vector<double> &vy, std::vector<double> &vz);
-	void VerletAlgorithm(std::vector<double> &rx,std::vector<double> &ry, std::vector<double> &rz, 
+	void VerletAlgorithm(std::vector<double> &rx,std::vector<double> &ry, std::vector<double> &rz,
 						 std::vector<double> &vx, std::vector<double> &vy, std::vector<double> &vz,
 						 std::vector<double> &rrx, std::vector<double> &rry, std::vector<double> &rrz);
 	void VelocityAutocorrelationFunction(std::vector<double> &Cvx, std::vector<double> &Cvy, std::vector<double> &Cvz);
@@ -108,4 +108,3 @@ protected:
 	void WriteToFiles();
 	void ShowRun(size_t step_size_show);
 };
-

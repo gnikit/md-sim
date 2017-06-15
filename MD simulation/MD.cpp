@@ -250,18 +250,11 @@ void MD::VelocityAutocorrelationFunction(std::vector<double> &Cvx,
 void MD::RadialDistributionFunction() {
   double R = 0;
   double norm;
-  for (size_t i = 0; i < Nhist; i++) {	// discard last point
+  for (size_t i = 0; i < Nhist; i++) {	
     R = rg * (i+1) / Nhist; // dr = rg*Nhist, gr.size() == Nhist+1
     norm = (rho * 2 * pi * R * R * N * N_max * dr);
-	   if (norm != 0) {
-		     gr[i] = gr[i] / norm;	// HACK: Enable for debugging
-		     Hist << gr[i] << std::endl;	// HACK: remove /norm if above line uncommented
-	      }
-	   else {
-			 std::cout << "Division by 0" << std::endl;
-		     //gr[i] = gr[i];  // this can be anything
-		     Hist << gr[i] << std::endl;
-	  }
+	gr[i] = gr[i] / norm;	// not really needed
+	Hist << gr[i] << std::endl;	
   }
 }
 void MD::MeanSquareDisplacement(std::vector<double> &MSDx,
@@ -284,7 +277,6 @@ void MD::Simulation() {
   OpenFiles();
   Initialise(rx, ry, rz, vx, vy, vz);
   std::cout << "MD Simulation running..." << std::endl;
-  // std::cout << "step:\tT:\tKE:\tU:\tU+K:\tPC:\tPK:\t(PK+PC):" << std::endl;
 
   double xx, yy, zz;
   for (N_step = 0; N_step < N_max; N_step++) {
@@ -368,18 +360,10 @@ void MD::Simulation() {
           PC += r * ff;
           U += pow(q, -power); // Potential Calculation
 
-          // Radial Distribution
-            igr = round(Nhist * r / rg);
-          //if (igr < gr.size()) {
-            gr[igr] = gr[igr] + 1;
+			// Radial Distribution
+			igr = round(Nhist * r / rg);
+			gr[igr] = gr[igr] + 1;
 			//rn = (igr - 0.5)*dr;
-   //       }
-   //       else {
-   //         gr.resize(igr+1);
-   //         gr[igr] += 1;
-   //		////  std::cout << "Discarder 100 index" << std::endl;
-   //         //std::cout << "Resising in gr occured of size: " << igr << std::endl;
-   //       }
         }
       }
     }
@@ -393,17 +377,17 @@ void MD::Simulation() {
 
     // Verlet Algorithm
     VerletAlgorithm(rx, ry, rz, vx, vy, vz, rrx, rry, rrz);
-    ///////////////////// (M)EAN (S)QUARE (D)ISPLACEMENT
+    // MSD
 	MeanSquareDisplacement(MSDx, MSDy, MSDz);
 
-    /////////////////// (V)ELOCITY (A)UTOCORRELATION (F)UNCTION
+    // VAF
     VelocityAutocorrelationFunction(Cvx, Cvy, Cvz);
 
     T = KE / (1.5 * N); // Average T
     PK = rho * T;       // Kinetic part of pressure
     KE /= N;
 
-    WriteToFiles(); // writes data to open streams
+    WriteToFiles();
     //ShowRun(500);  // shows every 500 steps
   }
   // Simulation Ends HERE
@@ -460,6 +444,11 @@ void MD::WriteToFiles() {
   PCK << (PC + PK) << std::endl;
 }
 void MD::ShowRun(size_t step_size_show) {
+	
+	if (N_step == 0) {
+		std::cout << "step:\tT:\tKE:\tU:\tU+K:\tPC:\tPK:\t(PK+PC):" << std::endl;
+	}
+
   if (N_step % step_size_show == 0 || N_step == 1) // print every 500 results
   {
     std::cout.precision(5);

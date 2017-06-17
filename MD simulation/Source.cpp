@@ -13,128 +13,127 @@ void StaticDataProcessing(size_t n);
 
 
 int main() {
-  // freopen_s(&stream, "LOG.txt", "a+", stderr);
-  size_t steps = 5000;
-  vector<double> A_par = {0.0, 0.25, 0.5,  0.75, 1.0, 1.25, 1.50, 1.75,
-                                2.0, 2.25, 2.50, 2.75, 3.0, 3.5,  4.0};
-   //vector<size_t> power = {6, 7, 8, 9, 10, 12};
-  vector<size_t> power = { 6};
-  // cerr << "Log file of the MD simulation" << endl;
-  // cerr << "Power:\tA:\tsteps:" << endl;
-  size_t num = 1;
-  char full = 'y';
-  std::string dir = "../../Archives of Data/";
-   if (full == 'y')
-	 {
-	      for (size_t n = 0; n < power.size(); n++)
-		   {
-			   for (size_t a = 0; a < A_par.size(); a++)
-			   {
-				   cout << "run: " << num << endl;
-				   //srand(time(NULL));
-				   std::auto_ptr<MD> run(new MD(dir, 0.5, steps));
-				   run->Simulation(power.at(n), A_par.at(a));
-				   ++num;
-				   //cerr << power.at(n) << "\t" << A_parameter.at(a) << "\t" <<  steps << "rho = 0.8" << endl;
-			   }
-			   //StaticDataProcessing(power.at(n));
-		   }
-	}
+	// freopen_s(&stream, "LOG.txt", "a+", stderr);
+	size_t steps = 5000;
+	vector<double> A_par = { 0.0, 0.25, 0.5,  0.75, 1.0, 1.25, 1.50, 1.75,
+								  2.0, 2.25, 2.50, 2.75, 3.0, 3.5,  4.0 };
+	vector<size_t> power = {6/*, 7, 8, 9, 10, 12*/};
+	// cerr << "Log file of the MD simulation" << endl;
+	// cerr << "Power:\tA:\tsteps:" << endl;
+	size_t num = 1;
+	char full = 'y';
+	std::string dir = "../../Archives of Data/";
+	//if (full == 'y')
+	//  {
+	//       for (size_t n = 0; n < power.size(); n++)
+	// 	   {
+	// 		   for (size_t a = 0; a < A_par.size(); a++)
+	// 		   {
+	// 			   cout << "run: " << num << endl;
+	// 			   //srand(time(NULL));
+	// 			   std::auto_ptr<MD> run(new MD(dir, 0.5, steps));
+	// 			   run->Simulation(power.at(n), A_par.at(a));
+	// 			   ++num;
+	// 			   //cerr << power.at(n) << "\t" << A_parameter.at(a) << "\t" <<  steps << "rho = 0.8" << endl;
+	// 		   }
+	// 		   //StaticDataProcessing(power.at(n));
+	// 	   }
+	// }
 
-  //std::auto_ptr<MD> run(new MD(6, 0, steps));
-  //run->Simulation();
+	MD run(dir, 0.5, steps);
+	run.Simulation(6, 0);
 
 
-   system("pause");
+	system("pause");
 }
 
-void ReadFromFile(std::vector<double> &x, const std::string &file_name){
-  /*
-  Reads from a stream that already exists for a file that is already placed in the
-  directory and appends the data into a 1D vector.
-  */
-  std::ifstream read_file(file_name);
-  assert(read_file.is_open());
+void ReadFromFile(std::vector<double> &x, const std::string &file_name) {
+	/*
+	Reads from a stream that already exists for a file that is already placed in the
+	directory and appends the data into a 1D vector.
+	*/
+	std::ifstream read_file(file_name);
+	assert(read_file.is_open());
 
-  std::copy(std::istream_iterator<double>(read_file),
-            std::istream_iterator<double>(), std::back_inserter(x));
+	std::copy(std::istream_iterator<double>(read_file),
+		std::istream_iterator<double>(), std::back_inserter(x));
 
-  read_file.close();
+	read_file.close();
 }
 
 double Mean(std::vector<double> &x) {
-  size_t n = 0;
-  double temp = 0;
-  for (size_t i = 0; i < x.size(); i++) {
-    temp += x.at(i);
-    n++;
-  }
-  temp /= n; // this is the mean
-  m1 = temp;
+	size_t n = 0;
+	double temp = 0;
+	for (size_t i = 0; i < x.size(); i++) {
+		temp += x.at(i);
+		n++;
+	}
+	temp /= n; // this is the mean
+	m1 = temp;
 
-  return m1;
+	return m1;
 }
 
 void StaticDataProcessing(size_t n)
 /*
-        Used to average the energies and pressures for all
-        values of A for a specific number n of the potential
-        strength
+		Used to average the energies and pressures for all
+		values of A for a specific number n of the potential
+		strength
 */
 {
-  using namespace std;
+	using namespace std;
 
-  vector<double> A{0, 0.25, 0.5,  0.75, 1, 1.25, 1.5, 1.75,
-                   2, 2.25, 2.50, 2.75, 3, 3.5,  4};
-  vector<double> temp;
+	vector<double> A{ 0, 0.25, 0.5,  0.75, 1, 1.25, 1.5, 1.75,
+					 2, 2.25, 2.50, 2.75, 3, 3.5,  4 };
+	vector<double> temp;
 
-  ofstream data;
-  string K, U, Tot, Pc, path, sep, power, a, txt;
-  path = "../../Archives of Data/Density 0.5/Isothermal~step 5000/"; // warning change step count
-  sep = "~";														// TODO: generic step change
-  txt = ".txt";
-  // path = "\0";
-  power = std::to_string(n);
-  string name = path + "data" + power + txt;
-  data.open(name, std::ios::out | std::ios::trunc);
+	ofstream data;
+	string K, U, Tot, Pc, path, sep, power, a, txt;
+	path = "../../Archives of Data/Density 0.5/Isothermal~step 5000/"; // warning change step count
+	sep = "~";														// TODO: generic step change
+	txt = ".txt";
+	// path = "\0";
+	power = std::to_string(n);
+	string name = path + "data" + power + txt;
+	data.open(name, std::ios::out | std::ios::trunc);
 
-  // data << "Power:\t" << n << endl;
-  data << "#A:\tK:\tU:\tTot:\tPc:" << endl;
+	// data << "Power:\t" << n << endl;
+	data << "#A:\tK:\tU:\tTot:\tPc:" << endl;
 
-  for (size_t i = 0; i < A.size(); i++) {
-    K.clear();
-    U.clear();
-    Tot.clear();
-    Pc.clear();
-    temp1.clear();
-    temp2.clear();
-    temp3.clear();
-    temp4.clear();
-    K = "KinEn";
-    U = "PotEn";
-    Tot = "TotEn";
-    Pc = "PressureC";
-    std::stringstream stream;
-    stream << fixed << setprecision(2) << A.at(i);
-    a = stream.str();
-    K = path + K + power + sep + a + txt;
-    U = path + U + power + sep + a + txt;
-    Tot = path + Tot + power + sep + a + txt;
-    Pc = path + Pc + power + sep + a + txt;
+	for (size_t i = 0; i < A.size(); i++) {
+		K.clear();
+		U.clear();
+		Tot.clear();
+		Pc.clear();
+		temp1.clear();
+		temp2.clear();
+		temp3.clear();
+		temp4.clear();
+		K = "KinEn";
+		U = "PotEn";
+		Tot = "TotEn";
+		Pc = "PressureC";
+		std::stringstream stream;
+		stream << fixed << setprecision(2) << A.at(i);
+		a = stream.str();
+		K = path + K + power + sep + a + txt;
+		U = path + U + power + sep + a + txt;
+		Tot = path + Tot + power + sep + a + txt;
+		Pc = path + Pc + power + sep + a + txt;
 
-    ReadFromFile(temp1, K);
-    ReadFromFile(temp2, U);
-    ReadFromFile(temp3, Tot);
-    ReadFromFile(temp4, Pc);
+		ReadFromFile(temp1, K);
+		ReadFromFile(temp2, U);
+		ReadFromFile(temp3, Tot);
+		ReadFromFile(temp4, Pc);
 
-    Mean(temp1);
-    data.precision(5);
-    data << A.at(i) << '\t' << m1 << '\t';
-    Mean(temp2);
-    data << m1 << '\t';
-    Mean(temp3);
-    data << m1 << '\t';
-    Mean(temp4);
-    data << m1 << endl;
-  }
+		Mean(temp1);
+		data.precision(5);
+		data << A.at(i) << '\t' << m1 << '\t';
+		Mean(temp2);
+		data << m1 << '\t';
+		Mean(temp3);
+		data << m1 << '\t';
+		Mean(temp4);
+		data << m1 << endl;
+	}
 }

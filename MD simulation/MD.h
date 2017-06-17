@@ -12,25 +12,25 @@
 //	creates a coarse-graining effect for the system allowing it		//
 //	to transition to SPH											//
 //																	//
-//	Usage: Change string path to the required directory and			//
-//		   create folders to store systems with same number of		//
-//		   steps.													//
 //																	//
-//	Written for Windows												//
+//	Use Intel C++ compiler with O3 and GPU acceleration for			//
+//	optimal results.												//	   
+//																	//	   
+//																	//
+//																	//
 //																	//
 //																	//
 //////////////////////////////////////////////////////////////////////
 #pragma once
 #include <iostream>
-#include <cmath>
+#include <math.h>
 #include <iomanip>  // setprecision
 #include <vector>
 #include <chrono>   // CPU run-time
 #include <fstream>  // file writing
 #include <iterator>
-#include <cassert>
+#include <assert.h>
 #include <sstream>
-//#include "tbb/tbb.h"
 
 
 
@@ -38,37 +38,37 @@ class MD
 {
 
 protected:
-	std::vector <double> rx;	std::vector <double> ry;	std::vector <double> rz;				// Position Arrays
-	std::vector <double> vx;	std::vector <double> vy;	std::vector <double> vz;				// Velocity Arrays
+	std::vector <double> rx;	std::vector <double> ry;	std::vector <double> rz;	// Position Arrays
+	std::vector <double> vx;	std::vector <double> vy;	std::vector <double> vz;	// Velocity Arrays
 	std::vector <double> fx;	std::vector <double> fy;	std::vector <double> fz;
 	std::vector<double> Cvx;    std::vector<double> Cvy;    std::vector<double> Cvz;
-	std::vector<double> rrx;	std::vector<double> rry;	std::vector<double> rrz;				// used in MSD
+	std::vector<double> rrx;	std::vector<double> rry;	std::vector<double> rrz;	// used in MSD
 	std::vector<double> MSDx;	std::vector<double> MSDy;	std::vector<double> MSDz;
-	std::vector<double> Cr;		std::vector<double> msd;										// correlation vector with time index
+	std::vector<double> Cr;		std::vector<double> msd;								// correlation vector with time index
 
 
 	size_t Nx;	size_t Ny;	size_t Nz;
 	size_t N; 	size_t N_step; size_t N_max;
 	int power; double A;
-	double dt = 0.005;								 // time step dt = 0.005/sqrt(T0)
-	double x, y, z;								     // distance between particle i and j
-	double r;										 // distance in polar
-	double rho;										 // density
+	double dt = 0.005;		// time step dt = 0.005/sqrt(T0)
+	double x, y, z;			// distance between particle i and j
+	double r;				// distance in polar
+	double rho;				// density
 	double scale;
-	double KE = 0.0;								 // Kinetic Energy
-	double T;									   	 // Temperature
-	double T0 = 1.4;								 // Target Temperature. Desired T for the system to operate
-	double L;										 // Length of the box after scaling
-													 //std::cout << "Box side length: " << L << std::endl;
+	double KE = 0.0;		// Kinetic Energy
+	double T;				// Temperature
+	double T0 = 1.4;		// Target Temperature. Desired T for the system to operate
+	double L;				// Length of the box after scaling
+							//std::cout << "Box side length: " << L << std::endl;
 	double Vol;
-	double cut_off = 2.5;							 // Cut off radius for the analysis
-	double U = 0;									 // Potential Energy
-	double PC = 0;									 // Config Pressure
+	double cut_off = 2.5;	// Cut off radius for the analysis
+	double U = 0;			// Potential Energy
+	double PC = 0;			// Config Pressure
 	double PK;
 	double scale_v;
 
 	// HISTOGRAM VARIABLES
-	size_t Nhist, igr;										 // Index of Hist
+	size_t Nhist, igr;		// Index of Hist
 	double rg, den, rn;
 	double dr;
 	std::vector<double> gr;
@@ -88,7 +88,6 @@ private:
 
 public:
 
-	MD();
 	MD(std::string DIRECTORY, double DENSITY, size_t run_number);
 	~MD();
 
@@ -96,10 +95,10 @@ public:
 
 protected:
 	void Initialise(std::vector<double> &x, std::vector<double> &y, std::vector<double> &z,
-					std::vector<double> &vx, std::vector<double> &vy, std::vector<double> &vz);
-	void VerletAlgorithm(std::vector<double> &rx,std::vector<double> &ry, std::vector<double> &rz,
-						 std::vector<double> &vx, std::vector<double> &vy, std::vector<double> &vz,
-						 std::vector<double> &rrx, std::vector<double> &rry, std::vector<double> &rrz);
+		std::vector<double> &vx, std::vector<double> &vy, std::vector<double> &vz);
+	void VerletAlgorithm(std::vector<double> &rx, std::vector<double> &ry, std::vector<double> &rz,
+		std::vector<double> &vx, std::vector<double> &vy, std::vector<double> &vz,
+		std::vector<double> &rrx, std::vector<double> &rry, std::vector<double> &rrz);
 	void VelocityAutocorrelationFunction(std::vector<double> &Cvx, std::vector<double> &Cvy, std::vector<double> &Cvz);
 	void RadialDistributionFunction();
 	void MeanSquareDisplacement(std::vector<double> &MSDx, std::vector<double> &MSDy, std::vector<double> &MSDz);

@@ -18,92 +18,29 @@ MD::MD() {
   fy.resize(N, 0);
   fz.resize(N, 0);
 }
-MD::MD(int POWER, double A_cst, size_t run_number) {
-  power = POWER;
-  A = A_cst;
-  N_max = run_number;
-
-  Nx = Ny = Nz = 8;
-  N = Nx * Ny * Nz;
-  scale = pow((N / rho), (1.0 / 3.0)) / Nx; // scalling factor for length of box
-  L = pow((N / rho), 1.0 / 3.0);            // L depends on rho
-  Vol = N / rho;
-
-  cut_off = L / 2;
-  // dt /= sqrt(T0);		// scalling
+MD::MD(std::string DIRECTORY, double DENSITY, size_t run_number) {
+	_dir = DIRECTORY;
+	rho = DENSITY;
+	N_max = run_number;
+	
+	Nx = Ny = Nz = 8;
+	N = Nx * Ny * Nz;
+	scale = pow((N / rho), (1.0 / 3.0)) / Nx; // scalling factor for length of box
+	L = pow((N / rho), 1.0 / 3.0);            // L depends on rho
+	Vol = N / rho;
+	
+	cut_off = L / 2;
+	// dt /= sqrt(T0);		// scalling
 							// it for different T0
-
-  rg = cut_off;
-  Nhist = 100; // might change # of part in bin
-  dr = rg / Nhist;
-  gr.resize( Nhist+1, 0); // gr with Index igr
-  fx.resize(N, 0);
-  fy.resize(N, 0);
-  fz.resize(N, 0);
-  //TODO: reserve r's and v's, instead of push_back
-  /*  NAMES USED FOR PYTHON PROCESSING	        	*/
-  run = std::to_string(power);
-  separator = "~";
-  std::stringstream stream;
-  stream << std::fixed << std::setprecision(2) << A;
-  A_par = stream.str();
-
-  path = "../../Archives of Data/Density 0.5/Isothermal~step 5000/"; // FUTURE: will be passed in constructor
-  file_type = ".txt";
-  KIN = "KinEn";
-  POT = "PotEn";
-  TOT = "TotEn";
-  PRESSUREC = "PressureC";
-  PRESSUREK = "PressureK";
-  PCKTOT = "PCK";
-  TEMPERATURE = "Temperature";
-  HIST = "Hist";
-  _VAF = "VAF";
-  _MSD = "MSD";
-  data = "data";
-  Ldrx = "Loadrx";
-  Ldry = "Loadry";
-  Ldrz = "Loadrz";
-  Ldvx = "Loadvx";
-  Ldvy = "Loadvy";
-  Ldvz = "Loadvz";
-
-  // Path addition
-  KIN = path + KIN;
-  POT = path + POT;
-  TOT = path + TOT;
-  PRESSUREC = path + PRESSUREC;
-  PRESSUREK = path + PRESSUREK;
-  PCKTOT = path + PCKTOT;
-  TEMPERATURE = path + TEMPERATURE;
-  HIST = path + HIST;
-  _VAF = path + _VAF;
-  _MSD = path + _MSD;
-  data = path + data;
-  Ldrx = path + Ldrx;
-  Ldry = path + Ldry;
-  Ldrz = path + Ldrz;
-  Ldvx = path + Ldvx;
-  Ldvy = path + Ldvy;
-  Ldvz = path + Ldvz;
-
-  KIN = KIN + run + separator + A_par + file_type;
-  POT += run + separator + A_par + file_type;
-  TOT += run + separator + A_par + file_type;
-  PRESSUREC += run + separator + A_par + file_type;
-  PRESSUREK += run + separator + A_par + file_type;
-  PCKTOT += run + separator + A_par + file_type;
-  TEMPERATURE += run + separator + A_par + file_type;
-  HIST += run + separator + A_par + file_type;
-  _VAF += run + separator + A_par + file_type;
-  _MSD += run + separator + A_par + file_type;
-  // data += run + separator + A_par + file_type;	// for future use
-  Ldrx += run + separator + A_par + file_type;
-  Ldry += run + separator + A_par + file_type;
-  Ldrz += run + separator + A_par + file_type;
-  Ldvx += run + separator + A_par + file_type;
-  Ldvy += run + separator + A_par + file_type;
-  Ldvz += run + separator + A_par + file_type;
+	
+	rg = cut_off;
+	Nhist = 100; // might change # of part in bin
+	dr = rg / Nhist;
+	gr.resize( Nhist+1, 0); // gr with Index igr
+	fx.resize(N, 0);
+	fy.resize(N, 0);
+	fz.resize(N, 0);
+	//TODO: reserve r's and v's, instead of push_back 
 }
 MD::~MD() {}
 
@@ -271,18 +208,18 @@ void MD::MeanSquareDisplacement(std::vector<double> &MSDx,
 }
 
 // MD Simulation
-void MD::Simulation() {
-  std::chrono::steady_clock::time_point begin =
-      std::chrono::steady_clock::now();
+void MD::Simulation(int POWER, double A_cst) {
+  CreateFiles(POWER, A_cst);
   OpenFiles();
+  std::chrono::steady_clock::time_point begin =
+	  std::chrono::steady_clock::now();
   Initialise(rx, ry, rz, vx, vy, vz);
   std::cout << "MD Simulation running..." << std::endl;
 
   double xx, yy, zz;
   for (N_step = 0; N_step < N_max; N_step++) {
     // Forces loop
-
-    // Re-setting forces
+    // Resetting forces
     std::fill(fx.begin(), fx.end(), 0);
     std::fill(fy.begin(), fy.end(), 0);
     std::fill(fz.begin(), fz.end(), 0);
@@ -433,6 +370,78 @@ void MD::OpenFiles() {
   Loadvx.open(Ldvx, std::ios::out | std::ios::trunc);
   Loadvy.open(Ldvy, std::ios::out | std::ios::trunc);
   Loadvz.open(Ldvz, std::ios::out | std::ios::trunc);
+}
+void MD::CreateFiles(int POWER, double A_cst){
+	power = POWER;
+	A = A_cst;
+
+	run = std::to_string(power);	// yields INTEGER
+	_step = "/Isothermal~step " + std::to_string(N_max) + "/";
+	separator = "~";
+	std::stringstream stream;
+	std::stringstream density_stream;
+	stream << std::fixed << std::setprecision(2) << A;	// 2 decimals
+	density_stream << std::fixed << std::setprecision(1) << rho;	// 1 decimal
+	A_par = stream.str();
+	_density = "Density " + density_stream.str();
+		//   ------------_dir------||---_density--||-----_step-------||
+	//path = "../../Archives of Data/Density 0.5/Isothermal~step 5000/";
+	path = _dir + _density + _step;
+	file_type = ".txt";
+	KIN = "KinEn";
+	POT = "PotEn";
+	TOT = "TotEn";
+	PRESSUREC = "PressureC";
+	PRESSUREK = "PressureK";
+	PCKTOT = "PCK";
+	TEMPERATURE = "Temperature";
+	HIST = "Hist";
+	_VAF = "VAF";
+	_MSD = "MSD";
+	data = "data";
+	Ldrx = "Loadrx";
+	Ldry = "Loadry";
+	Ldrz = "Loadrz";
+	Ldvx = "Loadvx";
+	Ldvy = "Loadvy";
+	Ldvz = "Loadvz";
+
+	// Path addition
+	KIN = path + KIN;
+	POT = path + POT;
+	TOT = path + TOT;
+	PRESSUREC = path + PRESSUREC;
+	PRESSUREK = path + PRESSUREK;
+	PCKTOT = path + PCKTOT;
+	TEMPERATURE = path + TEMPERATURE;
+	HIST = path + HIST;
+	_VAF = path + _VAF;
+	_MSD = path + _MSD;
+	data = path + data;
+	Ldrx = path + Ldrx;
+	Ldry = path + Ldry;
+	Ldrz = path + Ldrz;
+	Ldvx = path + Ldvx;
+	Ldvy = path + Ldvy;
+	Ldvz = path + Ldvz;
+
+	KIN = KIN + run + separator + A_par + file_type;
+	POT += run + separator + A_par + file_type;
+	TOT += run + separator + A_par + file_type;
+	PRESSUREC += run + separator + A_par + file_type;
+	PRESSUREK += run + separator + A_par + file_type;
+	PCKTOT += run + separator + A_par + file_type;
+	TEMPERATURE += run + separator + A_par + file_type;
+	HIST += run + separator + A_par + file_type;
+	_VAF += run + separator + A_par + file_type;
+	_MSD += run + separator + A_par + file_type;
+	Ldrx += run + separator + A_par + file_type;
+	Ldry += run + separator + A_par + file_type;
+	Ldrz += run + separator + A_par + file_type;
+	Ldvx += run + separator + A_par + file_type;
+	Ldvy += run + separator + A_par + file_type;
+	Ldvz += run + separator + A_par + file_type;
+
 }
 void MD::WriteToFiles() {
   Temperature << T << std::endl;

@@ -14,7 +14,7 @@ void StaticDataProcessing(size_t n);
 
 int main() {
   // freopen_s(&stream, "LOG.txt", "a+", stderr);
-  size_t steps = 15000;
+  size_t steps = 5000;
   //vector<double> A_parameter = {0.0, 0.25, 0.5,  0.75, 1.0, 1.25, 1.50, 1.75,
   //                              2.0, 2.25, 2.50, 2.75, 3.0, 3.5,  4.0};
   vector<double> A_parameter = {/* 0.0, 0.25, 0.5, */ 0.75, 1.0, 1.25, 1.50, 2.0,  4.0 };
@@ -27,67 +27,31 @@ int main() {
   char full = 'y';
   // cout << "Run full simulation?"; cin >> full;
   // Currently this code is not executing
-   if (full == 'y')
-	 {
-	      for (size_t n = 0; n < power.size(); n++)
-		   {
-			   for (size_t a = 0; a < A_parameter.size(); a++)
-			   {
-				   cout << "run: " << num << endl;
-				   //srand(time(NULL));
-				   std::auto_ptr<MD> run(new MD(power.at(n), A_parameter.at(a), steps));
-				   run->Simulation();
-				   ++num;
-				  /* MD run(power.at(n), A_parameter.at(a), steps);
-				   run.Simulation();
-				   ++num;*/
-				   //cerr << power.at(n) << "\t" << A_parameter.at(a) << "\t" <<  steps << "rho = 0.8" << endl;
-			   }
-			   //StaticDataProcessing(power.at(n));
-		   }
-	}
-  
- // for (auto i : power) {
-	//  std::auto_ptr<MD> run(new MD(i, 10, steps));
-	//  run->Simulation();
+ //  if (full == 'y')
+	// {
+	//      for (size_t n = 0; n < power.size(); n++)
+	//	   {
+	//		   for (size_t a = 0; a < A_parameter.size(); a++)
+	//		   {
+	//			   cout << "run: " << num << endl;
+	//			   //srand(time(NULL));
+	//			   std::auto_ptr<MD> run(new MD(power.at(n), A_parameter.at(a), steps));
+	//			   run->Simulation();
+	//			   ++num;
+	//			  /* MD run(power.at(n), A_parameter.at(a), steps);
+	//			   run.Simulation();
+	//			   ++num;*/
+	//			   //cerr << power.at(n) << "\t" << A_parameter.at(a) << "\t" <<  steps << "rho = 0.8" << endl;
+	//		   }
+	//		   //StaticDataProcessing(power.at(n));
+	//	   }
 	//}
-
+  std::string dir = "../../Archives of Data/";
+  MD run(dir, 0.5, 5000);
+  run.Simulation(6, 0);
   //std::auto_ptr<MD> run(new MD(6, 0, steps));
   //run->Simulation();
-  //std::auto_ptr<MD> run1(new MD(12, 0, steps));
-  //run1->Simulation();
-  //MD* run1 = new MD(12, 0, steps);
-  //run1->Simulation();
-  //delete run1;
-  //MD* run2 = new MD(6, 0.75, steps);
-  //run2->Simulation();
-  //delete run2;
-  //MD* run3 = new MD(12, 0.75, steps);
-  //run3->Simulation();
-  //delete run3;
-  // MD run1(8, 0.75, steps);
-  // run.Simulation();
-  // MD run2(10, 0.75, steps);
-  // run.Simulation();
-  // MD run3(12, 0.75, steps);
-  // run.Simulation();
-  // MD run1(11, 1.1, steps);
-  // run1.Simulation();
-  //
-  // MD run1(6, 0.5, steps);
-  // run1.Simulation(); cerr << "U: 6\tA:0.5" << endl;
-  //
-  // MD run2(6, 0.75, steps);
-  // run2.Simulation(); cerr << "U: 6\tA:0.75" << endl;
-  //
-  // MD run3(6, 1, steps);
-  // run3.Simulation(); cerr << "U: 6\tA:1" << endl;
-  //
-  // MD run4(6, 1.25, steps);
-  // run4.Simulation(); cerr << "U: 6\tA:1.25" << endl;
-  //
-  // MD run5(6, 1.5, steps);
-  // run5.Simulation(); cerr << "U: 6\tA:1.5" << endl;
+
 
    system("pause");
 }

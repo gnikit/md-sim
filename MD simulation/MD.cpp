@@ -133,7 +133,6 @@ void MD::VerletAlgorithm(std::vector<double> &rx, std::vector<double> &ry,
                          std::vector<double> &vy, std::vector<double> &vz,
                          std::vector<double> &rrx, std::vector<double> &rry,
                          std::vector<double> &rrz) {
-  using namespace std;
 
   for (size_t i = 0; i < N; i++) {
     vx[i] = vx[i] * scale_v + fx[i] * dt;

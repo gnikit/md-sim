@@ -25,14 +25,14 @@ Code to run the program can be found in **Source.cpp**. The example above, demon
 
 int main()
 {
-  int steps = 5000; // number of steps
-  float A = 0.75; // softness parameter
-  int n = 6;  // potential strength
-  int density = 0.5 // fluid density
+  int steps = 5000; 	// number of steps
+  float A = 0.75; 	// softness parameter
+  int n = 6;  	// potential strength
+  int density = 0.5 	// fluid density
   std::string dir = "/Desired/Path/"; // existing directory for file export
   
-	MD run(dir, density, steps);
-	run.Simulation(n, A);
+  MD run(dir, density, steps);
+  run.Simulation(n, A);
 
   return 0;
 }

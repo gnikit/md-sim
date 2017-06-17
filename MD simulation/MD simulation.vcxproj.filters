@@ -26,5 +26,8 @@
     <ClInclude Include="MD.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="stat_analysis.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

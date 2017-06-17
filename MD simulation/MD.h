@@ -53,7 +53,7 @@ protected:
 	double dt = 0.005;								 // time step dt = 0.005/sqrt(T0)
 	double x, y, z;								     // distance between particle i and j
 	double r;										 // distance in polar
-	double rho = 0.5;								 // density
+	double rho;										 // density
 	double scale;
 	double KE = 0.0;								 // Kinetic Energy
 	double T;									   	 // Temperature
@@ -82,17 +82,17 @@ private:
 	std::string PRESSUREC; std::string PRESSUREK; std::string PCKTOT; std::string TEMPERATURE;
 	std::string HIST; std::string _VAF; std::string _MSD; std::string data;
 	std::string Ldrx, Ldry, Ldrz, Ldvx, Ldvy, Ldvz;
-
+	std::string _dir, _density, _step;
 	std::ofstream Temperature, KinEn, PotEn, TotEn, PressureC, PressureK, PCK, Hist, VAF, MSD, DATA;
 	std::ofstream Loadrx, Loadry, Loadrz, Loadvx, Loadvy, Loadvz;
 
 public:
 
 	MD();
-	MD(int POWER, double A_cst, size_t run_number);
+	MD(std::string DIRECTORY, double DENSITY, size_t run_number);
 	~MD();
 
-	void Simulation();
+	void Simulation(int POWER, double A_cst);
 
 protected:
 	void Initialise(std::vector<double> &x, std::vector<double> &y, std::vector<double> &z,
@@ -105,6 +105,7 @@ protected:
 	void MeanSquareDisplacement(std::vector<double> &MSDx, std::vector<double> &MSDy, std::vector<double> &MSDz);
 
 	void OpenFiles();
+	void CreateFiles(int POWER, double A_cst);
 	void WriteToFiles();
 	void ShowRun(size_t step_size_show);
 };

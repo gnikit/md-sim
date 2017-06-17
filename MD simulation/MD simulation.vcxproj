@@ -123,6 +123,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MD.h" />
+    <ClInclude Include="stat_analysis.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

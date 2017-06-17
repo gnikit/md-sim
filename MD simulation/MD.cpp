@@ -48,7 +48,7 @@ MD::MD(int POWER, double A_cst, size_t run_number) {
   stream << std::fixed << std::setprecision(2) << A;
   A_par = stream.str();
 
-  path = "../../Archives of Data/Density 0.5/Isothermal~step 5000/"; // path change depending on steps
+  path = "../../Archives of Data/Density 0.5/Isothermal~step 5000/"; // FUTURE: will be passed in constructor
   file_type = ".txt";
   KIN = "KinEn";
   POT = "PotEn";

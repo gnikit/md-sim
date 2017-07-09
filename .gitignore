@@ -240,3 +240,14 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+
+# Ignore Self
+.gitattributes
+.gitignore
+
+# Ignore .sln files
+*.sln
+
+# Ignore in ./MD Simulation debug files
+/MD simulation.vcxproj
+/MD simulation.vcxproj.filters

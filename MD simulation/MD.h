@@ -1,14 +1,14 @@
 //////////////////////////////////////////////////////////////////////
-// Ioannis Nikiteas 23/2/2017										//
-//																	//
-// BSc Dissertation:												//
-//  Investigating the transition from Molecular Dynamics to			//
-//	Smoothed Particle Hydrodynamics									//
-//																	//
-//	University: Royal Holloway University of London					//
-//																	//
-//	A program meant to simulate a MD fluid with an only				//
-//	repulsive pair-potential. Increasing the parameter A			//
+// Ioannis Nikiteas 23/2/2017									    //
+//																    //
+// BSc Dissertation:											    //
+//  Investigating the transition from Molecular Dynamics to		    //
+//	Smoothed Particle Hydrodynamics					    		    //
+//																    //
+//	University: Royal Holloway University of London		            //
+//																    //
+//	A program meant to simulate a MD fluid with an only	            //
+//	repulsive pair-potential. Increasing the parameter A		 	//
 //	creates a coarse-graining effect for the system allowing it		//
 //	to transition to SPH											//
 //																	//
@@ -23,7 +23,7 @@
 //////////////////////////////////////////////////////////////////////
 #pragma once
 #include <iostream>
-#include <math.h>
+#include <cmath>
 #include <iomanip>  // setprecision
 #include <vector>
 #include <chrono>   // CPU run-time
@@ -68,7 +68,7 @@ protected:
 	double scale_v;
 
 	// HISTOGRAM VARIABLES
-	size_t Nhist, igr;		// Index of Hist
+	int Nhist, igr;		// Index of Hist
 	double rg, den, rn;
 	double dr;
 	std::vector<double> gr;
@@ -107,4 +107,5 @@ protected:
 	void CreateFiles(int POWER, double A_cst);
 	void WriteToFiles();
 	void ShowRun(size_t step_size_show);
+	void ResetValues();
 };

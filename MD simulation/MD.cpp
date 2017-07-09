@@ -12,7 +12,7 @@ MD::MD(std::string DIRECTORY, double DENSITY, size_t run_number) {
 	L = std::pow((N / rho), 1.0 / 3.0);            // L depends on rho
 	Vol = N / rho;
 
-	cut_off = L / 2;
+	cut_off = L / 2.;
 	// dt /= sqrt(T0);		// scalling
 							// it for different T0
 
@@ -169,10 +169,15 @@ void MD::VelocityAutocorrelationFunction(std::vector<double> &Cvx,
 void MD::RadialDistributionFunction() {
 	double R = 0;
 	double norm;
+	double cor_rho = rho * (N - 1) / N;
 	for (size_t i = 0; i < Nhist; i++) {
 		R = rg * (i + 1) / Nhist; // dr = rg*Nhist, gr.size() == Nhist+1
-		norm = (rho * 2 * pi * R * R * N * N_max * dr);
-		gr[i] = gr[i] / norm;	// not really needed
+		if ((i + 1) == Nhist) {
+			R = rg * (i) / Nhist; // dr = rg*Nhist, gr.size() == Nhist+1
+			std::cout << "trigered" << std::endl;
+		}
+		norm = (cor_rho * 2 * pi * R * R * N * N_max * dr);
+		gr[i] /= norm;	// not really needed
 		Hist << gr[i] << std::endl;
 	}
 }
@@ -209,8 +214,8 @@ void MD::Simulation(int POWER, double A_cst) {
 		U = 0; // seting Potential U to 0
 		PC = 0;
 
-		for (size_t i = 0; i < N - 2; i++) {
-			for (size_t j = i + 1; j < N - 1; j++) {
+		for (size_t i = 0; i < N - 1; i++) {
+			for (size_t j = i + 1; j < N; j++) {
 				x = rx[i] - rx[j]; // Separation distance
 				y = ry[i] - ry[j]; // between particles i and j
 				z = rz[i] - rz[j]; // in Cartesian
@@ -278,10 +283,10 @@ void MD::Simulation(int POWER, double A_cst) {
 					PC += r * ff;
 					U += std::pow(q, -power); // Potential Calculation
 
-					  // Radial Distribution
-					igr = round(Nhist * r / rg);
-					gr[igr] = gr[igr] + 1;
-					//rn = (igr - 0.5)*dr;
+					// Radial Distribution
+					igr = (Nhist * r / rg);
+					gr[igr] += 1;
+					//rn = (igr - 0.5)*dr;					
 				}
 			}
 		}
@@ -329,6 +334,7 @@ void MD::Simulation(int POWER, double A_cst) {
 		<< std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() %
 		60
 		<< "s" << std::endl;
+	ResetValues(); // Check if everything is reset, could have missed something
 }
 
 // File Handling
@@ -446,4 +452,22 @@ void MD::ShowRun(size_t step_size_show) {
 			<< (U + KE) << "\t" << PC << "\t" << PK << "\t" << (PK + PC)
 			<< std::endl;
 	}
+}
+
+void MD::ResetValues()
+{
+	rx.resize(0, 0);
+	ry.resize(0, 0);
+	rz.resize(0, 0);
+	rrx.resize(0, 0);
+	rry.resize(0, 0);
+	rrz.resize(0, 0);
+	vx.resize(0, 0);
+	vy.resize(0, 0);
+	vz.resize(0, 0);
+	gr.resize(Nhist + 1, 0); // gr with Index igr
+	fx.resize(N, 0);
+	fy.resize(N, 0);
+	fz.resize(N, 0);
+
 }

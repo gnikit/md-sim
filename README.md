@@ -15,7 +15,6 @@ Download, **MD.cpp, MD.h, FileLoadingPlotting.py** and **Run.py**. **Source.cpp*
 ### Path
 * Change *path* in the constructor of **MD** to choose where the files will be saved.
 
-* Chose that same *path* in the **Run.py**
 
 ### Run
 Code to run the program can be found in **Source.cpp**. The example above, demonstrates the basic idea.
@@ -42,9 +41,7 @@ int main()
 
 ## Components
 The simulation is comprosed by the following:
-* master: Fluid in a Non-Isothermal container
-
-* Isothermal: Fluid in an Isothermal container
+* master: Fluid in an Isothermal container
 
 * Force_Interaction: A constant force in the x-direction is applied to the particle that is closest to the centre of the box
 

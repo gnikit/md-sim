@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// Ioannis Nikiteas 23/2/2017									    //
+// Ioannis Nikiteas 13/7/2017									    //
 //																    //
 // BSc Dissertation:											    //
 //  Investigating the transition from Molecular Dynamics to		    //
@@ -13,13 +13,9 @@
 //	to transition to SPH											//
 //																	//
 //																	//
-//	Use Intel C++ compiler with O3 and GPU acceleration for			//
+//	Use Intel C++ compiler with with MPI libraries for				//
 //	optimal results.												//	   
 //																	//	   
-//																	//
-//																	//
-//																	//
-//																	//
 //////////////////////////////////////////////////////////////////////
 #pragma once
 #include <iostream>
@@ -38,14 +34,15 @@ class MD
 {
 
 protected:
-	std::vector <double> rx;	std::vector <double> ry;	std::vector <double> rz;	// Position Arrays
-	std::vector <double> vx;	std::vector <double> vy;	std::vector <double> vz;	// Velocity Arrays
-	std::vector <double> fx;	std::vector <double> fy;	std::vector <double> fz;
-	std::vector<double> Cvx;    std::vector<double> Cvy;    std::vector<double> Cvz;
-	std::vector<double> rrx;	std::vector<double> rry;	std::vector<double> rrz;	// used in MSD
-	std::vector<double> MSDx;	std::vector<double> MSDy;	std::vector<double> MSDz;
-	std::vector<double> Cr;		std::vector<double> msd;								// correlation vector with time index
+	typedef std::vector<double> vec1d;	// short-hand notation, use with care
 
+	vec1d rx;	vec1d ry;	vec1d rz;	// Position Arrays
+	vec1d vx;	vec1d vy;	vec1d vz;	// Velocity Arrays
+	vec1d fx;	vec1d fy;	vec1d fz;
+	vec1d Cvx;	vec1d Cvy;	vec1d Cvz;
+	vec1d rrx;	vec1d rry;	vec1d rrz;	// used in MSD
+	vec1d MSDx;	vec1d MSDy;	vec1d MSDz;
+	vec1d Cr;	vec1d msd;								// correlation vector with time index
 
 	size_t Nx;	size_t Ny;	size_t Nz;
 	size_t N; 	size_t N_step; size_t N_max;
@@ -71,7 +68,7 @@ protected:
 	int Nhist, igr;		// Index of Hist
 	double rg, den, rn;
 	double dr;
-	std::vector<double> gr;
+	vec1d gr;
 
 private:
 	const long double pi = acos(-1.0);
@@ -94,14 +91,14 @@ public:
 	void Simulation(int POWER, double A_cst);
 
 protected:
-	void Initialise(std::vector<double> &x, std::vector<double> &y, std::vector<double> &z,
-		std::vector<double> &vx, std::vector<double> &vy, std::vector<double> &vz);
-	void VerletAlgorithm(std::vector<double> &rx, std::vector<double> &ry, std::vector<double> &rz,
-		std::vector<double> &vx, std::vector<double> &vy, std::vector<double> &vz,
-		std::vector<double> &rrx, std::vector<double> &rry, std::vector<double> &rrz);
-	void VelocityAutocorrelationFunction(std::vector<double> &Cvx, std::vector<double> &Cvy, std::vector<double> &Cvz);
+	void Initialise(vec1d &x, vec1d &y, vec1d &z,
+					vec1d &vx, vec1d &vy, vec1d &vz);
+	void VerletAlgorithm(vec1d &rx, vec1d &ry, vec1d &rz,
+						 vec1d &vx, vec1d &vy, vec1d &vz,
+						 vec1d &rrx, vec1d &rry, vec1d &rrz);
+	void VelocityAutocorrelationFunction(vec1d &Cvx, vec1d &Cvy, vec1d &Cvz);
 	void RadialDistributionFunction();
-	void MeanSquareDisplacement(std::vector<double> &MSDx, std::vector<double> &MSDy, std::vector<double> &MSDz);
+	void MeanSquareDisplacement(vec1d &MSDx, vec1d &MSDy, vec1d &MSDz);
 
 	void OpenFiles();
 	void CreateFiles(int POWER, double A_cst);

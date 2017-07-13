@@ -38,7 +38,7 @@ int main() {
 	for (size_t i = 0; i < p.size(); i++) {
 		srand(time(NULL));
 		MD run(dir, density, steps);
-		run.Simulation(p[i], 0);
+		run.Simulation(p[i], 0.75);
 	}
 
 	//system("pause");

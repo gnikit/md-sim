@@ -246,5 +246,5 @@ ModelManifest.xml
 *.sln
 
 # Ignore in ./MD Simulation debug files
-./MD simulation.vcxproj
-./MD simulation.vcxproj.filters
+*.vcxproj
+*.vcxproj.filters

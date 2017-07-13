@@ -28,9 +28,9 @@ MD::MD(std::string DIRECTORY, double DENSITY, size_t run_number) {
 MD::~MD() {}
 
 // Methods for MD Analysis
-void MD::Initialise(std::vector<double> &x, std::vector<double> &y,
-	std::vector<double> &z, std::vector<double> &vx,
-	std::vector<double> &vy, std::vector<double> &vz)
+void MD::Initialise(vec1d &x, vec1d &y,
+	vec1d &z, vec1d &vx,
+	vec1d &vy, vec1d &vz)
 	/*
 			Initialises the:
 			+ Position Arrays
@@ -111,11 +111,11 @@ void MD::Initialise(std::vector<double> &x, std::vector<double> &y,
 	VAF << first_val << std::endl;
 }
 
-void MD::VerletAlgorithm(std::vector<double> &rx, std::vector<double> &ry,
-	std::vector<double> &rz, std::vector<double> &vx,
-	std::vector<double> &vy, std::vector<double> &vz,
-	std::vector<double> &rrx, std::vector<double> &rry,
-	std::vector<double> &rrz) {
+void MD::VerletAlgorithm(vec1d &rx, vec1d &ry,
+	vec1d &rz, vec1d &vx,
+	vec1d &vy, vec1d &vz,
+	vec1d &rrx, vec1d &rry,
+	vec1d &rrz) {
 
 	for (size_t i = 0; i < N; i++) {
 		vx[i] = vx[i] * scale_v + fx[i] * dt;
@@ -154,9 +154,9 @@ void MD::VerletAlgorithm(std::vector<double> &rx, std::vector<double> &ry,
 	}
 }
 
-void MD::VelocityAutocorrelationFunction(std::vector<double> &Cvx,
-	std::vector<double> &Cvy,
-	std::vector<double> &Cvz) {
+void MD::VelocityAutocorrelationFunction(vec1d &Cvx,
+	vec1d &Cvy,
+	vec1d &Cvz) {
 	double temp_ = 0; // resets every time step
 	for (size_t i = 0; i < N; i++) {
 		temp_ += (Cvx[i] * vx[i] + Cvy[i] * vy[i] + Cvz[i] * vz[i]);
@@ -181,9 +181,9 @@ void MD::RadialDistributionFunction() {
 		Hist << gr[i] << std::endl;
 	}
 }
-void MD::MeanSquareDisplacement(std::vector<double> &MSDx,
-	std::vector<double> &MSDy,
-	std::vector<double> &MSDz) {
+void MD::MeanSquareDisplacement(vec1d &MSDx,
+	vec1d &MSDy,
+	vec1d &MSDz) {
 	double msd_temp = 0;
 	for (size_t i = 0; i < N; ++i) {
 		msd_temp += (std::pow((rrx[i] - MSDx[i]), 2) + std::pow((rry[i] - MSDy[i]), 2) +

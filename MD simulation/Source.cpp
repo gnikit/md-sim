@@ -1,6 +1,7 @@
 #include "MD.h"
 //#include "stat_analysis.h"
 #include <memory>
+#include <thread>
 
 using namespace std;
 
@@ -35,12 +36,18 @@ int main() {
 	std::vector<int> p{ 6, 8, 10, 12 };
 	double density = 0.5;
 	
-	for (size_t i = 0; i < p.size(); i++) {
-		srand(time(NULL));
-		MD run(dir, density, steps);
-		run.Simulation(p[i], 0.75);
-	}
+	MD run(dir, density, steps);
+	MD run1(dir, density, steps);
 
-	//system("pause");
+
+	run.Simulation(6, 0.75);
+
+	//for (size_t i = 0; i < p.size(); i++) {
+	//	srand(time(NULL));
+	//	MD run(dir, density, steps);
+	//	run.Simulation(p[i], 0.75);
+	//}
+
+	system("pause");
 } 
 

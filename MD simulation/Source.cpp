@@ -52,6 +52,6 @@ int main() {
 		run.Simulation(p[i], 0.75);
 	}
 
-	system("pause");
+	//system("pause");
 } 
 

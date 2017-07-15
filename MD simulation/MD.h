@@ -23,10 +23,12 @@
 #include <iomanip>  // setprecision
 #include <vector>
 #include <chrono>   // CPU run-time
+#include <ctime>
 #include <fstream>  // file writing
 #include <iterator>
 #include <assert.h>
 #include <sstream>
+
 
 
 
@@ -75,13 +77,11 @@ private:
 	std::string run; std::string A_par; std::string separator;
 	std::string path;
 	std::string file_type;
-	std::string KIN; std::string POT; std::string TOT;
-	std::string PRESSUREC; std::string PRESSUREK; std::string PCKTOT; std::string TEMPERATURE;
 	std::string HIST; std::string _VAF; std::string _MSD; std::string data;
+	std::string pos;
 	std::string Ldrx, Ldry, Ldrz, Ldvx, Ldvy, Ldvz;
 	std::string _dir, _density, _step;
-	std::ofstream Temperature, KinEn, PotEn, TotEn, PressureC, PressureK, PCK, Hist, VAF, MSD, DATA;
-	std::ofstream Loadrx, Loadry, Loadrz, Loadvx, Loadvy, Loadvz;
+	std::ofstream Hist, VAF, MSD, DATA, POS;
 
 public:
 
@@ -105,4 +105,5 @@ protected:
 	void WriteToFiles();
 	void ShowRun(size_t step_size_show);
 	void ResetValues();
+	void time(std::ofstream&, std::string variables);
 };

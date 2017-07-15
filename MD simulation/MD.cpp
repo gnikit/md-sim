@@ -181,6 +181,7 @@ void MD::RadialDistributionFunction() {
 		Hist << gr[i] << std::endl;
 	}
 }
+
 void MD::MeanSquareDisplacement(vec1d &MSDx,
 	vec1d &MSDy,
 	vec1d &MSDz) {
@@ -198,6 +199,7 @@ void MD::MeanSquareDisplacement(vec1d &MSDx,
 void MD::Simulation(int POWER, double A_cst) {
 	CreateFiles(POWER, A_cst);
 	OpenFiles();
+	time(DATA,"# T\tK\tU\tEtot\tPc\tPk\tPtot");
 	std::chrono::steady_clock::time_point begin =
 		std::chrono::steady_clock::now();
 	Initialise(rx, ry, rz, vx, vy, vz);
@@ -315,13 +317,11 @@ void MD::Simulation(int POWER, double A_cst) {
 	}
 	// Simulation Ends HERE
 	// Saving Last Position
+	time(POS, "# X\tY\tZ\tVx\tVy\tVz");
 	for (size_t el = 0; el < rx.size(); el++) {
-		Loadrx << rx[el] << std::endl;
-		Loadry << ry[el] << std::endl;
-		Loadrz << rz[el] << std::endl;
-		Loadvx << vx[el] << std::endl;
-		Loadvy << vy[el] << std::endl;
-		Loadvz << vz[el] << std::endl;
+		POS << rx[el] << '\t' << ry[el] << '\t'
+			<< rz[el] << '\t' << vx[el] << '\t'
+			<< vy[el] << '\t' << vz[el] << std::endl;
 	}
 
 	RadialDistributionFunction();
@@ -339,25 +339,14 @@ void MD::Simulation(int POWER, double A_cst) {
 
 // File Handling
 void MD::OpenFiles() {
-	Temperature.open(TEMPERATURE, std::ios::out | std::ios::trunc); // opens for output and deletes prev content
-	KinEn.open(KIN, std::ios::out | std::ios::trunc);
-	PotEn.open(POT, std::ios::out | std::ios::trunc);
-	TotEn.open(TOT, std::ios::out | std::ios::trunc);
-	PressureC.open(PRESSUREC, std::ios::out | std::ios::trunc);
-	PressureK.open(PRESSUREK, std::ios::out | std::ios::trunc);
-	PCK.open(PCKTOT, std::ios::out | std::ios::trunc);
+	// opens for files output and deletes prev content
 	Hist.open(HIST, std::ios::out | std::ios::trunc);
 	VAF.open(_VAF, std::ios::out | std::ios::trunc);
 	MSD.open(_MSD, std::ios::out | std::ios::trunc);
-	// DATA.open(data, std::ios::out | std::ios::trunc);
-
-	Loadrx.open(Ldrx, std::ios::out | std::ios::trunc);
-	Loadry.open(Ldry, std::ios::out | std::ios::trunc);
-	Loadrz.open(Ldrz, std::ios::out | std::ios::trunc);
-	Loadvx.open(Ldvx, std::ios::out | std::ios::trunc);
-	Loadvy.open(Ldvy, std::ios::out | std::ios::trunc);
-	Loadvz.open(Ldvz, std::ios::out | std::ios::trunc);
+	DATA.open(data, std::ios::out | std::ios::trunc);
+	POS.open(pos, std::ios::out | std::ios::trunc);
 }
+
 void MD::CreateFiles(int POWER, double A_cst) {
 	power = POWER;
 	A = A_cst;
@@ -375,69 +364,30 @@ void MD::CreateFiles(int POWER, double A_cst) {
     //path = "../../Archives of Data/Density 0.5/Isothermal~step 5000/";
 	path = _dir + _density + _step;
 	file_type = ".txt";
-	KIN = "KinEn";
-	POT = "PotEn";
-	TOT = "TotEn";
-	PRESSUREC = "PressureC";
-	PRESSUREK = "PressureK";
-	PCKTOT = "PCK";
-	TEMPERATURE = "Temperature";
+	data = "Data";
+	pos = "Positions_Velocities"; 
 	HIST = "Hist";
 	_VAF = "VAF";
 	_MSD = "MSD";
-	data = "data";
-	Ldrx = "Loadrx";
-	Ldry = "Loadry";
-	Ldrz = "Loadrz";
-	Ldvx = "Loadvx";
-	Ldvy = "Loadvy";
-	Ldvz = "Loadvz";
 
 	// Path addition
-	KIN = path + KIN;
-	POT = path + POT;
-	TOT = path + TOT;
-	PRESSUREC = path + PRESSUREC;
-	PRESSUREK = path + PRESSUREK;
-	PCKTOT = path + PCKTOT;
-	TEMPERATURE = path + TEMPERATURE;
 	HIST = path + HIST;
 	_VAF = path + _VAF;
 	_MSD = path + _MSD;
-	data = path + data;
-	Ldrx = path + Ldrx;
-	Ldry = path + Ldry;
-	Ldrz = path + Ldrz;
-	Ldvx = path + Ldvx;
-	Ldvy = path + Ldvy;
-	Ldvz = path + Ldvz;
+	data = path + data; 
+	pos = path + pos;   
 
-	KIN = KIN + run + separator + A_par + file_type;
-	POT += run + separator + A_par + file_type;
-	TOT += run + separator + A_par + file_type;
-	PRESSUREC += run + separator + A_par + file_type;
-	PRESSUREK += run + separator + A_par + file_type;
-	PCKTOT += run + separator + A_par + file_type;
-	TEMPERATURE += run + separator + A_par + file_type;
+	data += run + separator + A_par + file_type;
+	pos += run + separator + A_par + file_type; 
 	HIST += run + separator + A_par + file_type;
 	_VAF += run + separator + A_par + file_type;
 	_MSD += run + separator + A_par + file_type;
-	Ldrx += run + separator + A_par + file_type;
-	Ldry += run + separator + A_par + file_type;
-	Ldrz += run + separator + A_par + file_type;
-	Ldvx += run + separator + A_par + file_type;
-	Ldvy += run + separator + A_par + file_type;
-	Ldvz += run + separator + A_par + file_type;
-
 }
 void MD::WriteToFiles() {
-	Temperature << T << std::endl;
-	KinEn << KE << std::endl;
-	PotEn << U << std::endl;
-	TotEn << (U + KE) << std::endl;
-	PressureC << PC << std::endl;
-	PressureK << PK << std::endl;
-	PCK << (PC + PK) << std::endl;
+	DATA << T << '\t' << KE << '\t' << U << '\t'
+		 << (U + KE) << '\t' << PC << '\t' << PK
+		 << '\t' << (PC + PK) << std::endl;
+	
 }
 void MD::ShowRun(size_t step_size_show) {
 
@@ -445,15 +395,13 @@ void MD::ShowRun(size_t step_size_show) {
 		std::cout << "step:\tT:\tKE:\tU:\tU+K:\tPC:\tPK:\t(PK+PC):" << std::endl;
 	}
 
-	if (N_step % step_size_show == 0 || N_step == 1) // print every 500 results
-	{
+	if (N_step % step_size_show == 0 || N_step == 1) {
 		std::cout.precision(5);
 		std::cout << N_step << "\t" << T << "\t" << KE << "\t" << U << "\t"
 			<< (U + KE) << "\t" << PC << "\t" << PK << "\t" << (PK + PC)
 			<< std::endl;
 	}
 }
-
 void MD::ResetValues()
 {
 	rx.resize(0, 0);
@@ -471,3 +419,13 @@ void MD::ResetValues()
 	fz.resize(N, 0);
 
 }
+
+void MD::time(std::ofstream& stream, std::string variables) { 
+	std::chrono::time_point<std::chrono::system_clock> instance;
+	instance = std::chrono::system_clock::now();
+	std::time_t date_time = std::chrono::system_clock::to_time_t(instance);
+	stream << "# Created on: " << std::ctime(&date_time);
+	stream << variables << std::endl;
+
+}
+

@@ -346,7 +346,6 @@ void MD::OpenFiles() {
 	DATA.open(data, std::ios::out | std::ios::trunc);
 	POS.open(pos, std::ios::out | std::ios::trunc);
 }
-
 void MD::CreateFiles(int POWER, double A_cst) {
 	power = POWER;
 	A = A_cst;
@@ -419,7 +418,6 @@ void MD::ResetValues()
 	fz.resize(N, 0);
 
 }
-
 void MD::time(std::ofstream& stream, std::string variables) { 
 	std::chrono::time_point<std::chrono::system_clock> instance;
 	instance = std::chrono::system_clock::now();

@@ -36,17 +36,27 @@ int main() {
 	std::vector<int> p{ 6, 8, 10, 12 };
 	double density = 0.5;
 	
-	MD run(dir, density, steps);
-	MD run1(dir, density, steps);
-
-
-	run.Simulation(6, 0.75);
-
-	//for (size_t i = 0; i < p.size(); i++) {
-	//	srand(time(NULL));
-	//	MD run(dir, density, steps);
-	//	run.Simulation(p[i], 0.75);
+	//MD run(dir, density, steps);
+	//MD run1(dir, density, steps);
+	//
+	//for (size_t i = 0; i < power.size() - 1; i+=2) {
+	//	for (size_t j = 0; j < A_par.size(); j++) {
+	//		srand(time(NULL));
+	//		std::thread t1(&MD::Simulation, &run, power[i], A_par[j]);
+	//		std::thread t2(&MD::Simulation, &run1, power[i+1], A_par[j]);
+	//
+	//		t1.join();
+	//		t2.join();
+	//	}
 	//}
+
+	//run.Simulation(6, 0.75);
+
+	for (size_t i = 0; i < p.size(); i++) {
+		srand(time(NULL));
+		MD run(dir, density, steps);
+		run.Simulation(p[i], 0.75);
+	}
 
 	system("pause");
 } 

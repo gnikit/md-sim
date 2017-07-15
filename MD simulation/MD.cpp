@@ -174,7 +174,7 @@ void MD::RadialDistributionFunction() {
 		R = rg * (i + 1) / Nhist; // dr = rg*Nhist, gr.size() == Nhist+1
 		if ((i + 1) == Nhist) {
 			R = rg * (i) / Nhist; // dr = rg*Nhist, gr.size() == Nhist+1
-			std::cout << "trigered" << std::endl;
+			//std::cout << "trigered" << std::endl;
 		}
 		norm = (cor_rho * 2 * pi * R * R * N * N_max * dr);
 		gr[i] /= norm;	// not really needed

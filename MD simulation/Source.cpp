@@ -11,7 +11,7 @@ int main() {
 	size_t steps = 5000;
 	vector<double> A_par = { 0.0, 0.25, 0.5,  0.75, 1.0, 1.25, 1.50, 1.75,
 								  2.0, 2.25, 2.50, 2.75, 3.0, 3.5,  4.0 };
-	vector<size_t> power = {6, 7, 8, 9, 10, 12};
+	vector<size_t> power = { 6, 7, 8, 9, 10, 12 };
 	// cerr << "Log file of the MD simulation" << endl;
 	// cerr << "Power:\tA:\tsteps:" << endl;
 	size_t num = 1;
@@ -44,7 +44,7 @@ int main() {
 
 	std::vector<int> p{ 6, 8, 10, 12 };
 	double density = 0.5;
-	
+
 
 	for (size_t i = 0; i < p.size(); i++) {
 		srand(time(NULL));
@@ -53,5 +53,5 @@ int main() {
 	}
 
 	//system("pause");
-} 
+}
 

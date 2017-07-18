@@ -199,7 +199,7 @@ void MD::MeanSquareDisplacement(vec1d &MSDx,
 void MD::Simulation(int POWER, double A_cst) {
 	CreateFiles(POWER, A_cst);
 	OpenFiles();
-	time(DATA,"# T\tK\tU\tEtot\tPc\tPk\tPtot");
+	time(DATA, "# T\tK\tU\tEtot\tPc\tPk\tPtot");
 	std::chrono::steady_clock::time_point begin =
 		std::chrono::steady_clock::now();
 	Initialise(rx, ry, rz, vx, vy, vz);
@@ -360,11 +360,11 @@ void MD::CreateFiles(int POWER, double A_cst) {
 	A_par = stream.str();
 	_density = "Density " + density_stream.str();
 	//   ------------_dir------||---_density--||-----_step-------||
-    //path = "../../Archives of Data/Density 0.5/Isothermal~step 5000/";
+	//path = "../../Archives of Data/Density 0.5/Isothermal~step 5000/";
 	path = _dir + _density + _step;
 	file_type = ".txt";
 	data = "Data";
-	pos = "Positions_Velocities"; 
+	pos = "Positions_Velocities";
 	HIST = "Hist";
 	_VAF = "VAF";
 	_MSD = "MSD";
@@ -373,20 +373,20 @@ void MD::CreateFiles(int POWER, double A_cst) {
 	HIST = path + HIST;
 	_VAF = path + _VAF;
 	_MSD = path + _MSD;
-	data = path + data; 
-	pos = path + pos;   
+	data = path + data;
+	pos = path + pos;
 
 	data += run + separator + A_par + file_type;
-	pos += run + separator + A_par + file_type; 
+	pos += run + separator + A_par + file_type;
 	HIST += run + separator + A_par + file_type;
 	_VAF += run + separator + A_par + file_type;
 	_MSD += run + separator + A_par + file_type;
 }
 void MD::WriteToFiles() {
 	DATA << T << '\t' << KE << '\t' << U << '\t'
-		 << (U + KE) << '\t' << PC << '\t' << PK
-		 << '\t' << (PC + PK) << std::endl;
-	
+		<< (U + KE) << '\t' << PC << '\t' << PK
+		<< '\t' << (PC + PK) << std::endl;
+
 }
 void MD::ShowRun(size_t step_size_show) {
 
@@ -401,8 +401,7 @@ void MD::ShowRun(size_t step_size_show) {
 			<< std::endl;
 	}
 }
-void MD::ResetValues()
-{
+void MD::ResetValues() {
 	rx.resize(0, 0);
 	ry.resize(0, 0);
 	rz.resize(0, 0);
@@ -418,7 +417,7 @@ void MD::ResetValues()
 	fz.resize(N, 0);
 
 }
-void MD::time(std::ofstream& stream, std::string variables) { 
+void MD::time(std::ofstream& stream, std::string variables) {
 	std::chrono::time_point<std::chrono::system_clock> instance;
 	instance = std::chrono::system_clock::now();
 	std::time_t date_time = std::chrono::system_clock::to_time_t(instance);

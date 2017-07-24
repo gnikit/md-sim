@@ -120,6 +120,7 @@
   <ItemGroup>
     <ClCompile Include="MD.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="stat_analysis.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MD.h" />

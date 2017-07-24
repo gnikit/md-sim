@@ -1,51 +1,16 @@
-#pragma once
-#include <iostream>
-#include <string>
-#include <vector>
-#include <fstream>	
-#include <assert.h>
-#include <iterator>
-#include <sstream>
-#include <iomanip>  // setprecision
+#include "stat_analysis.h"
 
+Stat_Analysis::Stat_Analysis(std::string PATH, vec1d A_LIST) {
+	// Do everything in the constructor
+	// No need for a Run function
+	_path = PATH;
+	_A_list = A_LIST;
+}
 
-// This is a very crude way of moving the methods from
-// Source.cpp to a separate file in order to increase readability
-//TODO: make stat_analysis into a class or inlcude into MD 
+Stat_Analysis::~Stat_Analysis() {
+}
 
-class Stat_Analysis {
-
-protected:
-	typedef std::vector<double> vec1d;
-
-private:
-
-	vec1d temp1, temp2, temp3, temp4;
-	vec1d _A_list;
-	std::string _path;
-	double m1;
-
-public:
-	Stat_Analysis(std::string PATH, vec1d A_LIST);
-	~Stat_Analysis();
-
-	void ReadFromFile(std::vector<double> &x, const std::string &file_name);
-	double Mean(std::vector<double> &x);
-	void StaticDataProcessing(size_t n);
-
-};
-using namespace std;
-
-// FILE *stream;
-vector<double> temp1, temp2, temp3, temp4;
-double m1;
-
-void ReadFromFile(std::vector<double> &x, const std::string &file_name);
-double Mean(std::vector<double> &x);
-void StaticDataProcessing(size_t n);
-
-
-void ReadFromFile(std::vector<double> &x, const std::string &file_name) {
+void Stat_Analysis::ReadFromFile(std::vector<double> &x, const std::string &file_name) {
 	/*
 	Reads from a stream that already exists for a file that is already placed in the
 	directory and appends the data into a 1D vector.
@@ -59,7 +24,7 @@ void ReadFromFile(std::vector<double> &x, const std::string &file_name) {
 	read_file.close();
 }
 
-double Mean(std::vector<double> &x) {
+double Stat_Analysis::Mean(std::vector<double> &x) {
 	size_t n = 0;
 	double temp = 0;
 	for (size_t i = 0; i < x.size(); i++) {
@@ -72,7 +37,7 @@ double Mean(std::vector<double> &x) {
 	return m1;
 }
 
-void StaticDataProcessing(size_t n)
+void Stat_Analysis::StaticDataProcessing(size_t n)
 /*
 Used to average the energies and pressures for all
 values of A for a specific number n of the potential
@@ -133,5 +98,3 @@ strength
 		data << m1 << endl;
 	}
 }
-
-

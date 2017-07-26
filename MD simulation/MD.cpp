@@ -198,7 +198,7 @@ void MD::MeanSquareDisplacement(vec1d &MSDx,
 // MD Simulation
 void MD::Simulation(int POWER, double A_cst) {
 	CreateFiles(POWER, A_cst);
-	OpenFiles();
+  OpenFiles();  // TODO: new file stream are not created when 1 constructor is used INVESTIGATE
 	time(DATA, "# T\tK\tU\tEtot\tPc\tPk\tPtot");
 	std::chrono::steady_clock::time_point begin =
 		std::chrono::steady_clock::now();

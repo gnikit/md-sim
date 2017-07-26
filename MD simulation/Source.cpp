@@ -43,7 +43,7 @@ int main() {
 
   std::vector<int> p = { 6, 8, 10, 12 };
   std::vector<double> A = { 0.0, 0.25, 0.5,  0.75, 1.0, 1.25, 4.0 };
-  double density = 3.6;
+  double density = 0.5;
 
   for (size_t i = 0; i < p.size(); i++) {
     for (size_t j = 0; j < A.size(); j++) {

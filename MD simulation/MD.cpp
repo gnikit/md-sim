@@ -198,7 +198,7 @@ void MD::MeanSquareDisplacement(vec1d &MSDx,
 // MD Simulation
 void MD::Simulation(int POWER, double A_cst) {
 	CreateFiles(POWER, A_cst);
-  OpenFiles();  // TODO: new file stream are not created when 1 constructor is used INVESTIGATE
+  OpenFiles();
 	time(DATA, "# T\tK\tU\tEtot\tPc\tPk\tPtot");
 	std::chrono::steady_clock::time_point begin =
 		std::chrono::steady_clock::now();
@@ -402,6 +402,12 @@ void MD::ShowRun(size_t step_size_show) {
 	}
 }
 void MD::ResetValues() {
+  Hist.close(); // Close streams at the end of run
+  VAF.close();
+  MSD.close();
+  DATA.close();
+  POS.close();
+
 	rx.resize(0, 0);
 	ry.resize(0, 0);
 	rz.resize(0, 0);

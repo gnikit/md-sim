@@ -8,14 +8,15 @@
 int main() {
   // freopen_s(&stream, "LOG.txt", "a+", stderr);
   size_t steps = 5000;
-  std::vector<double> A_par = { 0.0, 0.25, 0.5,  0.75, 1.0, 1.25, 1.50, 1.75,
-                  2.0, 2.25, 2.50, 2.75, 3.0, 3.5, 4.0 };
-  std::vector<size_t> power = { 6, 7, 8, 9, 10, 12 };
-  // cerr << "Log file of the MD simulation" << endl;
-  // cerr << "Power:\tA:\tsteps:" << endl;
   size_t num = 1;
   char full = 'y';
   std::string dir = "../../Archives of Data/";
+  //std::vector<double> A_par = { 0.0, 0.25, 0.5,  0.75, 1.0, 1.25, 1.50, 1.75,
+  //                2.0, 2.25, 2.50, 2.75, 3.0, 3.5, 4.0 };
+  //std::vector<size_t> power = { 6, 7, 8, 9, 10, 12 };
+  // cerr << "Log file of the MD simulation" << endl;
+  // cerr << "Power:\tA:\tsteps:" << endl;
+  //
   //if (full == 'y')
   //  {
   //       for (size_t n = 0; n < power.size(); n++)
@@ -42,19 +43,21 @@ int main() {
   //t2.join();
 
   std::vector<int> p = { 6, 8, 10, 12 };
-  std::vector<double> A = { 0.0, 0.25, 0.5,  0.75, 1.0, 1.25, 4.0 };
+  std::vector<double> A = {0, 0.25/*, 0.5,  0.75, 1.0, 1.25, 4.0*/ };
   double density = 0.5;
+
+
+  MD run(dir, density, steps);
 
   for (size_t i = 0; i < p.size(); i++) {
     for (size_t j = 0; j < A.size(); j++) {
-      srand(time(NULL));
-      MD run(dir, density, steps);
+      //srand(time(NULL));
       std::cout << "p: " << p[i] << " A: " << A[j] << " run num: " << num << std::endl;
       run.Simulation(p[i], A[j]);
       ++num;
     }
   }
 
-  //system("pause");
+ // system("pause");
 }
 

@@ -6,8 +6,8 @@ MD::MD(std::string DIRECTORY, double DENSITY, size_t run_number) {
 	rho = DENSITY;
 	N_max = run_number;
 
-	Nx = Ny = Nz = 8;
-	N = Nx * Ny * Nz;
+	Nx = Ny = Nz = 8; // Number of particles per axis
+  N = Nx * Ny * Nz;
 	scale = std::pow((N / rho), (1.0 / 3.0)) / Nx; // scalling factor for length of box
 	L = std::pow((N / rho), 1.0 / 3.0);            // L depends on rho
 	Vol = N / rho;
@@ -266,7 +266,7 @@ void MD::Simulation(int POWER, double A_cst) {
 					zz = zz + L;
 				}
 
-				r = sqrt(std::pow(x, 2) + std::pow(y, 2) + std::pow(z, 2));
+				r = sqrt((x * x) + (y * y) + (z * z));
 				double q = sqrt(r * r + A);
 
 				// Force loop
@@ -338,14 +338,6 @@ void MD::Simulation(int POWER, double A_cst) {
 }
 
 // File Handling
-void MD::OpenFiles() {
-	// opens for files output and deletes prev content
-	Hist.open(HIST, std::ios::out | std::ios::trunc);
-	VAF.open(_VAF, std::ios::out | std::ios::trunc);
-	MSD.open(_MSD, std::ios::out | std::ios::trunc);
-	DATA.open(data, std::ios::out | std::ios::trunc);
-	POS.open(pos, std::ios::out | std::ios::trunc);
-}
 void MD::CreateFiles(int POWER, double A_cst) {
 	power = POWER;
 	A = A_cst;
@@ -381,6 +373,14 @@ void MD::CreateFiles(int POWER, double A_cst) {
 	HIST += run + separator + A_par + file_type;
 	_VAF += run + separator + A_par + file_type;
 	_MSD += run + separator + A_par + file_type;
+}
+void MD::OpenFiles() {
+  // opens for files output and deletes prev content
+  Hist.open(HIST, std::ios::out | std::ios::trunc);
+  VAF.open(_VAF, std::ios::out | std::ios::trunc);
+  MSD.open(_MSD, std::ios::out | std::ios::trunc);
+  DATA.open(data, std::ios::out | std::ios::trunc);
+  POS.open(pos, std::ios::out | std::ios::trunc);
 }
 void MD::WriteToFiles() {
 	DATA << T << '\t' << KE << '\t' << U << '\t'

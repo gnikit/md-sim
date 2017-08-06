@@ -248,3 +248,7 @@ ModelManifest.xml
 # Ignore in ./MD Simulation debug files
 *.vcxproj
 *.vcxproj.filters
+/MD simulation/Source1.cpp
+/MD simulation/Source1.cpp
+/MD simulation/MD.exe
+/MD simulation/MD.exe

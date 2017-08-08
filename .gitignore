@@ -249,6 +249,4 @@ ModelManifest.xml
 *.vcxproj
 *.vcxproj.filters
 /MD simulation/Source1.cpp
-/MD simulation/Source1.cpp
-/MD simulation/MD.exe
-/MD simulation/MD.exe
+/MD simulation/run_me.bat

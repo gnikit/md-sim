@@ -7,10 +7,8 @@ Stat_Analysis::Stat_Analysis(std::string PATH, vec1d A_LIST) {
 	_A_list = A_LIST;
 }
 
-Stat_Analysis::~Stat_Analysis() {
-}
 
-void Stat_Analysis::ReadFromFile(std::vector<double> &x, const std::string &file_name) {
+void Stat_Analysis::ReadFromFile(vec1d &x, const std::string &file_name) {
 	/*
 	Reads from a stream that already exists for a file that is already placed in the
 	directory and appends the data into a 1D vector.
@@ -24,17 +22,67 @@ void Stat_Analysis::ReadFromFile(std::vector<double> &x, const std::string &file
 	read_file.close();
 }
 
-double Stat_Analysis::Mean(std::vector<double> &x) {
-	size_t n = 0;
-	double temp = 0;
-	for (size_t i = 0; i < x.size(); i++) {
-		temp += x.at(i);
-		n++;
-	}
-	temp /= n; // this is the mean
-	m1 = temp;
+void Stat_Analysis::ReadFromFile(vec1d &x, vec1d &y, vec1d &z,
+                                 vec1d &Xx, vec1d &Yy, vec1d &Zz, vec1d &w,
+                                 const std::string &file_name){
+/*
+  Reads from a stream that already exists for a file that is already placed in the
+  directory and appends the data into a 1D vector.
+  */
+  std::ifstream read_file(file_name);
+  assert(read_file.is_open()); // Checks if file is open
+  double a, b, c, d, e, f, g;
+  std::string line;
+ 
+  while (!read_file.eof()) {
+    std::getline(read_file, line);
 
-	return m1;
+    if (line.length() == 0 || line[0] == '#')
+      std::cout << "IGNORE LINE\n";
+    else {
+      std::stringstream ss(line);
+      ss >> a; 
+      ss >> b;
+      ss >> c;
+      ss >> d;
+      ss >> e;
+      //ss >> f;
+      //ss >> g;
+      x.push_back(a);
+      y.push_back(b);
+      z.push_back(c);
+      Xx.push_back(d);
+      Yy.push_back(e);
+      //Zz.push_back(f);
+      //w.push_back(g);
+    }
+      
+  }
+  read_file.close();
+}
+
+void Stat_Analysis::Mean(vec1d &x, vec1d &y, vec1d &z,
+  vec1d &Xx, vec1d &Yy, vec1d &Zz, vec1d &w) {
+  size_t n = 0;
+
+  for (size_t i = 0; i < x.size(); i++) {
+    _temp0 += x[i];
+    _temp1 += y[i];
+    _temp2 += z[i];
+    _temp3 += Xx[i];
+    _temp4 += Yy[i];
+    //_temp5 += Zz[i];
+    //_temp6 += w[i];
+    n++;
+  }
+  _temp0 /= n; // this is the mean
+  _temp1 /= n;
+  _temp2 /= n;
+  _temp3 /= n;
+  _temp4 /= n;
+  //_temp5 /= n;
+  //_temp6 /= n;
+
 }
 
 void Stat_Analysis::StaticDataProcessing(size_t n)
@@ -44,57 +92,50 @@ values of A for a specific number n of the potential
 strength
 */
 {
-	std::vector<double> A{ 0, 0.25, 0.5,  0.75, 1, 1.25, 1.5, 1.75,
-		2, 2.25, 2.50, 2.75, 3, 3.5,  4 };
 	std::vector<double> temp;
 
 	std::ofstream data;
-	std::string K, U, Tot, Pc, path, sep, power, a, txt;
-	path = "../../Archives of Data/Density 0.5/Isothermal~step 5000/"; // warning change step count
-	sep = "~";														// TODO: generic step change
-	txt = ".txt";
+	std::string file_name, path, sep, power, a, txt;
+	path = _path; 
+	sep = "~";													
+  txt = ".txt";
 	// path = "\0";
 	power = std::to_string(n);
-	std::string name = path + "data" + power + txt;
+	std::string name = path + "AVGdata" + power + txt;
 	data.open(name, std::ios::out | std::ios::trunc);
 
-	// data << "Power:\t" << n << endl;
-	data << "# A:\tK:\tU:\tTot:\tPc:" << endl;
+	// data << "Power:\t" << n << std::endl;
+	data << "# A:\tT\tK:\tU:\tETot:\tPc:" << std::endl;
 
-	for (size_t i = 0; i < A.size(); i++) {
-		K.clear();
-		U.clear();
-		Tot.clear();
-		Pc.clear();
-		temp1.clear();
-		temp2.clear();
-		temp3.clear();
-		temp4.clear();
-		K = "KinEn";
-		U = "PotEn";
-		Tot = "TotEn";
-		Pc = "PressureC";
+	for (size_t i = 0; i < _A_list.size(); i++) {
+    file_name.clear();
+		TEMP0.clear();
+		TEMP1.clear();
+		TEMP2.clear();
+		TEMP3.clear();
+    TEMP4.clear();
+    TEMP5.clear();
+    TEMP6.clear();
+    file_name = "Data";
+
+    // Converts A to 2 decimal double
 		std::stringstream stream;
-		stream << std::fixed << std::setprecision(2) << A.at(i);
+		stream << std::fixed << std::setprecision(2) << _A_list.at(i);
+
 		a = stream.str();
-		K = path + K + power + sep + a + txt;
-		U = path + U + power + sep + a + txt;
-		Tot = path + Tot + power + sep + a + txt;
-		Pc = path + Pc + power + sep + a + txt;
+		file_name = path + file_name + power + sep + a + txt;
 
-		ReadFromFile(temp1, K);
-		ReadFromFile(temp2, U);
-		ReadFromFile(temp3, Tot);
-		ReadFromFile(temp4, Pc);
 
-		Mean(temp1);
+
+		ReadFromFile(TEMP0, TEMP1, TEMP2, TEMP3, TEMP4, TEMP5, TEMP6, file_name);
+
+
+		Mean(TEMP0, TEMP1, TEMP2, TEMP3, TEMP4, TEMP5, TEMP6);
 		data.precision(5);
-		data << A.at(i) << '\t' << m1 << '\t';
-		Mean(temp2);
-		data << m1 << '\t';
-		Mean(temp3);
-		data << m1 << '\t';
-		Mean(temp4);
-		data << m1 << endl;
+		data << _A_list.at(i) << '\t' << _temp0 << '\t';
+    // rinse and repeat for the rest
+    // consider excluding usless vectors like PK, PTOT
+    // Debug to see if the smethod for file reading still works
+
 	}
 }

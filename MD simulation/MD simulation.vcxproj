@@ -37,9 +37,10 @@
     <PlatformToolset>Intel C++ Compiler 17.0</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
-    <UseIntelIPP>false</UseIntelIPP>
-    <UseIntelMKL>No</UseIntelMKL>
-    <UseIntelDAAL>false</UseIntelDAAL>
+    <UseIntelIPP>Sequential_Dynamic</UseIntelIPP>
+    <UseIntelMKL>Parallel</UseIntelMKL>
+    <UseIntelDAAL>Sequential_Dynamic</UseIntelDAAL>
+    <InterproceduralOptimization>true</InterproceduralOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -93,13 +94,19 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <EnableMatrixMultiplyLibraryCall>Yes</EnableMatrixMultiplyLibraryCall>
       <Parallelization>true</Parallelization>
       <UseIntelOptimizedHeaders>true</UseIntelOptimizedHeaders>
       <Mtune>Sandybridge</Mtune>
       <Optimization>MaxSpeedHighLevel</Optimization>
       <OptimizeForWindowsApplication>true</OptimizeForWindowsApplication>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <FlushDenormalResultsToZero>false</FlushDenormalResultsToZero>
+      <C99Support>true</C99Support>
+      <Cpp0xSupport>true</Cpp0xSupport>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

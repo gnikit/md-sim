@@ -6,7 +6,7 @@ MD::MD(std::string DIRECTORY, double DENSITY, size_t run_number) {
   rho = DENSITY;
   N_max = run_number;
 
-  Nx = Ny = Nz = 8; // Number of particles per axis
+  Nx = Ny = Nz = 10; // Number of particles per axis
   N = Nx * Ny * Nz;
   scale = std::pow((N / rho), (1.0 / 3.0)) / Nx; // scalling factor for length of box
   L = std::pow((N / rho), 1.0 / 3.0);            // L depends on rho
@@ -281,7 +281,10 @@ void MD::Simulation(int POWER, double A_cst) {
           U += std::pow(q, -power); // Potential Calculation
 
           // Radial Distribution
-          igr = (Nhist * r / rg);
+          igr = round(Nhist * r / rg);
+          if (igr > 99) {
+            igr = 99; // round might round up to 100 sometimes
+          }
           gr[igr] += 1;
           //rn = (igr - 0.5)*dr;					
         }

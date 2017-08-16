@@ -1,7 +1,6 @@
 #include "MD.h"
 
-
-MD::MD(std::string DIRECTORY, double DENSITY, size_t run_number) {
+MD::MD(std::string DIRECTORY, long double DENSITY, size_t run_number) {
   _dir = DIRECTORY;
   rho = DENSITY;
   N_max = run_number;
@@ -18,11 +17,11 @@ MD::MD(std::string DIRECTORY, double DENSITY, size_t run_number) {
   rg = cut_off;
   Nhist = 100; // might change # of part in bin
   dr = rg / Nhist;
-  gr.resize(Nhist, 0); // gr with Index igr
+  gr.resize(Nhist + 1, 0); // gr with Index igr
   fx.resize(N, 0);
   fy.resize(N, 0);
   fz.resize(N, 0);
-  //TODO: reserve r's and v's, instead of push_back 
+  //TODO: reserve r's and v's, instead of push_back
 }
 MD::~MD() {}
 
@@ -54,18 +53,18 @@ void MD::Initialise(vec1d &x, vec1d &y,
         rrz.push_back((k + 0.5) * scale);
 
         // Add random initial velocities
-        vx.push_back(((double)rand() / (RAND_MAX)) + 1);
-        vy.push_back(((double)rand() / (RAND_MAX)) + 1);
-        vz.push_back(((double)rand() / (RAND_MAX)) + 1);
+        vx.push_back(((long double)rand() / (RAND_MAX)) + 1);
+        vy.push_back(((long double)rand() / (RAND_MAX)) + 1);
+        vz.push_back(((long double)rand() / (RAND_MAX)) + 1);
 
         ++n;
       }
     }
   }
   // scale of x, y, z
-  double mean_vx = 0;
-  double mean_vy = 0;
-  double mean_vz = 0;
+  long double mean_vx = 0;
+  long double mean_vy = 0;
+  long double mean_vz = 0;
 
   // Momentum conservation array
   for (size_t i = 0; i < N; i++) {
@@ -115,7 +114,6 @@ void MD::VerletAlgorithm(vec1d &rx, vec1d &ry,
   vec1d &vy, vec1d &vz,
   vec1d &rrx, vec1d &rry,
   vec1d &rrz) {
-
   for (size_t i = 0; i < N; i++) {
     vx[i] = vx[i] * scale_v + fx[i] * dt;
     vy[i] = vy[i] * scale_v + fy[i] * dt;
@@ -166,9 +164,9 @@ void MD::VelocityAutocorrelationFunction(vec1d &Cvx,
 }
 
 void MD::RadialDistributionFunction() {
-  double R = 0;
-  double norm;
-  double cor_rho = rho * (N - 1) / N;
+  long double R = 0;
+  long double norm;
+  long double cor_rho = rho * (N - 1) / N;
   for (size_t i = 0; i < Nhist; i++) {
     R = rg * (i + 1) / Nhist;
     norm = (cor_rho * 2 * pi * R * R * N * N_max * dr);
@@ -191,7 +189,7 @@ void MD::MeanSquareDisplacement(vec1d &MSDx,
 }
 
 // MD Simulation
-void MD::Simulation(int POWER, double A_cst) {
+void MD::Simulation(int POWER, long double A_cst) {
   CreateFiles(POWER, A_cst);
   OpenFiles();
   time(DATA, "# T\tK\tU\tEtot\tPc\tPk\tPtot");
@@ -262,12 +260,12 @@ void MD::Simulation(int POWER, double A_cst) {
         }
 
         r = sqrt((x * x) + (y * y) + (z * z));
-        double q = sqrt(r * r + A);
+        long double q = sqrt(r * r + A);
 
         // Force loop
         if (r < cut_off) // for particles within the cut off range
         {
-          double ff =
+          long double ff =
             (power)*r *	std::pow(q, (-power - 2)); // Force for particles
 
           fx[i] += x * ff / r;
@@ -281,12 +279,15 @@ void MD::Simulation(int POWER, double A_cst) {
           U += std::pow(q, -power); // Potential Calculation
 
           // Radial Distribution
-          igr = round(Nhist * r / rg);
+          igr = (Nhist * r / rg);
+          /*
+            roundl() yields better 
+          */
           if (igr > 99) {
-            igr = 99; // round might round up to 100 sometimes
+            igr = 99;
           }
           gr[igr] += 1;
-          //rn = (igr - 0.5)*dr;					
+          //rn = (igr - 0.5)*dr;
         }
       }
     }
@@ -336,7 +337,7 @@ void MD::Simulation(int POWER, double A_cst) {
 }
 
 // File Handling
-void MD::CreateFiles(int POWER, double A_cst) {
+void MD::CreateFiles(int POWER, long double A_cst) {
   power = POWER;
   A = A_cst;
 
@@ -384,10 +385,8 @@ void MD::WriteToFiles() {
   DATA << T << '\t' << KE << '\t' << U << '\t'
     << (U + KE) << '\t' << PC << '\t' << PK
     << '\t' << (PC + PK) << std::endl;
-
 }
 void MD::ShowRun(size_t step_size_show) {
-
   if (N_step == 0) {
     std::cout << "step:\tT:\tKE:\tU:\tU+K:\tPC:\tPK:\t(PK+PC):" << std::endl;
   }
@@ -419,7 +418,6 @@ void MD::ResetValues() {
   fx.resize(N, 0);
   fy.resize(N, 0);
   fz.resize(N, 0);
-
 }
 void MD::time(std::ofstream& stream, std::string variables) {
   std::chrono::time_point<std::chrono::system_clock> instance;
@@ -427,6 +425,4 @@ void MD::time(std::ofstream& stream, std::string variables) {
   std::time_t date_time = std::chrono::system_clock::to_time_t(instance);
   stream << "# Created on: " << std::ctime(&date_time);
   stream << variables << std::endl;
-
 }
-

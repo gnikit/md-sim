@@ -1,4 +1,6 @@
 #include "MD.h"
+#pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
+
 
 MD::MD(std::string DIRECTORY, long double DENSITY, size_t run_number) {
   _dir = DIRECTORY;
@@ -27,8 +29,8 @@ MD::~MD() {}
 
 // Methods for MD Analysis
 void MD::Initialise(vec1d &x, vec1d &y,
-  vec1d &z, vec1d &vx,
-  vec1d &vy, vec1d &vz)
+                    vec1d &z, vec1d &vx,
+                    vec1d &vy, vec1d &vz)
   /*
       Initialises the:
       + Position Arrays
@@ -110,10 +112,10 @@ void MD::Initialise(vec1d &x, vec1d &y,
 }
 
 void MD::VerletAlgorithm(vec1d &rx, vec1d &ry,
-  vec1d &rz, vec1d &vx,
-  vec1d &vy, vec1d &vz,
-  vec1d &rrx, vec1d &rry,
-  vec1d &rrz) {
+                         vec1d &rz, vec1d &vx,
+                         vec1d &vy, vec1d &vz,
+                         vec1d &rrx, vec1d &rry,
+                         vec1d &rrz) {
   for (size_t i = 0; i < N; i++) {
     vx[i] = vx[i] * scale_v + fx[i] * dt;
     vy[i] = vy[i] * scale_v + fy[i] * dt;
@@ -152,8 +154,8 @@ void MD::VerletAlgorithm(vec1d &rx, vec1d &ry,
 }
 
 void MD::VelocityAutocorrelationFunction(vec1d &Cvx,
-  vec1d &Cvy,
-  vec1d &Cvz) {
+                                         vec1d &Cvy,
+                                         vec1d &Cvz) {
   double temp_ = 0; // resets every time step
   for (size_t i = 0; i < N; i++) {
     temp_ += (Cvx[i] * vx[i] + Cvy[i] * vy[i] + Cvz[i] * vz[i]);
@@ -176,12 +178,12 @@ void MD::RadialDistributionFunction() {
 }
 
 void MD::MeanSquareDisplacement(vec1d &MSDx,
-  vec1d &MSDy,
-  vec1d &MSDz) {
+                                vec1d &MSDy,
+                                vec1d &MSDz) {
   double msd_temp = 0;
   for (size_t i = 0; i < N; ++i) {
     msd_temp += (std::pow((rrx[i] - MSDx[i]), 2) + std::pow((rry[i] - MSDy[i]), 2) +
-      std::pow((rrz[i] - MSDz[i]), 2));
+                 std::pow((rrz[i] - MSDz[i]), 2));
   }
   msd_temp /= N;
   //msd.push_back(msd_temp);	// HACK: Enable for debugging
@@ -279,9 +281,9 @@ void MD::Simulation(int POWER, long double A_cst) {
           U += std::pow(q, -power); // Potential Calculation
 
           // Radial Distribution
-          igr = (Nhist * r / rg);
+          igr = roundl(Nhist * r / rg);
           /*
-            roundl() yields better 
+            roundl() yields better
           */
           if (igr > 99) {
             igr = 99;

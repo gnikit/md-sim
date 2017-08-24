@@ -7,8 +7,7 @@ Stat_Analysis::Stat_Analysis(std::string PATH, vec1d A_LIST) {
   _A_list = A_LIST;
 }
 
-Stat_Analysis::~Stat_Analysis() {
-}
+Stat_Analysis::~Stat_Analysis() {}
 
 
 void Stat_Analysis::ReadFromFile(vec1d &x, const std::string &file_name) {
@@ -20,14 +19,14 @@ void Stat_Analysis::ReadFromFile(vec1d &x, const std::string &file_name) {
   assert(read_file.is_open());
 
   std::copy(std::istream_iterator<long double>(read_file),
-    std::istream_iterator<long double>(), std::back_inserter(x));
+            std::istream_iterator<long double>(), std::back_inserter(x));
 
   read_file.close();
 }
 
 void Stat_Analysis::ReadFromFile(vec1d &x, vec1d &y, vec1d &z,
-  vec1d &Xx, vec1d &Yy, vec1d &Zz, vec1d &w,
-  const std::string &file_name) {
+                                 vec1d &Xx, vec1d &Yy, vec1d &Zz, vec1d &w,
+                                 const std::string &file_name) {
   /*
   Reads from a stream that already exists for a file that is already placed in the
   directory and appends the data into a 1D vector.
@@ -76,7 +75,7 @@ void Stat_Analysis::ReadFromFile(vec1d &x, vec1d &y, vec1d &z,
 }
 
 void Stat_Analysis::Mean(vec1d &x, vec1d &y, vec1d &z,
-  vec1d &Xx, vec1d &Yy, vec1d &Zz, vec1d &w) {
+                         vec1d &Xx, vec1d &Yy, vec1d &Zz, vec1d &w) {
   size_t n = 0;
 
   for (size_t i = 0; i < x.size(); i++) {

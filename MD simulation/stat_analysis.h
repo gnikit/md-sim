@@ -9,11 +9,6 @@
 #include <iomanip>  // setprecision
 #include <exception>
 
-
-// This is a very crude way of moving the methods from
-// Source.cpp to a separate file in order to increase readability
-//TODO: make stat_analysis into a class or inlcude into MD 
-
 class Stat_Analysis {
 
 protected:
@@ -43,7 +38,7 @@ public:
                     vec1d &Xx, vec1d &Yy, vec1d &Zz, vec1d &w,
                     const std::string &file_name);
   void Mean(vec1d &x, vec1d &y, vec1d &z,
-              vec1d &Xx, vec1d &Yy, vec1d &Zz, vec1d &w);
+            vec1d &Xx, vec1d &Yy, vec1d &Zz, vec1d &w);
   void StaticDataProcessing(size_t n);
   // TODO: make a RunMe method and add arguments to the existing methods for increased reusability
 

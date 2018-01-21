@@ -242,11 +242,18 @@ ModelManifest.xml
 .fake/
 
 
-# Ignore .sln files
+# Ignore .sln and .git files
 *.sln
+*.json
+*.gitattributes
+*.gitignore
 
 # Ignore in ./MD Simulation debug files
 *.vcxproj
 *.vcxproj.filters
 /MD simulation/Source1.cpp
 /MD simulation/run_me.bat
+
+# Ignore VS project files
+/MD simulation/MD simulation.vcxproj
+/MD simulation/MD simulation.vcxproj.filters

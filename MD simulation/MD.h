@@ -17,7 +17,7 @@
 //////////////////////////////////////////////////////////////////////
 #pragma once
 #include <iostream>
-#include <math.h>
+#include <cmath>
 #include <iomanip>  // setprecision
 #include <vector>
 #include <chrono>   // CPU run-time
@@ -26,10 +26,11 @@
 #include <iterator>
 #include <assert.h>
 #include <sstream>
+#include <cstdint>
 
 class MD {
 protected:
-  typedef std::vector<long double> vec1d;	// short-hand notation, use with care
+  typedef std::vector<double> vec1d;	// short-hand notation, use with care
 
   vec1d rx;	vec1d ry;	vec1d rz;	// Position Arrays
   vec1d vx;	vec1d vy;	vec1d vz;	// Velocity Arrays
@@ -41,28 +42,28 @@ protected:
 
   size_t Nx;	size_t Ny;	size_t Nz;
   size_t N; 	size_t N_step; size_t N_max;
-  int power; long double A;
-  long double dt = 0.005;	// time step dt = 0.005/sqrt(T0)
-  long double x, y, z;			// distance between particle i and j
-  long double r;				    // distance in polar
-  long double rho;				  // density
-  long double scale;
-  long double KE = 0.0;		// Kinetic Energy
-  long double T;				    // Temperature
-  long double T0 = 1.4;		// Target Temperature. Desired T for the system to operate
-  long double L;				    // Length of the box after scaling
+  int power; double A;
+  double dt = 0.005;	// time step dt = 0.005/sqrt(T0)
+  double x, y, z;			// distance between particle i and j
+  double r;				    // distance in polar
+  double rho;				  // density
+  double scale;
+  double KE = 0.0;		// Kinetic Energy
+  double T;				    // Temperature
+  double T0 = 1.4;		// Target Temperature. Desired T for the system to operate
+  double L;				    // Length of the box after scaling
   //std::cout << "Box side length: " << L << std::endl;
-  long double Vol;
-  long double cut_off = 2.5;	// Cut off radius for the analysis
-  long double U = 0;			    // Potential Energy
-  long double PC = 0;			  // Config Pressure
-  long double PK;
-  long double scale_v;
+  double Vol;
+  double cut_off = 2.5;	// Cut off radius for the analysis
+  double U = 0;			    // Potential Energy
+  double PC = 0;			  // Config Pressure
+  double PK;
+  double scale_v;
 
   // HISTOGRAM VARIABLES
   int Nhist, igr;		// Index of Hist
-  long double rg, den, rn;
-  long double dr;
+  double rg, den, rn;
+  double dr;
   vec1d gr;
 
 private:
@@ -78,10 +79,11 @@ private:
 
 public:
 
-  MD(std::string DIRECTORY, long double DENSITY, size_t run_number);
+  MD(std::string DIRECTORY, double DENSITY, size_t run_number);
   ~MD();
 
-  void Simulation(int POWER, long double A_cst);
+  void Simulation(int POWER, double A_cst);
+  std::string getDir();
 
 protected:
   void Initialise(vec1d &x, vec1d &y, vec1d &z,
@@ -94,9 +96,10 @@ protected:
   void MeanSquareDisplacement(vec1d &MSDx, vec1d &MSDy, vec1d &MSDz);
 
   void OpenFiles();
-  void CreateFiles(int POWER, long double A_cst);
+  void CreateFiles(int POWER, double A_cst);
   void WriteToFiles();
   void ShowRun(size_t step_size_show);
   void ResetValues();
   void time(std::ofstream&, std::string variables);
+  std::vector<double> ReadFromFile(const std::string &file_name);
 };

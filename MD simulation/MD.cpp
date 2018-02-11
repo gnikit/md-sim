@@ -1,8 +1,10 @@
 #include "MD.h"
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
+// TODO: Check RDF is calculated correclty
+// TODO: Boltzmann Dist normalisation of the particles velocities in the beggining
 
 
-MD::MD(std::string DIRECTORY, long double DENSITY, size_t run_number) {
+MD::MD(std::string DIRECTORY, double DENSITY, size_t run_number) {
   _dir = DIRECTORY;
   rho = DENSITY;
   N_max = run_number;
@@ -55,18 +57,18 @@ void MD::Initialise(vec1d &x, vec1d &y,
         rrz.push_back((k + 0.5) * scale);
 
         // Add random initial velocities
-        vx.push_back(((long double)rand() / (RAND_MAX)) + 1);
-        vy.push_back(((long double)rand() / (RAND_MAX)) + 1);
-        vz.push_back(((long double)rand() / (RAND_MAX)) + 1);
+        vx.push_back(((double)rand() / (RAND_MAX)) + 1);
+        vy.push_back(((double)rand() / (RAND_MAX)) + 1);
+        vz.push_back(((double)rand() / (RAND_MAX)) + 1);
 
         ++n;
       }
     }
   }
   // scale of x, y, z
-  long double mean_vx = 0;
-  long double mean_vy = 0;
-  long double mean_vz = 0;
+  double mean_vx = 0;
+  double mean_vy = 0;
+  double mean_vz = 0;
 
   // Momentum conservation array
   for (size_t i = 0; i < N; i++) {
@@ -166,11 +168,11 @@ void MD::VelocityAutocorrelationFunction(vec1d &Cvx,
 }
 
 void MD::RadialDistributionFunction() {
-  long double R = 0;
-  long double norm;
-  long double cor_rho = rho * (N - 1) / N;
-  for (size_t i = 0; i < Nhist; i++) {
-    R = rg * (i + 1) / Nhist;
+  double R = 0;
+  double norm;
+  double cor_rho = rho * (N - 1) / N;
+  for (size_t i = 1; i < Nhist; i++) {  // Changed initial loop value from 0 -> 1
+    R = rg * i / Nhist;
     norm = (cor_rho * 2 * pi * R * R * N * N_max * dr);
     gr[i] /= norm;	// not really needed
     Hist << gr[i] << std::endl;
@@ -191,7 +193,7 @@ void MD::MeanSquareDisplacement(vec1d &MSDx,
 }
 
 // MD Simulation
-void MD::Simulation(int POWER, long double A_cst) {
+void MD::Simulation(int POWER, double A_cst) {
   CreateFiles(POWER, A_cst);
   OpenFiles();
   time(DATA, "# T\tK\tU\tEtot\tPc\tPk\tPtot");
@@ -207,7 +209,7 @@ void MD::Simulation(int POWER, long double A_cst) {
     std::fill(fx.begin(), fx.end(), 0);
     std::fill(fy.begin(), fy.end(), 0);
     std::fill(fz.begin(), fz.end(), 0);
-
+    
     U = 0; // seting Potential U to 0
     PC = 0;
 
@@ -281,13 +283,7 @@ void MD::Simulation(int POWER, long double A_cst) {
           U += std::pow(q, -power); // Potential Calculation
 
           // Radial Distribution
-          igr = roundl(Nhist * r / rg);
-          /*
-            roundl() yields better
-          */
-          if (igr > 99) {
-            igr = 99;
-          }
+          igr = round(Nhist * r / rg);
           gr[igr] += 1;
           //rn = (igr - 0.5)*dr;
         }
@@ -338,8 +334,13 @@ void MD::Simulation(int POWER, long double A_cst) {
   ResetValues(); // Check if everything is reset, could have missed something
 }
 
+std::string MD::getDir() {
+
+  return path;
+}
+
 // File Handling
-void MD::CreateFiles(int POWER, long double A_cst) {
+void MD::CreateFiles(int POWER, double A_cst) {
   power = POWER;
   A = A_cst;
 
@@ -416,7 +417,7 @@ void MD::ResetValues() {
   vx.resize(0, 0);
   vy.resize(0, 0);
   vz.resize(0, 0);
-  gr.resize(Nhist, 0); // gr with Index igr
+  gr.resize(Nhist + 1, 0); // gr with Index igr
   fx.resize(N, 0);
   fy.resize(N, 0);
   fz.resize(N, 0);
@@ -427,4 +428,20 @@ void MD::time(std::ofstream& stream, std::string variables) {
   std::time_t date_time = std::chrono::system_clock::to_time_t(instance);
   stream << "# Created on: " << std::ctime(&date_time);
   stream << variables << std::endl;
+}
+
+std::vector<double> MD::ReadFromFile(const std::string & file_name) {
+  /*
+  Reads from a stream that already exists for a file that is already placed in the
+  directory and appends the data into a 1D vector.
+  */
+  std::vector<double> data;
+  std::ifstream read_file(file_name);
+  assert(read_file.is_open());
+
+  std::copy(std::istream_iterator<long double>(read_file),
+            std::istream_iterator<long double>(), std::back_inserter(data));
+
+  read_file.close();
+  return data;
 }

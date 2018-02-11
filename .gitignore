@@ -257,3 +257,6 @@ ModelManifest.xml
 # Ignore VS project files
 /MD simulation/MD simulation.vcxproj
 /MD simulation/MD simulation.vcxproj.filters
+/MD simulation/submit.sh
+MD simulation/runme.out
+/MD simulation/vel.csv

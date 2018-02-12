@@ -1,4 +1,6 @@
 #include "MD.h"
+#define PARTICLES_PER_AXIS 10
+#define NHIST 300
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 // TODO: Check RDF is calculated correclty
 // TODO: Boltzmann Dist normalisation of the particles velocities in the beggining
@@ -9,9 +11,9 @@ MD::MD(std::string DIRECTORY, double DENSITY, size_t run_number) {
   rho = DENSITY;
   N_max = run_number;
 
-  Nx = Ny = Nz = 10; // Number of particles per axis
+  Nx = Ny = Nz = PARTICLES_PER_AXIS; // Number of particles per axis
   N = Nx * Ny * Nz;
-  scale = std::pow((N / rho), (1.0 / 3.0)) / Nx; // scalling factor for length of box
+  scale = std::pow((N / rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS; // scalling factor for length of box
   L = std::pow((N / rho), 1.0 / 3.0);            // L depends on rho
   Vol = N / rho;
 
@@ -19,9 +21,8 @@ MD::MD(std::string DIRECTORY, double DENSITY, size_t run_number) {
   // dt /= sqrt(T0);		// scalling T for different T0
 
   rg = cut_off;
-  Nhist = 100; // might change # of part in bin
-  dr = rg / Nhist;
-  gr.resize(Nhist + 1, 0); // gr with Index igr
+  dr = rg / NHIST;
+  gr.resize(NHIST + 1, 0); // gr with Index igr
   fx.resize(N, 0);
   fy.resize(N, 0);
   fz.resize(N, 0);
@@ -34,13 +35,12 @@ void MD::Initialise(vec1d &x, vec1d &y,
                     vec1d &z, vec1d &vx,
                     vec1d &vy, vec1d &vz)
   /*
-      Initialises the:
-      + Position Arrays
-      + Velocity Arrays (assign random velocities)
-      + Conserves/ Scales momentum == 0
-      + Temperature
-      + Velocity Autocorrelaion Function
-
+  Initialises the:
+  + Position Arrays
+  + Velocity Arrays (assign random velocities)
+  + Conserves/ Scales momentum == 0
+  + Temperature
+  + Velocity Autocorrelaion Function
   */
 {
   // Initialise position matrix and velocity matrix
@@ -56,15 +56,15 @@ void MD::Initialise(vec1d &x, vec1d &y,
         rry.push_back((j + 0.5) * scale);
         rrz.push_back((k + 0.5) * scale);
 
-        // Add random initial velocities
-        vx.push_back(((double)rand() / (RAND_MAX)) + 1);
-        vy.push_back(((double)rand() / (RAND_MAX)) + 1);
-        vz.push_back(((double)rand() / (RAND_MAX)) + 1);
-
+        // TODO: Velocitied need to follow a Maxwell-Boltzmann Dist
         ++n;
       }
     }
   }
+// Reading Maxwell Boltzmann velocity Dist from files
+  vx = ReadFromFile("vx.txt");
+  vy = ReadFromFile("vy.txt");
+  vz = ReadFromFile("vz.txt");
   // scale of x, y, z
   double mean_vx = 0;
   double mean_vy = 0;
@@ -89,7 +89,7 @@ void MD::Initialise(vec1d &x, vec1d &y,
   T = KE / (1.5 * N);
   scale_v = sqrt(T0 / T); // scalling factor
 
-  // Velocity scaling
+                          // Velocity scaling
   for (size_t i = 0; i < N; i++) {
     vx[i] *= scale_v;
     vy[i] *= scale_v;
@@ -171,8 +171,8 @@ void MD::RadialDistributionFunction() {
   double R = 0;
   double norm;
   double cor_rho = rho * (N - 1) / N;
-  for (size_t i = 1; i < Nhist; i++) {  // Changed initial loop value from 0 -> 1
-    R = rg * i / Nhist;
+  for (size_t i = 1; i < NHIST; i++) {  // Changed initial loop value from 0 -> 1
+    R = rg * i / NHIST;
     norm = (cor_rho * 2 * pi * R * R * N * N_max * dr);
     gr[i] /= norm;	// not really needed
     Hist << gr[i] << std::endl;
@@ -209,7 +209,7 @@ void MD::Simulation(int POWER, double A_cst) {
     std::fill(fx.begin(), fx.end(), 0);
     std::fill(fy.begin(), fy.end(), 0);
     std::fill(fz.begin(), fz.end(), 0);
-    
+
     U = 0; // seting Potential U to 0
     PC = 0;
 
@@ -282,8 +282,8 @@ void MD::Simulation(int POWER, double A_cst) {
           PC += r * ff;
           U += std::pow(q, -power); // Potential Calculation
 
-          // Radial Distribution
-          igr = round(Nhist * r / rg);
+                                    // Radial Distribution
+          igr = round(NHIST * r / rg);
           gr[igr] += 1;
           //rn = (igr - 0.5)*dr;
         }
@@ -297,7 +297,7 @@ void MD::Simulation(int POWER, double A_cst) {
     scale_v = sqrt(T0 / T); // using T & KE from prev timestep
     KE = 0; // set 0 for each step
 
-    // Verlet Algorithm
+            // Verlet Algorithm
     VerletAlgorithm(rx, ry, rz, vx, vy, vz, rrx, rry, rrz);
     // MSD
     MeanSquareDisplacement(MSDx, MSDy, MSDz);
@@ -376,6 +376,7 @@ void MD::CreateFiles(int POWER, double A_cst) {
   _VAF += run + separator + A_par + file_type;
   _MSD += run + separator + A_par + file_type;
 }
+
 void MD::OpenFiles() {
   // opens for files output and deletes prev content
   Hist.open(HIST, std::ios::out | std::ios::trunc);
@@ -384,11 +385,13 @@ void MD::OpenFiles() {
   DATA.open(data, std::ios::out | std::ios::trunc);
   POS.open(pos, std::ios::out | std::ios::trunc);
 }
+
 void MD::WriteToFiles() {
   DATA << T << '\t' << KE << '\t' << U << '\t'
     << (U + KE) << '\t' << PC << '\t' << PK
     << '\t' << (PC + PK) << std::endl;
 }
+
 void MD::ShowRun(size_t step_size_show) {
   if (N_step == 0) {
     std::cout << "step:\tT:\tKE:\tU:\tU+K:\tPC:\tPK:\t(PK+PC):" << std::endl;
@@ -401,6 +404,7 @@ void MD::ShowRun(size_t step_size_show) {
       << std::endl;
   }
 }
+
 void MD::ResetValues() {
   Hist.close(); // Close streams at the end of run
   VAF.close();
@@ -417,11 +421,12 @@ void MD::ResetValues() {
   vx.resize(0, 0);
   vy.resize(0, 0);
   vz.resize(0, 0);
-  gr.resize(Nhist + 1, 0); // gr with Index igr
+  gr.resize(NHIST + 1, 0); // gr with Index igr
   fx.resize(N, 0);
   fy.resize(N, 0);
   fz.resize(N, 0);
 }
+
 void MD::time(std::ofstream& stream, std::string variables) {
   std::chrono::time_point<std::chrono::system_clock> instance;
   instance = std::chrono::system_clock::now();

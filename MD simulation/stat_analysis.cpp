@@ -36,7 +36,7 @@ void Stat_Analysis::ReadFromFile(vec1d &x, vec1d &y, vec1d &z,
     if (read_file.is_open() == false) {
       throw "File does not exist!";
     }
-
+    // TODO: Fix exception throwing, currently exception is not caught properly.
     //assert(read_file.is_open()); // Evaluates false if file does not exist
     long double a, b, c, d, e, f, g;
     std::string line;

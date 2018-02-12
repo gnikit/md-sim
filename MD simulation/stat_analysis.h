@@ -12,7 +12,7 @@
 class Stat_Analysis {
 
 protected:
-  typedef std::vector<long double> vec1d;
+  typedef std::vector<double> vec1d;
   std::ifstream _data_reader;
 
 private:

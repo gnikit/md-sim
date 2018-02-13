@@ -32,16 +32,16 @@ class MD {
 protected:
   typedef std::vector<double> vec1d;	// short-hand notation, use with care
 
-  vec1d rx;	vec1d ry;	vec1d rz;	// Position Arrays
-  vec1d vx;	vec1d vy;	vec1d vz;	// Velocity Arrays
-  vec1d fx;	vec1d fy;	vec1d fz;
-  vec1d Cvx;	vec1d Cvy;	vec1d Cvz;
-  vec1d rrx;	vec1d rry;	vec1d rrz;	// used in MSD
-  vec1d MSDx;	vec1d MSDy;	vec1d MSDz;
+  vec1d rx, ry, rz;	// Position Arrays
+  vec1d vx, vy, vz;	// Velocity Arrays
+  vec1d fx, fy, fz;
+  vec1d Cvx, Cvy, Cvz;
+  vec1d rrx, rry, rrz;	// used in MSD
+  vec1d MSDx, MSDy, MSDz;
   vec1d Cr;	vec1d msd;								// correlation vector with time index
 
-  size_t Nx;	size_t Ny;	size_t Nz;
-  size_t N; 	size_t N_step; size_t N_max;
+  size_t Nx, Ny, Nz;
+  size_t N, N_step, N_max;
   int power; double A;
   double dt = 0.005;	// time step dt = 0.005/sqrt(T0)
   double x, y, z;			// distance between particle i and j

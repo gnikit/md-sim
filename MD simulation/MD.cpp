@@ -335,21 +335,26 @@ void MD::Simulation(int POWER, double A_cst) {
 }
 
 std::string MD::getDir() {
-
+  /*
+  Returns the directory in a string
+  */
   return path;
 }
 
 // File Handling
 void MD::CreateFiles(int POWER, double A_cst) {
+  /*
+  Generates file names for the different I/O operations
+  */
   power = POWER;
   A = A_cst;
 
-  run = std::to_string(power);	// yields INTEGER
+  run = std::to_string(power);	// yields INT
   _step = "/Isothermal~step " + std::to_string(N_max) + "/";
   separator = "~";
-  std::stringstream stream;
+  std::stringstream stream;     // Fixing double to 2 decimals
   std::stringstream density_stream;
-  stream << std::fixed << std::setprecision(2) << A;	// 2 decimals
+  stream << std::fixed << std::setprecision(2) << A;	
   density_stream << std::fixed << std::setprecision(1) << rho;	// 1 decimal
   A_par = stream.str();
   _density = "Density " + density_stream.str();
@@ -378,6 +383,10 @@ void MD::CreateFiles(int POWER, double A_cst) {
 }
 
 void MD::OpenFiles() {
+  /*
+  Open/Create if file does not exist
+  Overwrite existing data
+  */
   // opens for files output and deletes prev content
   Hist.open(HIST, std::ios::out | std::ios::trunc);
   VAF.open(_VAF, std::ios::out | std::ios::trunc);
@@ -387,12 +396,20 @@ void MD::OpenFiles() {
 }
 
 void MD::WriteToFiles() {
+  /*
+  Writes values of parameters to file
+  */
   DATA << T << '\t' << KE << '\t' << U << '\t'
     << (U + KE) << '\t' << PC << '\t' << PK
     << '\t' << (PC + PK) << std::endl;
 }
 
 void MD::ShowRun(size_t step_size_show) {
+  /*
+  Displays the system parameters every step_size_show of steps
+  
+  Input the increment step
+  */
   if (N_step == 0) {
     std::cout << "step:\tT:\tKE:\tU:\tU+K:\tPC:\tPK:\t(PK+PC):" << std::endl;
   }
@@ -406,7 +423,12 @@ void MD::ShowRun(size_t step_size_show) {
 }
 
 void MD::ResetValues() {
-  Hist.close(); // Close streams at the end of run
+  /*
+  Closes open file streams and resets sizes and values to 0
+  For multiple simulations
+  */
+// Close streams at the end of run
+  Hist.close(); 
   VAF.close();
   MSD.close();
   DATA.close();
@@ -428,6 +450,10 @@ void MD::ResetValues() {
 }
 
 void MD::time(std::ofstream& stream, std::string variables) {
+  /*
+  Dates the file and allows the input of a header
+  Input a file stream to write and string of characters to display as headers
+  */
   std::chrono::time_point<std::chrono::system_clock> instance;
   instance = std::chrono::system_clock::now();
   std::time_t date_time = std::chrono::system_clock::to_time_t(instance);

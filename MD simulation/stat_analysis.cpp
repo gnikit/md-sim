@@ -110,7 +110,7 @@ strength
   std::ofstream data;
   std::string file_name, path, sep, power, a, txt;
   path = _path;
-  sep = "~";
+  sep = "_";
   txt = ".txt";
   // path = "\0";
   power = std::to_string(n);

@@ -2,7 +2,6 @@
 #define PARTICLES_PER_AXIS 10
 #define NHIST 300
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
-// TODO: Check RDF is calculated correclty
 // TODO: Boltzmann Dist normalisation of the particles velocities in the beggining
 
 
@@ -23,9 +22,7 @@ MD::MD(std::string DIRECTORY, double DENSITY, size_t run_number) {
   rg = cut_off;
   dr = rg / NHIST;
   gr.resize(NHIST + 1, 0); // gr with Index igr
-  fx.resize(N, 0);
-  fy.resize(N, 0);
-  fz.resize(N, 0);
+  fx.resize(N, 0); fy.resize(N, 0); fz.resize(N, 0);
   //TODO: reserve r's and v's, instead of push_back
 }
 MD::~MD() {}
@@ -45,9 +42,10 @@ void MD::Initialise(vec1d &x, vec1d &y,
 {
   // Initialise position matrix and velocity matrix
   size_t n = 0;
-  for (size_t i = 0; i < Nx; i++) {
-    for (size_t j = 0; j < Ny; j++) {
-      for (size_t k = 0; k < Nz; k++) {
+  size_t i, j, k;
+  for ( i = 0; i < Nx; i++) {
+    for ( j = 0; j < Ny; j++) {
+      for ( k = 0; k < Nz; k++) {
         x.push_back((i + 0.5) * scale);
         y.push_back((j + 0.5) * scale);
         z.push_back((k + 0.5) * scale);
@@ -71,26 +69,26 @@ void MD::Initialise(vec1d &x, vec1d &y,
   double mean_vz = 0;
 
   // Momentum conservation array
-  for (size_t i = 0; i < N; i++) {
+  for ( i = 0; i < N; i++) {
     mean_vx += vx[i] / N; // Calculating Average velocity for each dimension
     mean_vy += vy[i] / N;
     mean_vz += vz[i] / N;
   }
-  for (size_t i = 0; i < N; i++) {
+  for ( i = 0; i < N; i++) {
     vx[i] = vx[i] - mean_vx; // Subtracting Av. velocities from each particle
     vy[i] = vy[i] - mean_vy;
     vz[i] = vz[i] - mean_vz;
   }
   // T Calc
   KE = 0;
-  for (size_t i = 0; i < N; i++) {
+  for ( i = 0; i < N; i++) {
     KE += 0.5 * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]);
   }
   T = KE / (1.5 * N);
   scale_v = sqrt(T0 / T); // scalling factor
 
                           // Velocity scaling
-  for (size_t i = 0; i < N; i++) {
+  for ( i = 0; i < N; i++) {
     vx[i] *= scale_v;
     vy[i] *= scale_v;
     vz[i] *= scale_v;
@@ -105,7 +103,7 @@ void MD::Initialise(vec1d &x, vec1d &y,
   Cvy = vy;
   Cvz = vz;
   double first_val = 0;
-  for (size_t i = 0; i < N; i++) {
+  for ( i = 0; i < N; i++) {
     first_val += (Cvx[i] * Cvx[i] + Cvy[i] * Cvy[i] + Cvz[i] * Cvz[i]) / N;
   }
   first_val /= N;
@@ -118,7 +116,8 @@ void MD::VerletAlgorithm(vec1d &rx, vec1d &ry,
                          vec1d &vy, vec1d &vz,
                          vec1d &rrx, vec1d &rry,
                          vec1d &rrz) {
-  for (size_t i = 0; i < N; i++) {
+  size_t i;
+  for ( i = 0; i < N; i++) {
     vx[i] = vx[i] * scale_v + fx[i] * dt;
     vy[i] = vy[i] * scale_v + fy[i] * dt;
     vz[i] = vz[i] * scale_v + fz[i] * dt;
@@ -159,7 +158,8 @@ void MD::VelocityAutocorrelationFunction(vec1d &Cvx,
                                          vec1d &Cvy,
                                          vec1d &Cvz) {
   double temp_ = 0; // resets every time step
-  for (size_t i = 0; i < N; i++) {
+  size_t i;
+  for ( i = 0; i < N; i++) {
     temp_ += (Cvx[i] * vx[i] + Cvy[i] * vy[i] + Cvz[i] * vz[i]);
   }
   temp_ /= N;
@@ -171,7 +171,8 @@ void MD::RadialDistributionFunction() {
   double R = 0;
   double norm;
   double cor_rho = rho * (N - 1) / N;
-  for (size_t i = 1; i < NHIST; i++) {  // Changed initial loop value from 0 -> 1
+  size_t i;
+  for (i = 1; i < NHIST; i++) {  // Changed initial loop value from 0 -> 1
     R = rg * i / NHIST;
     norm = (cor_rho * 2 * pi * R * R * N * N_max * dr);
     gr[i] /= norm;	// not really needed
@@ -200,7 +201,7 @@ void MD::Simulation(int POWER, double A_cst) {
   std::chrono::steady_clock::time_point begin =
     std::chrono::steady_clock::now();
   Initialise(rx, ry, rz, vx, vy, vz);
-  std::cout << "MD Simulation running..." << std::endl;
+  //std::cout << "MD Simulation running..." << std::endl;
 
   double xx, yy, zz;
   for (N_step = 0; N_step < N_max; N_step++) {
@@ -212,9 +213,9 @@ void MD::Simulation(int POWER, double A_cst) {
 
     U = 0; // seting Potential U to 0
     PC = 0;
-
-    for (size_t i = 0; i < N - 1; i++) {
-      for (size_t j = i + 1; j < N; j++) {
+    size_t i, j;
+    for ( i = 0; i < N - 1; i++) {
+      for ( j = i + 1; j < N; j++) {
         x = rx[i] - rx[j]; // Separation distance
         y = ry[i] - ry[j]; // between particles i and j
         z = rz[i] - rz[j]; // in Cartesian
@@ -350,16 +351,16 @@ void MD::CreateFiles(int POWER, double A_cst) {
   A = A_cst;
 
   run = std::to_string(power);	// yields INT
-  _step = "/Isothermal~step " + std::to_string(N_max) + "/";
-  separator = "~";
+  _step = "/Isothermal_step_" + std::to_string(N_max) + "/";
+  separator = "_";
   std::stringstream stream;     // Fixing double to 2 decimals
   std::stringstream density_stream;
   stream << std::fixed << std::setprecision(2) << A;	
   density_stream << std::fixed << std::setprecision(1) << rho;	// 1 decimal
   A_par = stream.str();
-  _density = "Density " + density_stream.str();
+  _density = "Density_" + density_stream.str();
   //   ------------_dir------||---_density--||-----_step-------||
-  //path = "../../Archives of Data/Density 0.5/Isothermal~step 5000/";
+  //path = "../../Archives of Data/Density_0.5/Isothermal_step_5000/";
   path = _dir + _density + _step;
   file_type = ".txt";
   data = "Data";

@@ -40,7 +40,7 @@ void Stat_Analysis::ReadFromFile(vec1d &x, vec1d &y, vec1d &z,
     //assert(read_file.is_open()); // Evaluates false if file does not exist
     long double a, b, c, d, e, f, g;
     std::string line;
-    while (!read_file.eof()) {
+    while (!read_file.eof()) {  // Stops when End Of File is reached
       std::getline(read_file, line);
 
       if (line.length() == 0 || line[0] == '#') {
@@ -137,18 +137,13 @@ strength
 
     a = stream.str();
     file_name = path + file_name + power + sep + a + txt;
-
-
-
     ReadFromFile(TEMP0, TEMP1, TEMP2, TEMP3, TEMP4, TEMP5, TEMP6, file_name);
-
-
     Mean(TEMP0, TEMP1, TEMP2, TEMP3, TEMP4, TEMP5, TEMP6);
     data.precision(5);
     data << _A_list.at(i) << '\t' << _temp0 << '\t' << _temp1 << '\t' <<
       _temp2 << '\t' << _temp3 << '\t' << _temp4 << std::endl;
     // consider excluding usless vectors like PK, PTOT
-    // Debug to see if the smethod for file reading still works
+    // Debug to see if the method for file reading still works
 
   }
 }

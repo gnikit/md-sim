@@ -136,8 +136,12 @@
       <UseIntelOptimizedHeaders>true</UseIntelOptimizedHeaders>
       <EnableMatrixMultiplyLibraryCall>Yes</EnableMatrixMultiplyLibraryCall>
       <Optimization>MaxSpeedHighLevel</Optimization>
-      <FloatingPointModel>Fast2</FloatingPointModel>
+      <FloatingPointModel>Precise</FloatingPointModel>
       <FloatingPointExpressionEvaluation>Extended</FloatingPointExpressionEvaluation>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <GenerateAlternateCodePaths>AVX2</GenerateAlternateCodePaths>
+      <UseProcessorExtensions>AVX</UseProcessorExtensions>
+      <Mtune>Sandybridge</Mtune>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

@@ -42,6 +42,7 @@ protected:
 
   size_t Nx, Ny, Nz;
   size_t N, N_step, N_max;
+  double T0;		// Target Temperature. Desired T for the system to operate
   int power; double A;
   double dt = 0.005;	// time step dt = 0.005/sqrt(T0)
   double x, y, z;			// distance between particle i and j
@@ -50,7 +51,7 @@ protected:
   double scale;
   double KE = 0.0;		// Kinetic Energy
   double T;				    // Temperature
-  double T0 = 1.4;		// Target Temperature. Desired T for the system to operate
+
   double L;				    // Length of the box after scaling
   //std::cout << "Box side length: " << L << std::endl;
   double Vol;
@@ -79,7 +80,7 @@ private:
 
 public:
 
-  MD(std::string DIRECTORY, double DENSITY, size_t run_number);
+  MD(std::string DIRECTORY, double TEMPERATURE, double DENSITY, size_t run_number);
   ~MD();
 
   void Simulation(int POWER, double A_cst);

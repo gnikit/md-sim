@@ -5,8 +5,9 @@
 // TODO: Boltzmann Dist normalisation of the particles velocities in the beggining
 
 
-MD::MD(std::string DIRECTORY, double DENSITY, size_t run_number) {
+MD::MD(std::string DIRECTORY, double TEMPERATURE, double DENSITY, size_t run_number) {
   _dir = DIRECTORY;
+  T0 = TEMPERATURE;
   rho = DENSITY;
   N_max = run_number;
 
@@ -17,7 +18,6 @@ MD::MD(std::string DIRECTORY, double DENSITY, size_t run_number) {
   Vol = N / rho;
 
   cut_off = L / 2.;
-  // dt /= sqrt(T0);		// scalling T for different T0
 
   rg = cut_off;
   dr = rg / NHIST;
@@ -41,6 +41,7 @@ void MD::Initialise(vec1d &x, vec1d &y,
   */
 {
   // Initialise position matrix and velocity matrix
+  dt /= sqrt(T0);		// scalling T for different T0
   size_t n = 0;
   size_t i, j, k;
   for ( i = 0; i < Nx; i++) {
@@ -351,16 +352,20 @@ void MD::CreateFiles(int POWER, double A_cst) {
   A = A_cst;
 
   run = std::to_string(power);	// yields INT
-  _step = "/Isothermal_step_" + std::to_string(N_max) + "/";
   separator = "_";
   std::stringstream stream;     // Fixing double to 2 decimals
   std::stringstream density_stream;
-  stream << std::fixed << std::setprecision(2) << A;	
+  std::stringstream temp_stream;
+
+  temp_stream << std::fixed << std::setprecision(1) << T0;  // 1 decimal
+  stream << std::fixed << std::setprecision(2) << A;        // 2 decimals
   density_stream << std::fixed << std::setprecision(1) << rho;	// 1 decimal
+
   A_par = stream.str();
   _density = "Density_" + density_stream.str();
-  //   ------------_dir------||---_density--||-----_step-------||
-  //path = "../../Archives of Data/Density_0.5/Isothermal_step_5000/";
+  _step = "/T_" + temp_stream.str() + "_step_" + std::to_string(N_max) + "/";
+  //   ------------_dir------||---_density--||--T0_step-------||
+  //path = "../../Archives of Data/Density_0.5/T_1.4_step_5000/";
   path = _dir + _density + _step;
   file_type = ".txt";
   data = "Data";

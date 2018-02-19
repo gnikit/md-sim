@@ -142,6 +142,12 @@
       <GenerateAlternateCodePaths>AVX2</GenerateAlternateCodePaths>
       <UseProcessorExtensions>AVX</UseProcessorExtensions>
       <Mtune>Sandybridge</Mtune>
+      <EmitDiagnosticsToFile>false</EmitDiagnosticsToFile>
+      <OptimizationDiagnosticLevel>Disable</OptimizationDiagnosticLevel>
+      <EmitOptimizationDiagnosticsToFile>false</EmitOptimizationDiagnosticsToFile>
+      <EnableGapAnalysis>Disable</EnableGapAnalysis>
+      <EmitGAPDiagnosticsToFile>false</EmitGAPDiagnosticsToFile>
+      <EmitGADDiagnosticsToFile>false</EmitGADDiagnosticsToFile>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

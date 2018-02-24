@@ -10,15 +10,15 @@
 
 MD::MD(std::string DIRECTORY, double TEMPERATURE, double DENSITY, size_t run_number) {
   _dir = DIRECTORY;
-  T0 = TEMPERATURE;
-  rho = DENSITY;
-  N_max = run_number;
+  _T0 = TEMPERATURE;
+  _rho = DENSITY;
+  _STEPS = run_number;
 
   Nx = Ny = Nz = PARTICLES_PER_AXIS; // Number of particles per axis
   N = Nx * Ny * Nz;
-  scale = std::pow((N / rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS; // scalling factor for length of box
-  L = std::pow((N / rho), 1.0 / 3.0);            // L depends on rho
-  Vol = N / rho;
+  scale = std::pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS; // scalling factor for length of box
+  L = std::pow((N / _rho), 1.0 / 3.0);            // L depends on rho
+  Vol = N / _rho;
 
   cut_off = L / 2.;
 
@@ -44,7 +44,7 @@ void MD::Initialise(vec1d &x, vec1d &y,
   */
 {
   // Initialise position matrix and velocity matrix
-  dt /= sqrt(T0);		// scalling T for different T0
+  dt /= sqrt(_T0);		// scalling T for different T0
   size_t n = 0;
   size_t i, j, k;
   for ( i = 0; i < Nx; i++) {
@@ -89,7 +89,7 @@ void MD::Initialise(vec1d &x, vec1d &y,
     KE += 0.5 * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]);
   }
   T = KE / (1.5 * N);
-  scale_v = sqrt(T0 / T); // scalling factor
+  scale_v = sqrt(_T0 / T); // scalling factor
 
                           // Velocity scaling
   for ( i = 0; i < N; i++) {
@@ -174,11 +174,11 @@ void MD::VelocityAutocorrelationFunction(vec1d &Cvx,
 void MD::RadialDistributionFunction() {
   double R = 0;
   double norm;
-  double cor_rho = rho * (N - 1) / N;
+  double cor_rho = _rho * (N - 1) / N;
   size_t i;
   for (i = 1; i < NHIST; i++) {  // Changed initial loop value from 0 -> 1
     R = rg * i / NHIST;
-    norm = (cor_rho * 2 * pi * R * R * N * N_max * dr);
+    norm = (cor_rho * 2 * PI * R * R * N * _STEPS * dr);
     gr[i] /= norm;	// not really needed
     Hist << gr[i] << std::endl;
   }
@@ -198,8 +198,8 @@ void MD::MeanSquareDisplacement(vec1d &MSDx,
 }
 
 // MD Simulation
-void MD::Simulation(int POWER, double A_cst) {
-  CreateFiles(POWER, A_cst);
+void MD::Simulation(int POWER, double A_CST) {
+  CreateFiles(POWER, A_CST);
   OpenFiles();
   time(DATA, "# T\tK\tU\tEtot\tPc\tPk\tPtot");
   std::chrono::steady_clock::time_point begin =
@@ -208,7 +208,7 @@ void MD::Simulation(int POWER, double A_cst) {
   //std::cout << "MD Simulation running..." << std::endl;
 
   double xx, yy, zz;
-  for (N_step = 0; N_step < N_max; N_step++) {
+  for (_STEP_INDEX = 0; _STEP_INDEX < _STEPS; _STEP_INDEX++) {
     // Forces loop
     // Resetting forces
     std::fill(fx.begin(), fx.end(), 0);
@@ -269,13 +269,13 @@ void MD::Simulation(int POWER, double A_cst) {
         }
 
         r = sqrt((x * x) + (y * y) + (z * z));
-        long double q = sqrt(r * r + A);
+        long double q = sqrt(r * r + A_CST);
 
         // Force loop
         if (r < cut_off) // for particles within the cut off range
         {
           long double ff =
-            (power)*r *	std::pow(q, (-power - 2)); // Force for particles
+            (POWER)*r *	std::pow(q, (-POWER - 2)); // Force for particles
 
           fx[i] += x * ff / r;
           fx[j] -= x * ff / r; // Canceling the ij and ji pairs
@@ -285,7 +285,7 @@ void MD::Simulation(int POWER, double A_cst) {
           fz[j] -= z * ff / r;
 
           PC += r * ff;
-          U += std::pow(q, -power); // Potential Calculation
+          U += std::pow(q, -POWER); // Potential Calculation
 
                                     // Radial Distribution
           igr = round(NHIST * r / rg);
@@ -299,7 +299,7 @@ void MD::Simulation(int POWER, double A_cst) {
     PC = PC / (3 * Vol);
 
     // Isothermal Calibration
-    scale_v = sqrt(T0 / T); // using T & KE from prev timestep
+    scale_v = sqrt(_T0 / T); // using T & KE from prev timestep
     KE = 0; // set 0 for each step
 
             // Verlet Algorithm
@@ -311,7 +311,7 @@ void MD::Simulation(int POWER, double A_cst) {
     VelocityAutocorrelationFunction(Cvx, Cvy, Cvz);
 
     T = KE / (1.5 * N); // Average T
-    PK = rho * T;       // Kinetic part of pressure
+    PK = _rho * T;       // Kinetic part of pressure
     KE /= N;
 
     WriteToFiles();
@@ -343,7 +343,7 @@ std::string MD::getDir() {
   /*
   Returns the directory in a string
   */
-  return path;
+  return _dir;
 }
 
 // File Handling
@@ -351,26 +351,27 @@ void MD::CreateFiles(int POWER, double A_cst) {
   /*
   Generates file names for the different I/O operations
   */
-  power = POWER;
-  A = A_cst;
+  std::stringstream A_stream;     // Fixing double to 2 decimals
+  std::stringstream rho_stream;
+  std::stringstream T_stream;
+  // TODO: setprecission function input here
 
-  run = std::to_string(power);	// yields INT
-  separator = "_";
-  std::stringstream stream;     // Fixing double to 2 decimals
-  std::stringstream density_stream;
-  std::stringstream temp_stream;
+  T_stream << std::fixed << std::setprecision(1) << _T0;  // 1 decimal
+  A_stream << std::fixed << std::setprecision(2) << A_cst;        // 2 decimals
+  rho_stream << std::fixed << std::setprecision(1) << _rho;	// 1 decimal
 
-  temp_stream << std::fixed << std::setprecision(1) << T0;  // 1 decimal
-  stream << std::fixed << std::setprecision(2) << A;        // 2 decimals
-  density_stream << std::fixed << std::setprecision(1) << rho;	// 1 decimal
+  _step_to_str = "_step_" + std::to_string(_STEPS);
+  _particles_to_str = "_particles_" + std::to_string(N);
+  _rho_to_str = "_rho_" + rho_stream.str();
+  _T_to_str = "_T_" + T_stream.str();
+  _n_to_str = "_n_" + std::to_string(POWER);	
+  _A_to_str = "_A_" + A_stream.str();
 
-  A_par = stream.str();
-  _density = "Density_" + density_stream.str();
-  _step = "/T_" + temp_stream.str() + "_step_" + std::to_string(N_max) + "/";
-  //   ------------_dir------||---_density--||--T0_step-------||
-  //path = "../../Archives of Data/Density_0.5/T_1.4_step_5000/";
-  path = _dir + _density + _step;
-  file_type = ".txt";
+  _FILE_ID = _step_to_str + _particles_to_str + _rho_to_str +
+             _T_to_str + _n_to_str + _A_to_str;
+
+  // Explicit defitions 
+  _FILE_EXT = ".txt";
   data = "Data";
   pos = "Positions_Velocities";
   HIST = "Hist";
@@ -378,17 +379,11 @@ void MD::CreateFiles(int POWER, double A_cst) {
   _MSD = "MSD";
 
   // Path addition
-  HIST = path + HIST;
-  _VAF = path + _VAF;
-  _MSD = path + _MSD;
-  data = path + data;
-  pos = path + pos;
-
-  data += run + separator + A_par + file_type;
-  pos += run + separator + A_par + file_type;
-  HIST += run + separator + A_par + file_type;
-  _VAF += run + separator + A_par + file_type;
-  _MSD += run + separator + A_par + file_type;
+  data = _dir + data + _FILE_ID + _FILE_EXT;
+  pos = _dir + pos + _FILE_ID + _FILE_EXT;
+  HIST = _dir + HIST + _FILE_ID + _FILE_EXT;
+  _VAF = _dir + _VAF + _FILE_ID + _FILE_EXT;
+  _MSD = _dir + _MSD + _FILE_ID + _FILE_EXT;
 }
 
 void MD::OpenFiles() {
@@ -419,13 +414,13 @@ void MD::ShowRun(size_t step_size_show) {
   
   Input the increment step
   */
-  if (N_step == 0) {
+  if (_STEP_INDEX == 0) {
     std::cout << "step:\tT:\tKE:\tU:\tU+K:\tPC:\tPK:\t(PK+PC):" << std::endl;
   }
 
-  if (N_step % step_size_show == 0 || N_step == 1) {
+  if (_STEP_INDEX % step_size_show == 0 || _STEP_INDEX == 1) {
     std::cout.precision(5);
-    std::cout << N_step << "\t" << T << "\t" << KE << "\t" << U << "\t"
+    std::cout << _STEP_INDEX << "\t" << T << "\t" << KE << "\t" << U << "\t"
       << (U + KE) << "\t" << PC << "\t" << PK << "\t" << (PK + PC)
       << std::endl;
   }
@@ -484,4 +479,12 @@ std::vector<double> MD::ReadFromFile(const std::string & file_name) {
 
   read_file.close();
   return data;
+}
+
+std::string MD::ConvertToString(const double & x, const int & precision) {
+  static std::ostringstream ss;
+  ss.str(std::string()); // don't forget to empty the stream
+  ss << std::fixed << std::setprecision(precision) << x;
+
+  return ss.str();
 }

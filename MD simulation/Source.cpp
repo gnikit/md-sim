@@ -4,10 +4,8 @@
 #include <string>
 
 #define DENSITY 0.5
-#define STEPS 5000
+#define STEPS 10
 #define DIR "../../Archives of Data/Particles_10^3/"
-#define DIR0_5 "../../Archives of Data/Particles_10^3/"
-#define DIR1 "../../Archives of Data/Particles_10^3/"
 // TODO: Add scripts for Linux/Windows to generate basic directory structure
 
 //void MultiThread(MD class_object, std::vector<long double> n, std::vector<int> A){
@@ -33,11 +31,7 @@ int main() {
   //std::vector<double> A3 = { 1., 1.25/*, 1.25, 1.50, 1.75, 2.00 */};
   //std::vector<double> A4 = { 2, 2.5/*, 2.75, 3.0, 3.5, 4.0*/ };
   MD run(DIR, 1.0, DENSITY, STEPS);
-  MD *run2 = new MD(DIR, 2.0, DENSITY, STEPS);
-  std::thread th(&MD::Simulation, run2, 12, a_value);
   run.Simulation(12, 0.5);
-  th.join();
-  delete run2;
   //MD *run3 = new MD(DIR, 0.5, DENSITY, STEPS);
   //MD *run4 = new MD(DIR, DENSITY, STEPS);
   //

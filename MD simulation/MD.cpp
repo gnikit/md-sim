@@ -78,7 +78,11 @@ void MD::Initialise(vec1d &x, vec1d &y,
     mean_vy += vy[i] / N;
     mean_vz += vz[i] / N;
   }
-  for ( i = 0; i < N; i++) {
+
+  int tempN = N;    // Recommended opt by Intel
+#pragma parallel
+#pragma loop count min(128)
+  for ( i = 0; i < tempN; i++) {
     vx[i] = vx[i] - mean_vx; // Subtracting Av. velocities from each particle
     vy[i] = vy[i] - mean_vy;
     vz[i] = vz[i] - mean_vz;
@@ -91,8 +95,10 @@ void MD::Initialise(vec1d &x, vec1d &y,
   T = KE / (1.5 * N);
   scale_v = sqrt(_T0 / T); // scalling factor
 
-                          // Velocity scaling
-  for ( i = 0; i < N; i++) {
+  // Velocity scaling
+#pragma parallel
+#pragma loop count min(128)
+  for ( i = 0; i < tempN; i++) {
     vx[i] *= scale_v;
     vy[i] *= scale_v;
     vz[i] *= scale_v;
@@ -199,7 +205,7 @@ void MD::MeanSquareDisplacement(vec1d &MSDx,
 
 // MD Simulation
 void MD::Simulation(int POWER, double A_CST) {
-  CreateFiles(POWER, A_CST);
+  FileNaming(POWER, A_CST);
   OpenFiles();
   time(DATA, "# T\tK\tU\tEtot\tPc\tPk\tPtot");
   std::chrono::steady_clock::time_point begin =
@@ -347,7 +353,7 @@ std::string MD::getDir() {
 }
 
 // File Handling
-void MD::CreateFiles(int POWER, double A_cst) {
+void MD::FileNaming(int POWER, double A_cst) {
   /*
   Generates file names for the different I/O operations
   */
@@ -438,15 +444,16 @@ void MD::ResetValues() {
   DATA.close();
   POS.close();
 
-  rx.resize(0, 0);
-  ry.resize(0, 0);
-  rz.resize(0, 0);
-  rrx.resize(0, 0);
-  rry.resize(0, 0);
-  rrz.resize(0, 0);
-  vx.resize(0, 0);
-  vy.resize(0, 0);
-  vz.resize(0, 0);
+  // Clear values, size, but reserve capacity
+  rx.clear();
+  ry.clear();
+  rz.clear();
+  rrx.clear();
+  rry.clear();
+  rrz.clear();
+  vx.clear();
+  vy.clear();
+  vz.clear();
   gr.resize(NHIST + 1, 0); // gr with Index igr
   fx.resize(N, 0);
   fy.resize(N, 0);

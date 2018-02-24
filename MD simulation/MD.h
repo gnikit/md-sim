@@ -60,8 +60,8 @@ protected:
   double scale_v;
 
   // HISTOGRAM VARIABLES
-  int Nhist, igr;		// Index of Hist
-  double rg, den, rn;
+  int igr;		// Index of Hist
+  double rg;
   double dr;
   vec1d gr;
   
@@ -92,7 +92,7 @@ protected:
   void MeanSquareDisplacement(vec1d &MSDx, vec1d &MSDy, vec1d &MSDz);
 
   void OpenFiles();
-  void CreateFiles(int POWER, double A_cst);
+  void FileNaming(int POWER, double A_cst);
   void WriteToFiles();
   void ShowRun(size_t step_size_show);
   void ResetValues();

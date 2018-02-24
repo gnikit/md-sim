@@ -38,22 +38,20 @@ protected:
   vec1d Cvx, Cvy, Cvz;
   vec1d rrx, rry, rrz;	// used in MSD
   vec1d MSDx, MSDy, MSDz;
-  vec1d Cr;	vec1d msd;								// correlation vector with time index
+  vec1d Cr, msd;								// correlation vector with time index
 
-  size_t Nx, Ny, Nz;
-  size_t N, N_step, N_max;
-  double T0;		// Target Temperature. Desired T for the system to operate
-  int power; double A;
+  size_t Nx, Ny, Nz;   // Particles in x, y, z
+  size_t N, _STEP_INDEX, _STEPS;  // Total particles, step index, maximum steps
+  double _T0;		// Target Temperature. Desired T for the system to operate
   double dt = 0.005;	// time step dt = 0.005/sqrt(T0)
   double x, y, z;			// distance between particle i and j
   double r;				    // distance in polar
-  double rho;				  // density
+  double _rho;				// density
   double scale;
   double KE = 0.0;		// Kinetic Energy
   double T;				    // Temperature
 
   double L;				    // Length of the box after scaling
-  //std::cout << "Box side length: " << L << std::endl;
   double Vol;
   double cut_off = 2.5;	// Cut off radius for the analysis
   double U = 0;			    // Potential Energy
@@ -66,16 +64,13 @@ protected:
   double rg, den, rn;
   double dr;
   vec1d gr;
-
+  
 private:
-  const long double pi = acos(-1.0);
-  std::string run; std::string A_par; std::string separator;
-  std::string path;
-  std::string file_type;
-  std::string HIST; std::string _VAF; std::string _MSD; std::string data;
-  std::string pos;
-  std::string Ldrx, Ldry, Ldrz, Ldvx, Ldvy, Ldvz;
-  std::string _dir, _density, _step;
+  const long double PI = acos(-1.0);
+  std::string _FILE_EXT;
+  std::string _step_to_str, _particles_to_str, _rho_to_str, _T_to_str, _n_to_str, _A_to_str;
+  std::string HIST, _VAF, _MSD, data, pos; // contain full names with args
+  std::string _dir, _FILE_ID;
   std::ofstream Hist, VAF, MSD, DATA, POS;
 
 public:
@@ -103,4 +98,5 @@ protected:
   void ResetValues();
   void time(std::ofstream&, std::string variables);
   std::vector<double> ReadFromFile(const std::string &file_name);
+  std::string MD::ConvertToString(const double & x, const int & precision);
 };

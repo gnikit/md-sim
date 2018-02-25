@@ -1,6 +1,6 @@
 #! /bin/bash
 
-#PBS -l walltime=00:30:00
+#PBS -l walltime=06:00:00
 #PBS -l select=1:ncpus=4:mem=2gb
 
 
@@ -14,13 +14,13 @@ cp vx.txt vy.txt vz.txt MD.h MD.cpp stat_analysis.h stat_analysis.cpp Source.cpp
 
 cd $TMPDIR
 pwd
-tree
+# Dir created in case of early termination
+OUTDIR="$HOME"/MD/data
+mkdir "$OUTDIR"
 
 # Compile
 icpc -std=c++17 -O3 -use-intel-optimized-headers -qopenmp -pthread -parallel MD.cpp stat_analysis.cpp Source.cpp -o run_me.out
 # Run
 ./run_me.out
-OUTDIR="$HOME"/MD/data
-mkdir "$OUTDIR"
 # Copy files from $TMPDIR to $WORK
 cp -r "$TMPDIR"/data/ "$OUTDIR"

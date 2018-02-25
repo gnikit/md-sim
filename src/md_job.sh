@@ -13,7 +13,8 @@ cd "$dir"
 cp vx.txt vy.txt vz.txt MD.h MD.cpp stat_analysis.h stat_analysis.cpp Source.cpp $TMPDIR
 
 cd $TMPDIR
-pwd 
+pwd
+tree
 
 # Compile
 icpc -std=c++17 -O3 -use-intel-optimized-headers -qopenmp -pthread -parallel MD.cpp stat_analysis.cpp Source.cpp -o run_me.out

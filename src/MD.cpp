@@ -4,7 +4,6 @@
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 // TODO: Boltzmann Dist normalisation of the particles velocities in the beggining
 // TODO: Change A into the potential pair fucntion
-// TODO: Fix file format into remove directories
 // TODO: Implement normalisation for r-> something like 1/a^n * pair-pot normalised (r**2 + 1)
 
 
@@ -275,7 +274,7 @@ void MD::Simulation(int POWER, double A_CST) {
         }
 
         r = sqrt((x * x) + (y * y) + (z * z));
-        long double q = sqrt(r * r + A_CST);
+        long double q = sqrt(r * r + A_CST *A_CST); // TODO: A_CST is now changed
 
         // Force loop
         if (r < cut_off) // for particles within the cut off range
@@ -362,9 +361,9 @@ void MD::FileNaming(int POWER, double A_cst) {
   std::stringstream T_stream;
   // TODO: setprecission function input here
 
-  T_stream << std::fixed << std::setprecision(1) << _T0;  // 1 decimal
-  A_stream << std::fixed << std::setprecision(2) << A_cst;        // 2 decimals
-  rho_stream << std::fixed << std::setprecision(1) << _rho;	// 1 decimal
+  T_stream << std::fixed << std::setprecision(2) << _T0;  // 1 decimal
+  A_stream << std::fixed << std::setprecision(4) << A_cst;        // 4 decimals
+  rho_stream << std::fixed << std::setprecision(2) << _rho;	// 1 decimal
 
   _step_to_str = "_step_" + std::to_string(_STEPS);
   _particles_to_str = "_particles_" + std::to_string(N);

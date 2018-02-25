@@ -4,7 +4,7 @@
 #include <string>
 
 #define DENSITY 0.5
-#define STEPS 1000
+#define STEPS 100000
 
 //void MultiThread(MD class_object, std::vector<long double> n, std::vector<int> A){
 //  for (size_t i = 0; i < n.size(); i++){
@@ -19,17 +19,17 @@ int main() {
   size_t num = 1;
   system ("mkdir ./data/");
   std::string dir = "./data/";
-  std::vector<int> p = { 6/* , 8, 10, 12  */};
+  std::vector<int> p = { 6/* , 8, 10, 12 */ };
   double a_value = 0.5 * std::pow(0.5, (2 / 12));
   // std::vector<double> A1 = { 0, 0.25, 0.50, 0.75, a_value, 1.00, 1.25, 1.50, 1.75, 2.00, 3, 4.00 };
-  std::vector<double> A1 = { 0.0, 0.25/*, 0.50, 0.65, 0.7, 0.75 */};
-  std::vector<double> A2 = { 0.5, 0.75/*, 0.90, 0.95, 1.00, 1.05 */};
-  std::vector<double> A3 = { 1., 1.25/*, 1.25, 1.50, 1.75, 2.00 */};
-  std::vector<double> A4 = { 2, 2.5/*, 2.75, 3.0, 3.5, 4.0*/ };
+  std::vector<double> A1 = { 0.0/* , 0.25, 0.50, 0.65, 0.70, 0.75 */};
+  std::vector<double> A2 = { 0.5/* , 0.75, 0.90, 0.95, 1.00, 1.05 */};
+  std::vector<double> A3 = { 1.0/* , 1.25, 1.25, 1.50, 1.75, 2.00 */};
+  std::vector<double> A4 = { 2.0/* , 2.50, 2.75, 3.00, 3.50, 4.00 */};
   MD run(dir, 1.0, DENSITY, STEPS);
   MD* run2 = new MD(dir, 1.0, DENSITY, STEPS);
-  MD* run3 = new MD(dir, 1.0, DENSITY, STEPS);
-  MD* run4 = new MD(dir, 1.0, DENSITY, STEPS);
+  MD* run3 = new MD(dir, 0.5, DENSITY, STEPS);
+  MD* run4 = new MD(dir, 0.5, DENSITY, STEPS);
 
   for (size_t i = 0; i < p.size(); i++) {
     for (size_t j = 0; j < A1.size(); j++) {

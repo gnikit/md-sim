@@ -135,7 +135,6 @@
       <Parallelization>true</Parallelization>
       <UseIntelOptimizedHeaders>true</UseIntelOptimizedHeaders>
       <EnableMatrixMultiplyLibraryCall>Yes</EnableMatrixMultiplyLibraryCall>
-      <Optimization>MaxSpeedHighLevel</Optimization>
       <FloatingPointModel>Precise</FloatingPointModel>
       <FloatingPointExpressionEvaluation>Extended</FloatingPointExpressionEvaluation>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>

@@ -6,13 +6,13 @@
 
 # Load intel compiler
 module load intel-suite/2017.1 
-
+pwd
 # Loads initial velocities
 
-# cp "$HOME"/MD/MD-simulation/MD\ simulation/vx.txt $TEMP
-# cp "$HOME"/MD/MD-simulation/MD\ simulation/vy.txt $TEMP
-# cp "$HOME"/MD/MD-simulation/MD\ simulation/vz.txt $TEMP
-pwd 
+cp "$HOME"/MD/MD-simulation/MD\ simulation/vx.txt $TEMP
+cp "$HOME"/MD/MD-simulation/MD\ simulation/vy.txt $TEMP
+cp "$HOME"/MD/MD-simulation/MD\ simulation/vz.txt $TEMP
+ 
 
 icpc -std=c++17 -O3 -use-intel-optimized-headers -qopenmp -pthread -parallel MD.cpp stat_analysis.cpp Source.cpp -o run_me.out
 ./run_me.out

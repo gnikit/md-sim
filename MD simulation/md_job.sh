@@ -14,7 +14,7 @@ module load intel-suite/2017.1
 # cp "$HOME"/MD/MD-simulation/MD\ simulation/vz.txt $TEMP
 echo pwd 
 
-icpc -std=c++17 -O3 MD.cpp stat_analysis.cpp Source.cpp -o run_me.out
+icpc -std=c++17 -O3 -use-intel-optimized-headers -qopenmp -pthread -parallel MD.cpp stat_analysis.cpp Source.cpp -o run_me.out
 ./run_me.out
 OUTDIR="$WORK"/data
 mkdir "$OUTDIR"

@@ -2,24 +2,23 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <fstream>	
+#include <fstream>
 #include <assert.h>
 #include <iterator>
 #include <sstream>
-#include <iomanip>  // setprecision
+#include <iomanip> // setprecision
 #include <exception>
 
-class Stat_Analysis {
+class Stat_Analysis
+{
 
 protected:
   typedef std::vector<double> vec1d;
   std::ifstream _data_reader;
-  size_t _N, _STEPS;  // Number of particles
+  size_t _N, _STEPS; // Number of particles
   double _RHO, _T0;
 
-
 private:
-
   vec1d T_vec, K_vec, U_vec, E_vec, Pc_vec, Pk_vec, P_vec;
   vec1d _A_list;
   std::string _path;
@@ -36,7 +35,8 @@ private:
   long double _temp6 = 0;
 
 public:
-  Stat_Analysis(std::string PATH, vec1d A_LIST, size_t STEPS, size_t T, size_t PARTICLES, double DENSITY);
+  Stat_Analysis(std::string PATH, vec1d A_LIST,
+                size_t STEPS, size_t T, size_t PARTICLES, double DENSITY);
   ~Stat_Analysis();
 
   void ReadFromFile(vec1d &x, const std::string &file_name);
@@ -47,5 +47,4 @@ public:
             vec1d &E, vec1d &Pc, vec1d &Pk, vec1d &P);
   void StaticDataProcessing(size_t n);
   // TODO: make a RunMe method and add arguments to the existing methods for increased reusability
-
 };

@@ -98,5 +98,5 @@ protected:
   void ResetValues();
   void time(std::ofstream&, std::string variables);
   std::vector<double> ReadFromFile(const std::string &file_name);
-  std::string MD::ConvertToString(const double & x, const int & precision);
+  std::string ConvertToString(const double & x, const int & precision);
 };

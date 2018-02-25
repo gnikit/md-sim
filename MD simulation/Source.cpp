@@ -4,7 +4,7 @@
 #include <string>
 
 #define DENSITY 0.5
-#define STEPS 10000
+#define STEPS 100
 #define DIR "../../Archives of Data/Particles_10^3/"
 
 //void MultiThread(MD class_object, std::vector<long double> n, std::vector<int> A){
@@ -19,11 +19,9 @@
 int main() {
   size_t num = 1;
   std::string dir = DIR;
-  std::string file = dir + "Density_0.5/T_1.0_step_" + std::to_string(STEPS) + "/"; // TODO: Add temperature variability
-  std::string file_05 = dir + "Density_0.5/T_0.5_step_" + std::to_string(STEPS) + "/";
-  std::vector<int> p = { 6, /*8, 10,*/ 12 };
+  std::vector<int> p = { 6, 8, 10, 12 };
   double a_value = 0.5 * std::pow(0.5, (2 / 12));
-  std::vector<double> A1 = { 0, 0.25/*, 0.50, 0.75, a_value, 1.00, 1.25, 1.50, 1.75, 2.00, 3, 4.00*/ };
+  std::vector<double> A1 = { 0, 0.25, 0.50, 0.75, a_value, 1.00, 1.25, 1.50, 1.75, 2.00, 3, 4.00 };
   //std::vector<double> A1 = { 0.0, 0.25/*, 0.50, 0.65, 0.7, 0.75 */};
   //std::vector<double> A2 = { 0.5, 0.75/*, 0.90, 0.95, 1.00, 1.05 */};
   //std::vector<double> A3 = { 1., 1.25/*, 1.25, 1.50, 1.75, 2.00 */};
@@ -33,7 +31,7 @@ int main() {
   //MD *run3 = new MD(DIR, 0.5, DENSITY, STEPS);
   //MD *run4 = new MD(DIR, DENSITY, STEPS);
   
-  for (size_t i = 0; i < 1/*p.size()*/; i++) {
+  for (size_t i = 0; i < p.size(); i++) {
     for (size_t j = 0; j < A1.size(); j++) {
       //std::cout << "p: " << p[i] << " A: " << A1[j] << " run num: " << num << std::endl;
       std::thread th(&MD::Simulation, run2, p[i], A1[j]);
@@ -55,13 +53,9 @@ int main() {
   //a.insert(a.end(), A3.begin(), A3.end());
   //a.insert(a.end(), A4.begin(), A4.end());
   //
-  //Stat_Analysis test(file, A1);
-  //for (size_t i = 0; i < p.size(); i++) {
-  //  test.StaticDataProcessing(p[i]);
-  //}
-  //Stat_Analysis test_05(file_05, A1);
-  //for (size_t i = 0; i < p.size(); i++) {
-  //  test_05.StaticDataProcessing(p[i]);
-  //}
+  Stat_Analysis test(dir, A1, STEPS, 1.0, 1000, DENSITY);
+  for (size_t i = 0; i < p.size(); i++) {
+    test.StaticDataProcessing(p[i]);
+  }
   //system("pause");
 }

@@ -242,11 +242,11 @@ ModelManifest.xml
 .fake/
 
 
-# Ignore .sln and .git files
+# Ignore .sln files
 *.sln
 *.json
-*.gitattributes
-*.gitignore
+MD simulation.sln
+
 
 # Ignore in ./MD Simulation debug files
 *.vcxproj
@@ -266,3 +266,5 @@ MD simulation/runme.out
 /Report20180224-1043.diagsession
 /data/*
 a.out
+*.filters
+/MD simulation

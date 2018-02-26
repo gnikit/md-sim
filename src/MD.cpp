@@ -360,9 +360,9 @@ void MD::FileNaming(int POWER, double A_cst) {
   std::stringstream T_stream;
   // TODO: setprecission function input here
 
-  T_stream << std::fixed << std::setprecision(2) << _T0;  // 1 decimal
+  T_stream << std::fixed << std::setprecision(2) << _T0;  // 2 decimal
   A_stream << std::fixed << std::setprecision(4) << A_cst;        // 4 decimals
-  rho_stream << std::fixed << std::setprecision(2) << _rho;	// 1 decimal
+  rho_stream << std::fixed << std::setprecision(2) << _rho;	// 2 decimal
 
   _step_to_str = "_step_" + std::to_string(_STEPS);
   _particles_to_str = "_particles_" + std::to_string(N);

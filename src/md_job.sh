@@ -23,4 +23,4 @@ icpc -std=c++17 -O3 -use-intel-optimized-headers -qopenmp -pthread -parallel MD.
 # Run
 ./run_me.out
 # Copy files from $TMPDIR to $WORK
-cp -r "$TMPDIR"/data/ "$OUTDIR"
+cp * "$WORK"

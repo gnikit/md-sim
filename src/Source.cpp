@@ -1,5 +1,5 @@
 #include "MD.h"
-#include "stat_analysis.h"
+// #include "stat_analysis.h"
 #include <thread>
 #include <string>
 
@@ -33,11 +33,11 @@ int main() {
   for (size_t i = 0; i < p.size(); i++) {
     for (size_t j = 0; j < A1.size(); j++) {
       std::cout << "p: " << p[i] << " A: " << A1[j] << " run num: " << num << std::endl;
-      // std::thread th(&MD::Simulation, run2, p[i], A2[j]);
+      std::thread th(&MD::Simulation, run2, p[i], A2[j]);
       // std::thread th2(&MD::Simulation, run3, p[i], A3[j]);
       // std::thread th3(&MD::Simulation, run4, p[i], A4[j]);
       run.Simulation(p[i], A1[j]);
-      // th.join();
+      th.join();
       // th2.join();
       // th3.join();
       ++num;

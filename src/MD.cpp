@@ -3,7 +3,6 @@
 #define NHIST 300
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 // TODO: Boltzmann Dist normalisation of the particles velocities in the beggining
-// TODO: Change A into the potential pair fucntion
 // TODO: Implement normalisation for r-> something like 1/a^n * pair-pot normalised (r**2 + 1)
 
 

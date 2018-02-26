@@ -1,6 +1,6 @@
 #include "MD.h"
 // #include "stat_analysis.h"
-#include <thread>
+// #include <thread>
 #include <string>
 
 #define DENSITY 0.5
@@ -26,18 +26,22 @@ int main() {
   std::vector<double> A3 = { 1.0/* , 1.25, 1.25, 1.50, 1.75, 2.00 */};
   std::vector<double> A4 = { 2.0/* , 2.50, 2.75, 3.00, 3.50, 4.00 */};
   MD run(dir, 1.0, DENSITY, STEPS);
-  MD* run2 = new MD(dir, 1.0, DENSITY, STEPS);
-  MD* run3 = new MD(dir, 0.5, DENSITY, STEPS);
-  MD* run4 = new MD(dir, 0.5, DENSITY, STEPS);
+  MD* run2 = new MD(dir, 1.0, 0.5, STEPS);
+  MD* run3 = new MD(dir, 0.5, 0.5, STEPS);
+  MD* run4 = new MD(dir, 0.5, 0.5, STEPS);
+  MD* run5 = new MD(dir, 0.5, 0.8, STEPS);
+  MD* run6 = new MD(dir, 0.5, 0.8, STEPS);
+  MD* run7 = new MD(dir, 1.0, 0.8, STEPS);
+  MD* run8 = new MD(dir, 1.0, 0.8, STEPS);
 
   for (size_t i = 0; i < p.size(); i++) {
     for (size_t j = 0; j < A1.size(); j++) {
       std::cout << "p: " << p[i] << " A: " << A1[j] << " run num: " << num << std::endl;
-      std::thread th(&MD::Simulation, run2, p[i], A2[j]);
+      // std::thread th(&MD::Simulation, run2, p[i], A2[j]);
       // std::thread th2(&MD::Simulation, run3, p[i], A3[j]);
       // std::thread th3(&MD::Simulation, run4, p[i], A4[j]);
       run.Simulation(p[i], A1[j]);
-      th.join();
+      // th.join();
       // th2.join();
       // th3.join();
       ++num;

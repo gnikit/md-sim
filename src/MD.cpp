@@ -1,6 +1,7 @@
 #include "MD.h"
 #define PARTICLES_PER_AXIS 10
 #define NHIST 300
+#pragma optimize ("", on)
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 // TODO: Boltzmann Dist normalisation of the particles velocities in the beggining
 // TODO: Implement normalisation for r-> something like 1/a^n * pair-pot normalised (r**2 + 1)

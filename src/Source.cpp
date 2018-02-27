@@ -4,7 +4,7 @@
 #include <string>
 
 #define DENSITY 0.5
-#define STEPS 100
+#define STEPS 10000
 
 //void MultiThread(MD class_object, std::vector<long double> n, std::vector<int> A){
 //  for (size_t i = 0; i < n.size(); i++){
@@ -29,7 +29,7 @@ std::vector<double> LinearSpacedArray(double a, double b, std::size_t N)
 int main() {
   size_t num = 1;
   std::string dir = "";  // Current Working Directory
-  std::vector<int> p = { 6/* , 8, 10, 12 */ };
+  std::vector<int> p = { 6, 8, 10, 12 };
   double a_value = 0.5 * std::pow(0.5, (2 / 12));
   // std::vector<double> A1 = { 0, 0.25, 0.50, 0.75, a_value, 1.00, 1.25, 1.50, 1.75, 2.00, 3, 4.00 };
   // std::vector<double> A1 = { 0.0/* , 0.25, 0.50, 0.65, 0.70, 0.75 */};

@@ -75,11 +75,11 @@ private:
 
 public:
 
-  MD(std::string DIRECTORY, double TEMPERATURE, double DENSITY, size_t run_number);
+  MD(std::string DIRECTORY, size_t run_number);
   ~MD();
 
-  void Simulation(int POWER, double A_cst);
-  std::string getDir();
+void Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST);
+std::string getDir();
 
 protected:
   void Initialise(vec1d &x, vec1d &y, vec1d &z,

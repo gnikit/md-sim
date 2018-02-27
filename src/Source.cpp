@@ -54,28 +54,28 @@ int main() {
   std::vector<double> A7 = LinearSpacedArray(2,4,5);
   std::vector<double> A8 = LinearSpacedArray(5,10,5);
 
-  MD run(dir, 1.0, DENSITY, STEPS);
-  MD* run2 = new MD(dir, 1.0, 0.5, STEPS);
-  MD* run3 = new MD(dir, 0.5, 0.5, STEPS);
-  MD* run4 = new MD(dir, 0.5, 0.5, STEPS);
-  MD* run5 = new MD(dir, 0.5, 0.8, STEPS);
-  MD* run6 = new MD(dir, 0.5, 0.8, STEPS);
-  MD* run7 = new MD(dir, 1.0, 0.8, STEPS);
-  MD* run8 = new MD(dir, 1.0, 0.8, STEPS);
+  MD run(dir, STEPS);
+  MD* run2 = new MD(dir, STEPS);
+  MD* run3 = new MD(dir, STEPS);
+  MD* run4 = new MD(dir, STEPS);
+  MD* run5 = new MD(dir, STEPS);
+  MD* run6 = new MD(dir, STEPS);
+  MD* run7 = new MD(dir, STEPS);
+  MD* run8 = new MD(dir, STEPS);
 
   for (size_t i = 0; i < p.size(); i++) {
     for (size_t j = 0; j < A1.size(); j++) {
       std::cout << "p: " << p[i] << " A: " << A1[j] << " run num: " << num << std::endl;
-      std::thread th2(&MD::Simulation, run2, p[i], A2[j]);
+      // std::thread th2(&MD::Simulation, run2, p[i], A2[j]);
       // std::thread th3(&MD::Simulation, run3, p[i], A3[j]);
       // std::thread th4(&MD::Simulation, run4, p[i], A4[j]);
       // std::thread th5(&MD::Simulation, run5, p[i], A5[j]);
       // std::thread th6(&MD::Simulation, run6, p[i], A6[j]);
       // std::thread th7(&MD::Simulation, run7, p[i], A7[j]);
       // std::thread th8(&MD::Simulation, run8, p[i], A8[j]);
-      run.Simulation(p[i], A1[j]);
+      run.Simulation(0.5, 0.5, 8, 0.5);
 
-      th2.join();
+      // th2.join();
       // th3.join();
       // th4.join();
       // th5.join();

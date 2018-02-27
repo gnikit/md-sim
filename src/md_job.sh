@@ -6,12 +6,13 @@
 
 # Load intel compiler
 module load intel-suite/2017.1 
-pwd
+
 # Copy files to $TMPDIR
 dir="$HOME"/MD/MD-simulation/src
 cd "$dir"
 cp vx.txt vy.txt vz.txt MD.h MD.cpp stat_analysis.h stat_analysis.cpp Source.cpp $TMPDIR
 
+# IMPORTANT: SHELL DIR HAS TO BE SAME AS VX, VY, VZ FILES
 cd $TMPDIR
 pwd
 # Dir created in case of early termination

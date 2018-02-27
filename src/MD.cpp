@@ -7,22 +7,13 @@
 // TODO: Implement normalisation for r-> something like 1/a^n * pair-pot normalised (r**2 + 1)
 
 
-MD::MD(std::string DIRECTORY, double TEMPERATURE, double DENSITY, size_t run_number) {
+MD::MD(std::string DIRECTORY, size_t run_number) {
   _dir = DIRECTORY;
-  _T0 = TEMPERATURE;
-  _rho = DENSITY;
   _STEPS = run_number;
 
   Nx = Ny = Nz = PARTICLES_PER_AXIS; // Number of particles per axis
   N = Nx * Ny * Nz;
-  scale = std::pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS; // scalling factor for length of box
-  L = std::pow((N / _rho), 1.0 / 3.0);            // L depends on rho
-  Vol = N / _rho;
 
-  cut_off = L / 2.;
-
-  rg = cut_off;
-  dr = rg / NHIST;
   gr.resize(NHIST + 1, 0); // gr with Index igr
   fx.resize(N, 0); fy.resize(N, 0); fz.resize(N, 0);
   //TODO: reserve r's and v's, instead of push_back
@@ -78,7 +69,7 @@ void MD::Initialise(vec1d &x, vec1d &y,
     mean_vz += vz[i] / N;
   }
 
-  int tempN = N;    // Recommended opt by Intel
+  size_t tempN = N;    // Recommended opt by Intel
 #pragma parallel
 #pragma loop count min(128)
   for ( i = 0; i < tempN; i++) {
@@ -203,12 +194,23 @@ void MD::MeanSquareDisplacement(vec1d &MSDx,
 }
 
 // MD Simulation
-void MD::Simulation(int POWER, double A_CST) {
+void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST) {
   FileNaming(POWER, A_CST);
   OpenFiles();
   time(DATA, "# T\tK\tU\tEtot\tPc\tPk\tPtot");
   std::chrono::steady_clock::time_point begin =
     std::chrono::steady_clock::now();
+  // THESE VARIABLES are INITIATED HERE, FIX
+  _T0 = TEMPERATURE;
+  _rho = DENSITY;
+  scale = std::pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS; // scalling factor for length of box
+  L = std::pow((N / _rho), 1.0 / 3.0);            // L depends on rho
+  Vol = N / _rho;
+
+  cut_off = L / 2.;
+
+  rg = cut_off;
+  dr = rg / NHIST;
   Initialise(rx, ry, rz, vx, vy, vz);
   //std::cout << "MD Simulation running..." << std::endl;
 

@@ -1,6 +1,6 @@
 #! /bin/bash
 
-#PBS -l walltime=00:30:00
+#PBS -l walltime=48:00:00
 #PBS -l select=1:ncpus=8:mem=4gb
 
 
@@ -23,4 +23,5 @@ icpc -std=c++17 -O3 -Ofast -xHost -complex-limited-range -use-intel-optimized-he
 # Run
 ./a.out
 # Copy files from $TMPDIR to $WORK
-cp * "$WORK"
+
+cp * "$OUTDIR"

@@ -12,7 +12,7 @@ dir="$HOME"/MD/MD-simulation/src
 cd "$dir"
 cp vx.txt vy.txt vz.txt MD.h MD.cpp stat_analysis.h stat_analysis.cpp Source.cpp $TMPDIR
 
-# IMPORTANT: SHELL DIR HAS TO BE SAME AS VX, VY, VZ FILES
+# IMPORTANT: SHELL DIR HAS TO BE SAME AS VX, VY, VZ
 cd $TMPDIR
 pwd
 # Dir created in case of early termination

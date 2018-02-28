@@ -20,7 +20,7 @@ OUTDIR="$HOME"/MD/data
 mkdir "$OUTDIR"
 
 # Compile
-icc -std=c++17 -parallel -O3 -use-intel-optimized-headers MD.h MD.cpp Source.cpp -o a.out
+icpc -std=c++17 -parallel -O3 -use-intel-optimized-headers MD.h MD.cpp Source.cpp -o a.out
 # Run
 ./a.out
 # Copy files from $TMPDIR to $WORK

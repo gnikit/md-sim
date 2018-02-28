@@ -1,6 +1,6 @@
 #! /bin/bash
 
-#PBS -l walltime=48:00:00
+#PBS -l walltime=00:01:00
 #PBS -l select=1:ncpus=8:mem=4gb
 
 
@@ -26,3 +26,8 @@ icc -std=c++17 -parallel -O3 -use-intel-optimized-headers MD.h MD.cpp Source.cpp
 # Copy files from $TMPDIR to $WORK
 
 cp * "$OUTDIR"
+
+# Display CPU model
+lcpu
+# Display intel compiler version
+icpc --version

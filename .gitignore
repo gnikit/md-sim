@@ -272,3 +272,5 @@ a.out
 /vx.txt
 /vy.txt
 /vz.txt
+src/gcc_comp.out
+src/#g++_compile.sh#

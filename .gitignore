@@ -268,3 +268,7 @@ MD simulation/runme.out
 a.out
 *.filters
 /MD simulation
+/src/runme.out
+/vx.txt
+/vy.txt
+/vz.txt

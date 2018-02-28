@@ -20,7 +20,8 @@ OUTDIR="$HOME"/MD/data
 mkdir "$OUTDIR"
 
 # Compile
-icpc -std=c++17 -parallel -O3 -use-intel-optimized-headers MD.h MD.cpp Source.cpp -o a.out
+# icpc -std=c++17 -parallel -O3 -use-intel-optimized-headers MD.h MD.cpp Source.cpp -o a.out
+icpc -fast -std=c++11 -parallel -use-intel-optimized-headers MD.cpp Source.cpp -o a.out
 # Run
 ./a.out
 # Copy files from $TMPDIR to $WORK
@@ -28,6 +29,6 @@ icpc -std=c++17 -parallel -O3 -use-intel-optimized-headers MD.h MD.cpp Source.cp
 cp * "$OUTDIR"
 
 # Display CPU model
-lcpu
+lscpu
 # Display intel compiler version
 icpc --version

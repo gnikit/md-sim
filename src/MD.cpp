@@ -185,8 +185,8 @@ void MD::MeanSquareDisplacement(vec1d &MSDx,
                                 vec1d &MSDz) {
   double msd_temp = 0;
   for (size_t i = 0; i < N; ++i) {
-    msd_temp += (std::pow((rrx[i] - MSDx[i]), 2) + std::pow((rry[i] - MSDy[i]), 2) +
-                 std::pow((rrz[i] - MSDz[i]), 2));
+    msd_temp += (pow((rrx[i] - MSDx[i]), 2) + pow((rry[i] - MSDy[i]), 2) +
+                 pow((rrz[i] - MSDz[i]), 2));
   }
   msd_temp /= N;
   //msd.push_back(msd_temp);	// HACK: Enable for debugging
@@ -203,8 +203,8 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
   // THESE VARIABLES are INITIATED HERE, FIX
   _T0 = TEMPERATURE;
   _rho = DENSITY;
-  scale = std::pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS; // scalling factor for length of box
-  L = std::pow((N / _rho), 1.0 / 3.0);            // L depends on rho
+  scale = pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS; // scalling factor for length of box
+  L = pow((N / _rho), 1.0 / 3.0);            // L depends on rho
   Vol = N / _rho;
 
   cut_off = L / 2.;
@@ -282,7 +282,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
         if (r < cut_off) // for particles within the cut off range
         {
           long double ff =
-            (POWER)*r *	std::pow(q, (-POWER - 2)); // Force for particles
+            (POWER)*r *	pow(q, (-POWER - 2)); // Force for particles
 
           fx[i] += x * ff / r;
           fx[j] -= x * ff / r; // Canceling the ij and ji pairs
@@ -292,7 +292,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
           fz[j] -= z * ff / r;
 
           PC += r * ff;
-          U += std::pow(q, -POWER); // Potential Calculation
+          U += pow(q, -POWER); // Potential Calculation
 
                                     // Radial Distribution
           igr = round(NHIST * r / rg);

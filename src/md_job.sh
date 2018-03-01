@@ -1,7 +1,7 @@
 #! /bin/bash
 
 #PBS -l walltime=01:00:00
-#PBS -l select=1:ncpus=8:mem=4gb
+#PBS -l select=1:ncpus=1:mem=4gb
 
 
 # Load intel compiler

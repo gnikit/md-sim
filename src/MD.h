@@ -17,7 +17,7 @@
 //////////////////////////////////////////////////////////////////////
 #pragma once
 #include <iostream>
-#include <math.h>
+#include <mathimf.h>
 #include <iomanip>  // setprecision
 #include <vector>
 #include <chrono>   // CPU run-time

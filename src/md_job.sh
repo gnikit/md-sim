@@ -21,7 +21,7 @@ mkdir "$OUTDIR"
 
 # Compile
 # icpc -std=c++17 -parallel -O3 -use-intel-optimized-headers MD.h MD.cpp Source.cpp -o a.out
-icpc -fast -std=c++17 -parallel -pthread -use-intel-optimized-headers MD.cpp Source.cpp -o a.out
+icpc -fast -std=c++17 -parallel -shared-intel -use-intel-optimized-headers MD.cpp Source.cpp -o a.out
 # Run
 ./a.out
 # Copy files from $TMPDIR to $WORK

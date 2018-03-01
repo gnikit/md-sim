@@ -27,8 +27,3 @@ icpc -fast -std=c++17 -parallel -pthread -use-intel-optimized-headers MD.cpp Sou
 # Copy files from $TMPDIR to $WORK
 
 cp * "$OUTDIR"
-
-# Display CPU model
-lscpu
-# Display intel compiler version
-icpc --version

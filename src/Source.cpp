@@ -15,12 +15,12 @@
 //  }
 //}
 double getRho2(double rho1, double T1, double T2, size_t n){
-  double rho2 = rho1 * std::pow((T2/T1), (3.0/n));
+  double rho2 = rho1 * pow((T2/T1), (3.0/n));
   return rho2;
 }
 
 double getA2(double a1, double rho1, double rho2, size_t n){
-  double a2 = a1 * std::pow((rho1/rho2), (1.0/n));
+  double a2 = a1 * powr((rho1/rho2), (1.0/n));
   return a2;
 }
 

@@ -20,7 +20,7 @@ double getRho2(double rho1, double T1, double T2, size_t n){
 }
 
 double getA2(double a1, double rho1, double rho2, size_t n){
-  double a2 = a1 * powr((rho1/rho2), (1.0/n));
+  double a2 = a1 * pow((rho1/rho2), (1.0/n));
   return a2;
 }
 

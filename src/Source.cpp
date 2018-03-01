@@ -40,11 +40,11 @@ int main() {
   size_t num = 1;
   std::string dir_windows = "C:/Code/C++/MD simulation/Archives of Data/";  // Current Working Directory
   std::string dir = "";   // Working directory of the cluster
-  std::vector<size_t> n = { 6/*, 8, 10, 12*/ };
-  std::vector<double> rho = { 0.5/*, 1.0, 1.5, 2.0, 2.5*/ };
-  std::vector<double> T = { 0.5/*, 1.0, 1.5, 2.0 */};
+  std::vector<size_t> n = { 6, 8, 10, 12 };
+  std::vector<double> rho = { 0.5, 1.0, 1.5, 2.0, 2.5 };
+  std::vector<double> T = { 0.5, 1.0, /* 1.5, 2.0 */};
   //std::vector<double> A1 = { 0, 0.25, 0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 2.00, 2.50, 4.00 };
-  std::vector<double> A1 = LinearSpacedArray(0,1,1);
+  std::vector<double> A1 = LinearSpacedArray(0,1,5);
   std::vector<double> A2 = LinearSpacedArray(1.25,2.25,5);
   std::vector<double> A3 = LinearSpacedArray(2.50,4.50,5);
   std::vector<double> A4 = LinearSpacedArray(5,10,5);

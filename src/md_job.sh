@@ -16,7 +16,7 @@ cp vx.txt vy.txt vz.txt MD.h MD.cpp stat_analysis.h stat_analysis.cpp Source.cpp
 cd $TMPDIR
 pwd
 # Dir created in case of early termination
-OUTDIR="$HOME"/MD/data
+OUTDIR="$HOME"/MD/Data
 mkdir "$OUTDIR"
 LIB=/apps/intel/2017.1/compilers_and_libraries_2017.1.132/linux/compiler/include
 # Compile

@@ -16,12 +16,12 @@ cp vx.txt vy.txt vz.txt MD.h MD.cpp stat_analysis.h stat_analysis.cpp Source.cpp
 cd $TMPDIR
 pwd
 # Dir created in case of early termination
-OUTDIR="$HOME"/MD/data
+OUTDIR="$HOME"/MD/Data
 mkdir "$OUTDIR"
 
 # Compile
 # icpc -std=c++17 -parallel -O3 -use-intel-optimized-headers MD.h MD.cpp Source.cpp -o a.out
-icpc -fast -std=c++11 -parallel -use-intel-optimized-headers MD.cpp Source.cpp -o a.out
+icpc -fast -std=c++17 -parallel -use-intel-optimized-headers MD.cpp Source.cpp -o a.out
 # Run
 ./a.out
 # Copy files from $TMPDIR to $WORK

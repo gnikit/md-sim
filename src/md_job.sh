@@ -18,10 +18,10 @@ pwd
 # Dir created in case of early termination
 OUTDIR="$HOME"/MD/data
 mkdir "$OUTDIR"
-
+LIB=/apps/intel/2017.1/compilers_and_libraries_2017.1.132//linux/compiler/include
 # Compile
 # icpc -std=c++17 -parallel -O3 -use-intel-optimized-headers MD.h MD.cpp Source.cpp -o a.out
-icpc -fast -std=c++17 -parallel -shared-intel -use-intel-optimized-headers MD.cpp Source.cpp -o a.out
+icpc -fast -std=c++17 -parallel -L$LIB -shared-intel -use-intel-optimized-headers MD.cpp Source.cpp -o a.out
 # Run
 ./a.out
 # Copy files from $TMPDIR to $WORK

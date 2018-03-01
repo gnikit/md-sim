@@ -60,13 +60,13 @@ int main() {
     for (size_t t = 0; t < T.size(); t++) {
       for (size_t i = 0; i < n.size(); i++) {
         for (size_t j = 0; j < A1.size(); j++) {
-          //std::cout << "p: " << n[i] << " A: " << A1[j] << " run num: " << num << std::endl;
-          //std::thread th2(&MD::Simulation, run2, rho.at(d), T.at(t), n.at(i), A2.at(j));
-          //std::thread th3(&MD::Simulation, run3, rho.at(d), T.at(t), n.at(i), A3.at(j));
-          //std::thread th4(&MD::Simulation, run4, rho.at(d), T.at(t), n.at(i), A4.at(j));
+          std::cout << "p: " << n[i] << " A: " << A1[j] << " run num: " << num << std::endl;
+          std::thread th2(&MD::Simulation, run2, rho.at(d), T.at(t), n.at(i), A2.at(j));
+          std::thread th3(&MD::Simulation, run3, rho.at(d), T.at(t), n.at(i), A3.at(j));
+          std::thread th4(&MD::Simulation, run4, rho.at(d), T.at(t), n.at(i), A4.at(j));
           run.Simulation(rho.at(d), T.at(t), n.at(i), A1.at(j));
           
-          //th2.join(); th3.join(); th4.join();
+          th2.join(); th3.join(); th4.join();
           ++num;
         }
       }

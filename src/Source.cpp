@@ -41,7 +41,7 @@ int main() {
   std::string dir_windows = "C:/Code/C++/MD simulation/Archives of Data/";  // Current Working Directory
   std::string dir = "";   // Working directory of the cluster
   std::vector<size_t> n = { 6, 8, 10, 12 };
-  std::vector<double> rho = { 0.5, 1.0, 1.5, 2.0, 2.5 };
+  std::vector<double> rho = { 0.5, /*1.0, 1.5, 2.0, 2.5*/ };
   std::vector<double> T = { 0.5, 1.0, /* 1.5, 2.0 */};
   //std::vector<double> A1 = { 0, 0.25, 0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 2.00, 2.50, 4.00 };
   std::vector<double> A1 = LinearSpacedArray(0,1,5);
@@ -49,28 +49,30 @@ int main() {
   std::vector<double> A3 = LinearSpacedArray(2.50,4.50,5);
   std::vector<double> A4 = LinearSpacedArray(5,10,5);
 
-  MD run(dir_windows, STEPS);
-  MD* run2 = new MD(dir_windows, STEPS);
-  MD* run3 = new MD(dir, STEPS);
-  MD* run4 = new MD(dir, STEPS);
+
 
   for (size_t d = 0; d < rho.size(); d++) {
     for (size_t t = 0; t < T.size(); t++) {
       for (size_t i = 0; i < n.size(); i++) {
         for (size_t j = 0; j < A1.size(); j++) {
           std::cout << "p: " << n[i] << " A: " << A1[j] << " run num: " << num << std::endl;
-          //std::thread th2(&MD::Simulation, run2, rho.at(d), T.at(t), n.at(i), A2.at(j));
-          //std::thread th3(&MD::Simulation, run3, rho.at(d), T.at(t), n.at(i), A3.at(j));
+
+          MD* run1 = new MD(dir_windows, STEPS);
+          MD* run2 = new MD(dir_windows, STEPS);
+          MD* run3 = new MD(dir, STEPS);
+
+          std::thread th1(&MD::Simulation, run1, rho[d], T[t], n[i], A1[j]);
+          std::thread th2(&MD::Simulation, run2, rho[d], T[t], n[i], A2[j]);
           //std::thread th4(&MD::Simulation, run4, rho.at(d), T.at(t), n.at(i), A4.at(j));
-          run.Simulation(rho.at(d), T.at(t), n.at(i), A1.at(j));
           
-          /*th2.join(); th3.join(); th4.join();*/
+          th2.join(); th1.join();/* th4.join();*/
+          delete run1, run2, run3;
+
           ++num;
         }
       }
     }
   }
-  delete run2, run3, run4;
   //std::vector<double> a;
   //a.reserve(A1.size() + A2.size() + A3.size() + A4.size());
   //a.reserve(A1.size() + A2.size());

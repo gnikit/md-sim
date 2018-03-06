@@ -4,7 +4,7 @@
 #include <string>
 
 #define DENSITY 0.5
-#define STEPS 100
+#define STEPS 10000
 
 //void MultiThread(MD class_object, std::vector<long double> n, std::vector<int> A){
 //  for (size_t i = 0; i < n.size(); i++){

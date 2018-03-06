@@ -124,11 +124,9 @@ void MD::MBDistribution(double TEMPERATURE) {
 }
 
 
-void MD::VerletAlgorithm(vec1d &rx, vec1d &ry,
-                         vec1d &rz, vec1d &vx,
-                         vec1d &vy, vec1d &vz,
-                         vec1d &rrx, vec1d &rry,
-                         vec1d &rrz) {
+void MD::VerletAlgorithm(vec1d &rx, vec1d &ry, vec1d &rz,
+                         vec1d &vx, vec1d &vy, vec1d &vz,
+                         vec1d &rrx, vec1d &rry, vec1d &rrz) {
   size_t i;
   for (i = 0; i < N; i++) {
     vx[i] = vx[i] * scale_v + fx[i] * dt;
@@ -209,7 +207,7 @@ void MD::MeanSquareDisplacement(vec1d &MSDx,
 // MD Simulation
 void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST) {
   // Initialise scalling variables
-  // If Simulation is not run, _T0, _rho need to be initialised elsewhere
+  // If Simulation(...) is not run, _T0, _rho need to be initialised elsewhere
   _T0 = TEMPERATURE;
   _rho = DENSITY;
   dt /= sqrt(_T0);

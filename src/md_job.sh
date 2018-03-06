@@ -20,7 +20,7 @@ OUTDIR="$HOME"/MD/Data
 mkdir "$OUTDIR"
 LIB=/apps/intel/2017.1/compilers_and_libraries_2017.1.132/linux/compiler/include
 # Compile
-icpc -parallel -mkl=parallel -Ofast -xHOST -ipo -std=c++17 -mgpu-arch=haswell,broadwell,cherryview,skylake,broxton -m64 -prec-sqrt -prec-div MD.cpp Source.cpp -o a.out
+icpc -pthread -parallel -mkl=parallel -Ofast -xHOST -std=c++17 -m64 -prec-sqrt -prec-div MD.cpp Source.cpp -o a.out
 # Run
 ./a.out
 # Copy files from $TMPDIR to $WORK

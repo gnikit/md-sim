@@ -3,8 +3,6 @@
 Stat_Analysis::Stat_Analysis(std::string PATH, vec1d A_LIST,
                              size_t STEPS, size_t T, size_t PARTICLES,
                              double DENSITY) {
-  // Do everything in the constructor
-  // No need for a Run function
   _DIR = PATH;
   _A_list = A_LIST;
   _STEPS = STEPS;
@@ -59,17 +57,12 @@ void Stat_Analysis::ReadFromFile(vec1d &T, vec1d &K, vec1d &U,
         ss >> c;
         ss >> d;
         ss >> e;
-        //ss >> f;
-        //ss >> g;
-        //TODO: convert string STEP_NUM to int and resize vec1d to the appropriate size
-        // add an index ++i that occupies vec1ds
+
         T.push_back(a);
         K.push_back(b);
         U.push_back(c);
         E.push_back(d);
         Pc.push_back(e);
-        //Zz.push_back(f);
-        //w.push_back(g);
       }
     }
   }

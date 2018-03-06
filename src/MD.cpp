@@ -1,7 +1,6 @@
 #include "MD.h"
 #define PARTICLES_PER_AXIS 10
 #define NHIST 300
-#pragma optimize ("", on)
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 // TODO: Boltzmann Dist normalisation of the particles velocities in the beggining
 // TODO: Implement normalisation for r-> something like 1/a^n * pair-pot normalised (r**2 + 1)
@@ -21,9 +20,8 @@ MD::MD(std::string DIRECTORY, size_t run_number) {
 MD::~MD() {}
 
 // Methods for MD Analysis
-void MD::Initialise(vec1d &x, vec1d &y,
-                    vec1d &z, vec1d &vx,
-                    vec1d &vy, vec1d &vz)
+void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
+                    vec1d &vx, vec1d &vy, vec1d &vz, double TEMPERATURE) {
   /*
   Initialises the:
   + Position Arrays
@@ -32,14 +30,12 @@ void MD::Initialise(vec1d &x, vec1d &y,
   + Temperature
   + Velocity Autocorrelaion Function
   */
-{
   // Initialise position matrix and velocity matrix
-  dt /= sqrt(_T0);		// scalling T for different T0
   size_t n = 0;
   size_t i, j, k;
-  for ( i = 0; i < Nx; i++) {
-    for ( j = 0; j < Ny; j++) {
-      for ( k = 0; k < Nz; k++) {
+  for (i = 0; i < Nx; i++) {
+    for (j = 0; j < Ny; j++) {
+      for (k = 0; k < Nz; k++) {
         x.push_back((i + 0.5) * scale);
         y.push_back((j + 0.5) * scale);
         z.push_back((k + 0.5) * scale);
@@ -53,42 +49,41 @@ void MD::Initialise(vec1d &x, vec1d &y,
       }
     }
   }
-// Reading Maxwell Boltzmann velocity Dist from files
+  // Reading Maxwell Boltzmann velocity Dist from files
+  // TODO: Python script buggy with argument passing
   vx = ReadFromFile("vx.txt");
   vy = ReadFromFile("vy.txt");
   vz = ReadFromFile("vz.txt");
+  //MBDistribution(TEMPERATURE);
   // scale of x, y, z
   double mean_vx = 0;
   double mean_vy = 0;
   double mean_vz = 0;
 
   // Momentum conservation array
-  for ( i = 0; i < N; i++) {
+  for (i = 0; i < N; i++) {
     mean_vx += vx[i] / N; // Calculating Average velocity for each dimension
     mean_vy += vy[i] / N;
     mean_vz += vz[i] / N;
   }
 
   size_t tempN = N;    // Recommended opt by Intel
-#pragma parallel
-#pragma loop count min(128)
-  for ( i = 0; i < tempN; i++) {
+
+  for (i = 0; i < tempN; i++) {
     vx[i] = vx[i] - mean_vx; // Subtracting Av. velocities from each particle
     vy[i] = vy[i] - mean_vy;
     vz[i] = vz[i] - mean_vz;
   }
   // T Calc
   KE = 0;
-  for ( i = 0; i < N; i++) {
+  for (i = 0; i < N; i++) {
     KE += 0.5 * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]);
   }
   T = KE / (1.5 * N);
-  scale_v = sqrt(_T0 / T); // scalling factor
+  scale_v = sqrt(TEMPERATURE / T); // scalling factor
 
   // Velocity scaling
-#pragma parallel
-#pragma loop count min(128)
-  for ( i = 0; i < tempN; i++) {
+  for (i = 0; i < tempN; i++) {
     vx[i] *= scale_v;
     vy[i] *= scale_v;
     vz[i] *= scale_v;
@@ -103,7 +98,7 @@ void MD::Initialise(vec1d &x, vec1d &y,
   Cvy = vy;
   Cvz = vz;
   double first_val = 0;
-  for ( i = 0; i < N; i++) {
+  for (i = 0; i < N; i++) {
     first_val += (Cvx[i] * Cvx[i] + Cvy[i] * Cvy[i] + Cvz[i] * Cvz[i]) / N;
   }
   first_val /= N;
@@ -111,13 +106,31 @@ void MD::Initialise(vec1d &x, vec1d &y,
   VAF << first_val << std::endl;
 }
 
+void MD::MBDistribution(double TEMPERATURE) {
+  std::string t = ConvertToString(TEMPERATURE, 2);
+  std::string particles = std::to_string(N); // defined in constructor
+  // Could be stored as variables and passed into FileNaming
+  // rather than repeating the process
+  // store in _particles_to_str, _T_to_str
+  // TODO: Python script is buggy and sometimes gives error when passing arguments
+  //std::string command = "python C:/Users/gn/source/repos/MD-simulation/MBDistribution.py " + particles + " " + t;
+  //system(command.c_str());  // Creates files with MD velocities
+
+  std::string vel_id = "particles_" + particles + "_T_" + t;
+
+  vx = ReadFromFile(vel_id + "vx.txt");
+  vy = ReadFromFile(vel_id + "vy.txt");
+  vz = ReadFromFile(vel_id + "vz.txt");
+}
+
+
 void MD::VerletAlgorithm(vec1d &rx, vec1d &ry,
                          vec1d &rz, vec1d &vx,
                          vec1d &vy, vec1d &vz,
                          vec1d &rrx, vec1d &rry,
                          vec1d &rrz) {
   size_t i;
-  for ( i = 0; i < N; i++) {
+  for (i = 0; i < N; i++) {
     vx[i] = vx[i] * scale_v + fx[i] * dt;
     vy[i] = vy[i] * scale_v + fy[i] * dt;
     vz[i] = vz[i] * scale_v + fz[i] * dt;
@@ -159,7 +172,7 @@ void MD::VelocityAutocorrelationFunction(vec1d &Cvx,
                                          vec1d &Cvz) {
   double temp_ = 0; // resets every time step
   size_t i;
-  for ( i = 0; i < N; i++) {
+  for (i = 0; i < N; i++) {
     temp_ += (Cvx[i] * vx[i] + Cvy[i] * vy[i] + Cvz[i] * vz[i]);
   }
   temp_ /= N;
@@ -195,24 +208,26 @@ void MD::MeanSquareDisplacement(vec1d &MSDx,
 
 // MD Simulation
 void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST) {
-  FileNaming(POWER, A_CST);
-  OpenFiles();
-  time(DATA, "# T\tK\tU\tEtot\tPc\tPk\tPtot");
-  std::chrono::steady_clock::time_point begin =
-    std::chrono::steady_clock::now();
-  // THESE VARIABLES are INITIATED HERE, FIX
+  // Initialise scalling variables
+  // If Simulation is not run, _T0, _rho need to be initialised elsewhere
   _T0 = TEMPERATURE;
   _rho = DENSITY;
-  scale = pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS; // scalling factor for length of box
-  L = pow((N / _rho), 1.0 / 3.0);            // L depends on rho
+  dt /= sqrt(_T0);
+  // Box length scalling
+  scale = pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS;
+  L = pow((N / _rho), 1.0 / 3.0);
   Vol = N / _rho;
 
   cut_off = L / 2.;
-
   rg = cut_off;
   dr = rg / NHIST;
-  Initialise(rx, ry, rz, vx, vy, vz);
-  //std::cout << "MD Simulation running..." << std::endl;
+
+  FileNaming(POWER, A_CST);
+  OpenFiles();
+  TimeStamp(DATA, "# T\tK\tU\tEtot\tPc\tPk\tPtot");
+  std::chrono::steady_clock::time_point begin =
+    std::chrono::steady_clock::now();
+  Initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
 
   double xx, yy, zz;
   for (_STEP_INDEX = 0; _STEP_INDEX < _STEPS; _STEP_INDEX++) {
@@ -225,8 +240,8 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
     U = 0; // seting Potential U to 0
     PC = 0;
     size_t i, j;
-    for ( i = 0; i < N - 1; i++) {
-      for ( j = i + 1; j < N; j++) {
+    for (i = 0; i < N - 1; i++) {
+      for (j = i + 1; j < N; j++) {
         x = rx[i] - rx[j]; // Separation distance
         y = ry[i] - ry[j]; // between particles i and j
         z = rz[i] - rz[j]; // in Cartesian
@@ -276,7 +291,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
         }
 
         r = sqrt((x * x) + (y * y) + (z * z));
-        long double q = sqrt(r * r + A_CST *A_CST); // TODO: A_CST is now changed
+        long double q = sqrt(r * r + A_CST * A_CST); // TODO: A_CST is now changed
 
         // Force loop
         if (r < cut_off) // for particles within the cut off range
@@ -309,11 +324,10 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
     scale_v = sqrt(_T0 / T); // using T & KE from prev timestep
     KE = 0; // set 0 for each step
 
-            // Verlet Algorithm
+    // Verlet Algorithm
     VerletAlgorithm(rx, ry, rz, vx, vy, vz, rrx, rry, rrz);
     // MSD
     MeanSquareDisplacement(MSDx, MSDy, MSDz);
-
     // VAF
     VelocityAutocorrelationFunction(Cvx, Cvy, Cvz);
 
@@ -326,7 +340,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
   }
   // Simulation Ends HERE
   // Saving Last Position
-  time(POS, "# X\tY\tZ\tVx\tVy\tVz");
+  TimeStamp(POS, "# X\tY\tZ\tVx\tVy\tVz");
   for (size_t el = 0; el < rx.size(); el++) {
     POS << rx[el] << '\t' << ry[el] << '\t'
       << rz[el] << '\t' << vx[el] << '\t'
@@ -371,11 +385,11 @@ void MD::FileNaming(int POWER, double A_cst) {
   _particles_to_str = "_particles_" + std::to_string(N);
   _rho_to_str = "_rho_" + rho_stream.str();
   _T_to_str = "_T_" + T_stream.str();
-  _n_to_str = "_n_" + std::to_string(POWER);	
+  _n_to_str = "_n_" + std::to_string(POWER);
   _A_to_str = "_A_" + A_stream.str();
 
   _FILE_ID = _step_to_str + _particles_to_str + _rho_to_str +
-             _T_to_str + _n_to_str + _A_to_str;
+    _T_to_str + _n_to_str + _A_to_str;
 
   // Explicit defitions 
   _FILE_EXT = ".txt";
@@ -418,7 +432,7 @@ void MD::WriteToFiles() {
 void MD::ShowRun(size_t step_size_show) {
   /*
   Displays the system parameters every step_size_show of steps
-  
+
   Input the increment step
   */
   if (_STEP_INDEX == 0) {
@@ -438,8 +452,8 @@ void MD::ResetValues() {
   Closes open file streams and resets sizes and values to 0
   For multiple simulations
   */
-// Close streams at the end of run
-  Hist.close(); 
+  // Close streams at the end of run
+  Hist.close();
   VAF.close();
   MSD.close();
   DATA.close();
@@ -461,7 +475,7 @@ void MD::ResetValues() {
   fz.resize(N, 0);
 }
 
-void MD::time(std::ofstream& stream, std::string variables) {
+void MD::TimeStamp(std::ofstream& stream, std::string variables) {
   /*
   Dates the file and allows the input of a header
   Input a file stream to write and string of characters to display as headers
@@ -480,6 +494,7 @@ std::vector<double> MD::ReadFromFile(const std::string & file_name) {
   */
   std::vector<double> data;
   std::ifstream read_file(file_name);
+
   assert(read_file.is_open());
 
   std::copy(std::istream_iterator<long double>(read_file),

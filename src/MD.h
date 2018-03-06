@@ -64,7 +64,7 @@ protected:
   double rg;
   double dr;
   vec1d gr;
-  
+
 private:
   const long double PI = acos(-1.0);
   std::string _FILE_EXT;
@@ -78,12 +78,14 @@ public:
   MD(std::string DIRECTORY, size_t run_number);
   ~MD();
 
-void Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST);
-std::string getDir();
+  void Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST);
+  std::string getDir();
 
 protected:
   void Initialise(vec1d &x, vec1d &y, vec1d &z,
-                  vec1d &vx, vec1d &vy, vec1d &vz);
+                  vec1d &vx, vec1d &vy, vec1d &vz,
+                  double TEMPERATURE);
+  void MBDistribution(double TEMPERATURE);
   void VerletAlgorithm(vec1d &rx, vec1d &ry, vec1d &rz,
                        vec1d &vx, vec1d &vy, vec1d &vz,
                        vec1d &rrx, vec1d &rry, vec1d &rrz);
@@ -96,7 +98,7 @@ protected:
   void WriteToFiles();
   void ShowRun(size_t step_size_show);
   void ResetValues();
-  void time(std::ofstream&, std::string variables);
+  void TimeStamp(std::ofstream&, std::string variables);
   std::vector<double> ReadFromFile(const std::string &file_name);
   std::string ConvertToString(const double & x, const int & precision);
 };

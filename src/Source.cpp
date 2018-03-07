@@ -87,5 +87,5 @@ int main() {
   // for (size_t i = 0; i < n.size(); i++) {
   //   test.StaticDataProcessing(n[i]);
   // }
-  system("pause");
+  // system("pause");
 }

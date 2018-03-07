@@ -3,17 +3,8 @@
 #include <thread>
 #include <string>
 
-#define DENSITY 0.5
 #define STEPS 10000
 
-//void MultiThread(MD class_object, std::vector<long double> n, std::vector<int> A){
-//  for (size_t i = 0; i < n.size(); i++){
-//    for (size_t j = 0; j < A.size(); j++){
-//      std::cout << "Thread2: p: " << n[i] << " A: " << A[j] << std::endl;
-//      class_object.Simulation(n[i], A[j]);
-//    }
-//  }
-//}
 double getRho2(double rho1, double T1, double T2, size_t n) {
   double rho2 = rho1 * pow((T2 / T1), (3.0 / n));
   return rho2;
@@ -40,8 +31,8 @@ int main() {
   size_t num = 1;
   std::string dir_windows = "C:/Code/C++/MD simulation/Archives of Data/";  // Current Working Directory
   std::string dir = "";   // Working directory of the cluster
-  std::vector<size_t> n = { 6/*, 8, 10, 12*/ };
-  std::vector<double> rho = { 0.5/*, 1.0, 1.5, 2.0*/ };
+  std::vector<size_t> n = { 6, 8, 10, 12 };
+  std::vector<double> rho = { 0.5/*, 1.0, 1.5, 2.0 */};
   std::vector<double> T = { 0.5/*, 1.0, 1.5, 2.0 */ };
   //std::vector<double> A1 = { 0, 0.25, 0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 2.00, 2.50, 4.00 };
   std::vector<double> A1 = LinearSpacedArray(0, 1, 1);
@@ -51,7 +42,7 @@ int main() {
 
 
 
-  for (size_t d = 0; d < 2/*rho.size()/2*/; d++) {
+  for (size_t d = 0; d < rho.size(); d++) {
     for (size_t t = 0; t < T.size(); t++) {
       for (size_t i = 0; i < n.size(); i++) {
         for (size_t j = 0; j < A1.size(); j++) {
@@ -64,10 +55,10 @@ int main() {
 
           std::thread th1(&MD::Simulation, run1, rho[d], T[t], n[i], A1[j]);
           std::thread th2(&MD::Simulation, run2, rho[d], T[t], n[i], A2[j]);
-          //std::thread th3(&MD::Simulation, run3, rho[d + 2], T[t], n[i], A1[j]);
-          //std::thread th4(&MD::Simulation, run4, rho[d + 2], T[t], n[i], A2[j]);
+          std::thread th3(&MD::Simulation, run3, rho[d], T[t], n[i], A3[j]);
+          std::thread th4(&MD::Simulation, run4, rho[d], T[t], n[i], A4[j]);
 
-          th1.join(); th2.join();// th3.join(); th4.join();
+          th1.join(); th2.join(); th3.join(); th4.join();
           delete run1, run2, run3, run4;
 
           ++num;

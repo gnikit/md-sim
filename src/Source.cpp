@@ -40,9 +40,9 @@ int main() {
   size_t num = 1;
   std::string dir_windows = "C:/Code/C++/MD simulation/Archives of Data/";  // Current Working Directory
   std::string dir = "";   // Working directory of the cluster
-  std::vector<size_t> n = { 6, 8, 10, 12 };
-  std::vector<double> rho = { 0.5, 1.0, 1.5, 2.0 };
-  std::vector<double> T = { 0.5, 1.0, /* 1.5, 2.0 */ };
+  std::vector<size_t> n = { 6/*, 8, 10, 12*/ };
+  std::vector<double> rho = { 0.5/*, 1.0, 1.5, 2.0*/ };
+  std::vector<double> T = { 0.5/*, 1.0, 1.5, 2.0 */ };
   //std::vector<double> A1 = { 0, 0.25, 0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 2.00, 2.50, 4.00 };
   std::vector<double> A1 = LinearSpacedArray(0, 1, 5);
   std::vector<double> A2 = LinearSpacedArray(1.25, 2.25, 5);
@@ -64,10 +64,10 @@ int main() {
 
           std::thread th1(&MD::Simulation, run1, rho[d], T[t], n[i], A1[j]);
           std::thread th2(&MD::Simulation, run2, rho[d], T[t], n[i], A2[j]);
-          std::thread th3(&MD::Simulation, run3, rho[d + 2], T[t], n[i], A1[j]);
-          std::thread th4(&MD::Simulation, run4, rho[d + 2], T[t], n[i], A2[j]);
+          //std::thread th3(&MD::Simulation, run3, rho[d + 2], T[t], n[i], A1[j]);
+          //std::thread th4(&MD::Simulation, run4, rho[d + 2], T[t], n[i], A2[j]);
 
-          th1.join(); th2.join(); th3.join(); th4.join();
+          th1.join(); th2.join();// th3.join(); th4.join();
           delete run1, run2, run3, run4;
 
           ++num;

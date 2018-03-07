@@ -28,3 +28,6 @@ mkdir "$OUTDIR"
 
 # Copy files from $TMPDIR to $WORK
 cp * "$OUTDIR"
+
+# See CPU specs
+lscpu

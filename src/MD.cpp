@@ -216,7 +216,8 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
   L = pow((N / _rho), 1.0 / 3.0);
   Vol = N / _rho;
 
-  cut_off = L / 2.;
+  //TASK: cut_off redefinition
+  cut_off = 3.0;//L / 2.;
   rg = cut_off;
   dr = rg / NHIST;
 

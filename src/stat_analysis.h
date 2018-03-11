@@ -35,8 +35,7 @@ private:
   long double _temp6 = 0;
 
 public:
-  Stat_Analysis(std::string PATH, vec1d A_LIST,
-                size_t STEPS, size_t T, size_t PARTICLES, double DENSITY);
+  Stat_Analysis(std::string PATH, size_t STEPS, size_t PARTICLES, double DENSITY, double T, vec1d A_LIST);
   ~Stat_Analysis();
 
   void ReadFromFile(vec1d &x, const std::string &file_name);

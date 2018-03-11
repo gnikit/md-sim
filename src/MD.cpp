@@ -305,6 +305,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
           fz[j] -= z * ff / r;
 
           PC += r * ff;
+          // TODO: Add infinity and edge correction, do same for Pc
           U += pow(q, -POWER); // Potential Calculation
 
                                     // Radial Distribution

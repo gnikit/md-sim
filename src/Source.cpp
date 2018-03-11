@@ -4,7 +4,7 @@
 #include <string>
 #include <tuple>
 
-#define STEPS 10000
+#define STEPS 50000
 typedef std::vector<double> vec1d;
 
 // TODO: Move to another file?
@@ -39,15 +39,15 @@ public:
     double a2 = a1 * pow((rho1 / rho2), (1.0 / 3.0));
     return a2;
   }
-  std::tuple<vec1d, vec1d> GenLine() {
+  std::tuple<vec1d, vec1d> GenLine(size_t n) {
     /*
     * This method returns a tuple of Isomorphic points 
     * for the density and A parameter in the form of a vector. 
     */
     for (size_t i = 0; i < _T.size(); i++) {
       _T_out = _T[i];
-      _rho_out = getRho(_rho_r, _T_r, _T_out, 12);
-      _A_out = getA(_A_r, _rho_r, _rho_out, 12);
+      _rho_out = getRho(_rho_r, _T_r, _T_out, n);
+      _A_out = getA(_A_r, _rho_r, _rho_out, n);
       _RHO.push_back(_rho_out);
       _A.push_back(_A_out);
     }
@@ -80,12 +80,13 @@ int main() {
   vec1d rho_iso, A_iso;
   /* Generate Denbsity and A isomorph vectors */
   Isomorph line(0.5, 0.5, 0.5, T_iso);
-  std::tie(rho_iso, A_iso) = line.GenLine();
+  std::tie(rho_iso, A_iso) = line.GenLine(12);   // for n=12
   for (size_t i = 0; i < T_iso.size(); i++) {
     std::cout << "T: " << T_iso[i] << " rho: " << 
       rho_iso[i] << " A: " << A_iso[i] << std::endl;
+    MD run(dir_windows, STEPS);
+    run.Simulation(rho_iso[i], T_iso[i], 12, A_iso[i]);
   }
-  MD 
   //std::vector<size_t> n = { 6, 8, 10, 12 };
   //std::vector<double> rho = { 0.5, 1.0, 1.5, 2.0 }; //TODO: do in sets of 2, do 1.5, 2.0
   //std::vector<double> T = { 0.5, 1.0, 1.5, 2.0  }; //TODO: do 1.0, 1.5 and 2.0 are running

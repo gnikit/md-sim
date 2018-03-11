@@ -1,8 +1,7 @@
 #include "stat_analysis.h"
 
-Stat_Analysis::Stat_Analysis(std::string PATH, vec1d A_LIST,
-                             size_t STEPS, size_t T, size_t PARTICLES,
-                             double DENSITY) {
+Stat_Analysis::Stat_Analysis(std::string PATH, size_t STEPS, size_t PARTICLES,
+                             double DENSITY, double T, vec1d A_LIST) {
   _DIR = PATH;
   _A_list = A_LIST;
   _STEPS = STEPS;
@@ -110,8 +109,8 @@ strength
   std::stringstream T_stream;
   // TODO: setprecission function input here
 
-  T_stream << std::fixed << std::setprecision(1) << _T0;  // 1 decimal
-  rho_stream << std::fixed << std::setprecision(1) << _RHO;	// 1 decimal
+  T_stream << std::fixed << std::setprecision(2) << _T0;  // 1 decimal
+  rho_stream << std::fixed << std::setprecision(2) << _RHO;	// 1 decimal
 
   // For consistency string streams should be placed here
   _step_to_str = "_step_" + std::to_string(_STEPS); // constr
@@ -147,7 +146,7 @@ strength
 
     // Converts A to 2 decimals
     std::stringstream stream;
-    stream << std::fixed << std::setprecision(2) << _A_list[i];
+    stream << std::fixed << std::setprecision(4) << _A_list[i];
 
     _A_to_str = "_A_" + stream.str();
     _FILE_NAME = _DIR + _FILE_NAME + _FILE_ID + _A_to_str + TXT;

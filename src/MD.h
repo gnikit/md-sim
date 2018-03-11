@@ -34,10 +34,10 @@ protected:
 
   vec1d rx, ry, rz;	// Position Arrays
   vec1d vx, vy, vz;	// Velocity Arrays
-  vec1d fx, fy, fz;
-  vec1d Cvx, Cvy, Cvz;
-  vec1d rrx, rry, rrz;	// used in MSD
-  vec1d MSDx, MSDy, MSDz;
+  vec1d fx, fy, fz; // Force arrays
+  vec1d Cvx, Cvy, Cvz;  // VAF arrays
+  vec1d rrx, rry, rrz;	// used in MSD calculation
+  vec1d MSDx, MSDy, MSDz; // MSD arrays
   vec1d Cr, msd;								// correlation vector with time index
 
   size_t Nx, Ny, Nz;   // Particles in x, y, z
@@ -47,13 +47,13 @@ protected:
   double x, y, z;			// distance between particle i and j
   double r;				    // distance in polar
   double _rho;				// density
-  double scale;
+  double scale;       // scales size of the box
   double KE = 0.0;		// Kinetic Energy
   double T;				    // Temperature
 
   double L;				    // Length of the box after scaling
   double Vol;
-  double cut_off = 2.5;	// Cut off radius for the analysis
+  double cut_off = 3.0;	// Cut off radius for the analysis
   double U = 0;			    // Potential Energy
   double PC = 0;			  // Config Pressure
   double PK;

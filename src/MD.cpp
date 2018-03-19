@@ -371,14 +371,13 @@ void MD::FileNaming(int POWER, double A_cst) {
   /*
   * Generates file names for the different I/O operations
   */
-  std::stringstream A_stream;     // Fixing double to 2 decimals
-  std::stringstream rho_stream;
-  std::stringstream T_stream;
+  std::stringstream A_stream, rho_stream, T_stream;
+
   // TODO: setprecission function input here
 
-  T_stream << std::fixed << std::setprecision(2) << _T0;  // 2 decimal
-  A_stream << std::fixed << std::setprecision(5) << A_cst;        // 4 decimals
-  rho_stream << std::fixed << std::setprecision(4) << _rho;	// 2 decimal
+  T_stream << std::fixed << std::setprecision(4) << _T0;    // 4 decimal
+  A_stream << std::fixed << std::setprecision(5) << A_cst;  // 5 decimals
+  rho_stream << std::fixed << std::setprecision(4) << _rho;	// 4 decimal
 
   _step_to_str = "_step_" + std::to_string(_STEPS);
   _particles_to_str = "_particles_" + std::to_string(N);

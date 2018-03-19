@@ -4,7 +4,7 @@
 #include <string>
 #include <tuple>
 
-#define STEPS 50000
+#define STEPS 10000
 typedef std::vector<double> vec1d;
 
 // TODO: Move to another file?
@@ -81,12 +81,16 @@ int main() {
   /* Generate Denbsity and A isomorph vectors */
   Isomorph line(0.5, 0.5, 0.5, T_iso);
   std::tie(rho_iso, A_iso) = line.GenLine(12);   // for n=12
-  for (size_t i = 0; i < T_iso.size(); i++) {
-    std::cout << "T: " << T_iso[i] << " rho: " << 
-      rho_iso[i] << " A: " << A_iso[i] << std::endl;
-    MD run(dir_windows, STEPS);
-    run.Simulation(rho_iso[i], T_iso[i], 12, A_iso[i]);
-  }
+  MD run1(dir_windows, STEPS);
+  run1.Simulation(0.5, 0.5, 8, 0.5);
+  MD run2(dir_windows, STEPS);
+  run2.Simulation(0.8409, 2.0, 8, 0.42045);
+  //for (size_t i = 0; i < T_iso.size(); i++) {
+  //  std::cout << "T: " << T_iso[i] << " rho: " << 
+  //    rho_iso[i] << " A: " << A_iso[i] << std::endl;
+  //  MD run(dir_windows, STEPS);
+  //  run.Simulation(rho_iso[i], T_iso[i], 12, A_iso[i]);
+  //}
   //std::vector<size_t> n = { 6, 8, 10, 12 };
   //std::vector<double> rho = { 0.5, 1.0, 1.5, 2.0 }; //TODO: do in sets of 2, do 1.5, 2.0
   //std::vector<double> T = { 0.5, 1.0, 1.5, 2.0  }; //TODO: do 1.0, 1.5 and 2.0 are running

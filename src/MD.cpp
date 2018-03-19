@@ -23,12 +23,12 @@ MD::~MD() {}
 void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
                     vec1d &vx, vec1d &vy, vec1d &vz, double TEMPERATURE) {
   /*
-  Initialises the:
-  + Position Arrays
-  + Velocity Arrays (assign random velocities)
-  + Conserves/ Scales momentum == 0
-  + Temperature
-  + Velocity Autocorrelaion Function
+  * Initialises the:
+  * + Position Arrays
+  * + Velocity Arrays (assign random velocities)
+  * + Conserves/ Scales momentum == 0
+  * + Temperature
+  * + Velocity Autocorrelaion Function
   */
   // Initialise position matrix and velocity matrix
   size_t n = 0;
@@ -290,13 +290,12 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
         }
 
         r = sqrt((x * x) + (y * y) + (z * z));
-        long double q = sqrt(r * r + A_CST * A_CST); // TODO: A_CST is now changed
+        long double q = (r * r + A_CST * A_CST); 
 
         // Force loop
-        if (r < cut_off) // for particles within the cut off range
-        {
+        if (r < cut_off) {
           long double ff =
-            (POWER)*r *	pow(q, (-POWER - 2)); // Force for particles
+            (POWER)*r *	pow(q, ((-POWER - 2.0)/2.0)); // Force for particles
 
           fx[i] += x * ff / r;
           fx[j] -= x * ff / r; // Canceling the ij and ji pairs
@@ -307,7 +306,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 
           PC += r * ff;
           // TODO: Add infinity and edge correction, do same for Pc
-          U += pow(q, -POWER); // Potential Calculation
+          U += pow(q, (-POWER/2.0)); // Potential Calculation
 
                                     // Radial Distribution
           igr = round(NHIST * r / rg);
@@ -362,7 +361,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 
 std::string MD::getDir() {
   /*
-  Returns the directory in a string
+  * Returns the directory in a string
   */
   return _dir;
 }
@@ -370,7 +369,7 @@ std::string MD::getDir() {
 // File Handling
 void MD::FileNaming(int POWER, double A_cst) {
   /*
-  Generates file names for the different I/O operations
+  * Generates file names for the different I/O operations
   */
   std::stringstream A_stream;     // Fixing double to 2 decimals
   std::stringstream rho_stream;
@@ -378,8 +377,8 @@ void MD::FileNaming(int POWER, double A_cst) {
   // TODO: setprecission function input here
 
   T_stream << std::fixed << std::setprecision(2) << _T0;  // 2 decimal
-  A_stream << std::fixed << std::setprecision(4) << A_cst;        // 4 decimals
-  rho_stream << std::fixed << std::setprecision(2) << _rho;	// 2 decimal
+  A_stream << std::fixed << std::setprecision(5) << A_cst;        // 4 decimals
+  rho_stream << std::fixed << std::setprecision(4) << _rho;	// 2 decimal
 
   _step_to_str = "_step_" + std::to_string(_STEPS);
   _particles_to_str = "_particles_" + std::to_string(N);
@@ -409,8 +408,8 @@ void MD::FileNaming(int POWER, double A_cst) {
 
 void MD::OpenFiles() {
   /*
-  Open/Create if file does not exist
-  Overwrite existing data
+  * Open/Create if file does not exist
+  * Overwrite existing data
   */
   // opens for files output and deletes prev content
   Hist.open(HIST, std::ios::out | std::ios::trunc);
@@ -422,7 +421,7 @@ void MD::OpenFiles() {
 
 void MD::WriteToFiles() {
   /*
-  Writes values of parameters to file
+  * Writes values of parameters to file
   */
   DATA << T << '\t' << KE << '\t' << U << '\t'
     << (U + KE) << '\t' << PC << '\t' << PK
@@ -431,9 +430,8 @@ void MD::WriteToFiles() {
 
 void MD::ShowRun(size_t step_size_show) {
   /*
-  Displays the system parameters every step_size_show of steps
-
-  Input the increment step
+  *Displays the system parameters every step_size_show of steps
+  *Input the increment step
   */
   if (_STEP_INDEX == 0) {
     std::cout << "step:\tT:\tKE:\tU:\tU+K:\tPC:\tPK:\t(PK+PC):" << std::endl;

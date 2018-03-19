@@ -4,20 +4,20 @@
 #include <string>
 #include <tuple>
 
-#define STEPS 10000
+#define STEPS 20000
 typedef std::vector<double> vec1d;
 
 // TODO: Move to another file?
 class Isomorph {
   typedef std::vector<double> vec1d;
   vec1d _T, _RHO, _A; // T points
-  double _rho_r;  // Reference density
-  double _T_r;    // Reference temperature
-  double _A_r;    // Reference A
+  double _rho_r;      // Reference density
+  double _T_r;        // Reference temperature
+  double _A_r;        // Reference A
   /*----------------------------------*/
-  double _rho_out; // Output density
-  double _T_out;   // Output temperature
-  double _A_out;   // Output A
+  double _rho_out;    // Output density
+  double _T_out;      // Output temperature
+  double _A_out;      // Output A
 public:
   Isomorph(double RHO, double T, double Ar, vec1d T_in) {
     /*
@@ -41,8 +41,8 @@ public:
   }
   std::tuple<vec1d, vec1d> GenLine(size_t n) {
     /*
-    * This method returns a tuple of Isomorphic points 
-    * for the density and A parameter in the form of a vector. 
+    * This method returns a tuple of Isomorphic points
+    * for the density and A parameter in the form of a vector.
     */
     for (size_t i = 0; i < _T.size(); i++) {
       _T_out = _T[i];
@@ -56,7 +56,7 @@ public:
 };
 
 
-std::vector<double> LinearSpacedArray(double a, double b, std::size_t N){
+std::vector<double> LinearSpacedArray(double a, double b, std::size_t N) {
   /*
   * Produces an equally spaced vector of N increments
   * in the inclusive range of (a, b)
@@ -75,22 +75,24 @@ int main() {
   size_t num = 1;
   std::string dir_windows = "C:/Code/C++/MD simulation/Archives of Data/";  // Current Working Directory
   std::string dir = "";   // Working directory of the cluster
+  /* Potential power strength */
+  size_t n = 12;
   /* Generate Temperature vector for isomorph */
   vec1d T_iso = LinearSpacedArray(0.6, 3, 5);
+  /* Empty containers for density and a_par */
   vec1d rho_iso, A_iso;
-  /* Generate Denbsity and A isomorph vectors */
-  Isomorph line(0.5, 0.5, 0.5, T_iso);
-  std::tie(rho_iso, A_iso) = line.GenLine(12);   // for n=12
-  MD run1(dir_windows, STEPS);
-  run1.Simulation(0.5, 0.5, 8, 0.5);
-  MD run2(dir_windows, STEPS);
-  run2.Simulation(0.8409, 2.0, 8, 0.42045);
-  //for (size_t i = 0; i < T_iso.size(); i++) {
-  //  std::cout << "T: " << T_iso[i] << " rho: " << 
-  //    rho_iso[i] << " A: " << A_iso[i] << std::endl;
-  //  MD run(dir_windows, STEPS);
-  //  run.Simulation(rho_iso[i], T_iso[i], 12, A_iso[i]);
-  //}
+  /* Generate Density and A isomorph vectors */
+  Isomorph isomorph_line(0.5, 0.5, 0.5, T_iso);
+  std::tie(rho_iso, A_iso) = isomorph_line.GenLine(n);
+  /*
+  * This is an isomorph line run
+  * Simulates the fluid along the line
+  */
+  for (size_t i = 0; i < T_iso.size(); i++) {
+    std::cout << "T: " << T_iso[i] << " rho: " << rho_iso[i] << " A: " << A_iso[i] << std::endl;
+    MD run(dir_windows, STEPS);
+    run.Simulation(rho_iso[i], T_iso[i], n, A_iso[i]);
+  }
   //std::vector<size_t> n = { 6, 8, 10, 12 };
   //std::vector<double> rho = { 0.5, 1.0, 1.5, 2.0 }; //TODO: do in sets of 2, do 1.5, 2.0
   //std::vector<double> T = { 0.5, 1.0, 1.5, 2.0  }; //TODO: do 1.0, 1.5 and 2.0 are running

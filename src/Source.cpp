@@ -45,7 +45,7 @@ public:
     * for the density and A parameter in the form of a vector.
     */
     for (size_t i = 0; i < _T.size(); i++) {
-      _T_out = _T[i];
+      _T_out = _T[i];   // reduntant step
       _rho_out = getRho(_rho_r, _T_r, _T_out, n);
       _A_out = getA(_A_r, _rho_r, _rho_out, n);
       _RHO.push_back(_rho_out);
@@ -113,6 +113,9 @@ int main() {
     std::thread th2(&MD::Simulation, run2, rho_iso_h[i], T_iso[i], n, A_iso_h[i]);
     std::thread th3(&MD::Simulation, run3, rho_iso_k[i], T_iso[i], n, A_iso_k[i]);
     std::thread th4(&MD::Simulation, run4, rho_iso_l[i], T_iso[i], n, A_iso_l[i]);
+
+    th1.join(); th2.join(); th3.join(); th4.join();
+    delete run1, run2, run3, run4;
   }
   /*-----------------------------------------------*/
   //std::vector<size_t> n = { 6, 8, 10, 12 };

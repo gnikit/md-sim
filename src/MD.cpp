@@ -474,8 +474,8 @@ void MD::ResetValues() {
 
 void MD::TimeStamp(std::ofstream& stream, std::string variables) {
   /*
-  Dates the file and allows the input of a header
-  Input a file stream to write and string of characters to display as headers
+  * Dates the file and allows the input of a header
+  * Input a file stream to write and string of characters to display as headers
   */
   std::chrono::time_point<std::chrono::system_clock> instance;
   instance = std::chrono::system_clock::now();
@@ -486,8 +486,8 @@ void MD::TimeStamp(std::ofstream& stream, std::string variables) {
 
 std::vector<double> MD::ReadFromFile(const std::string & file_name) {
   /*
-  Reads from a stream that already exists for a file that is already placed in the
-  directory and appends the data into a 1D vector.
+  * Reads from a stream that already exists for a file that is already placed in the
+  * directory and appends the data into a 1D vector.
   */
   std::vector<double> data;
   std::ifstream read_file(file_name);

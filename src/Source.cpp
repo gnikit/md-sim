@@ -96,7 +96,7 @@ int main() {
   //  run.Simulation(rho_iso[i], T_iso[i], n, A_iso[i]);
   //}
   /*-----------------------------------------------*/
-  std::vector<size_t> n = { 6, 8, 10, 12 };
+  std::vector<size_t> n = { 6/*, 8, 10, 12*/ };
   std::vector<double> rho = { 0.5, 1.0, 1.5, 2.0 }; 
   std::vector<double> T = { 0.5, 1.0, 1.5, 2.0  };  
   std::vector<double> A1 = LinearSpacedArray(0, 1, 5);

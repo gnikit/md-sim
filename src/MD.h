@@ -17,12 +17,12 @@
 //////////////////////////////////////////////////////////////////////
 #pragma once
 #include <iostream>
-#include <mathimf.h>
-#include <iomanip>  // setprecision
+#include <mathimf.h>  // Intel Math library
+#include <iomanip>    // setprecision
 #include <vector>
-#include <chrono>   // CPU run-time
+#include <chrono>     // CPU run-time
 #include <ctime>
-#include <fstream>  // file writing
+#include <fstream>    // file writing
 #include <iterator>
 #include <assert.h>
 #include <sstream>
@@ -32,44 +32,44 @@ class MD {
 protected:
   typedef std::vector<double> vec1d;	// short-hand notation, use with care
 
-  vec1d rx, ry, rz;	// Position Arrays
-  vec1d vx, vy, vz;	// Velocity Arrays
-  vec1d fx, fy, fz; // Force arrays
-  vec1d Cvx, Cvy, Cvz;  // VAF arrays
-  vec1d rrx, rry, rrz;	// used in MSD calculation
+  vec1d rx, ry, rz;	      // Position Arrays
+  vec1d vx, vy, vz;	      // Velocity Arrays
+  vec1d fx, fy, fz;       // Force arrays
+  vec1d Cvx, Cvy, Cvz;    // VAF arrays
+  vec1d rrx, rry, rrz;	  // used in MSD calculation
   vec1d MSDx, MSDy, MSDz; // MSD arrays
-  vec1d Cr, msd;								// correlation vector with time index
+  vec1d Cr, msd;					// correlation vector with time index
 
   size_t Nx, Ny, Nz;   // Particles in x, y, z
   size_t N, _STEP_INDEX, _STEPS;  // Total particles, step index, maximum steps
   double _T0;		// Target Temperature. Desired T for the system to operate
-  double dt = 0.005;	// time step dt = 0.005/sqrt(T0)
+  double dt = 0.005;	// time step This applies: dt = 0.005/sqrt(T0)
   double x, y, z;			// distance between particle i and j
   double r;				    // distance in polar
   double _rho;				// density
-  double scale;       // scales size of the box
+  double scale;       // box scaling parameter
   double KE = 0.0;		// Kinetic Energy
   double T;				    // Temperature
-
   double L;				    // Length of the box after scaling
-  double Vol;
-  double cut_off = 3.0;	// Cut off radius for the analysis
+  double Vol;         // Volume
+  double cut_off = 3.0;	// simulation runs only within cutoff
   double U = 0;			    // Potential Energy
-  double PC = 0;			  // Config Pressure
-  double PK;
-  double scale_v;
+  double PC = 0;			  // Configurational Pressure
+  double PK;            // Kinetic Pressure
+  double scale_v;       // velocity scaling
 
   // HISTOGRAM VARIABLES
   int igr;		// Index of Hist
   double rg;
   double dr;
-  vec1d gr;
+  vec1d gr;   // RDF vector container
 
 private:
   const long double PI = acos(-1.0);
-  std::string _FILE_EXT;
+  std::string _FILE_EXT;      // output file extension
+  /* Variables for storing inside the object the file ID */
   std::string _step_to_str, _particles_to_str, _rho_to_str, _T_to_str, _n_to_str, _A_to_str;
-  std::string HIST, _VAF, _MSD, data, pos; // contain full names with args
+  std::string HIST, _VAF, _MSD, data, pos;
   std::string _dir, _FILE_ID;
   std::ofstream Hist, VAF, MSD, DATA, POS;
 

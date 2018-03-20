@@ -290,12 +290,12 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
         }
 
         r = sqrt((x * x) + (y * y) + (z * z));
-        long double q = (r * r + A_CST * A_CST); 
+        long double q = sqrt(r * r + A_CST * A_CST); 
 
         // Force loop
         if (r < cut_off) {
           long double ff =
-            (POWER)*r *	pow(q, ((-POWER - 2.0)/2.0)); // Force for particles
+            (POWER)*r *	pow(q, ((-POWER - 2.0)/*/2.0*/)); // Force for particles
 
           fx[i] += x * ff / r;
           fx[j] -= x * ff / r; // Canceling the ij and ji pairs
@@ -306,7 +306,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 
           PC += r * ff;
           // TODO: Add infinity and edge correction, do same for Pc
-          U += pow(q, (-POWER/2.0)); // Potential Calculation
+          U += pow(q, (-POWER/*/2.0*/)); // Potential Calculation
 
                                     // Radial Distribution
           igr = round(NHIST * r / rg);

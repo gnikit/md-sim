@@ -3,7 +3,6 @@
 #define NHIST 300
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 // TODO: Boltzmann Dist normalisation of the particles velocities in the beggining
-// TODO: Implement normalisation for r-> something like 1/a^n * pair-pot normalised (r**2 + 1)
 
 
 MD::MD(std::string DIRECTORY, size_t run_number) {
@@ -51,9 +50,9 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
   }
   // Reading Maxwell Boltzmann velocity Dist from files
   // TODO: Python script buggy with argument passing
-  vx = ReadFromFile("vx.txt");
-  vy = ReadFromFile("vy.txt");
-  vz = ReadFromFile("vz.txt");
+  vx = ReadFromFile("../data/vx.txt");
+  vy = ReadFromFile("../data/vy.txt");
+  vz = ReadFromFile("../data/vz.txt");
   //MBDistribution(TEMPERATURE);
   // scale of x, y, z
   double mean_vx = 0;
@@ -290,12 +289,12 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
         }
 
         r = sqrt((x * x) + (y * y) + (z * z));
-        long double q = sqrt(r * r + A_CST * A_CST); 
+        long double q = sqrt(r * r + A_CST * A_CST);
 
         // Force loop
         if (r < cut_off) {
           long double ff =
-            (POWER)*r *	pow(q, ((-POWER - 2.0)/*/2.0*/)); // Force for particles
+            (POWER)*r *	pow(q, ((-POWER - 2.0))); // Force for particles
 
           fx[i] += x * ff / r;
           fx[j] -= x * ff / r; // Canceling the ij and ji pairs
@@ -306,9 +305,9 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 
           PC += r * ff;
           // TODO: Add infinity and edge correction, do same for Pc
-          U += pow(q, (-POWER/*/2.0*/)); // Potential Calculation
+          U += pow(q, (-POWER)); // Potential Calculation
 
-                                    // Radial Distribution
+          // Radial Distribution
           igr = round(NHIST * r / rg);
           gr[igr] += 1;
           //rn = (igr - 0.5)*dr;

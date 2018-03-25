@@ -4,7 +4,7 @@
 #include <string>
 #include <tuple>
 
-#define STEPS 50000
+#define STEPS 10000
 typedef std::vector<double> vec1d;
 
 // TODO: Move to another file?
@@ -102,21 +102,25 @@ int main() {
   * This is an isomorph line run
   * Simulates the fluid along the line
   */
-  for (size_t i = 0; i < T_iso.size(); i++) {
+ /* for (size_t i = 0; i < T_iso.size(); i++) {
     std::cout << "T: " << T_iso[i] << " rho: " << rho_iso[i] << " A: " << A_iso[i] << std::endl;
-    MD* run1 = new MD(dir, STEPS);
-    MD* run2 = new MD(dir, STEPS);
-    MD* run3 = new MD(dir, STEPS);
-    MD* run4 = new MD(dir, STEPS);
+    MD run(dir_windows, STEPS);
+    run.Simulation(rho_iso[i], T_iso[i], n, A_iso[i]);
+  }*/
+  /* Individual Run */
+  //MD* run1 = new MD(dir_windows, STEPS);
+  //MD* run2 = new MD(dir_windows, STEPS);
+  //MD* run3 = new MD(dir_windows, STEPS);
+  //MD* run4 = new MD(dir_windows, STEPS);
 
-    std::thread th1(&MD::Simulation, run1, rho_iso[i], T_iso[i], n, A_iso[i]);
-    std::thread th2(&MD::Simulation, run2, rho_iso_h[i], T_iso[i], n, A_iso_h[i]);
-    std::thread th3(&MD::Simulation, run3, rho_iso_k[i], T_iso[i], n, A_iso_k[i]);
-    std::thread th4(&MD::Simulation, run4, rho_iso_l[i], T_iso[i], n, A_iso_l[i]);
+  //std::thread th1(&MD::Simulation, run1, 1, 1, 6,  0.5);
+  //std::thread th2(&MD::Simulation, run2, 1, 1, 8,  0.5);
+  //std::thread th3(&MD::Simulation, run3, 1, 1, 10, 0.5);
+  //std::thread th4(&MD::Simulation, run4, 1, 1, 12, 0.5);
 
-    th1.join(); th2.join(); th3.join(); th4.join();
-    delete run1, run2, run3, run4;
-  }
+  //th1.join(); th2.join(); th3.join(); th4.join();
+  //delete run1, run2, run3, run4;
+
   /*-----------------------------------------------*/
   //std::vector<size_t> n = { 6, 8, 10, 12 };
   //std::vector<double> rho = { 0.5, 1.0, 1.5, 2.0 }; 
@@ -126,26 +130,6 @@ int main() {
   //std::vector<double> A3 = LinearSpacedArray(2.50, 4.50, 5);  
   //std::vector<double> A4 = LinearSpacedArray(0.6, 1.2, 5);       
   //
-  //for (size_t d = 0; d < rho.size(); d++) {
-  //  for (size_t t = 0; t < T.size(); t++) {
-  //    std::cout << " run num: " << num << std::endl;
-  //    
-  //    MD* run1 = new MD(dir_windows, STEPS);
-  //    MD* run2 = new MD(dir_windows, STEPS);
-  //    MD* run3 = new MD(dir_windows, STEPS);
-  //    MD* run4 = new MD(dir_windows, STEPS);
-  //    
-  //    std::thread th1(&MD::Simulation, run1, rho[d], T[t], 6, 1);
-  //    std::thread th2(&MD::Simulation, run2, rho[d], T[t], 8, 1);
-  //    std::thread th3(&MD::Simulation, run3, rho[d], T[t], 10, 1);
-  //    std::thread th4(&MD::Simulation, run4, rho[d], T[t], 12, 1);
-  //    
-  //    th1.join(); th2.join(); th3.join(); th4.join();
-  //    delete run1, run2, run3, run4;
-  //    
-  //    ++num;
-  //  }
-  //}
   //for (size_t d = 0; d < rho.size(); d++) {
   //  for (size_t t = 0; t < T.size(); t++) {
   //    for (size_t i = 0; i < n.size(); i++) {

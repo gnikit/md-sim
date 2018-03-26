@@ -50,6 +50,7 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
   }
   // Reading Maxwell Boltzmann velocity Dist from files
   // TODO: Python script buggy with argument passing
+  // directory defined wrt the dir wheere .o will execute
   vx = ReadFromFile("../data/vx.txt");
   vy = ReadFromFile("../data/vy.txt");
   vz = ReadFromFile("../data/vz.txt");

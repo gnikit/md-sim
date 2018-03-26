@@ -10,6 +10,7 @@ module load intel-suite/2017.1
 # Copy files to $TMPDIR
 dir="$HOME"/MD/MD-simulation/src
 cd "$dir"
+# TODO: Copy vx, vy, vz from MD-simulation/data/
 cp vx.txt vy.txt vz.txt MD.h MD.cpp stat_analysis.h stat_analysis.cpp Source.cpp $TMPDIR
 
 # IMPORTANT: SHELL DIR HAS TO BE SAME AS VX, VY, VZ

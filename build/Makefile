@@ -21,5 +21,5 @@ stat_analysis.o: $(SRCDIR)/stat_analysis.cpp
 	$(CXX) $(CXXFLAGS) $(SRCDIR)/stat_analysis.cpp
 
 clean:
-	rm -rf *o project 
+	rm -r *.o project 
 

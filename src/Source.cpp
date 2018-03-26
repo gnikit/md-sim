@@ -18,7 +18,7 @@ class Isomorph {
   double _rho_out;    // Output density
   double _T_out;      // Output temperature
   double _A_out;      // Output A
-  public:
+public:
   Isomorph(double RHO, double T, double Ar, vec1d T_in) {
     /*
     * Takes as arguments a, Reference density, temperature and A parameter
@@ -75,8 +75,10 @@ int main() {
   size_t num = 1;
   /* Windows working directory for Archives of Data */
   std::string dir_windows = "C:/Code/C++/MD simulation/Archives of Data/"; 
+  /* Linux working directory */
+  std::string dir_linux = "/home/gn/Desktop/test_data/";
   /* Working directory of the cx1 cluster */
-  std::string dir = "/home/gn/test_data/";
+  std::string dir = "";
   /* Potential power strength */
   size_t n = 8;
   /* Generate Temperature vector for isomorph */
@@ -98,7 +100,9 @@ int main() {
 
   Isomorph isomorph_linr_l(0.5, 0.5, 2.00, T_iso);
   std::tie(rho_iso_l, A_iso_l) = isomorph_linr_l.GenLine(n);
-  MD run(dir, STEPS);
+
+  /* Simulation Examples */
+  MD run(dir_linux, STEPS);
   run.Simulation(0.5, 0.5, 8, 0.5);
   /*
   * This is an isomorph line run

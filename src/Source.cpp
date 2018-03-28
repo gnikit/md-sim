@@ -114,18 +114,18 @@ int main() {
     run.Simulation(rho_iso[i], T_iso[i], n, A_iso[i]);
   }*/
   /* Individual Run */
-  //MD* run1 = new MD(dir_windows, STEPS);
-  //MD* run2 = new MD(dir_windows, STEPS);
-  //MD* run3 = new MD(dir_windows, STEPS);
-  //MD* run4 = new MD(dir_windows, STEPS);
+  MD* run1 = new MD(dir_windows, STEPS);
+  MD* run2 = new MD(dir_windows, STEPS);
+  MD* run3 = new MD(dir_windows, STEPS);
+  MD* run4 = new MD(dir_windows, STEPS);
 
-  //std::thread th1(&MD::Simulation, run1, 1, 1, 6,  0.5);
-  //std::thread th2(&MD::Simulation, run2, 1, 1, 8,  0.5);
-  //std::thread th3(&MD::Simulation, run3, 1, 1, 10, 0.5);
-  //std::thread th4(&MD::Simulation, run4, 1, 1, 12, 0.5);
+  std::thread th1(&MD::Simulation, run1, 0.6, 10, 6,  0.5);
+  std::thread th2(&MD::Simulation, run2, 0.6, 10, 8,  0.5);
+  std::thread th3(&MD::Simulation, run3, 0.6, 10, 10, 0.5);
+  std::thread th4(&MD::Simulation, run4, 0.6, 10, 12, 0.5);
 
-  //th1.join(); th2.join(); th3.join(); th4.join();
-  //delete run1, run2, run3, run4;
+  th1.join(); th2.join(); th3.join(); th4.join();
+  delete run1, run2, run3, run4;
 
   /*-----------------------------------------------*/
   //std::vector<size_t> n = { 6, 8, 10, 12 };

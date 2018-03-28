@@ -37,18 +37,6 @@ int main()
 }
 ```
 
-
-
-## Components
-The simulation is comprosed by the following:
-* master: Fluid in an Isothermal container
-
-* Force_Interaction: A constant force in the x-direction is applied to the particle that is closest to the centre of the box
-
-* Particle_Tracking: Writes the x,y,z position and velovities of all the particles for all the steps. Used in a combination with Python file **particles plot.py**
-
-* Force_Interaction_Particle_Tracking: a combination of the ***Force_Interaction*** and ***Particle_Tracking*** branches
-
 ## Results
 Snapshot of the fluid in 2D
 ![2Dsnap](https://github.com/GiannisNikiteas/MD-simulation/blob/master/snap_n6_a075.png?raw=true)

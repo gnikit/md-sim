@@ -58,7 +58,7 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
   vx = ReadFromFile("../data/vx.txt");
   vy = ReadFromFile("../data/vy.txt");
   vz = ReadFromFile("../data/vz.txt");
-  //MBDistribution(TEMPERATURE);
+  MBDistribution(TEMPERATURE);
   // scale of x, y, z
   double mean_vx = 0;
   double mean_vy = 0;
@@ -111,13 +111,15 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 }
 
 void MD::MBDistribution(double TEMPERATURE) {
-  std::string t = ConvertToString(TEMPERATURE, 2);
+  std::string t = ConvertToString(TEMPERATURE, 4);
   std::string particles = std::to_string(N); // defined in constructor
   // Could be stored as variables and passed into FileNaming
   // rather than repeating the process
   // store in _particles_to_str, _T_to_str
+  // TODO: if windows, store CD cout >> to dir_str
+  //       if linux, store pwd >> to dir_str
   // TODO: Python script is buggy and sometimes gives error when passing arguments
-  //std::string command = "python C:/Users/gn/source/repos/MD-simulation/MBDistribution.py " + particles + " " + t;
+  //std::string command = "python " + dir_str + "/MBDistribution.py " + particles + " " + t;
   //system(command.c_str());  // Creates files with MD velocities
 
   std::string vel_id = "particles_" + particles + "_T_" + t;

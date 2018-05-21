@@ -8,6 +8,7 @@
 typedef std::vector<double> vec1d;
 
 // TODO: Move to another file?
+//TODO: missing T = 1 data
 class Isomorph {
   typedef std::vector<double> vec1d;
   vec1d _T, _RHO, _A; // T points

@@ -78,6 +78,7 @@ int main() {
   std::string dir_windows = "C:/Code/C++/MD simulation/Archives of Data/"; 
   /* Linux working directory */
   std::string dir_linux = "/home/gn/Desktop/test_data/";
+  std::string dir_crystal = "/home/gn/Desktop/crystallisation_data/";
   /* Working directory of the cx1 cluster */
   std::string dir = "";
   /* Potential power strength */
@@ -103,8 +104,8 @@ int main() {
   std::tie(rho_iso_l, A_iso_l) = isomorph_linr_l.GenLine(n);
 
   /* Simulation Examples */
-  MD run(dir_linux, STEPS);
-  run.Simulation(0.5, 0.5, 8, 0.5);
+  // MD run(dir_linux, STEPS);
+  // run.Simulation(0.5, 0.5, 8, 0.5);
   /*
   * This is an isomorph line run
   * Simulates the fluid along the line
@@ -114,18 +115,18 @@ int main() {
     MD run(dir_windows, STEPS);
     run.Simulation(rho_iso[i], T_iso[i], n, A_iso[i]);
   }*/
-  /* Individual Run */
-  MD* run1 = new MD(dir_windows, STEPS);
-  MD* run2 = new MD(dir_windows, STEPS);
-  MD* run3 = new MD(dir_windows, STEPS);
-  MD* run4 = new MD(dir_windows, STEPS);
+  /* Individual Runs */
+  MD* run1 = new MD(dir_linux, STEPS);
+  MD* run2 = new MD(dir_linux, STEPS);
+  MD* run3 = new MD(dir_linux, STEPS);
+  MD* run4 = new MD(dir_linux, STEPS);
 
-  std::thread th1(&MD::Simulation, run1, 0.6, 10, 6,  0.5);
-  std::thread th2(&MD::Simulation, run2, 0.6, 10, 8,  0.5);
-  std::thread th3(&MD::Simulation, run3, 0.6, 10, 10, 0.5);
-  std::thread th4(&MD::Simulation, run4, 0.6, 10, 12, 0.5);
+  std::thread th1(&MD::Simulation, run1, 0.5, 0.5, 8,  0.5);
+  std::thread th2(&MD::Simulation, run2, 0.84089, 2, 8,  0.42044);
+  // std::thread th3(&MD::Simulation, run3, 0.6, 10, 10, 0.5);
+  // std::thread th4(&MD::Simulation, run4, 0.6, 10, 12, 0.5);
 
-  th1.join(); th2.join(); th3.join(); th4.join();
+  th1.join(); th2.join();// th3.join(); th4.join();
   delete run1, run2, run3, run4;
 
   /*-----------------------------------------------*/

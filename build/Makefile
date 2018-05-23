@@ -9,7 +9,7 @@ SRCDIR=../src
 all: project
 
 project: Source.o MD.o stat_analysis.o
-	$(CXX) Source.o MD.o stat_analysis.o -o project
+	icpc -std=c++17 MD.o stat_analysis.o Source.o -lpthread -o project
 
 Source.o: $(SRCDIR)/Source.cpp
 	$(CXX) $(CXXFLAGS) $(SRCDIR)/Source.cpp

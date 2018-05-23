@@ -14,7 +14,6 @@ MD::MD(std::string DIRECTORY, size_t run_number) {
 
   gr.resize(NHIST + 1, 0); // gr with Index igr
   fx.resize(N, 0); fy.resize(N, 0); fz.resize(N, 0);
-  //TODO: reserve r's and v's, instead of push_back
 }
 MD::~MD() {}
 
@@ -50,7 +49,7 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
   }
   // Reading Maxwell Boltzmann velocity Dist from files
   // TODO: Python script buggy with argument passing
-  // directory defined wrt the dir wheere .o will execute
+  // directory defined wrt the dir where .o will execute
   // Windowd: PWD=MD-simulation
   // TODO: Add precompiler handles for Linux/Windows
   //       if Win -> load from /data/vx.txt etc.
@@ -300,8 +299,12 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 
         // Force loop
         if (r < cut_off) {
+          // BIP potential of the form: phi = 1/[(r**2 + a**2)**(n/2)]
           long double ff =
             (POWER)*r *	pow(q, ((-POWER - 2.0))); // Force for particles
+          // Gausian-force with sigma=1 and epsilon=1
+          // long double ff = 2*r * exp(-r);
+
 
           fx[i] += x * ff / r;
           fx[j] -= x * ff / r; // Canceling the ij and ji pairs
@@ -311,8 +314,13 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
           fz[j] -= z * ff / r;
 
           PC += r * ff;
+          // TODO:Gaussian-Potential configurational Pressure
+          // integral not evaluated
+      
           // TODO: Add infinity and edge correction, do same for Pc
-          U += pow(q, (-POWER)); // Potential Calculation
+          // U += pow(q, (-POWER)); // Potential Calculation
+          // Gaussian-Potential
+          U += exp(-r*r);
 
           // Radial Distribution
           igr = round(NHIST * r / rg);

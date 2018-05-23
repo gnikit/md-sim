@@ -77,6 +77,7 @@ int main() {
   std::string dir_windows = "C:/Code/C++/MD simulation/Archives of Data/"; 
   /* Linux working directory */
   std::string dir_linux = "/home/gn/Desktop/test_data/";
+  std::string dir_crystal = "/home/gn/Desktop/crystallisation_data/";
   /* Working directory of the cx1 cluster */
   std::string dir = "";
   /* Potential power strength */
@@ -113,7 +114,7 @@ int main() {
     MD run(dir_windows, STEPS);
     run.Simulation(rho_iso[i], T_iso[i], n, A_iso[i]);
   }*/
-  /* Individual Run */
+  /* Individual Runs */
   MD* run1 = new MD(dir_linux, STEPS);
   MD* run2 = new MD(dir_linux, STEPS);
   MD* run3 = new MD(dir_linux, STEPS);

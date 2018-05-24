@@ -65,7 +65,7 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
   vx = ReadFromFile(LOAD_DATA_PATH"/vx.txt");
   vy = ReadFromFile(LOAD_DATA_PATH"/vy.txt");
   vz = ReadFromFile(LOAD_DATA_PATH"/vz.txt");
-  MBDistribution(TEMPERATURE);
+  ////MBDistribution(TEMPERATURE);
   // scale of x, y, z
   double mean_vx = 0;
   double mean_vy = 0;
@@ -514,7 +514,7 @@ std::vector<double> MD::ReadFromFile(const std::string & file_name) {
   std::vector<double> data;
   std::ifstream read_file(file_name);
 
-  //assert(read_file.is_open());
+  assert(read_file.is_open());
 
   std::copy(std::istream_iterator<double>(read_file),
             std::istream_iterator<double>(), std::back_inserter(data));

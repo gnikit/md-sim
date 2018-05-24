@@ -2,6 +2,14 @@
 #define PARTICLES_PER_AXIS 10
 #define NHIST 300
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
+#ifdef _WIN32
+  #define LOAD_DATA_PATH "C:/Users/gn/source/repos/MD-simulation/data"
+#else
+  #define LOAD_DATA_PATH "../data"
+#endif
+
+
+
 // TODO: Boltzmann Dist normalisation of the particles velocities in the beggining
 
 
@@ -54,9 +62,9 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
   // TODO: Add precompiler handles for Linux/Windows
   //       if Win -> load from /data/vx.txt etc.
   //       else ->  load from ../data/vx.txt etc. (makefile)
-  vx = ReadFromFile("../data/vx.txt");
-  vy = ReadFromFile("../data/vy.txt");
-  vz = ReadFromFile("../data/vz.txt");
+  vx = ReadFromFile(LOAD_DATA_PATH"/vx.txt");
+  vy = ReadFromFile(LOAD_DATA_PATH"/vy.txt");
+  vz = ReadFromFile(LOAD_DATA_PATH"/vz.txt");
   MBDistribution(TEMPERATURE);
   // scale of x, y, z
   double mean_vx = 0;
@@ -508,8 +516,8 @@ std::vector<double> MD::ReadFromFile(const std::string & file_name) {
 
   assert(read_file.is_open());
 
-  std::copy(std::istream_iterator<long double>(read_file),
-            std::istream_iterator<long double>(), std::back_inserter(data));
+  std::copy(std::istream_iterator<double>(read_file),
+            std::istream_iterator<double>(), std::back_inserter(data));
 
   read_file.close();
   return data;

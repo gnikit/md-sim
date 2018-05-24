@@ -116,10 +116,10 @@ int main() {
     run.Simulation(rho_iso[i], T_iso[i], n, A_iso[i]);
   }*/
   /* Individual Runs */
-  MD* run1 = new MD(dir_linux, STEPS);
-  MD* run2 = new MD(dir_linux, STEPS);
-  MD* run3 = new MD(dir_linux, STEPS);
-  MD* run4 = new MD(dir_linux, STEPS);
+  MD* run1 = new MD(dir_windows, STEPS);
+  MD* run2 = new MD(dir_windows, STEPS);
+  MD* run3 = new MD(dir_windows, STEPS);
+  MD* run4 = new MD(dir_windows, STEPS);
 
   std::thread th1(&MD::Simulation, run1, 0.5, 0.5, 8,  0.5);
   std::thread th2(&MD::Simulation, run2, 0.84089, 2, 8,  0.42044);
@@ -174,5 +174,5 @@ int main() {
   // for (size_t i = 0; i < n.size(); i++) {
   //   test.StaticDataProcessing(n[i]);
   // }
-  //system("pause");
+  system("pause");
 }

@@ -514,7 +514,7 @@ std::vector<double> MD::ReadFromFile(const std::string & file_name) {
   std::vector<double> data;
   std::ifstream read_file(file_name);
 
-  assert(read_file.is_open());
+  //assert(read_file.is_open());
 
   std::copy(std::istream_iterator<double>(read_file),
             std::istream_iterator<double>(), std::back_inserter(data));

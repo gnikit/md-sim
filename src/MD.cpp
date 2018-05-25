@@ -10,7 +10,7 @@
 
 
 
-// TODO: Boltzmann Dist normalisation of the particles velocities in the beggining
+// TODO: Boltzmann Dist normalisation of the particles velocities in the beggining make it C++
 
 
 MD::MD(std::string DIRECTORY, size_t run_number) {
@@ -50,7 +50,6 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
         rry.push_back((j + 0.5) * scale);
         rrz.push_back((k + 0.5) * scale);
 
-        // TODO: Velocitied need to follow a Maxwell-Boltzmann Dist
         ++n;
       }
     }
@@ -58,13 +57,11 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
   // Reading Maxwell Boltzmann velocity Dist from files
   // TODO: Python script buggy with argument passing
   // directory defined wrt the dir where .o will execute
-  // Windowd: PWD=MD-simulation
-  // TODO: Add precompiler handles for Linux/Windows
-  //       if Win -> load from /data/vx.txt etc.
-  //       else ->  load from ../data/vx.txt etc. (makefile)
   vx = ReadFromFile(LOAD_DATA_PATH"/vx.txt");
   vy = ReadFromFile(LOAD_DATA_PATH"/vy.txt");
   vz = ReadFromFile(LOAD_DATA_PATH"/vz.txt");
+
+  // This is where buggy python script executes
   ////MBDistribution(TEMPERATURE);
   // scale of x, y, z
   double mean_vx = 0;
@@ -217,6 +214,18 @@ void MD::MeanSquareDisplacement(vec1d &MSDx,
   MSD << msd_temp << std::endl;
 }
 
+void MD::DensityQuenching(int steps_quench) {
+  if (_STEP_INDEX % steps_quench == 0 && _STEP_INDEX != 0) {
+    // Increase _rho by 0.001
+    _rho += 0.001;
+    // Re-using this piece of code from MD::Simulation
+    scale = pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS;
+    L = pow((N / _rho), 1.0 / 3.0);
+    Vol = N / _rho;
+    // TODO: possibly need to add MD::Initialise to use the **scale** var
+  }
+}
+
 // MD Simulation
 void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST) {
   // Initialise scalling variables
@@ -237,8 +246,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
   FileNaming(POWER, A_CST);
   OpenFiles();
   TimeStamp(DATA, "# T\tK\tU\tEtot\tPc\tPk\tPtot");
-  std::chrono::steady_clock::time_point begin =
-    std::chrono::steady_clock::now();
+  std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
   Initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
 
   double xx, yy, zz;
@@ -251,6 +259,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 
     U = 0; // seting Potential U to 0
     PC = 0;
+    DensityQuenching(100);
     size_t i, j;
     for (i = 0; i < N - 1; i++) {
       for (j = i + 1; j < N; j++) {
@@ -326,9 +335,9 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
           // integral not evaluated
       
           // TODO: Add infinity and edge correction, do same for Pc
-          // U += pow(q, (-POWER)); // Potential Calculation
+          U += pow(q, (-POWER)); // Potential Calculation
           // Gaussian-Potential
-          U += exp(-r*r);
+          //U += exp(-r*r);
 
           // Radial Distribution
           igr = round(NHIST * r / rg);
@@ -395,7 +404,7 @@ void MD::FileNaming(int POWER, double A_cst) {
   */
   std::stringstream A_stream, rho_stream, T_stream;
 
-  // TODO: setprecission function input here
+  // setprecission function input here
 
   T_stream << std::fixed << std::setprecision(4) << _T0;    // 4 decimal
   A_stream << std::fixed << std::setprecision(5) << A_cst;  // 5 decimals

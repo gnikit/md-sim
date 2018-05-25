@@ -102,6 +102,7 @@ protected:
   void VelocityAutocorrelationFunction(vec1d &Cvx, vec1d &Cvy, vec1d &Cvz);
   void RadialDistributionFunction();
   void MeanSquareDisplacement(vec1d &MSDx, vec1d &MSDy, vec1d &MSDz);
+  void DensityQuenching(int steps_quench);
 
   void OpenFiles();
   void FileNaming(int POWER, double A_cst);

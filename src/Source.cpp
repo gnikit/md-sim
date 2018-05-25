@@ -4,10 +4,10 @@
 #include <string>
 #include <tuple>
 
-#define STEPS 10000
+#define STEPS 50000
 typedef std::vector<double> vec1d;
 
-// TODO: Move to another file?
+//TODO: Move to another file?
 //TODO: missing T = 1 data
 class Isomorph {
   typedef std::vector<double> vec1d;
@@ -79,6 +79,7 @@ int main() {
   /* Linux working directory */
   std::string dir_linux = "/home/gn/Desktop/test_data/";
   std::string dir_crystal = "/home/gn/Desktop/crystallisation_data/";
+  std::string dir_crystal_win = "C:/Code/C++/MD simulation/Archives of Data/crystallisation/";
   /* Working directory of the cx1 cluster */
   std::string dir = "";
   /* Potential power strength */
@@ -116,17 +117,17 @@ int main() {
     run.Simulation(rho_iso[i], T_iso[i], n, A_iso[i]);
   }*/
   /* Individual Runs */
-  MD* run1 = new MD(dir_windows, STEPS);
+  MD* run1 = new MD(dir_crystal_win, STEPS);
   MD* run2 = new MD(dir_windows, STEPS);
   MD* run3 = new MD(dir_windows, STEPS);
   MD* run4 = new MD(dir_windows, STEPS);
 
-  std::thread th1(&MD::Simulation, run1, 0.5, 0.5, 8,  0.5);
-  std::thread th2(&MD::Simulation, run2, 0.84089, 2, 8,  0.42044);
+  std::thread th1(&MD::Simulation, run1, 0.005, 0.003, 8,  0.5);
+  //std::thread th2(&MD::Simulation, run2, 0.84089, 2, 8,  0.42044);
   // std::thread th3(&MD::Simulation, run3, 0.6, 10, 10, 0.5);
   // std::thread th4(&MD::Simulation, run4, 0.6, 10, 12, 0.5);
 
-  th1.join(); th2.join();// th3.join(); th4.join();
+  th1.join();// th2.join();// th3.join(); th4.join();
   delete run1, run2, run3, run4;
 
   /*-----------------------------------------------*/

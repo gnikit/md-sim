@@ -372,11 +372,13 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
   }
   // Simulation Ends HERE
   // Saving Last Position
-  TimeStamp(POS, "# X\tY\tZ\tVx\tVy\tVz");
+  TimeStamp(POS, "# X\tY\tZ\tVx\tVy\tVz\tFx\tFy\tFz");
   for (size_t el = 0; el < rx.size(); el++) {
     POS << rx[el] << '\t' << ry[el] << '\t'
       << rz[el] << '\t' << vx[el] << '\t'
-      << vy[el] << '\t' << vz[el] << std::endl;
+      << vy[el] << '\t' << vz[el] << '\t'
+      << fx[el] << '\t' << fy[el] << '\t'
+      << fz[el] << std::endl;
   }
 
   RadialDistributionFunction();

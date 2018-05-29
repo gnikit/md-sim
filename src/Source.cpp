@@ -122,17 +122,21 @@ int main() {
   //MD* run3 = new MD(dir_windows, STEPS);
   //MD* run4 = new MD(dir_windows, STEPS);
 
-  std::vector<double> a_par = { 0.50, 0.75, 1.0, 1.25, 2.0, 2.5 };
+  std::vector<double> a_list = {0.25, 0.65, 0.7, 0.8, 0.85, 0.90, 0.95, 0.97, 1.1, 1.2, 1.50, 1.75, 2.25, 2.50, 2.75, 4.00 };
 
-  for (size_t i = 0; i < a_par.size()/2; i++) {
+  for (size_t i = 0; i < a_list.size()/4; i++) {
     MD* run1 = new MD(dir_windows, STEPS);
     MD* run2 = new MD(dir_windows, STEPS);
+    MD* run3 = new MD(dir_windows, STEPS);
+    MD* run4 = new MD(dir_windows, STEPS);
 
-    std::thread th1(&MD::Simulation, run1, 0.5, 0.5, 6, a_par[i]);
-    std::thread th2(&MD::Simulation, run2, 0.5, 0.5, 6, a_par[i+3]);
+    std::thread th1(&MD::Simulation, run1, 0.5, 1.0, 6, a_list[i]);
+    std::thread th2(&MD::Simulation, run2, 0.5, 1.0, 6, a_list[i+4]);
+    std::thread th3(&MD::Simulation, run1, 0.5, 1.0, 6, a_list[i+8]);
+    std::thread th4(&MD::Simulation, run2, 0.5, 1.0, 6, a_list[i+12]);
 
-    th1.join(); th2.join();
-    delete run1, run2;
+    th1.join(); th2.join(); th3.join(); th4.join();
+    delete run1, run2, run3, run4;
 
   }
 

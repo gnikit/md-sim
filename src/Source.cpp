@@ -4,7 +4,7 @@
 #include <string>
 #include <tuple>
 
-#define STEPS 50000
+#define STEPS 10000
 typedef std::vector<double> vec1d;
 
 //TODO: Move to another file?
@@ -79,7 +79,7 @@ int main() {
   /* Linux working directory */
   std::string dir_linux = "/home/gn/Desktop/test_data/";
   std::string dir_crystal = "/home/gn/Desktop/crystallisation_data/";
-  std::string dir_crystal_win = "C:/Code/C++/MD simulation/Archives of Data/crystallisation/";
+  std::string dir_crystal_win = "C:/Code/C++/MD simulation/Archives of Data/crystallisation/gaussian/";
   /* Working directory of the cx1 cluster */
   std::string dir = "";
   /* Potential power strength */
@@ -117,18 +117,32 @@ int main() {
     run.Simulation(rho_iso[i], T_iso[i], n, A_iso[i]);
   }*/
   /* Individual Runs */
-  MD* run1 = new MD(dir_crystal_win, STEPS);
-  MD* run2 = new MD(dir_windows, STEPS);
-  MD* run3 = new MD(dir_windows, STEPS);
-  MD* run4 = new MD(dir_windows, STEPS);
+  //MD* run1 = new MD(dir_windows, STEPS);
+  //MD* run2 = new MD(dir_windows, STEPS);
+  //MD* run3 = new MD(dir_windows, STEPS);
+  //MD* run4 = new MD(dir_windows, STEPS);
 
-  std::thread th1(&MD::Simulation, run1, 0.005, 0.003, 8,  0.5);
+  std::vector<double> a_par = { 0.50, 0.75, 1.0, 1.25, 2.0, 2.5 };
+
+  for (size_t i = 0; i < a_par.size()/2; i++) {
+    MD* run1 = new MD(dir_windows, STEPS);
+    MD* run2 = new MD(dir_windows, STEPS);
+
+    std::thread th1(&MD::Simulation, run1, 0.5, 0.5, 6, a_par[i]);
+    std::thread th2(&MD::Simulation, run2, 0.5, 0.5, 6, a_par[i+3]);
+
+    th1.join(); th2.join();
+    delete run1, run2;
+
+  }
+
+  //std::thread th1(&MD::Simulation, run1, 0.8409, 2.0, 8, 0.42045);
   //std::thread th2(&MD::Simulation, run2, 0.84089, 2, 8,  0.42044);
   // std::thread th3(&MD::Simulation, run3, 0.6, 10, 10, 0.5);
   // std::thread th4(&MD::Simulation, run4, 0.6, 10, 12, 0.5);
 
-  th1.join();// th2.join();// th3.join(); th4.join();
-  delete run1, run2, run3, run4;
+  //th1.join();// th2.join();// th3.join(); th4.join();
+  //delete run1, run2, run3, run4;
 
   /*-----------------------------------------------*/
   //std::vector<size_t> n = { 6, 8, 10, 12 };
@@ -175,5 +189,5 @@ int main() {
   // for (size_t i = 0; i < n.size(); i++) {
   //   test.StaticDataProcessing(n[i]);
   // }
-  system("pause");
+  //system("pause");
 }

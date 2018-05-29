@@ -245,7 +245,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 
   FileNaming(POWER, A_CST);
   OpenFiles();
-  TimeStamp(DATA, "# T\tK\tU\tEtot\tPc\tPk\tPtot");
+  TimeStamp(DATA, "# T\tK\tU\tEtot\tPc\tPk\tPtot\tSteps\trho");
   std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
   Initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
 
@@ -259,7 +259,9 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 
     U = 0; // seting Potential U to 0
     PC = 0;
-    DensityQuenching(100);
+    // Density phase change method
+    //DensityQuenching(100);
+
     size_t i, j;
     for (i = 0; i < N - 1; i++) {
       for (j = i + 1; j < N; j++) {
@@ -320,7 +322,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
           long double ff =
             (POWER)*r *	pow(q, ((-POWER - 2.0))); // Force for particles
           // Gausian-force with sigma=1 and epsilon=1
-          // long double ff = 2*r * exp(-r);
+          //long double ff = 2*r * exp(-r);
 
 
           fx[i] += x * ff / r;
@@ -455,7 +457,8 @@ void MD::WriteToFiles() {
   */
   DATA << T << '\t' << KE << '\t' << U << '\t'
     << (U + KE) << '\t' << PC << '\t' << PK
-    << '\t' << (PC + PK) << std::endl;
+    << '\t' << (PC + PK) << '\t' << (_STEP_INDEX+1) 
+    << '\t' << _rho << std::endl;
 }
 
 void MD::ShowRun(size_t step_size_show) {

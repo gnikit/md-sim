@@ -1,5 +1,5 @@
 #include "MD.h"
-#include "Isomorph.h"
+#include "isomorph.h"
 #include "stat_analysis.h"
 #include <thread>
 #include <string>
@@ -71,7 +71,7 @@ int main() {
     run.Simulation(rho_iso[i], T_iso[i], n, A_iso[i]);
   }*/
   /* Individual Runs */
-  MD* run1 = new MD(dir_windows, STEPS);
+  MD* run1 = new MD(dir_linux, STEPS);
   MD* run2 = new MD(dir_windows, STEPS);
   MD* run3 = new MD(dir_windows, STEPS);
   MD* run4 = new MD(dir_windows, STEPS);

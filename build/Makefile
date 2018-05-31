@@ -8,8 +8,8 @@ SRCDIR=../src
 
 all: project
 
-project: Source.o MD.o stat_analysis.o
-	icpc -std=c++17 MD.o stat_analysis.o Isomorph.o Source.o -lpthread -o project
+project: Source.o MD.o stat_analysis.o isomorph.o
+	icpc -std=c++17 MD.o stat_analysis.o isomorph.o Source.o -lpthread -o project
 
 Source.o: $(SRCDIR)/Source.cpp
 	$(CXX) $(CXXFLAGS) $(SRCDIR)/Source.cpp
@@ -17,8 +17,8 @@ Source.o: $(SRCDIR)/Source.cpp
 MD.o: $(SRCDIR)/MD.cpp 
 	$(CXX) $(CXXFLAGS) $(SRCDIR)/MD.cpp
 
-Isomorph.o $(SRCDIR)/Isomorph.cpp
-	$(CXX) $(CXXFLAGS) $(SRCDIR)/Isomorph.cpp
+isomorph.o: $(SRCDIR)/isomorph.cpp
+	$(CXX) $(CXXFLAGS) $(SRCDIR)/isomorph.cpp
 
 stat_analysis.o: $(SRCDIR)/stat_analysis.cpp
 	$(CXX) $(CXXFLAGS) $(SRCDIR)/stat_analysis.cpp

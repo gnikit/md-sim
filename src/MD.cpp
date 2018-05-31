@@ -331,7 +331,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
           fy[j] -= y * ff / r;
           fz[i] += z * ff / r;
           fz[j] -= z * ff / r;
-
+          
           PC += r * ff;
           // TODO:Gaussian-Potential configurational Pressure
           // integral not evaluated

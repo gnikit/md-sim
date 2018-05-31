@@ -1,4 +1,14 @@
 #pragma once
+#if defined (__INTEL_COMPILER)
+  #include <mathimf.h>  // Intel Math library
+  #define COMPILER "INTEL"
+#elif defined (__GNUC__)
+  #include <math.h>
+  #define COMPILER "G++"
+#else
+  #include <math.h>
+  #define COMPILER "YOU KNOW NOTHING JOHN SNOW"
+#endif
 #include <tuple>
 #include <vector>
 

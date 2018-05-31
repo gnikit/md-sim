@@ -14,6 +14,7 @@ Stat_Analysis::~Stat_Analysis() {}
 
 
 void Stat_Analysis::ReadFromFile(vec1d &x, const std::string &file_name) {
+  //TODO: this could be inherited from MD.cpp
   /*
   Reads from a stream that already exists for a file that is already placed in the
   directory and appends the data into a 1D vector.
@@ -37,7 +38,7 @@ void Stat_Analysis::ReadFromFile(vec1d &T, vec1d &K, vec1d &U,
   std::ifstream read_file(file_name);
   try {
     if (read_file.is_open() == false) {
-      throw "File does not exist!";
+      throw "File Not Found";
     }
     // TODO: Fix exception throwing, currently exception is not caught properly.
     //assert(read_file.is_open()); // Evaluates false if file does not exist
@@ -46,8 +47,9 @@ void Stat_Analysis::ReadFromFile(vec1d &T, vec1d &K, vec1d &U,
     while (!read_file.eof()) {  // Stops when End Of File is reached
       std::getline(read_file, line);
 
+      //TODO: the IF and ELSE statements should be reversed and then ELSE should be removed
       if (line.length() == 0 || line[0] == '#') {
-        std::cout << "IGNORE LINE" << std::endl;
+        //std::cout << "IGNORE LINE" << std::endl;
       }
       else {
         std::stringstream ss(line);

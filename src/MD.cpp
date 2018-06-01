@@ -3,9 +3,9 @@
 #define NHIST 300
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 #ifdef _WIN32
-  #define LOAD_DATA_PATH "C:/Users/gn/source/repos/MD-simulation/data"
+#define LOAD_DATA_PATH "C:/Users/gn/source/repos/MD-simulation/data"
 #else
-  #define LOAD_DATA_PATH "../data"
+#define LOAD_DATA_PATH "../data"
 #endif
 
 
@@ -76,7 +76,8 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
   }
 
   size_t tempN = N;    // Recommended opt by Intel
-
+#pragma parallel 
+#pragma loop count min(128)
   for (i = 0; i < tempN; i++) {
     vx[i] = vx[i] - mean_vx; // Subtracting Av. velocities from each particle
     vy[i] = vy[i] - mean_vy;
@@ -91,6 +92,8 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
   scale_v = sqrt(TEMPERATURE / T); // scalling factor
 
   // Velocity scaling
+#pragma parallel
+#pragma loop count min(128)
   for (i = 0; i < tempN; i++) {
     vx[i] *= scale_v;
     vy[i] *= scale_v;
@@ -331,11 +334,11 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
           fy[j] -= y * ff / r;
           fz[i] += z * ff / r;
           fz[j] -= z * ff / r;
-          
+
           PC += r * ff;
           // TODO:Gaussian-Potential configurational Pressure
           // integral not evaluated
-      
+
           // TODO: Add infinity and edge correction, do same for Pc
           U += pow(q, (-POWER)); // Potential Calculation
           // Gaussian-Potential
@@ -459,7 +462,7 @@ void MD::WriteToFiles() {
   */
   DATA << T << '\t' << KE << '\t' << U << '\t'
     << (U + KE) << '\t' << PC << '\t' << PK
-    << '\t' << (PC + PK) << '\t' << (_STEP_INDEX+1) 
+    << '\t' << (PC + PK) << '\t' << (_STEP_INDEX + 1)
     << '\t' << _rho << std::endl;
 }
 

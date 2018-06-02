@@ -11,7 +11,7 @@
 
 
 // TODO: Boltzmann Dist normalisation of the particles velocities in the beggining make it C++
-
+//TODO: Export the final data file of the density quenching
 
 MD::MD(std::string DIRECTORY, size_t run_number) {
   _dir = DIRECTORY;
@@ -29,13 +29,18 @@ MD::~MD() {}
 void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
                     vec1d &vx, vec1d &vy, vec1d &vz, double TEMPERATURE) {
   /*
-  * Initialises the:
-  * + Position Arrays
-  * + Velocity Arrays (assign random velocities)
-  * + Conserves/ Scales momentum == 0
-  * + Temperature
-  * + Velocity Autocorrelaion Function
+    Initialises the:
+    + Position Arrays
+    + Velocity Arrays (assign random velocities)
+    + Conserves/ Scales momentum == 0
+    + Temperature
+    + Velocity Autocorrelaion Function
+
+    @param &x, &y, &z: X, Y, Z vector points
+    @param &vx, &vy, &vz: Vx, Vy, Vz vector points
+    @param TEMPERATURE: Thermostat target temperature
   */
+
   // Initialise position matrix and velocity matrix
   size_t n = 0;
   size_t i, j, k;
@@ -445,8 +450,8 @@ void MD::FileNaming(int POWER, double A_cst) {
 
 void MD::OpenFiles() {
   /*
-  * Open/Create if file does not exist
-  * Overwrite existing data
+    Open/Create if file does not exist
+    Overwrite existing data
   */
   // opens for files output and deletes prev content
   Hist.open(HIST, std::ios::out | std::ios::trunc);
@@ -458,7 +463,7 @@ void MD::OpenFiles() {
 
 void MD::WriteToFiles() {
   /*
-  * Writes values of parameters to file
+    Writes values of parameters to file
   */
   DATA << T << '\t' << KE << '\t' << U << '\t'
     << (U + KE) << '\t' << PC << '\t' << PK
@@ -468,8 +473,8 @@ void MD::WriteToFiles() {
 
 void MD::ShowRun(size_t step_size_show) {
   /*
-  *Displays the system parameters every step_size_show of steps
-  *Input the increment step
+    Displays the system parameters every step_size_show of steps
+    Input the increment step
   */
   if (_STEP_INDEX == 0) {
     std::cout << "step:\tT:\tKE:\tU:\tU+K:\tPC:\tPK:\t(PK+PC):" << std::endl;
@@ -485,8 +490,8 @@ void MD::ShowRun(size_t step_size_show) {
 
 void MD::ResetValues() {
   /*
-  Closes open file streams and resets sizes and values to 0
-  For multiple simulations
+    Closes open file streams and resets sizes and values to 0
+    For multiple simulations
   */
   // Close streams at the end of run
   Hist.close();
@@ -513,8 +518,8 @@ void MD::ResetValues() {
 
 void MD::TimeStamp(std::ofstream& stream, std::string variables) {
   /*
-  * Dates the file and allows the input of a header
-  * Input a file stream to write and string of characters to display as headers
+    Dates the file and allows the input of a header
+    Input a file stream to write and string of characters to display as headers
   */
   std::chrono::time_point<std::chrono::system_clock> instance;
   instance = std::chrono::system_clock::now();
@@ -525,19 +530,27 @@ void MD::TimeStamp(std::ofstream& stream, std::string variables) {
 
 std::vector<double> MD::ReadFromFile(const std::string & file_name) {
   /*
-  * Reads from a stream that already exists for a file that is already placed in the
-  * directory and appends the data into a 1D vector.
+    Reads from a stream that already exists for a file that is already placed in the
+    directory and appends the data into a 1D vector.
   */
   std::vector<double> data;
   std::ifstream read_file(file_name);
+  try {
+    read_file.exceptions(read_file.failbit);
+    std::copy(std::istream_iterator<double>(read_file),
+              std::istream_iterator<double>(), std::back_inserter(data));
 
-  assert(read_file.is_open());
+    read_file.close();
+    return data;
+  }
 
-  std::copy(std::istream_iterator<double>(read_file),
-            std::istream_iterator<double>(), std::back_inserter(data));
+  catch (const std::ios_base::failure& e) {
+    std::cerr << "Caught an ios_base::failure.\n"
+      << "Explanatory string: " << e.what() << '\n'
+      << "Error code: " << e.code() << '\n';
+  }
 
-  read_file.close();
-  return data;
+
 }
 
 std::string MD::ConvertToString(const double & x, const int & precision) {

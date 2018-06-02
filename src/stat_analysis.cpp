@@ -32,8 +32,8 @@ void Stat_Analysis::ReadFromFile(vec1d &T, vec1d &K, vec1d &U,
                                  vec1d &E, vec1d &Pc, vec1d &Pk, vec1d &P,
                                  const std::string &file_name) {
   /*
-  Reads from a stream that already exists for a file that is already placed in the
-  directory and appends the data into a 1D vector.
+    Reads from a stream that already exists for a file that is already placed in the
+    directory and appends the data into a 1D vector.
   */
   std::ifstream read_file(file_name);
   try {

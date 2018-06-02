@@ -62,7 +62,7 @@ int main() {
   MD* run2 = new MD(dir_windows, STEPS);
   MD* run3 = new MD(dir_windows, STEPS);
   MD* run4 = new MD(dir_windows, STEPS);
-  vec1d a = { 0, 0.25};
+  vec1d a = { 0, 0.25 };
 
   for (size_t i = 0; i < a.size(); i++) {
     std::thread th1(&MD::Simulation, run1, 0.5, 1, 6, a[i]);

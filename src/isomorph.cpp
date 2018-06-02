@@ -3,8 +3,13 @@
 
   Isomorph::Isomorph(double RHO, double T, double Ar, vec1d T_in) {
     /*
-    * Takes as arguments a, Reference density, temperature and A parameter
-    * T_in is the input Temperature vector, where the isomorph will be placed
+      Takes as arguments a, Reference density, temperature and A parameter
+      T_in is the input Temperature vector, where the isomorph will be placed
+
+      @param RHO: Reference point density
+      @param T: Reference point temperature
+      @param Ar: Reference point A
+      @param T_in: Range of temperatures for which isomorph points will be generated.
     */
     _rho_r = RHO;
     _T_r = T;
@@ -23,8 +28,12 @@
   }
   std::tuple<vec1d, vec1d> Isomorph::GenLine(size_t n) {
     /*
-    * This method returns a tuple of Isomorphic points
-    * for the density and A parameter in the form of a vector.
+      This method returns a tuple of Isomorphic points
+      for the density and A parameter in the form of a vector.
+
+      @param n: Potential strength parameter for isomorph
+      @return tuple(_RHO, _A): Two 1D vectors with the densities and As of
+                               an isomorphic state.
     */
     for (size_t i = 0; i < _T.size(); i++) {
       _T_out = _T[i];   // reduntant step

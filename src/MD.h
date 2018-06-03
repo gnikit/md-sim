@@ -68,6 +68,11 @@ protected:
 	double PK;              // Kinetic Pressure
 	double scale_v;         // velocity scaling
 
+	// Quenching varibles
+	bool quenching_flag = false;
+	size_t Q_counter = 0; // counts the number qunchings that have occured
+	std::chrono::steady_clock::time_point begin;
+
 	// HISTOGRAM VARIABLES
 	int igr;		// Index of Hist
 	double rg;
@@ -86,12 +91,14 @@ private:
 public:
 
 	MD(std::string DIRECTORY, size_t run_number);
+	MD(std::string DIRECTORY, size_t run_number, bool QUENCH_F);
 	~MD();
 
 	void Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST);
 	std::string getDir();
 
 protected:
+	void LoadFirstPosition(vec1d &x, vec1d &y, vec1d &z, double TEMPERATURE);
 	void Initialise(vec1d &x, vec1d &y, vec1d &z,
 					vec1d &vx, vec1d &vy, vec1d &vz,
 					double TEMPERATURE);
@@ -102,7 +109,7 @@ protected:
 	void VelocityAutocorrelationFunction(vec1d &Cvx, vec1d &Cvy, vec1d &Cvz);
 	void RadialDistributionFunction();
 	void MeanSquareDisplacement(vec1d &MSDx, vec1d &MSDy, vec1d &MSDz);
-	void DensityQuenching(int steps_quench);
+	void DensityQuenching(int steps_quench, double TEMPERATURE);
 
 	void OpenFiles();
 	void FileNaming(int POWER, double A_cst);

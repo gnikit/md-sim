@@ -23,24 +23,22 @@ MD::MD(std::string DIRECTORY, size_t run_number) {
 	gr.resize(NHIST + 1, 0); // gr with Index igr
 	fx.resize(N, 0); fy.resize(N, 0); fz.resize(N, 0);
 }
+
+MD::MD(std::string DIRECTORY, size_t run_number, bool QUENCH_F) {
+	_dir = DIRECTORY;
+	_STEPS = run_number;
+
+	Nx = Ny = Nz = PARTICLES_PER_AXIS; // Number of particles per axis
+	N = Nx * Ny * Nz;
+
+	gr.resize(NHIST + 1, 0); // gr with Index igr
+	fx.resize(N, 0); fy.resize(N, 0); fz.resize(N, 0);
+	quenching_flag = QUENCH_F;
+}
 MD::~MD() {}
 
-// Methods for MD Analysis
-void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
-					vec1d &vx, vec1d &vy, vec1d &vz, double TEMPERATURE) {
-	/*
-	  Initialises the:
-	  + Position Arrays
-	  + Velocity Arrays (assign random velocities)
-	  + Conserves/ Scales momentum == 0
-	  + Temperature
-	  + Velocity Autocorrelaion Function
 
-	  @param &x, &y, &z: X, Y, Z vector points
-	  @param &vx, &vy, &vz: Vx, Vy, Vz vector points
-	  @param TEMPERATURE: Thermostat target temperature
-	*/
-
+void MD::LoadFirstPosition(vec1d &x, vec1d &y, vec1d &z, double TEMPERATURE) {
 	// Initialise position matrix and velocity matrix
 	size_t n = 0;
 	size_t i, j, k;
@@ -68,11 +66,63 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 
 	// This is where buggy python script executes
 	////MBDistribution(TEMPERATURE);
+}
+
+// Methods for MD Analysis
+void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
+					vec1d &vx, vec1d &vy, vec1d &vz, double TEMPERATURE) {
+	/*
+	  Initialises the:
+	  + Position Arrays
+	  + Velocity Arrays (assign random velocities)
+	  + Conserves/ Scales momentum == 0
+	  + Temperature
+	  + Velocity Autocorrelaion Function
+
+	  @param &x, &y, &z: X, Y, Z vector points
+	  @param &vx, &vy, &vz: Vx, Vy, Vz vector points
+	  @param TEMPERATURE: Thermostat target temperature
+	*/
+
+	// Initialise position matrix and velocity matrix
+	if (quenching_flag == false || Q_counter == 0) {
+		size_t n = 0;
+		size_t i, j, k;
+		for (i = 0; i < Nx; i++) {
+			for (j = 0; j < Ny; j++) {
+				for (k = 0; k < Nz; k++) {
+					x.push_back((i + 0.5) * scale);
+					y.push_back((j + 0.5) * scale);
+					z.push_back((k + 0.5) * scale);
+
+					rrx.push_back((i + 0.5) * scale);
+					rry.push_back((j + 0.5) * scale);
+					rrz.push_back((k + 0.5) * scale);
+
+					++n;
+				}
+			}
+		}
+		// Reading Maxwell Boltzmann velocity Dist from files
+		// TODO: Python script buggy with argument passing
+		// directory defined wrt the dir where .o will execute
+		vx = ReadFromFile(LOAD_DATA_PATH"/vx.txt");
+		vy = ReadFromFile(LOAD_DATA_PATH"/vy.txt");
+		vz = ReadFromFile(LOAD_DATA_PATH"/vz.txt");
+	}
+
+	// This is where buggy python script executes
+	////MBDistribution(TEMPERATURE);
+	//if (Q_counter == 0) {
+	//	LoadFirstPosition(x, y, z, TEMPERATURE);
+	//}
+
 	// scale of x, y, z
 	double mean_vx = 0;
 	double mean_vy = 0;
 	double mean_vz = 0;
 
+	size_t i;
 	// Momentum conservation array
 	for (i = 0; i < N; i++) {
 		mean_vx += vx[i] / N; // Calculating Average velocity for each dimension
@@ -222,16 +272,16 @@ void MD::MeanSquareDisplacement(vec1d &MSDx,
 	MSD << msd_temp << std::endl;
 }
 
-void MD::DensityQuenching(int steps_quench) {
-	if (_STEP_INDEX % steps_quench == 0 && _STEP_INDEX != 0) {
-		// Increase _rho by 0.001
-		_rho += 0.001;
-		// Re-using this piece of code from MD::Simulation
-		scale = pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS;
-		L = pow((N / _rho), 1.0 / 3.0);
-		Vol = N / _rho;
-		// TODO: possibly need to add MD::Initialise to use the **scale** var
-	}
+void MD::DensityQuenching(int steps_quench, double TEMPERATURE) {
+	// Increase _rho by 0.001
+	_rho += 0.001;
+	// Re-using this piece of code from MD::Simulation
+	scale = pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS;
+	L = pow((N / _rho), 1.0 / 3.0);
+	Vol = N / _rho;
+	// TODO: possibly need to add MD::Initialise to use the **scale** var
+	Initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE); // ++quenching num
+
 }
 
 // MD Simulation
@@ -240,6 +290,13 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 	// If Simulation(...) is not run, _T0, _rho need to be initialised elsewhere
 	_T0 = TEMPERATURE;
 	_rho = DENSITY;
+
+	// goto statement for quenching
+//new_quench:
+//	if (quenching_flag == true && Q_counter != 0) {
+//		// Increase _rho by 0.01
+//		_rho += 0.01;
+//	}
 	dt /= sqrt(_T0);
 	// Box length scalling
 	scale = pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS;
@@ -251,11 +308,13 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 	rg = cut_off;
 	dr = rg / NHIST;
 
+	// Filenaming should not be called
 	FileNaming(POWER, A_CST);
 	OpenFiles();
 	TimeStamp(DATA, "# T\tK\tU\tEtot\tPc\tPk\tPtot\tSteps\trho");
-	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-	Initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
+	begin = std::chrono::steady_clock::now();
+
+	Initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE); // ++quenching num
 
 	double xx, yy, zz;
 	for (_STEP_INDEX = 0; _STEP_INDEX < _STEPS; _STEP_INDEX++) {
@@ -269,6 +328,17 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 		PC = 0;
 		// Density phase change method
 		//DensityQuenching(100);
+
+		size_t steps_quench = 1000;	// steps between each quenching
+		if (quenching_flag == true && _STEP_INDEX != 0 && _STEP_INDEX % steps_quench == 0) {
+			++Q_counter;	// preventing first stage of initialisation to run
+			DensityQuenching(steps_quench, TEMPERATURE);
+			std::cout << "successful quench " << Q_counter << std::endl;
+			++_STEP_INDEX;	// so it won't enter an infite loop
+			//goto new_quench;
+			//TODO: incrementing the _STEP_INDEX loses a few iterations
+
+		}
 
 		size_t i, j;
 		for (i = 0; i < N - 1; i++) {
@@ -399,7 +469,8 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 		<< std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() %
 		60
 		<< "s" << std::endl;
-	ResetValues(); // Check if everything is reset, could have missed something
+	// Streams should not close, vectors should not be cleared
+	//ResetValues(); // Check if everything is reset, could have missed something
 }
 
 std::string MD::getDir() {
@@ -535,21 +606,11 @@ std::vector<double> MD::ReadFromFile(const std::string & file_name) {
 	*/
 	std::vector<double> data;
 	std::ifstream read_file(file_name);
-	try {
-		read_file.exceptions(read_file.failbit);
-		std::copy(std::istream_iterator<double>(read_file),
-				  std::istream_iterator<double>(), std::back_inserter(data));
 
-		read_file.close();
-		return data;
-	}
+	std::copy(std::istream_iterator<double>(read_file),
+			  std::istream_iterator<double>(), std::back_inserter(data));
 
-	catch (const std::ios_base::failure& e) {
-		std::cerr << "Caught an ios_base::failure.\n"
-			<< "Explanatory string: " << e.what() << '\n'
-			<< "Error code: " << e.code() << '\n';
-	}
-
+	return data;
 
 }
 

@@ -4,8 +4,9 @@
 #include <thread>
 #include <string>
 
-#define STEPS 10000
-#define PARTICLES 1000
+
+#define STEPS 10000	//10000
+#define PARTICLES 1000 //1000
 typedef std::vector<double> vec1d;
 
 /* Windows working directory for Archives of Data */
@@ -46,8 +47,8 @@ int main() {
 		std::tie(rho_iso_l, A_iso_l) = isomorph_linr_l.GenLine(n);
 	}
 	/* Simulation Examples */
-	MD run(dir_windows, STEPS, true);
-	run.Simulation(0.5, 0.5, 8, 0.5);
+	MD run(dir_windows, STEPS, false);
+	run.Simulation(0.5, 0.5, 8, 0);
 	/*
 	* This is an isomorph line run
 	* Simulates the fluid along the line
@@ -78,7 +79,7 @@ int main() {
 
 	/*-----------------------------------------------*/
 
-	//system("pause");
+	system("pause");
 }
 
 void MakeDataBase() {

@@ -107,7 +107,7 @@ protected:
 						 vec1d &vx, vec1d &vy, vec1d &vz,
 						 vec1d &rrx, vec1d &rry, vec1d &rrz);
 	void VelocityAutocorrelationFunction(vec1d &Cvx, vec1d &Cvy, vec1d &Cvz);
-	void RadialDistributionFunction();
+	void RadialDistributionFunction(bool normalise = true);
 	void MeanSquareDisplacement(vec1d &MSDx, vec1d &MSDy, vec1d &MSDz);
 	void DensityQuenching(int steps_quench, double TEMPERATURE);
 

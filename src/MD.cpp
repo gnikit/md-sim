@@ -1,5 +1,5 @@
 #include "MD.h"
-#define PARTICLES_PER_AXIS 10
+#define PARTICLES_PER_AXIS 10  // if changed, new vx,vy,vz files need to be generated
 #define NHIST 300
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 #ifdef _WIN32
@@ -246,14 +246,17 @@ void MD::VelocityAutocorrelationFunction(vec1d &Cvx,
 	VAF << temp_ << std::endl; // writes to file
 }
 
-void MD::RadialDistributionFunction() {
+void MD::RadialDistributionFunction(bool normalise) {
+	/*normalise by default is TRUE*/
 	double R = 0;
-	double norm;
+	double norm = 1;
 	double cor_rho = _rho * (N - 1) / N;
 	size_t i;
 	for (i = 1; i < NHIST; i++) {  // Changed initial loop value from 0 -> 1
-		R = rg * i / NHIST;
-		norm = (cor_rho * 2 * PI * R * R * N * _STEPS * dr);
+		if (normalise) {
+			R = rg * i / NHIST;
+			norm = (cor_rho * 2 * PI * R * R * N * _STEPS * dr);
+		}
 		gr[i] /= norm;	// not really needed
 		Hist << gr[i] << std::endl;
 	}
@@ -334,7 +337,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 			++Q_counter;	// preventing first stage of initialisation to run
 			DensityQuenching(steps_quench, TEMPERATURE);
 			std::cout << "successful quench " << Q_counter << std::endl;
-			++_STEP_INDEX;	// so it won't enter an infite loop
+			//++_STEP_INDEX;	// so it won't enter an infite loop
 			//goto new_quench;
 			//TODO: incrementing the _STEP_INDEX loses a few iterations
 
@@ -347,49 +350,49 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 				y = ry[i] - ry[j]; // between particles i and j
 				z = rz[i] - rz[j]; // in Cartesian
 
-				xx = rrx[i] - rrx[j];
-				yy = rry[i] - rry[j];
-				zz = rrz[i] - rrz[j];
+				xx = x;
+				yy = y;
+				zz = z;
 
 				// Transposing elements with Periodic BC
 				if (x > (0.5 * L)) {
 					x = x - L;
+					xx = xx - L;
 				}
 				if (y > (0.5 * L)) {
 					y = y - L;
+					yy = yy - L;
 				}
 				if (z > (0.5 * L)) {
 					z = z - L;
+					zz = zz - L;
 				}
 				if (x < (-0.5 * L)) {
 					x = x + L;
+					xx = xx + L;
 				}
 				if (y < (-0.5 * L)) {
 					y = y + L;
+					yy = yy + L;
 				}
 				if (z < (-0.5 * L)) {
 					z = z + L;
-				}
-
-				/////////// for MSD  /////////////////
-				if (xx > (0.5 * L)) {
-					xx = xx - L;
-				}
-				if (yy > (0.5 * L)) {
-					yy = yy - L;
-				}
-				if (zz > (0.5 * L)) {
-					zz = zz - L;
-				}
-				if (xx < (-0.5 * L)) {
-					xx = xx + L;
-				}
-				if (yy < (-0.5 * L)) {
-					yy = yy + L;
-				}
-				if (zz < (-0.5 * L)) {
 					zz = zz + L;
 				}
+
+				///////////// for MSD  /////////////////
+				//if (xx > (0.5 * L)) {
+				//}
+				//if (yy > (0.5 * L)) {
+				//}
+				//if (zz > (0.5 * L)) {
+				//}
+				//if (xx < (-0.5 * L)) {
+				//}
+				//if (yy < (-0.5 * L)) {
+				//}
+				//if (zz < (-0.5 * L)) {
+				//}
 
 				r = sqrt((x * x) + (y * y) + (z * z));
 				long double q = sqrt(r * r + A_CST * A_CST);
@@ -459,7 +462,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 			<< fz[el] << std::endl;
 	}
 
-	RadialDistributionFunction();
+	RadialDistributionFunction(false);	// normalisation not occuring
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	std::cout
 		<< "CPU run time = "

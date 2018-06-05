@@ -117,3 +117,7 @@ MD simulation/runme.out
 /Report20180603-2255.vspx
 /Report20180603-2255.diagsession
 /My Advisor Results - MD-sim
+/tests/mb_file_generation/unittest1.cpp
+/tests/mb_file_generation/targetver.h
+/tests/mb_file_generation/stdafx.h
+/tests/mb_file_generation/stdafx.cpp

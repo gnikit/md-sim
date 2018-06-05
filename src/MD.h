@@ -1,19 +1,19 @@
 //////////////////////////////////////////////////////////////////////
-// Ioannis Nikiteas 13/7/2017									                      //
-//																                                  //
-// BSc Dissertation:										                      	    //
-//  Investigating the transition from Molecular Dynamics to		      //
-//	Smoothed Particle Hydrodynamics					    		                //
-//																                                  //
-//	University: Royal Holloway University of London		              //
-//																                                  // 
+// Ioannis Nikiteas 13/7/2017									    //
+//																    //
+// BSc Dissertation:										        //
+//  Investigating the transition from Molecular Dynamics to		    //
+//	Smoothed Particle Hydrodynamics					    		    //
+//																    //
+//	University: Royal Holloway University of London		            //
+//																    // 
 //	A program meant to simulate a MD fluid with an only	            //
-//	repulsive pair-potential. Increasing the parameter A		 	      //
-//	creates a coarse-graining effect for the system allowing it		  //
-//	to transition to SPH											                      //
-//																	                                //
-//																	                                //
-//																	                                //
+//	repulsive pair-potential. Increasing the parameter A		 	//
+//	creates a coarse-graining effect for the system allowing it		//
+//	to transition to SPH											//
+//																	//
+//																	//
+//																	//
 //////////////////////////////////////////////////////////////////////
 #pragma once
 #if defined (__INTEL_COMPILER)
@@ -31,11 +31,10 @@
 #include <iomanip>    // setprecision
 #include <vector>
 #include <chrono>     // CPU run-time
-#include <ctime>
+#include <ctime>	  // std::chrono
 #include <fstream>    // file writing
 #include <iterator>
-#include <assert.h>
-#include <sstream>
+#include <sstream>	  // stringstream
 #include <cstdint>
 
 class MD {
@@ -71,7 +70,6 @@ protected:
 	// Quenching varibles
 	bool quenching_flag = false;
 	size_t Q_counter = 0; // counts the number qunchings that have occured
-	std::chrono::steady_clock::time_point begin;
 
 	// HISTOGRAM VARIABLES
 	int igr;		// Index of Hist

@@ -10,7 +10,7 @@
 typedef std::vector<double> vec1d;
 
 /* Windows working directory for Archives of Data */
-std::string dir_windows = "C:/Code/C++/MD simulation/Archives of Data/testing/";
+std::string dir_windows = "C:/Code/C++/MD simulation/Archives of Data/testing/gaussian/";
 /* Linux working directory */
 std::string dir_linux = "/home/gn/Desktop/test_data/";
 std::string dir_crystal = "/home/gn/Desktop/crystallisation_data/";
@@ -47,8 +47,19 @@ int main() {
 		std::tie(rho_iso_l, A_iso_l) = isomorph_linr_l.GenLine(n);
 	}
 	/* Simulation Examples */
-	MD run(dir_windows, STEPS, false);
-	run.Simulation(0.5, 0.5, 8, 0);
+	vec1d temp = { 0.005, 0.001 };
+	for (int i = 0; i < temp.size() / 2; i++) {
+		MD* run1 = new MD(dir_windows, STEPS, true);
+		MD* run2 = new MD(dir_windows, STEPS, true);
+
+		std::thread th1(&MD::Simulation, run1, 0.05, temp[i], 0, 0);
+		//std::thread th2(&MD::Simulation, run2, 0.05, temp[i + 1], 0, 0);
+
+		th1.join();// th2.join();
+		delete run1, run2;
+	}
+	//MD run(dir_windows, STEPS, true);
+	//run.Simulation(0.001, 0.1, 8, 0);
 	/*
 	* This is an isomorph line run
 	* Simulates the fluid along the line
@@ -79,7 +90,7 @@ int main() {
 
 	/*-----------------------------------------------*/
 
-	system("pause");
+	//system("pause");
 }
 
 void MakeDataBase() {

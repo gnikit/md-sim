@@ -1,4 +1,5 @@
 #include "MD.h"
+#include "../lib/FileLoading.h"
 #define PARTICLES_PER_AXIS 10  // if changed, new vx,vy,vz files need to be generated
 #define NHIST 300
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS

@@ -10,7 +10,7 @@
 
 
 
-// TODO: Boltzmann Dist normalisation of the particles velocities in the beggining make it C++
+//TODO: Boltzmann Dist normalisation of the particles velocities in the beggining make it C++
 //TODO: Export the final data file of the density quenching
 
 MD::MD(std::string DIRECTORY, size_t run_number) {
@@ -277,7 +277,7 @@ void MD::MeanSquareDisplacement(vec1d &MSDx,
 
 void MD::DensityQuenching(int steps_quench, double TEMPERATURE) {
 	// Increase _rho by 0.001
-	_rho += 0.001;
+	_rho += 0.01;
 	// Re-using this piece of code from MD::Simulation
 	scale = pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS;
 	L = pow((N / _rho), 1.0 / 3.0);
@@ -315,7 +315,8 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 	FileNaming(POWER, A_CST);
 	OpenFiles();
 	TimeStamp(DATA, "# T\tK\tU\tEtot\tPc\tPk\tPtot\tSteps\trho");
-	begin = std::chrono::steady_clock::now();
+
+	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
 	Initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE); // ++quenching num
 
@@ -329,8 +330,6 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 
 		U = 0; // seting Potential U to 0
 		PC = 0;
-		// Density phase change method
-		//DensityQuenching(100);
 
 		size_t steps_quench = 1000;	// steps between each quenching
 		if (quenching_flag == true && _STEP_INDEX != 0 && _STEP_INDEX % steps_quench == 0) {
@@ -395,15 +394,15 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 				//}
 
 				r = sqrt((x * x) + (y * y) + (z * z));
-				long double q = sqrt(r * r + A_CST * A_CST);
+				//long double q = sqrt(r * r + A_CST * A_CST);
 
 				// Force loop
 				if (r < cut_off) {
 					// BIP potential of the form: phi = 1/[(r**2 + a**2)**(n/2)]
-					long double ff =
-						(POWER)*r *	pow(q, ((-POWER - 2.0))); // Force for particles
+					//long double ff =
+					//	(POWER)*r *	pow(q, ((-POWER - 2.0))); // Force for particles
 					  // Gausian-force with sigma=1 and epsilon=1
-					  //long double ff = 2*r * exp(-r);
+					long double ff = 2 * r * exp(-r * r);
 
 
 					fx[i] += x * ff / r;
@@ -418,9 +417,9 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 					// integral not evaluated
 
 					// TODO: Add infinity and edge correction, do same for Pc
-					U += pow(q, (-POWER)); // Potential Calculation
+					//U += pow(q, (-POWER)); // Potential Calculation
 					// Gaussian-Potential
-					//U += exp(-r*r);
+					U += exp(-r * r);
 
 					// Radial Distribution
 					igr = round(NHIST * r / rg);
@@ -462,7 +461,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 			<< fz[el] << std::endl;
 	}
 
-	RadialDistributionFunction(false);	// normalisation not occuring
+	RadialDistributionFunction(false);	// normalisation argument
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	std::cout
 		<< "CPU run time = "
@@ -524,8 +523,8 @@ void MD::FileNaming(int POWER, double A_cst) {
 
 void MD::OpenFiles() {
 	/*
-	  Open/Create if file does not exist
-	  Overwrite existing data
+	Open/Create if file does not exist
+	Overwrite existing data
 	*/
 	// opens for files output and deletes prev content
 	Hist.open(HIST, std::ios::out | std::ios::trunc);
@@ -537,7 +536,7 @@ void MD::OpenFiles() {
 
 void MD::WriteToFiles() {
 	/*
-	  Writes values of parameters to file
+	Writes values of parameters to file
 	*/
 	DATA << T << '\t' << KE << '\t' << U << '\t'
 		<< (U + KE) << '\t' << PC << '\t' << PK
@@ -547,8 +546,8 @@ void MD::WriteToFiles() {
 
 void MD::ShowRun(size_t step_size_show) {
 	/*
-	  Displays the system parameters every step_size_show of steps
-	  Input the increment step
+	Displays the system parameters every step_size_show of steps
+	Input the increment step
 	*/
 	if (_STEP_INDEX == 0) {
 		std::cout << "step:\tT:\tKE:\tU:\tU+K:\tPC:\tPK:\t(PK+PC):" << std::endl;
@@ -564,8 +563,8 @@ void MD::ShowRun(size_t step_size_show) {
 
 void MD::ResetValues() {
 	/*
-	  Closes open file streams and resets sizes and values to 0
-	  For multiple simulations
+	Closes open file streams and resets sizes and values to 0
+	For multiple simulations
 	*/
 	// Close streams at the end of run
 	Hist.close();
@@ -592,8 +591,8 @@ void MD::ResetValues() {
 
 void MD::TimeStamp(std::ofstream& stream, std::string variables) {
 	/*
-	  Dates the file and allows the input of a header
-	  Input a file stream to write and string of characters to display as headers
+	Dates the file and allows the input of a header
+	Input a file stream to write and string of characters to display as headers
 	*/
 	std::chrono::time_point<std::chrono::system_clock> instance;
 	instance = std::chrono::system_clock::now();
@@ -604,8 +603,8 @@ void MD::TimeStamp(std::ofstream& stream, std::string variables) {
 
 std::vector<double> MD::ReadFromFile(const std::string & file_name) {
 	/*
-	  Reads from a stream that already exists for a file that is already placed in the
-	  directory and appends the data into a 1D vector.
+	Reads from a stream that already exists for a file that is already placed in the
+	directory and appends the data into a 1D vector.
 	*/
 	std::vector<double> data;
 	std::ifstream read_file(file_name);

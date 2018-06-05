@@ -96,7 +96,6 @@ public:
 	std::string getDir();
 
 protected:
-	void LoadFirstPosition(vec1d &x, vec1d &y, vec1d &z, double TEMPERATURE);
 	void Initialise(vec1d &x, vec1d &y, vec1d &z,
 					vec1d &vx, vec1d &vy, vec1d &vz,
 					double TEMPERATURE);

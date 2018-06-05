@@ -39,36 +39,6 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool QUENCH_F) {
 MD::~MD() {}
 
 
-void MD::LoadFirstPosition(vec1d &x, vec1d &y, vec1d &z, double TEMPERATURE) {
-	// Initialise position matrix and velocity matrix
-	size_t n = 0;
-	size_t i, j, k;
-	for (i = 0; i < Nx; i++) {
-		for (j = 0; j < Ny; j++) {
-			for (k = 0; k < Nz; k++) {
-				x.push_back((i + 0.5) * scale);
-				y.push_back((j + 0.5) * scale);
-				z.push_back((k + 0.5) * scale);
-
-				rrx.push_back((i + 0.5) * scale);
-				rry.push_back((j + 0.5) * scale);
-				rrz.push_back((k + 0.5) * scale);
-
-				++n;
-			}
-		}
-	}
-	// Reading Maxwell Boltzmann velocity Dist from files
-	// TODO: Python script buggy with argument passing
-	// directory defined wrt the dir where .o will execute
-	vx = ReadFromFile(LOAD_DATA_PATH"/vx.txt");
-	vy = ReadFromFile(LOAD_DATA_PATH"/vy.txt");
-	vz = ReadFromFile(LOAD_DATA_PATH"/vz.txt");
-
-	// This is where buggy python script executes
-	////MBDistribution(TEMPERATURE);
-}
-
 // Methods for MD Analysis
 void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 					vec1d &vx, vec1d &vy, vec1d &vz, double TEMPERATURE) {
@@ -112,11 +82,19 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 		vz = ReadFromFile(LOAD_DATA_PATH"/vz.txt");
 	}
 
+	if (quenching_flag == true) {
+		// Read from file with thermalised velocities of fluid
+		// Read from file thermalised positions
+		// TODO: file_name should be mobile depending on sim
+		std::string file_name = "Positions_Velocities_step_10000"
+			"_particles_1000_rho_0.5000_T_0.5000_n_6_A_0.00000.txt";
+		FileLoading<double> velocities_file;
+		std::vector<std::vector<double>> data =
+			velocities_file.LoadTxt(file_name, 9, '#');
+	}
+
 	// This is where buggy python script executes
 	////MBDistribution(TEMPERATURE);
-	//if (Q_counter == 0) {
-	//	LoadFirstPosition(x, y, z, TEMPERATURE);
-	//}
 
 	// scale of x, y, z
 	double mean_vx = 0;

@@ -1,5 +1,5 @@
 #include "MD.h"
-#include "Isomorph.h"
+#include "isomorph.h"
 #include "stat_analysis.h"
 #include <thread>
 #include <string>

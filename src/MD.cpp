@@ -91,7 +91,8 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 		}
 		// Generates Maxwell-Boltzmann dist from Python script
 		// Initialieses vx, vy, vz internally
-		MBDistribution(TEMPERATURE);
+		//TODO: add filecking method to see if file exists, else run python script
+		MBDistribution(TEMPERATURE, false);   // do not run Python script
 	}
 
 	else if (quenching_flag == true) {
@@ -170,17 +171,19 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 	Cr.push_back(first_val);
 }
 
-void MD::MBDistribution(double TEMPERATURE) {
+void MD::MBDistribution(double TEMPERATURE, bool run_python_script = false) {
 	std::string t = ConvertToString(TEMPERATURE, 4);
 	std::string particles = std::to_string(N);
 	//TODO: dir_str should be passed by obj MD internally or by precompiler
 	std::string dir_str = LOAD_DATA_PATH;
 
-	// Could be stored as variables and passed into FileNaming
+	if (run_python_script) {
+		// Could be stored as variables and passed into FileNaming
 	// rather than repeating the process
 	// store in _particles_to_str, _T_to_str
-	std::string command = "python " + dir_str + "/MBDistribution.py " + particles + " " + t;
-	system(command.c_str());  // Creates files with MD velocities
+		std::string command = "python " + dir_str + "/MBDistribution.py " + particles + " " + t;
+		system(command.c_str());  // Creates files with MD velocities 
+	}
 
 	std::string vel_id = "_particles_" + particles + "_T_" + t + ".txt";
 	FileLoading<double> obj;

@@ -4,16 +4,17 @@
 #include <thread>
 #include <string>
 
-#define STEPS 10000
-#define PARTICLES 1000
+
+#define STEPS 10000	//10000
+#define PARTICLES 1000 //1000
 typedef std::vector<double> vec1d;
 
 /* Windows working directory for Archives of Data */
-std::string dir_windows = "C:/Code/C++/MD simulation/Archives of Data/testing/";
+std::string dir_windows = "C:/Code/C++/MD-simulation/Archives of Data/testing/gaussian/";
 /* Linux working directory */
 std::string dir_linux = "/home/gn/Desktop/test_data/";
 std::string dir_crystal = "/home/gn/Desktop/crystallisation_data/";
-std::string dir_crystal_win = "C:/Code/C++/MD simulation/Archives of Data/crystallisation/gaussian/";
+std::string dir_crystal_win = "C:/Code/C++/MD-simulation/Archives of Data/crystallisation/gaussian/";
 /* Working directory of the cx1 cluster */
 std::string dir = "";
 
@@ -23,31 +24,33 @@ std::vector<double> LinearSpacedArray(double a, double b, std::size_t N);
 
 int main() {
 
-	/* Potential power strength */
-	size_t n = 8;
-	/* Generate Temperature vector for isomorph */
-	vec1d T_iso = LinearSpacedArray(0.5, 3, 5);
-	/* Empty containers for density and a_par */
-	vec1d rho_iso, A_iso;
-	vec1d rho_iso_h, A_iso_h;
-	vec1d rho_iso_k, A_iso_k;
-	vec1d rho_iso_l, A_iso_l;
-	/* Generate Density and A isomorph vectors */
-	Isomorph isomorph_line(0.5, 0.5, 1, T_iso);
-	std::tie(rho_iso, A_iso) = isomorph_line.GenLine(n);
+	{/* Potential power strength */
+		size_t n = 8;
+		/* Generate Temperature vector for isomorph */
+		vec1d T_iso = LinearSpacedArray(0.5, 3, 5);
+		/* Empty containers for density and a_par */
+		vec1d rho_iso, A_iso;
+		vec1d rho_iso_h, A_iso_h;
+		vec1d rho_iso_k, A_iso_k;
+		vec1d rho_iso_l, A_iso_l;
+		/* Generate Density and A isomorph vectors */
+		Isomorph isomorph_line(0.5, 0.5, 1, T_iso);
+		std::tie(rho_iso, A_iso) = isomorph_line.GenLine(n);
 
-	Isomorph isomorph_line_h(0.5, 0.5, 0.75, T_iso);
-	std::tie(rho_iso_h, A_iso_h) = isomorph_line_h.GenLine(n);
+		Isomorph isomorph_line_h(0.5, 0.5, 0.75, T_iso);
+		std::tie(rho_iso_h, A_iso_h) = isomorph_line_h.GenLine(n);
 
-	Isomorph isomorph_line_k(0.5, 0.5, 1.25, T_iso);
-	std::tie(rho_iso_k, A_iso_k) = isomorph_line_k.GenLine(n);
+		Isomorph isomorph_line_k(0.5, 0.5, 1.25, T_iso);
+		std::tie(rho_iso_k, A_iso_k) = isomorph_line_k.GenLine(n);
 
-	Isomorph isomorph_linr_l(0.5, 0.5, 2.00, T_iso);
-	std::tie(rho_iso_l, A_iso_l) = isomorph_linr_l.GenLine(n);
-
+		Isomorph isomorph_linr_l(0.5, 0.5, 2.00, T_iso);
+		std::tie(rho_iso_l, A_iso_l) = isomorph_linr_l.GenLine(n);
+	}
 	/* Simulation Examples */
-	//MD run(dir_linux, STEPS);
-	//run.Simulation(0.5, 0.5, 8, 0.5);
+	MD run(dir_windows, STEPS, true);
+	run.Simulation(0.05, 0.0035, 0, 0);
+	//MD run(dir_windows, STEPS, true);
+	//run.Simulation(0.001, 0.1, 8, 0);
 	/*
 	* This is an isomorph line run
 	* Simulates the fluid along the line
@@ -58,22 +61,23 @@ int main() {
 	run.Simulation(rho_iso[i], T_iso[i], n, A_iso[i]);
 	}*/
 	/* Individual Runs */
-	MD* run1 = new MD(dir_windows, STEPS);
-	MD* run2 = new MD(dir_windows, STEPS);
-	MD* run3 = new MD(dir_windows, STEPS);
-	MD* run4 = new MD(dir_windows, STEPS);
-	vec1d a = { 0, 0.25 };
-
-	for (size_t i = 0; i < a.size(); i++) {
-		std::thread th1(&MD::Simulation, run1, 0.5, 1, 6, a[i]);
-		th1.join();
-	}
+	//MD* run1 = new MD(dir_windows, STEPS);
+	//MD* run2 = new MD(dir_windows, STEPS);
+	//MD* run3 = new MD(dir_windows, STEPS);
+	//MD* run4 = new MD(dir_windows, STEPS);
+	//vec1d a = { 0, 0.25 };
+	//
+	//
+	//for (size_t i = 0; i < a.size(); i++) {
+	//	std::thread th1(&MD::Simulation, run1, 0.5, 1, 6, a[i]);
+	//	th1.join();
+	//}
 	//std::thread th2(&MD::Simulation, run2, 0.5, 0.5, 12,  0.75);
 	// std::thread th3(&MD::Simulation, run3, 0.6, 10, 10, 0.5);
 	// std::thread th4(&MD::Simulation, run4, 0.6, 10, 12, 0.5);
 
 	// th2.join();// th3.join(); th4.join();
-	delete run1, run2, run3, run4;
+	//delete run1, run2, run3, run4;
 
 	/*-----------------------------------------------*/
 

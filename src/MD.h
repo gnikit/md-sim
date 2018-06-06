@@ -1,19 +1,19 @@
 //////////////////////////////////////////////////////////////////////
-// Ioannis Nikiteas 13/7/2017									                      //
-//																                                  //
-// BSc Dissertation:										                      	    //
-//  Investigating the transition from Molecular Dynamics to		      //
-//	Smoothed Particle Hydrodynamics					    		                //
-//																                                  //
-//	University: Royal Holloway University of London		              //
-//																                                  // 
-//	A program meant to simulate a MD fluid with an only	            //
-//	repulsive pair-potential. Increasing the parameter A		 	      //
-//	creates a coarse-graining effect for the system allowing it		  //
-//	to transition to SPH											                      //
-//																	                                //
-//																	                                //
-//																	                                //
+// Ioannis Nikiteas 13/7/2017                                       //
+//                                                                  //
+// BSc Dissertation:                                                //
+//  Investigating the transition from Molecular Dynamics to         //
+//	Smoothed Particle Hydrodynamics                                 //
+//                                                                  //
+//	University: Royal Holloway University of London                 //
+//                                                                  // 
+//	A program meant to simulate a MD fluid with an only             //
+//	repulsive pair-potential. Increasing the parameter A            //
+//	creates a coarse-graining effect for the system allowing it     //
+//	to transition to SPH                                            //
+//                                                                  //
+//                                                                  //
+//                                                                  //
 //////////////////////////////////////////////////////////////////////
 #pragma once
 #if defined (__INTEL_COMPILER)
@@ -31,11 +31,10 @@
 #include <iomanip>    // setprecision
 #include <vector>
 #include <chrono>     // CPU run-time
-#include <ctime>
+#include <ctime>	  // std::chrono
 #include <fstream>    // file writing
 #include <iterator>
-#include <assert.h>
-#include <sstream>
+#include <sstream>	  // stringstream
 #include <cstdint>
 
 class MD {
@@ -68,6 +67,10 @@ protected:
 	double PK;              // Kinetic Pressure
 	double scale_v;         // velocity scaling
 
+	// Quenching varibles
+	bool quenching_flag = false;
+	size_t Q_counter = 0; // counts the number qunchings that have occured
+
 	// HISTOGRAM VARIABLES
 	int igr;		// Index of Hist
 	double rg;
@@ -86,10 +89,13 @@ private:
 public:
 
 	MD(std::string DIRECTORY, size_t run_number);
+	MD(std::string DIRECTORY, size_t run_number, bool QUENCH_F);
 	~MD();
 
 	void Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST);
 	std::string getDir();
+	void InitialiseTest(double TEMPERATURE);
+	void ResetValues();
 
 protected:
 	void Initialise(vec1d &x, vec1d &y, vec1d &z,
@@ -100,16 +106,14 @@ protected:
 						 vec1d &vx, vec1d &vy, vec1d &vz,
 						 vec1d &rrx, vec1d &rry, vec1d &rrz);
 	void VelocityAutocorrelationFunction(vec1d &Cvx, vec1d &Cvy, vec1d &Cvz);
-	void RadialDistributionFunction();
+	void RadialDistributionFunction(bool normalise = true);
 	void MeanSquareDisplacement(vec1d &MSDx, vec1d &MSDy, vec1d &MSDz);
-	void DensityQuenching(int steps_quench);
+	void DensityQuenching(int steps_quench, double TEMPERATURE);
 
 	void OpenFiles();
 	void FileNaming(int POWER, double A_cst);
 	void WriteToFiles();
 	void ShowRun(size_t step_size_show);
-	void ResetValues();
 	void TimeStamp(std::ofstream&, std::string variables);
-	std::vector<double> ReadFromFile(const std::string &file_name);
 	std::string ConvertToString(const double & x, const int & precision);
 };

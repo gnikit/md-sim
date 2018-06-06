@@ -1,17 +1,18 @@
 #include "MD.h"
-#define PARTICLES_PER_AXIS 10
+#include "../lib/FileLoading.h"
+#define PARTICLES_PER_AXIS 10  // if changed, new vx,vy,vz files need to be generated
 #define NHIST 300
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 #ifdef _WIN32
 #define LOAD_DATA_PATH "C:/Users/gn/source/repos/MD-simulation/data"
+#define LOAD_POSITIONS LOAD_DATA_PATH"/gaussian"
 #else
 #define LOAD_DATA_PATH "../data"
 #endif
 
 
 
-// TODO: Boltzmann Dist normalisation of the particles velocities in the beggining make it C++
-//TODO: Export the final data file of the density quenching
+//TODO: Boltzmann Dist normalisation of the particles velocities in the beggining make it C++
 
 MD::MD(std::string DIRECTORY, size_t run_number) {
 	_dir = DIRECTORY;
@@ -23,7 +24,20 @@ MD::MD(std::string DIRECTORY, size_t run_number) {
 	gr.resize(NHIST + 1, 0); // gr with Index igr
 	fx.resize(N, 0); fy.resize(N, 0); fz.resize(N, 0);
 }
+
+MD::MD(std::string DIRECTORY, size_t run_number, bool QUENCH_F) {
+	_dir = DIRECTORY;
+	_STEPS = run_number;
+
+	Nx = Ny = Nz = PARTICLES_PER_AXIS; // Number of particles per axis
+	N = Nx * Ny * Nz;
+
+	gr.resize(NHIST + 1, 0); // gr with Index igr
+	fx.resize(N, 0); fy.resize(N, 0); fz.resize(N, 0);
+	quenching_flag = QUENCH_F;
+}
 MD::~MD() {}
+
 
 // Methods for MD Analysis
 void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
@@ -42,37 +56,58 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 	*/
 
 	// Initialise position matrix and velocity matrix
-	size_t n = 0;
-	size_t i, j, k;
-	for (i = 0; i < Nx; i++) {
-		for (j = 0; j < Ny; j++) {
-			for (k = 0; k < Nz; k++) {
-				x.push_back((i + 0.5) * scale);
-				y.push_back((j + 0.5) * scale);
-				z.push_back((k + 0.5) * scale);
+	//TODO: once the feature is complete remove Q_counter == 0
+	if (quenching_flag == false) {
+		size_t n = 0;
+		size_t i, j, k;
+		for (i = 0; i < Nx; i++) {
+			for (j = 0; j < Ny; j++) {
+				for (k = 0; k < Nz; k++) {
+					x.push_back((i + 0.5) * scale);
+					y.push_back((j + 0.5) * scale);
+					z.push_back((k + 0.5) * scale);
 
-				rrx.push_back((i + 0.5) * scale);
-				rry.push_back((j + 0.5) * scale);
-				rrz.push_back((k + 0.5) * scale);
+					rrx.push_back((i + 0.5) * scale);
+					rry.push_back((j + 0.5) * scale);
+					rrz.push_back((k + 0.5) * scale);
 
-				++n;
+					++n;
+				}
 			}
 		}
+		// Generates Maxwell-Boltzmann dist from Python script
+		// Initialieses vx, vy, vz internally
+		MBDistribution(TEMPERATURE);
 	}
-	// Reading Maxwell Boltzmann velocity Dist from files
-	// TODO: Python script buggy with argument passing
-	// directory defined wrt the dir where .o will execute
-	vx = ReadFromFile(LOAD_DATA_PATH"/vx.txt");
-	vy = ReadFromFile(LOAD_DATA_PATH"/vy.txt");
-	vz = ReadFromFile(LOAD_DATA_PATH"/vz.txt");
 
-	// This is where buggy python script executes
-	////MBDistribution(TEMPERATURE);
+	else if (quenching_flag == true) {
+		FileLoading<double> load_data;
+		std::string file_name = LOAD_POSITIONS"Positions_Velocities_particles_" + std::to_string(N);
+		std::vector<std::vector<double>> vel = 
+			load_data.LoadTxt(file_name, 9, '#');
+		x = vel[0];
+		y = vel[1];
+		z = vel[2];
+		vx = vel[3];
+		vy = vel[4];
+		vz = vel[5];
+		// Start from a highly thermalised fluid state
+		// Generation of velocities with T = 10
+		//MBDistribution(10);
+		// TODO: Not sure what follows is correct in if-loop
+		// Temperature calculation for the first step with very high T
+		// scale of x, y, z
+		// TODO: Don't think there is need to scale for the first iteration
+		// system will equilibrate after that
+	}
+
+
 	// scale of x, y, z
 	double mean_vx = 0;
 	double mean_vy = 0;
 	double mean_vz = 0;
 
+	size_t i;
 	// Momentum conservation array
 	for (i = 0; i < N; i++) {
 		mean_vx += vx[i] / N; // Calculating Average velocity for each dimension
@@ -124,21 +159,22 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 
 void MD::MBDistribution(double TEMPERATURE) {
 	std::string t = ConvertToString(TEMPERATURE, 4);
-	std::string particles = std::to_string(N); // defined in constructor
+	std::string particles = std::to_string(N);
+	//TODO: dir_str should be passed by obj MD internally or by precompiler
+	std::string dir_str = LOAD_DATA_PATH;
+
 	// Could be stored as variables and passed into FileNaming
 	// rather than repeating the process
 	// store in _particles_to_str, _T_to_str
-	// TODO: if windows, store CD cout >> to dir_str
-	//       if linux, store pwd >> to dir_str
-	// TODO: Python script is buggy and sometimes gives error when passing arguments
-	//std::string command = "python " + dir_str + "/MBDistribution.py " + particles + " " + t;
-	//system(command.c_str());  // Creates files with MD velocities
+	std::string command = "python " + dir_str + "/MBDistribution.py " + particles + " " + t;
+	system(command.c_str());  // Creates files with MD velocities
 
-	std::string vel_id = "particles_" + particles + "_T_" + t;
-
-	vx = ReadFromFile(vel_id + "vx.txt");
-	vy = ReadFromFile(vel_id + "vy.txt");
-	vz = ReadFromFile(vel_id + "vz.txt");
+	std::string vel_id = "_particles_" + particles + "_T_" + t + ".txt";
+	FileLoading<double> obj;
+	vx = obj.LoadSingleCol(LOAD_DATA_PATH"/vx" + vel_id);
+	vy = obj.LoadSingleCol(LOAD_DATA_PATH"/vy" + vel_id);
+	vz = obj.LoadSingleCol(LOAD_DATA_PATH"/vz" + vel_id);
+	//TODO: define in heap and delete FileLoading obj
 }
 
 
@@ -196,14 +232,17 @@ void MD::VelocityAutocorrelationFunction(vec1d &Cvx,
 	VAF << temp_ << std::endl; // writes to file
 }
 
-void MD::RadialDistributionFunction() {
+void MD::RadialDistributionFunction(bool normalise) {
+	/*normalise by default is TRUE*/
 	double R = 0;
-	double norm;
+	double norm = 1;
 	double cor_rho = _rho * (N - 1) / N;
 	size_t i;
 	for (i = 1; i < NHIST; i++) {  // Changed initial loop value from 0 -> 1
-		R = rg * i / NHIST;
-		norm = (cor_rho * 2 * PI * R * R * N * _STEPS * dr);
+		if (normalise) {
+			R = rg * i / NHIST;
+			norm = (cor_rho * 2 * PI * R * R * N * _STEPS * dr);
+		}
 		gr[i] /= norm;	// not really needed
 		Hist << gr[i] << std::endl;
 	}
@@ -222,16 +261,16 @@ void MD::MeanSquareDisplacement(vec1d &MSDx,
 	MSD << msd_temp << std::endl;
 }
 
-void MD::DensityQuenching(int steps_quench) {
-	if (_STEP_INDEX % steps_quench == 0 && _STEP_INDEX != 0) {
-		// Increase _rho by 0.001
-		_rho += 0.001;
-		// Re-using this piece of code from MD::Simulation
-		scale = pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS;
-		L = pow((N / _rho), 1.0 / 3.0);
-		Vol = N / _rho;
-		// TODO: possibly need to add MD::Initialise to use the **scale** var
-	}
+void MD::DensityQuenching(int steps_quench, double TEMPERATURE) {
+	// Increase _rho by 0.01
+	_rho += 0.01;
+	// Re-using this piece of code from MD::Simulation
+	scale = pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS;
+	L = pow((N / _rho), 1.0 / 3.0);
+	Vol = N / _rho;
+	// TODO: possibly need to add MD::Initialise to use the **scale** var
+	Initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE); // ++quenching num
+
 }
 
 // MD Simulation
@@ -251,11 +290,14 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 	rg = cut_off;
 	dr = rg / NHIST;
 
+	// Filenaming should not be called
 	FileNaming(POWER, A_CST);
 	OpenFiles();
 	TimeStamp(DATA, "# T\tK\tU\tEtot\tPc\tPk\tPtot\tSteps\trho");
+
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-	Initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
+
+	Initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE); // ++quenching num
 
 	double xx, yy, zz;
 	for (_STEP_INDEX = 0; _STEP_INDEX < _STEPS; _STEP_INDEX++) {
@@ -267,8 +309,13 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 
 		U = 0; // seting Potential U to 0
 		PC = 0;
-		// Density phase change method
-		//DensityQuenching(100);
+
+		size_t steps_quench = 1000;	// steps between each quenching
+		if (quenching_flag == true && _STEP_INDEX != 0 && _STEP_INDEX % steps_quench == 0) {
+			DensityQuenching(steps_quench, TEMPERATURE);
+			std::cout << "successful quench " << Q_counter << std::endl;
+			++Q_counter;
+		}
 
 		size_t i, j;
 		for (i = 0; i < N - 1; i++) {
@@ -277,60 +324,52 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 				y = ry[i] - ry[j]; // between particles i and j
 				z = rz[i] - rz[j]; // in Cartesian
 
-				xx = rrx[i] - rrx[j];
-				yy = rry[i] - rry[j];
-				zz = rrz[i] - rrz[j];
+				xx = x;
+				yy = y;
+				zz = z;
 
 				// Transposing elements with Periodic BC
+				// xx, yy, zz are for the MSD calculation
 				if (x > (0.5 * L)) {
 					x = x - L;
+					xx = xx - L;
 				}
 				if (y > (0.5 * L)) {
 					y = y - L;
+					yy = yy - L;
 				}
 				if (z > (0.5 * L)) {
 					z = z - L;
+					zz = zz - L;
 				}
 				if (x < (-0.5 * L)) {
 					x = x + L;
+					xx = xx + L;
 				}
 				if (y < (-0.5 * L)) {
 					y = y + L;
+					yy = yy + L;
 				}
 				if (z < (-0.5 * L)) {
 					z = z + L;
-				}
-
-				/////////// for MSD  /////////////////
-				if (xx > (0.5 * L)) {
-					xx = xx - L;
-				}
-				if (yy > (0.5 * L)) {
-					yy = yy - L;
-				}
-				if (zz > (0.5 * L)) {
-					zz = zz - L;
-				}
-				if (xx < (-0.5 * L)) {
-					xx = xx + L;
-				}
-				if (yy < (-0.5 * L)) {
-					yy = yy + L;
-				}
-				if (zz < (-0.5 * L)) {
 					zz = zz + L;
 				}
 
 				r = sqrt((x * x) + (y * y) + (z * z));
-				long double q = sqrt(r * r + A_CST * A_CST);
+				//TODO: enable q for BIP potential
+				//long double q = sqrt(r * r + A_CST * A_CST);
 
 				// Force loop
 				if (r < cut_off) {
+					//TODO: implement functionally different potentials, currently 
+					//		using comment-uncomment to implement
 					// BIP potential of the form: phi = 1/[(r**2 + a**2)**(n/2)]
-					long double ff =
-						(POWER)*r *	pow(q, ((-POWER - 2.0))); // Force for particles
-					  // Gausian-force with sigma=1 and epsilon=1
-					  //long double ff = 2*r * exp(-r);
+					//TODO: BIP force
+					//long double ff =
+					//	(POWER)*r *	pow(q, ((-POWER - 2.0))); // Force for particles
+
+					//TODO: Gausian-force with sigma=1 and epsilon=1
+					long double ff = 2 * r * exp(-r * r);
 
 
 					fx[i] += x * ff / r;
@@ -341,13 +380,16 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 					fz[j] -= z * ff / r;
 
 					PC += r * ff;
-					// TODO:Gaussian-Potential configurational Pressure
+					//TODO:Gaussian-Potential configurational Pressure
 					// integral not evaluated
 
-					// TODO: Add infinity and edge correction, do same for Pc
-					U += pow(q, (-POWER)); // Potential Calculation
-					// Gaussian-Potential
-					//U += exp(-r*r);
+					//TODO: Add infinity and edge correction, do same for Pc
+
+					//TODO: BIP potential
+					//U += pow(q, (-POWER)); 
+
+					//TODO: Gaussian Potential GCM
+					U += exp(-r * r);
 
 					// Radial Distribution
 					igr = round(NHIST * r / rg);
@@ -389,7 +431,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 			<< fz[el] << std::endl;
 	}
 
-	RadialDistributionFunction();
+	RadialDistributionFunction(false);	// normalisation argument
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	std::cout
 		<< "CPU run time = "
@@ -399,7 +441,8 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 		<< std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() %
 		60
 		<< "s" << std::endl;
-	ResetValues(); // Check if everything is reset, could have missed something
+	// Streams should not close, vectors should not be cleared if object is to be reused
+	//ResetValues(); // no need to call if object is not reused
 }
 
 std::string MD::getDir() {
@@ -407,6 +450,123 @@ std::string MD::getDir() {
 	* Returns the directory in a string
 	*/
 	return _dir;
+}
+
+void MD::InitialiseTest(double TEMPERATURE) {
+	/*
+	  Unit test for the Initialisation method.
+	  Tests whether the bool quenching_flag trigers the correct loops.
+	  If MBDistribution.py performs as expected.
+	  If FileLoading.LoadSingleCol() works as expected.
+	  If the file directories with preprocessor commands work.
+	*/
+	// Initialise position matrix and velocity matrix
+	//TODO: once the feature is complete remove Q_counter == 0
+	if (quenching_flag == false/* || Q_counter == 0*/) {
+		size_t n = 0;
+		size_t i, j, k;
+		for (i = 0; i < Nx; i++) {
+			for (j = 0; j < Ny; j++) {
+				for (k = 0; k < Nz; k++) {
+					rx.push_back((i + 0.5) * scale);
+					ry.push_back((j + 0.5) * scale);
+					rz.push_back((k + 0.5) * scale);
+
+					rrx.push_back((i + 0.5) * scale);
+					rry.push_back((j + 0.5) * scale);
+					rrz.push_back((k + 0.5) * scale);
+
+					++n;
+				}
+			}
+		}
+		// Generates Maxwell-Boltzmann dist from Python script
+		// Initialieses vx, vy, vz internally
+		std::cout << "No quench will be performed" << std::endl;
+		MBDistribution(TEMPERATURE);
+	}
+
+	if (quenching_flag == true) {
+		// Start from a highly thermalised fluid state
+		std::cout << "High thermalisation for Quench prepparation" << std::endl;
+		MBDistribution(10);
+		// TODO: Not sure if this is correct
+		// Temperature calculation for the first step with very high T
+		// scale of x, y, z
+		double mean_vx = 0;
+		double mean_vy = 0;
+		double mean_vz = 0;
+
+		size_t i;
+		// Momentum conservation array
+		for (i = 0; i < N; i++) {
+			mean_vx += vx[i] / N; // Calculating Average velocity for each dimension
+			mean_vy += vy[i] / N;
+			mean_vz += vz[i] / N;
+		}
+
+		size_t tempN = N;    // Recommended opt by Intel
+#pragma parallel 
+#pragma loop count min(128)
+		for (i = 0; i < tempN; i++) {
+			vx[i] = vx[i] - mean_vx; // Subtracting Av. velocities from each particle
+			vy[i] = vy[i] - mean_vy;
+			vz[i] = vz[i] - mean_vz;
+		}
+		// T Calc
+		KE = 0;
+		for (i = 0; i < N; i++) {
+			KE += 0.5 * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]);
+		}
+		T = KE / (1.5 * N);
+		scale_v = sqrt(10 / T); // scalling factor
+										 // Velocity scaling
+#pragma parallel
+#pragma loop count min(128)
+		for (i = 0; i < tempN; i++) {
+			vx[i] *= scale_v;
+			vy[i] *= scale_v;
+			vz[i] *= scale_v;
+		}
+	}
+	// Restoring to normal operation of Initialisation
+	// scale of x, y, z
+	double mean_vx = 0;
+	double mean_vy = 0;
+	double mean_vz = 0;
+
+	size_t i;
+	// Momentum conservation array
+	for (i = 0; i < N; i++) {
+		mean_vx += vx[i] / N; // Calculating Average velocity for each dimension
+		mean_vy += vy[i] / N;
+		mean_vz += vz[i] / N;
+	}
+
+	size_t tempN = N;    // Recommended opt by Intel
+#pragma parallel 
+#pragma loop count min(128)
+	for (i = 0; i < tempN; i++) {
+		vx[i] = vx[i] - mean_vx; // Subtracting Av. velocities from each particle
+		vy[i] = vy[i] - mean_vy;
+		vz[i] = vz[i] - mean_vz;
+	}
+	// T Calc
+	KE = 0;
+	for (i = 0; i < N; i++) {
+		KE += 0.5 * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]);
+	}
+	T = KE / (1.5 * N);
+	scale_v = sqrt(TEMPERATURE / T); // scalling factor
+									 // Velocity scaling
+#pragma parallel
+#pragma loop count min(128)
+	for (i = 0; i < tempN; i++) {
+		vx[i] *= scale_v;
+		vy[i] *= scale_v;
+		vz[i] *= scale_v;
+	}
+
 }
 
 // File Handling
@@ -450,8 +610,8 @@ void MD::FileNaming(int POWER, double A_cst) {
 
 void MD::OpenFiles() {
 	/*
-	  Open/Create if file does not exist
-	  Overwrite existing data
+	Open/Create if file does not exist
+	Overwrite existing data
 	*/
 	// opens for files output and deletes prev content
 	Hist.open(HIST, std::ios::out | std::ios::trunc);
@@ -463,7 +623,7 @@ void MD::OpenFiles() {
 
 void MD::WriteToFiles() {
 	/*
-	  Writes values of parameters to file
+	Writes values of parameters to file
 	*/
 	DATA << T << '\t' << KE << '\t' << U << '\t'
 		<< (U + KE) << '\t' << PC << '\t' << PK
@@ -473,8 +633,8 @@ void MD::WriteToFiles() {
 
 void MD::ShowRun(size_t step_size_show) {
 	/*
-	  Displays the system parameters every step_size_show of steps
-	  Input the increment step
+	Displays the system parameters every step_size_show of steps
+	Input the increment step
 	*/
 	if (_STEP_INDEX == 0) {
 		std::cout << "step:\tT:\tKE:\tU:\tU+K:\tPC:\tPK:\t(PK+PC):" << std::endl;
@@ -490,8 +650,8 @@ void MD::ShowRun(size_t step_size_show) {
 
 void MD::ResetValues() {
 	/*
-	  Closes open file streams and resets sizes and values to 0
-	  For multiple simulations
+	Closes open file streams and resets sizes and values to 0
+	For multiple simulations
 	*/
 	// Close streams at the end of run
 	Hist.close();
@@ -518,39 +678,14 @@ void MD::ResetValues() {
 
 void MD::TimeStamp(std::ofstream& stream, std::string variables) {
 	/*
-	  Dates the file and allows the input of a header
-	  Input a file stream to write and string of characters to display as headers
+	Dates the file and allows the input of a header
+	Input a file stream to write and string of characters to display as headers
 	*/
 	std::chrono::time_point<std::chrono::system_clock> instance;
 	instance = std::chrono::system_clock::now();
 	std::time_t date_time = std::chrono::system_clock::to_time_t(instance);
 	stream << "# Created on: " << std::ctime(&date_time);
 	stream << variables << std::endl;
-}
-
-std::vector<double> MD::ReadFromFile(const std::string & file_name) {
-	/*
-	  Reads from a stream that already exists for a file that is already placed in the
-	  directory and appends the data into a 1D vector.
-	*/
-	std::vector<double> data;
-	std::ifstream read_file(file_name);
-	try {
-		read_file.exceptions(read_file.failbit);
-		std::copy(std::istream_iterator<double>(read_file),
-				  std::istream_iterator<double>(), std::back_inserter(data));
-
-		read_file.close();
-		return data;
-	}
-
-	catch (const std::ios_base::failure& e) {
-		std::cerr << "Caught an ios_base::failure.\n"
-			<< "Explanatory string: " << e.what() << '\n'
-			<< "Error code: " << e.code() << '\n';
-	}
-
-
 }
 
 std::string MD::ConvertToString(const double & x, const int & precision) {

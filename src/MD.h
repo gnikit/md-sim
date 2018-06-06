@@ -102,7 +102,7 @@ protected:
 	void Initialise(vec1d &x, vec1d &y, vec1d &z,
 					vec1d &vx, vec1d &vy, vec1d &vz,
 					double TEMPERATURE);
-	void MBDistribution(double TEMPERATURE);
+	void MBDistribution(double TEMPERATURE, bool run_python_script);
 	void VerletAlgorithm(vec1d &rx, vec1d &ry, vec1d &rz,
 						 vec1d &vx, vec1d &vy, vec1d &vz,
 						 vec1d &rrx, vec1d &rry, vec1d &rrz);

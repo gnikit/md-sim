@@ -23,6 +23,13 @@ MD::MD(std::string DIRECTORY, size_t run_number) {
 
 	gr.resize(NHIST + 1, 0); // gr with Index igr
 	fx.resize(N, 0); fy.resize(N, 0); fz.resize(N, 0);
+	Cr.reserve(_STEPS);
+	msd.reserve(_STEPS);
+	u_en.reserve(_STEPS);
+	k_en.reserve(_STEPS);
+	pc.reserve(_STEPS);
+	pk.reserve(_STEPS);
+	temperature.reserve(_STEPS);
 }
 
 MD::MD(std::string DIRECTORY, size_t run_number, bool QUENCH_F) {
@@ -34,6 +41,14 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool QUENCH_F) {
 
 	gr.resize(NHIST + 1, 0); // gr with Index igr
 	fx.resize(N, 0); fy.resize(N, 0); fz.resize(N, 0);
+	Cr.reserve(_STEPS);
+	msd.reserve(_STEPS);
+	u_en.reserve(_STEPS);
+	k_en.reserve(_STEPS);
+	pc.reserve(_STEPS);
+	pk.reserve(_STEPS);
+	temperature.reserve(_STEPS);
+
 	quenching_flag = QUENCH_F;
 }
 MD::~MD() {}
@@ -56,7 +71,6 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 	*/
 
 	// Initialise position matrix and velocity matrix
-	//TODO: once the feature is complete remove Q_counter == 0
 	if (quenching_flag == false) {
 		size_t n = 0;
 		size_t i, j, k;
@@ -153,8 +167,7 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 		first_val += (Cvx[i] * Cvx[i] + Cvy[i] * Cvy[i] + Cvz[i] * Cvz[i]) / N;
 	}
 	first_val /= N;
-	//Cr.push_back(first_val);	// HACK: Enable for debugging
-	VAF << first_val << std::endl;
+	Cr.push_back(first_val);
 }
 
 void MD::MBDistribution(double TEMPERATURE) {
@@ -222,14 +235,14 @@ void MD::VerletAlgorithm(vec1d &rx, vec1d &ry, vec1d &rz,
 void MD::VelocityAutocorrelationFunction(vec1d &Cvx,
 										 vec1d &Cvy,
 										 vec1d &Cvz) {
-	double temp_ = 0; // resets every time step
+	double temp = 0; // resets every time step
 	size_t i;
 	for (i = 0; i < N; i++) {
-		temp_ += (Cvx[i] * vx[i] + Cvy[i] * vy[i] + Cvz[i] * vz[i]);
+		temp += (Cvx[i] * vx[i] + Cvy[i] * vy[i] + Cvz[i] * vz[i]);
 	}
-	temp_ /= N;
-	//Cr.push_back(temp_);	// HACK: Enable for debugging
-	VAF << temp_ << std::endl; // writes to file
+	temp /= N;
+	Cr.push_back(temp);	// HACK: Enable for debugging
+	//VAF << temp_ << std::endl; // writes to file
 }
 
 void MD::RadialDistributionFunction(bool normalise) {
@@ -257,8 +270,8 @@ void MD::MeanSquareDisplacement(vec1d &MSDx,
 					 pow((rrz[i] - MSDz[i]), 2));
 	}
 	msd_temp /= N;
-	//msd.push_back(msd_temp);	// HACK: Enable for debugging
-	MSD << msd_temp << std::endl;
+	msd.push_back(msd_temp);	// HACK: Enable for debugging
+	//MSD << msd_temp << std::endl;
 }
 
 void MD::DensityQuenching(int steps_quench, double TEMPERATURE) {
@@ -293,7 +306,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 	// Filenaming should not be called
 	FileNaming(POWER, A_CST);
 	OpenFiles();
-	TimeStamp(DATA, "# T\tK\tU\tEtot\tPc\tPk\tPtot\tSteps\trho");
+	TimeStamp(DATA, "# step \t rho \t U \t K \t Pc \t Pk \t MSD \t VAF");
 
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
@@ -357,7 +370,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 
 				r = sqrt((x * x) + (y * y) + (z * z));
 				//TODO: enable q for BIP potential
-				//long double q = sqrt(r * r + A_CST * A_CST);
+				long double q = sqrt(r * r + A_CST * A_CST);
 
 				// Force loop
 				if (r < cut_off) {
@@ -365,11 +378,11 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 					//		using comment-uncomment to implement
 					// BIP potential of the form: phi = 1/[(r**2 + a**2)**(n/2)]
 					//TODO: BIP force
-					//long double ff =
-					//	(POWER)*r *	pow(q, ((-POWER - 2.0))); // Force for particles
+					long double ff =
+						(POWER)*r *	pow(q, ((-POWER - 2.0))); // Force for particles
 
 					//TODO: Gausian-force with sigma=1 and epsilon=1
-					long double ff = 2 * r * exp(-r * r);
+					//long double ff = 2 * r * exp(-r * r);
 
 
 					fx[i] += x * ff / r;
@@ -386,10 +399,10 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 					//TODO: Add infinity and edge correction, do same for Pc
 
 					//TODO: BIP potential
-					//U += pow(q, (-POWER)); 
+					U += pow(q, (-POWER)); 
 
 					//TODO: Gaussian Potential GCM
-					U += exp(-r * r);
+					//U += exp(-r * r);
 
 					// Radial Distribution
 					igr = round(NHIST * r / rg);
@@ -399,28 +412,45 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 			}
 		}
 
-		U /= N; // Average Potential Energy per particle
-		PC = PC / (3 * Vol);
+		// Average Potential Energy per particle
+		u_en.push_back(U / N);
+
+		// Average Configurational Pressure Pc
+		pc.push_back( PC / (3 * Vol));
 
 		// Isothermal Calibration
 		scale_v = sqrt(_T0 / T); // using T & KE from prev timestep
-		KE = 0; // set 0 for each step
+		KE = 0; // resetting Kintetic Energy per iteration
 
 		// Verlet Algorithm
 		VerletAlgorithm(rx, ry, rz, vx, vy, vz, rrx, rry, rrz);
+
 		// MSD
 		MeanSquareDisplacement(MSDx, MSDy, MSDz);
+
 		// VAF
 		VelocityAutocorrelationFunction(Cvx, Cvy, Cvz);
 
-		T = KE / (1.5 * N); // Average T
-		PK = _rho * T;       // Kinetic part of pressure
-		KE /= N;
+		// Average Temperature
+		T = KE / (1.5 * N); 
+		temperature.push_back(T);
 
-		WriteToFiles();
+		// Kinetic Pressure
+		PK = _rho * T;       
+		pk.push_back(PK);
+		
+		// Average Kintetic Energy
+		KE /= N;
+		k_en.push_back(KE);
+
+		// Density
+		density.push_back(_rho);
+
 		//ShowRun(500);  // shows every 500 steps
 	}
 	// Simulation Ends HERE
+
+	WriteToFiles();
 	// Saving Last Position
 	TimeStamp(POS, "# X\tY\tZ\tVx\tVy\tVz\tFx\tFy\tFz");
 	for (size_t el = 0; el < rx.size(); el++) {
@@ -597,15 +627,11 @@ void MD::FileNaming(int POWER, double A_cst) {
 	data = "Data";
 	pos = "Positions_Velocities";
 	HIST = "Hist";
-	_VAF = "VAF";
-	_MSD = "MSD";
 
 	// Path addition
 	data = _dir + data + _FILE_ID + _FILE_EXT;
 	pos = _dir + pos + _FILE_ID + _FILE_EXT;
 	HIST = _dir + HIST + _FILE_ID + _FILE_EXT;
-	_VAF = _dir + _VAF + _FILE_ID + _FILE_EXT;
-	_MSD = _dir + _MSD + _FILE_ID + _FILE_EXT;
 }
 
 void MD::OpenFiles() {
@@ -615,8 +641,6 @@ void MD::OpenFiles() {
 	*/
 	// opens for files output and deletes prev content
 	Hist.open(HIST, std::ios::out | std::ios::trunc);
-	VAF.open(_VAF, std::ios::out | std::ios::trunc);
-	MSD.open(_MSD, std::ios::out | std::ios::trunc);
 	DATA.open(data, std::ios::out | std::ios::trunc);
 	POS.open(pos, std::ios::out | std::ios::trunc);
 }
@@ -625,10 +649,12 @@ void MD::WriteToFiles() {
 	/*
 	Writes values of parameters to file
 	*/
-	DATA << T << '\t' << KE << '\t' << U << '\t'
-		<< (U + KE) << '\t' << PC << '\t' << PK
-		<< '\t' << (PC + PK) << '\t' << (_STEP_INDEX + 1)
-		<< '\t' << _rho << std::endl;
+	for (size_t i = 0; i < _STEPS; i++) {
+		DATA << (i + 1) << '\t' << density[i] << '\t'
+			<< temperature[i] << '\t' << u_en[i] << '\t'
+			<< k_en[i] << '\t' << pc[i] << '\t' << pk[i]
+			<< '\t' << msd[i] << '\t' << Cr[i] << std::endl;
+	}
 }
 
 void MD::ShowRun(size_t step_size_show) {
@@ -655,8 +681,6 @@ void MD::ResetValues() {
 	*/
 	// Close streams at the end of run
 	Hist.close();
-	VAF.close();
-	MSD.close();
 	DATA.close();
 	POS.close();
 

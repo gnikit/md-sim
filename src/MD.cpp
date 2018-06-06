@@ -12,7 +12,6 @@
 
 
 //TODO: Boltzmann Dist normalisation of the particles velocities in the beggining make it C++
-//TODO: Export the final data file of the density quenching
 
 MD::MD(std::string DIRECTORY, size_t run_number) {
 	_dir = DIRECTORY;
@@ -57,7 +56,7 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 
 	// Initialise position matrix and velocity matrix
 	//TODO: once the feature is complete remove Q_counter == 0
-	if (quenching_flag == false || Q_counter == 0) {
+	if (quenching_flag == false/* || Q_counter == 0*/) {
 		size_t n = 0;
 		size_t i, j, k;
 		for (i = 0; i < Nx; i++) {
@@ -78,20 +77,11 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 		// Generates Maxwell-Boltzmann dist from Python script
 		// Initialieses vx, vy, vz internally
 		MBDistribution(TEMPERATURE);
-		//vx = ReadFromFile(LOAD_DATA_PATH"/vx.txt");
-		//vy = ReadFromFile(LOAD_DATA_PATH"/vy.txt");
-		//vz = ReadFromFile(LOAD_DATA_PATH"/vz.txt");
 	}
 
 	if (quenching_flag == true) {
-		// Read from file with thermalised velocities of fluid
-		// Read from file thermalised positions
-		// TODO: file_name should be mobile depending on sim
-		std::string file_name = "Positions_Velocities_step_10000"
-			"_particles_1000_rho_0.5000_T_0.5000_n_6_A_0.00000.txt";
-		//FileLoading<double> velocities_file;
-		//std::vector<std::vector<double>> data =
-		//	velocities_file.LoadTxt(file_name, 9, '#');
+		// Start from a highly thermalised fluid state
+		MBDistribution(10);
 	}
 
 	// This is where buggy python script executes
@@ -156,7 +146,7 @@ void MD::MBDistribution(double TEMPERATURE) {
 	std::string t = ConvertToString(TEMPERATURE, 4);
 	std::string particles = std::to_string(N);
 	//TODO: dir_str should be passed by obj MD internally or by precompiler
-	std::string dir_str = "C:/Code/C++/MD-simulation/PlotAnalysis/MD-Simulation-Data-Analysis/";
+	std::string dir_str = LOAD_DATA_PATH;
 	// defined in constructor
 
 	// Could be stored as variables and passed into FileNaming
@@ -167,9 +157,10 @@ void MD::MBDistribution(double TEMPERATURE) {
 
 	std::string vel_id = "_particles_" + particles + "_T_" + t + ".txt";
 	FileLoading<double> obj;
-	vx = obj.LoadSingleCol("./data/vx" + vel_id);
-	vy = obj.LoadSingleCol("./data/vy" + vel_id);
-	vz = obj.LoadSingleCol("./data/vz" + vel_id);
+	vx = obj.LoadSingleCol(LOAD_DATA_PATH"/vx" + vel_id);
+	vy = obj.LoadSingleCol(LOAD_DATA_PATH"/vy" + vel_id);
+	vz = obj.LoadSingleCol(LOAD_DATA_PATH"/vz" + vel_id);
+	//TODO: define in heap and delete FileLoading obj
 }
 
 
@@ -463,6 +454,82 @@ std::string MD::getDir() {
 	return _dir;
 }
 
+void MD::Initialise(double TEMPERATURE) {
+	// Initialise position matrix and velocity matrix
+	//TODO: once the feature is complete remove Q_counter == 0
+	if (quenching_flag == false/* || Q_counter == 0*/) {
+		size_t n = 0;
+		size_t i, j, k;
+		for (i = 0; i < Nx; i++) {
+			for (j = 0; j < Ny; j++) {
+				for (k = 0; k < Nz; k++) {
+					rx.push_back((i + 0.5) * scale);
+					ry.push_back((j + 0.5) * scale);
+					rz.push_back((k + 0.5) * scale);
+
+					rrx.push_back((i + 0.5) * scale);
+					rry.push_back((j + 0.5) * scale);
+					rrz.push_back((k + 0.5) * scale);
+
+					++n;
+				}
+			}
+		}
+		// Generates Maxwell-Boltzmann dist from Python script
+		// Initialieses vx, vy, vz internally
+		std::cout << "No quench will be performed" << std::endl;
+		MBDistribution(TEMPERATURE);
+	}
+
+	if (quenching_flag == true) {
+		// Start from a highly thermalised fluid state
+		std::cout << "High thermalisation for Quench prepparation" << std::endl;
+		MBDistribution(10);
+	}
+
+	// This is where buggy python script executes
+	////MBDistribution(TEMPERATURE);
+
+	// scale of x, y, z
+	double mean_vx = 0;
+	double mean_vy = 0;
+	double mean_vz = 0;
+
+	size_t i;
+	// Momentum conservation array
+	for (i = 0; i < N; i++) {
+		mean_vx += vx[i] / N; // Calculating Average velocity for each dimension
+		mean_vy += vy[i] / N;
+		mean_vz += vz[i] / N;
+	}
+
+	size_t tempN = N;    // Recommended opt by Intel
+#pragma parallel 
+#pragma loop count min(128)
+	for (i = 0; i < tempN; i++) {
+		vx[i] = vx[i] - mean_vx; // Subtracting Av. velocities from each particle
+		vy[i] = vy[i] - mean_vy;
+		vz[i] = vz[i] - mean_vz;
+	}
+	// T Calc
+	KE = 0;
+	for (i = 0; i < N; i++) {
+		KE += 0.5 * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]);
+	}
+	T = KE / (1.5 * N);
+	scale_v = sqrt(TEMPERATURE / T); // scalling factor
+
+									 // Velocity scaling
+#pragma parallel
+#pragma loop count min(128)
+	for (i = 0; i < tempN; i++) {
+		vx[i] *= scale_v;
+		vy[i] *= scale_v;
+		vz[i] *= scale_v;
+	}
+
+}
+
 // File Handling
 void MD::FileNaming(int POWER, double A_cst) {
 	/*
@@ -580,21 +647,6 @@ void MD::TimeStamp(std::ofstream& stream, std::string variables) {
 	std::time_t date_time = std::chrono::system_clock::to_time_t(instance);
 	stream << "# Created on: " << std::ctime(&date_time);
 	stream << variables << std::endl;
-}
-
-std::vector<double> MD::ReadFromFile(const std::string & file_name) {
-	/*
-	Reads from a stream that already exists for a file that is already placed in the
-	directory and appends the data into a 1D vector.
-	*/
-	std::vector<double> data;
-	std::ifstream read_file(file_name);
-
-	std::copy(std::istream_iterator<double>(read_file),
-			  std::istream_iterator<double>(), std::back_inserter(data));
-
-	return data;
-
 }
 
 std::string MD::ConvertToString(const double & x, const int & precision) {

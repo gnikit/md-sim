@@ -47,16 +47,10 @@ int main() {
 		std::tie(rho_iso_l, A_iso_l) = isomorph_linr_l.GenLine(n);
 	}
 	/* Simulation Examples */
-	vec1d temp = { 0.005, 0.001 };
-	for (int i = 0; i < temp.size() / 2; i++) {
-		MD* run1 = new MD(dir_windows, STEPS, true);
-		MD* run2 = new MD(dir_windows, STEPS, true);
-
-		std::thread th1(&MD::Simulation, run1, 0.05, temp[i], 0, 0);
-		//std::thread th2(&MD::Simulation, run2, 0.05, temp[i + 1], 0, 0);
-
-		th1.join();// th2.join();
-		delete run1, run2;
+	MD run(dir_windows, STEPS);
+	for (int i = 0; i < 10; i++) {
+		run.Initialise(i);
+		run.ResetValues();
 	}
 	//MD run(dir_windows, STEPS, true);
 	//run.Simulation(0.001, 0.1, 8, 0);

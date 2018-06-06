@@ -94,6 +94,8 @@ public:
 
 	void Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST);
 	std::string getDir();
+	void Initialise(double TEMPERATURE);
+	void ResetValues();
 
 protected:
 	void Initialise(vec1d &x, vec1d &y, vec1d &z,
@@ -112,8 +114,6 @@ protected:
 	void FileNaming(int POWER, double A_cst);
 	void WriteToFiles();
 	void ShowRun(size_t step_size_show);
-	void ResetValues();
 	void TimeStamp(std::ofstream&, std::string variables);
-	std::vector<double> ReadFromFile(const std::string &file_name);
 	std::string ConvertToString(const double & x, const int & precision);
 };

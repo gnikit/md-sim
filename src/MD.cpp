@@ -56,7 +56,7 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 
 	// Initialise position matrix and velocity matrix
 	//TODO: once the feature is complete remove Q_counter == 0
-	if (quenching_flag == false/* || Q_counter == 0*/) {
+	if (quenching_flag == false) {
 		size_t n = 0;
 		size_t i, j, k;
 		for (i = 0; i < Nx; i++) {
@@ -79,9 +79,49 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 		MBDistribution(TEMPERATURE);
 	}
 
-	if (quenching_flag == true) {
+	else if (quenching_flag == true) {
 		// Start from a highly thermalised fluid state
+		// Generation of velocities with T = 10
 		MBDistribution(10);
+		// TODO: Not sure what follows is correct in if-loop
+		// Temperature calculation for the first step with very high T
+		// scale of x, y, z
+		double mean_vx = 0;
+		double mean_vy = 0;
+		double mean_vz = 0;
+
+		size_t i;
+		// Momentum conservation array
+		for (i = 0; i < N; i++) {
+			mean_vx += vx[i] / N; // Calculating Average velocity for each dimension
+			mean_vy += vy[i] / N;
+			mean_vz += vz[i] / N;
+		}
+
+		size_t tempN = N;    // Recommended opt by Intel
+#pragma parallel 
+#pragma loop count min(128)
+		for (i = 0; i < tempN; i++) {
+			vx[i] = vx[i] - mean_vx; // Subtracting Av. velocities from each particle
+			vy[i] = vy[i] - mean_vy;
+			vz[i] = vz[i] - mean_vz;
+		}
+		// T Calc
+		KE = 0;
+		for (i = 0; i < N; i++) {
+			KE += 0.5 * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]);
+		}
+		T = KE / (1.5 * N);
+		// T = 10 for the scalling
+		scale_v = sqrt(10 / T); // scalling factor
+								// Velocity scaling
+#pragma parallel
+#pragma loop count min(128)
+		for (i = 0; i < tempN; i++) {
+			vx[i] *= scale_v;
+			vy[i] *= scale_v;
+			vz[i] *= scale_v;
+		}
 	}
 
 	// This is where buggy python script executes
@@ -147,7 +187,6 @@ void MD::MBDistribution(double TEMPERATURE) {
 	std::string particles = std::to_string(N);
 	//TODO: dir_str should be passed by obj MD internally or by precompiler
 	std::string dir_str = LOAD_DATA_PATH;
-	// defined in constructor
 
 	// Could be stored as variables and passed into FileNaming
 	// rather than repeating the process
@@ -248,7 +287,7 @@ void MD::MeanSquareDisplacement(vec1d &MSDx,
 }
 
 void MD::DensityQuenching(int steps_quench, double TEMPERATURE) {
-	// Increase _rho by 0.001
+	// Increase _rho by 0.01
 	_rho += 0.01;
 	// Re-using this piece of code from MD::Simulation
 	scale = pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS;
@@ -265,13 +304,6 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 	// If Simulation(...) is not run, _T0, _rho need to be initialised elsewhere
 	_T0 = TEMPERATURE;
 	_rho = DENSITY;
-
-	// goto statement for quenching
-//new_quench:
-//	if (quenching_flag == true && Q_counter != 0) {
-//		// Increase _rho by 0.01
-//		_rho += 0.01;
-//	}
 	dt /= sqrt(_T0);
 	// Box length scalling
 	scale = pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS;
@@ -305,13 +337,9 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 
 		size_t steps_quench = 1000;	// steps between each quenching
 		if (quenching_flag == true && _STEP_INDEX != 0 && _STEP_INDEX % steps_quench == 0) {
-			++Q_counter;	// preventing first stage of initialisation to run
 			DensityQuenching(steps_quench, TEMPERATURE);
 			std::cout << "successful quench " << Q_counter << std::endl;
-			//++_STEP_INDEX;	// so it won't enter an infite loop
-			//goto new_quench;
-			//TODO: incrementing the _STEP_INDEX loses a few iterations
-
+			++Q_counter;
 		}
 
 		size_t i, j;
@@ -326,6 +354,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 				zz = z;
 
 				// Transposing elements with Periodic BC
+				// xx, yy, zz are for the MSD calculation
 				if (x > (0.5 * L)) {
 					x = x - L;
 					xx = xx - L;
@@ -351,25 +380,13 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 					zz = zz + L;
 				}
 
-				///////////// for MSD  /////////////////
-				//if (xx > (0.5 * L)) {
-				//}
-				//if (yy > (0.5 * L)) {
-				//}
-				//if (zz > (0.5 * L)) {
-				//}
-				//if (xx < (-0.5 * L)) {
-				//}
-				//if (yy < (-0.5 * L)) {
-				//}
-				//if (zz < (-0.5 * L)) {
-				//}
-
 				r = sqrt((x * x) + (y * y) + (z * z));
 				//long double q = sqrt(r * r + A_CST * A_CST);
 
 				// Force loop
 				if (r < cut_off) {
+					//TODO: implement functionally different potentials, currently 
+					//		using comment-uncomment to implement
 					// BIP potential of the form: phi = 1/[(r**2 + a**2)**(n/2)]
 					//long double ff =
 					//	(POWER)*r *	pow(q, ((-POWER - 2.0))); // Force for particles
@@ -443,8 +460,8 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 		<< std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() %
 		60
 		<< "s" << std::endl;
-	// Streams should not close, vectors should not be cleared
-	//ResetValues(); // Check if everything is reset, could have missed something
+	// Streams should not close, vectors should not be cleared if object is to be reused
+	//ResetValues(); // no need to call if object is not reused
 }
 
 std::string MD::getDir() {
@@ -456,7 +473,7 @@ std::string MD::getDir() {
 
 void MD::InitialiseTest(double TEMPERATURE) {
 	/*
-	  Unit test for the Initialisation method. 
+	  Unit test for the Initialisation method.
 	  Tests whether the bool quenching_flag trigers the correct loops.
 	  If MBDistribution.py performs as expected.
 	  If FileLoading.LoadSingleCol() works as expected.
@@ -521,7 +538,7 @@ void MD::InitialiseTest(double TEMPERATURE) {
 			KE += 0.5 * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]);
 		}
 		T = KE / (1.5 * N);
-		scale_v = sqrt(TEMPERATURE / T); // scalling factor
+		scale_v = sqrt(10 / T); // scalling factor
 										 // Velocity scaling
 #pragma parallel
 #pragma loop count min(128)
@@ -531,7 +548,7 @@ void MD::InitialiseTest(double TEMPERATURE) {
 			vz[i] *= scale_v;
 		}
 	}
-
+	// Restoring to normal operation of Initialisation
 	// scale of x, y, z
 	double mean_vx = 0;
 	double mean_vy = 0;

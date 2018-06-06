@@ -56,6 +56,7 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 	*/
 
 	// Initialise position matrix and velocity matrix
+	//TODO: once the feature is complete remove Q_counter == 0
 	if (quenching_flag == false || Q_counter == 0) {
 		size_t n = 0;
 		size_t i, j, k;
@@ -74,12 +75,12 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 				}
 			}
 		}
-		// Reading Maxwell Boltzmann velocity Dist from files
-		// TODO: Python script buggy with argument passing
-		// directory defined wrt the dir where .o will execute
-		vx = ReadFromFile(LOAD_DATA_PATH"/vx.txt");
-		vy = ReadFromFile(LOAD_DATA_PATH"/vy.txt");
-		vz = ReadFromFile(LOAD_DATA_PATH"/vz.txt");
+		// Generates Maxwell-Boltzmann dist from Python script
+		// Initialieses vx, vy, vz internally
+		MBDistribution(TEMPERATURE);
+		//vx = ReadFromFile(LOAD_DATA_PATH"/vx.txt");
+		//vy = ReadFromFile(LOAD_DATA_PATH"/vy.txt");
+		//vz = ReadFromFile(LOAD_DATA_PATH"/vz.txt");
 	}
 
 	if (quenching_flag == true) {
@@ -88,9 +89,9 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 		// TODO: file_name should be mobile depending on sim
 		std::string file_name = "Positions_Velocities_step_10000"
 			"_particles_1000_rho_0.5000_T_0.5000_n_6_A_0.00000.txt";
-		FileLoading<double> velocities_file;
-		std::vector<std::vector<double>> data =
-			velocities_file.LoadTxt(file_name, 9, '#');
+		//FileLoading<double> velocities_file;
+		//std::vector<std::vector<double>> data =
+		//	velocities_file.LoadTxt(file_name, 9, '#');
 	}
 
 	// This is where buggy python script executes
@@ -153,21 +154,22 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 
 void MD::MBDistribution(double TEMPERATURE) {
 	std::string t = ConvertToString(TEMPERATURE, 4);
-	std::string particles = std::to_string(N); // defined in constructor
+	std::string particles = std::to_string(N);
+	//TODO: dir_str should be passed by obj MD internally or by precompiler
+	std::string dir_str = "C:/Code/C++/MD-simulation/PlotAnalysis/MD-Simulation-Data-Analysis/";
+	// defined in constructor
+
 	// Could be stored as variables and passed into FileNaming
 	// rather than repeating the process
 	// store in _particles_to_str, _T_to_str
-	// TODO: if windows, store CD cout >> to dir_str
-	//       if linux, store pwd >> to dir_str
-	// TODO: Python script is buggy and sometimes gives error when passing arguments
-	//std::string command = "python " + dir_str + "/MBDistribution.py " + particles + " " + t;
-	//system(command.c_str());  // Creates files with MD velocities
+	std::string command = "python " + dir_str + "/MBDistribution.py " + particles + " " + t;
+	system(command.c_str());  // Creates files with MD velocities
 
-	std::string vel_id = "particles_" + particles + "_T_" + t;
-
-	vx = ReadFromFile(vel_id + "vx.txt");
-	vy = ReadFromFile(vel_id + "vy.txt");
-	vz = ReadFromFile(vel_id + "vz.txt");
+	std::string vel_id = "_particles_" + particles + "_T_" + t + ".txt";
+	FileLoading<double> obj;
+	vx = obj.LoadSingleCol("./data/vx" + vel_id);
+	vy = obj.LoadSingleCol("./data/vy" + vel_id);
+	vz = obj.LoadSingleCol("./data/vz" + vel_id);
 }
 
 

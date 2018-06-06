@@ -94,7 +94,7 @@ public:
 
 	void Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST);
 	std::string getDir();
-	void Initialise(double TEMPERATURE);
+	void InitialiseTest(double TEMPERATURE);
 	void ResetValues();
 
 protected:

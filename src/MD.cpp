@@ -454,7 +454,14 @@ std::string MD::getDir() {
 	return _dir;
 }
 
-void MD::Initialise(double TEMPERATURE) {
+void MD::InitialiseTest(double TEMPERATURE) {
+	/*
+	  Unit test for the Initialisation method. 
+	  Tests whether the bool quenching_flag trigers the correct loops.
+	  If MBDistribution.py performs as expected.
+	  If FileLoading.LoadSingleCol() works as expected.
+	  If the file directories with preprocessor commands work.
+	*/
 	// Initialise position matrix and velocity matrix
 	//TODO: once the feature is complete remove Q_counter == 0
 	if (quenching_flag == false/* || Q_counter == 0*/) {

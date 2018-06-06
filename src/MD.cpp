@@ -5,6 +5,7 @@
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 #ifdef _WIN32
 #define LOAD_DATA_PATH "C:/Users/gn/source/repos/MD-simulation/data"
+#define LOAD_POSITIONS LOAD_DATA_PATH"/gaussian"
 #else
 #define LOAD_DATA_PATH "../data"
 #endif
@@ -80,14 +81,19 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 	}
 
 	else if (quenching_flag == true) {
-		//TODO: load positions
-		FileLoading<double> pos_and_vel;
-		//pos_and_vel.LoadTxt(LOAD_POSITIONS, 9, '#');
-
-		std::vector<std::vector<double>> vel;
+		FileLoading<double> load_data;
+		std::string file_name = LOAD_POSITIONS"Positions_Velocities_particles_" + std::to_string(N);
+		std::vector<std::vector<double>> vel = 
+			load_data.LoadTxt(file_name, 9, '#');
+		x = vel[0];
+		y = vel[1];
+		z = vel[2];
+		vx = vel[3];
+		vy = vel[4];
+		vz = vel[5];
 		// Start from a highly thermalised fluid state
 		// Generation of velocities with T = 10
-		MBDistribution(10);
+		//MBDistribution(10);
 		// TODO: Not sure what follows is correct in if-loop
 		// Temperature calculation for the first step with very high T
 		// scale of x, y, z

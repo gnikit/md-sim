@@ -80,52 +80,21 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 	}
 
 	else if (quenching_flag == true) {
+		//TODO: load positions
+		FileLoading<double> pos_and_vel;
+		//pos_and_vel.LoadTxt(LOAD_POSITIONS, 9, '#');
+
+		std::vector<std::vector<double>> vel;
 		// Start from a highly thermalised fluid state
 		// Generation of velocities with T = 10
 		MBDistribution(10);
 		// TODO: Not sure what follows is correct in if-loop
 		// Temperature calculation for the first step with very high T
 		// scale of x, y, z
-		double mean_vx = 0;
-		double mean_vy = 0;
-		double mean_vz = 0;
-
-		size_t i;
-		// Momentum conservation array
-		for (i = 0; i < N; i++) {
-			mean_vx += vx[i] / N; // Calculating Average velocity for each dimension
-			mean_vy += vy[i] / N;
-			mean_vz += vz[i] / N;
-		}
-
-		size_t tempN = N;    // Recommended opt by Intel
-#pragma parallel 
-#pragma loop count min(128)
-		for (i = 0; i < tempN; i++) {
-			vx[i] = vx[i] - mean_vx; // Subtracting Av. velocities from each particle
-			vy[i] = vy[i] - mean_vy;
-			vz[i] = vz[i] - mean_vz;
-		}
-		// T Calc
-		KE = 0;
-		for (i = 0; i < N; i++) {
-			KE += 0.5 * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]);
-		}
-		T = KE / (1.5 * N);
-		// T = 10 for the scalling
-		scale_v = sqrt(10 / T); // scalling factor
-								// Velocity scaling
-#pragma parallel
-#pragma loop count min(128)
-		for (i = 0; i < tempN; i++) {
-			vx[i] *= scale_v;
-			vy[i] *= scale_v;
-			vz[i] *= scale_v;
-		}
+		// TODO: Don't think there is need to scale for the first iteration
+		// system will equilibrate after that
 	}
 
-	// This is where buggy python script executes
-	////MBDistribution(TEMPERATURE);
 
 	// scale of x, y, z
 	double mean_vx = 0;
@@ -381,6 +350,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 				}
 
 				r = sqrt((x * x) + (y * y) + (z * z));
+				//TODO: enable q for BIP potential
 				//long double q = sqrt(r * r + A_CST * A_CST);
 
 				// Force loop
@@ -388,9 +358,11 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 					//TODO: implement functionally different potentials, currently 
 					//		using comment-uncomment to implement
 					// BIP potential of the form: phi = 1/[(r**2 + a**2)**(n/2)]
+					//TODO: BIP force
 					//long double ff =
 					//	(POWER)*r *	pow(q, ((-POWER - 2.0))); // Force for particles
-					  // Gausian-force with sigma=1 and epsilon=1
+
+					//TODO: Gausian-force with sigma=1 and epsilon=1
 					long double ff = 2 * r * exp(-r * r);
 
 
@@ -402,12 +374,15 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 					fz[j] -= z * ff / r;
 
 					PC += r * ff;
-					// TODO:Gaussian-Potential configurational Pressure
+					//TODO:Gaussian-Potential configurational Pressure
 					// integral not evaluated
 
-					// TODO: Add infinity and edge correction, do same for Pc
-					//U += pow(q, (-POWER)); // Potential Calculation
-					// Gaussian-Potential
+					//TODO: Add infinity and edge correction, do same for Pc
+
+					//TODO: BIP potential
+					//U += pow(q, (-POWER)); 
+
+					//TODO: Gaussian Potential GCM
 					U += exp(-r * r);
 
 					// Radial Distribution

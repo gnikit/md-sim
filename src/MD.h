@@ -47,7 +47,8 @@ protected:
 	vec1d Cvx, Cvy, Cvz;      // VAF arrays
 	vec1d rrx, rry, rrz;	  // used in MSD calculation
 	vec1d MSDx, MSDy, MSDz;   // MSD arrays
-	vec1d Cr, msd;					// correlation vector with time index
+	vec1d Cr, msd, u_en, k_en,
+		pc, pk, temperature, density;	// vectors used as buffers
 
 	size_t Nx, Ny, Nz;   // Particles in x, y, z
 	size_t N, _STEP_INDEX, _STEPS;  // Total particles, step index, maximum steps
@@ -82,9 +83,9 @@ private:
 	std::string _FILE_EXT;      // output file extension
 	/* Variables for storing inside the object the file ID */
 	std::string _step_to_str, _particles_to_str, _rho_to_str, _T_to_str, _n_to_str, _A_to_str;
-	std::string HIST, _VAF, _MSD, data, pos;
+	std::string HIST, data, pos;
 	std::string _dir, _FILE_ID;
-	std::ofstream Hist, VAF, MSD, DATA, POS;
+	std::ofstream Hist, DATA, POS;
 
 public:
 

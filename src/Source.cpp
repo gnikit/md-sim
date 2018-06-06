@@ -10,7 +10,7 @@
 typedef std::vector<double> vec1d;
 
 /* Windows working directory for Archives of Data */
-std::string dir_windows = "C:/Code/C++/MD-simulation/Archives of Data/testing/gaussian/";
+std::string dir_windows = "C:/Code/C++/MD-simulation/Archives of Data/testing/";
 /* Linux working directory */
 std::string dir_linux = "/home/gn/Desktop/test_data/";
 std::string dir_crystal = "/home/gn/Desktop/crystallisation_data/";
@@ -47,8 +47,11 @@ int main() {
 		std::tie(rho_iso_l, A_iso_l) = isomorph_linr_l.GenLine(n);
 	}
 	/* Simulation Examples */
-	MD run(dir_windows, STEPS, true);
-	run.Simulation(0.05, 0.0035, 0, 0);
+	vec1d a_list = { 0, 0.25, 0.5, 0.75, 1, 1.5, 2.0 };
+	for (auto i : a_list) {
+		MD run(dir_windows, STEPS, false);
+		run.Simulation(0.5, 0.5, 12, i);
+	}
 	//MD run(dir_windows, STEPS, true);
 	//run.Simulation(0.001, 0.1, 8, 0);
 	/*

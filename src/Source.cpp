@@ -10,11 +10,11 @@
 typedef std::vector<double> vec1d;
 
 /* Windows working directory for Archives of Data */
-std::string dir_windows = "C:/Code/C++/MD simulation/Archives of Data/testing/gaussian/";
+std::string dir_windows = "C:/Code/C++/MD-simulation/Archives of Data/testing/gaussian/";
 /* Linux working directory */
 std::string dir_linux = "/home/gn/Desktop/test_data/";
 std::string dir_crystal = "/home/gn/Desktop/crystallisation_data/";
-std::string dir_crystal_win = "C:/Code/C++/MD simulation/Archives of Data/crystallisation/gaussian/";
+std::string dir_crystal_win = "C:/Code/C++/MD-simulation/Archives of Data/crystallisation/gaussian/";
 /* Working directory of the cx1 cluster */
 std::string dir = "";
 

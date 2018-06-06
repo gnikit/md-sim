@@ -97,7 +97,7 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 	else if (quenching_flag == true) {
 		FileLoading<double> load_data;
 		std::string file_name = LOAD_POSITIONS"Positions_Velocities_particles_" + std::to_string(N);
-		std::vector<std::vector<double>> vel = 
+		std::vector<std::vector<double>> vel =
 			load_data.LoadTxt(file_name, 9, '#');
 		x = vel[0];
 		y = vel[1];
@@ -399,7 +399,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 					//TODO: Add infinity and edge correction, do same for Pc
 
 					//TODO: BIP potential
-					U += pow(q, (-POWER)); 
+					U += pow(q, (-POWER));
 
 					//TODO: Gaussian Potential GCM
 					//U += exp(-r * r);
@@ -416,7 +416,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 		u_en.push_back(U / N);
 
 		// Average Configurational Pressure Pc
-		pc.push_back( PC / (3 * Vol));
+		pc.push_back(PC / (3 * Vol));
 
 		// Isothermal Calibration
 		scale_v = sqrt(_T0 / T); // using T & KE from prev timestep
@@ -432,13 +432,13 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 		VelocityAutocorrelationFunction(Cvx, Cvy, Cvz);
 
 		// Average Temperature
-		T = KE / (1.5 * N); 
+		T = KE / (1.5 * N);
 		temperature.push_back(T);
 
 		// Kinetic Pressure
-		PK = _rho * T;       
+		PK = _rho * T;
 		pk.push_back(PK);
-		
+
 		// Average Kintetic Energy
 		KE /= N;
 		k_en.push_back(KE);

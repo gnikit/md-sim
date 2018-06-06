@@ -492,10 +492,45 @@ void MD::InitialiseTest(double TEMPERATURE) {
 		// Start from a highly thermalised fluid state
 		std::cout << "High thermalisation for Quench prepparation" << std::endl;
 		MBDistribution(10);
-	}
+		// TODO: Not sure if this is correct
+		// Temperature calculation for the first step with very high T
+		// scale of x, y, z
+		double mean_vx = 0;
+		double mean_vy = 0;
+		double mean_vz = 0;
 
-	// This is where buggy python script executes
-	////MBDistribution(TEMPERATURE);
+		size_t i;
+		// Momentum conservation array
+		for (i = 0; i < N; i++) {
+			mean_vx += vx[i] / N; // Calculating Average velocity for each dimension
+			mean_vy += vy[i] / N;
+			mean_vz += vz[i] / N;
+		}
+
+		size_t tempN = N;    // Recommended opt by Intel
+#pragma parallel 
+#pragma loop count min(128)
+		for (i = 0; i < tempN; i++) {
+			vx[i] = vx[i] - mean_vx; // Subtracting Av. velocities from each particle
+			vy[i] = vy[i] - mean_vy;
+			vz[i] = vz[i] - mean_vz;
+		}
+		// T Calc
+		KE = 0;
+		for (i = 0; i < N; i++) {
+			KE += 0.5 * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]);
+		}
+		T = KE / (1.5 * N);
+		scale_v = sqrt(TEMPERATURE / T); // scalling factor
+										 // Velocity scaling
+#pragma parallel
+#pragma loop count min(128)
+		for (i = 0; i < tempN; i++) {
+			vx[i] *= scale_v;
+			vy[i] *= scale_v;
+			vz[i] *= scale_v;
+		}
+	}
 
 	// scale of x, y, z
 	double mean_vx = 0;
@@ -525,7 +560,6 @@ void MD::InitialiseTest(double TEMPERATURE) {
 	}
 	T = KE / (1.5 * N);
 	scale_v = sqrt(TEMPERATURE / T); // scalling factor
-
 									 // Velocity scaling
 #pragma parallel
 #pragma loop count min(128)

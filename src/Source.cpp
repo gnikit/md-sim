@@ -47,10 +47,11 @@ int main() {
 		std::tie(rho_iso_l, A_iso_l) = isomorph_linr_l.GenLine(n);
 	}
 	/* Simulation Examples */
-	MD run(dir_windows, STEPS);
-	for (int i = 0; i < 10; i++) {
-		run.Initialise(i);
-		run.ResetValues();
+
+	MD run2(dir_windows, STEPS, true);
+	for (int i = 1; i <= 10; i++) {
+		run2.InitialiseTest(i);
+		run2.ResetValues();
 	}
 	//MD run(dir_windows, STEPS, true);
 	//run.Simulation(0.001, 0.1, 8, 0);

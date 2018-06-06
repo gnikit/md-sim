@@ -83,7 +83,7 @@ if __name__ == '__main__':
         NUMBER_OF_PARTICLES = 10 ** 3
         TEMPERATURE = 1
     file_id = '_particles_' + str(NUMBER_OF_PARTICLES) + '_T_' + "{:.4f}".format(TEMPERATURE) + '.txt'
-    os.chdir('C:/Code/C++/MaxwellBoltzmannDistribution/MaxwellBoltzmannDistribution/data/')
+    os.chdir('./data')
     a = VelGen()
     vx, vy, vz = a.get_velocities()
     np.savetxt('vx' + file_id, vx, delimiter='\n')

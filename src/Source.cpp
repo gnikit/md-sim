@@ -5,12 +5,12 @@
 #include <string>
 
 
-#define STEPS 10000	//10000
+#define STEPS 210000	//10000
 #define PARTICLES 1000 //1000
 typedef std::vector<double> vec1d;
 
 /* Windows working directory for Archives of Data */
-std::string dir_windows = "C:/Code/C++/MD-simulation/Archives of Data/testing/";
+std::string dir_windows = "C:/Code/Archives of Data/testing/";
 /* Linux working directory */
 std::string dir_linux = "/home/gn/Desktop/test_data/";
 std::string dir_crystal = "/home/gn/Desktop/crystallisation_data/";
@@ -23,7 +23,6 @@ void MakeDataBase();
 std::vector<double> LinearSpacedArray(double a, double b, std::size_t N);
 
 int main() {
-
 	{/* Potential power strength */
 		size_t n = 8;
 		/* Generate Temperature vector for isomorph */
@@ -47,17 +46,12 @@ int main() {
 		std::tie(rho_iso_l, A_iso_l) = isomorph_linr_l.GenLine(n);
 	}
 	/* Simulation Examples */
-	vec1d a_list = { 0, 0.25, 0.5, 0.75, 1, 1.5 };
-	vec1d n_list = { 6, 8, 10 };
-	for (auto j : n_list) {
-		for (size_t i = 0; i < a_list.size() / 2; i++) {
-			MD* run1 = new MD(dir_windows, STEPS);
-			MD* run2 = new MD(dir_windows, STEPS);
-			std::thread th1(&MD::Simulation, run1, 0.5, 0.5, j, a_list[i]);
-			std::thread th2(&MD::Simulation, run2, 0.5, 0.5, j, a_list[i + 3]);
-			th1.join(); th2.join();
-			delete run1, run2;
-		}
+	vec1d T_range = LinearSpacedArray(0.001, 0.01, 10);
+	for (auto i : T_range) {
+		MD* run = new MD(dir_windows, STEPS, true);
+		std::thread th1(&MD::Simulation, run, 0.05, i, 0, 0);
+		th1.join();
+		delete run;
 	}
 	//MD run(dir_windows, STEPS, true);
 	//run.Simulation(0.001, 0.1, 8, 0);
@@ -91,7 +85,7 @@ int main() {
 
 	/*-----------------------------------------------*/
 
-	//system("pause");
+	system("pause");
 }
 
 void MakeDataBase() {

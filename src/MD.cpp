@@ -4,8 +4,8 @@
 #define NHIST 300
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 #ifdef _WIN32
-#define LOAD_DATA_PATH "C:/Users/gn/source/repos/MD-simulation/data"
-#define LOAD_POSITIONS LOAD_DATA_PATH"/gaussian"
+#define LOAD_DATA_PATH "C:/Code/MD-simulation/data"
+#define LOAD_POSITIONS LOAD_DATA_PATH"/gaussian"	//TODO: remove gaussian in future, Loads positions from saved file
 #else
 #define LOAD_DATA_PATH "../data"
 #endif
@@ -13,6 +13,7 @@
 
 
 //TODO: Boltzmann Dist normalisation of the particles velocities in the beggining make it C++
+//TODO: Calls to Python script are not multithread safe!
 
 MD::MD(std::string DIRECTORY, size_t run_number) {
 	_dir = DIRECTORY;
@@ -92,12 +93,12 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 		// Generates Maxwell-Boltzmann dist from Python script
 		// Initialieses vx, vy, vz internally
 		//TODO: add filecking method to see if file exists, else run python script
-		MBDistribution(TEMPERATURE, false);   // do not run Python script
+		MBDistribution(TEMPERATURE, true);   // do not run Python script
 	}
 
-	else if (quenching_flag == true) {
+	else if (quenching_flag == true && Q_counter == 0) {
 		FileLoading<double> load_data;
-		std::string file_name = LOAD_POSITIONS"Positions_Velocities_particles_" + std::to_string(N);
+		std::string file_name = LOAD_POSITIONS"/Positions_Velocities_particles_" + std::to_string(N) + ".txt";
 		std::vector<std::vector<double>> vel =
 			load_data.LoadTxt(file_name, 9, '#');
 		x = vel[0];
@@ -106,6 +107,9 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 		vx = vel[3];
 		vy = vel[4];
 		vz = vel[5];
+		rrx = vel[0];
+		rry = vel[1];
+		rrz = vel[2];
 		// Start from a highly thermalised fluid state
 		// Generation of velocities with T = 10
 		//MBDistribution(10);
@@ -179,8 +183,8 @@ void MD::MBDistribution(double TEMPERATURE, bool run_python_script = false) {
 
 	if (run_python_script) {
 		// Could be stored as variables and passed into FileNaming
-	// rather than repeating the process
-	// store in _particles_to_str, _T_to_str
+		// rather than repeating the process
+		// store in _particles_to_str, _T_to_str
 		std::string command = "python " + dir_str + "/MBDistribution.py " + particles + " " + t;
 		system(command.c_str());  // Creates files with MD velocities 
 	}
@@ -326,10 +330,10 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 		U = 0; // seting Potential U to 0
 		PC = 0;
 
-		size_t steps_quench = 1000;	// steps between each quenching
+		size_t steps_quench = 3000;	// steps between each quenching
 		if (quenching_flag == true && _STEP_INDEX != 0 && _STEP_INDEX % steps_quench == 0) {
 			DensityQuenching(steps_quench, TEMPERATURE);
-			std::cout << "successful quench " << Q_counter << std::endl;
+			std::cout << "quench: " << Q_counter << " rho: " << _rho << std::endl;
 			++Q_counter;
 		}
 
@@ -373,7 +377,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 
 				r = sqrt((x * x) + (y * y) + (z * z));
 				//TODO: enable q for BIP potential
-				long double q = sqrt(r * r + A_CST * A_CST);
+				//long double q = sqrt(r * r + A_CST * A_CST);
 
 				// Force loop
 				if (r < cut_off) {
@@ -381,11 +385,11 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 					//		using comment-uncomment to implement
 					// BIP potential of the form: phi = 1/[(r**2 + a**2)**(n/2)]
 					//TODO: BIP force
-					long double ff =
-						(POWER)*r *	pow(q, ((-POWER - 2.0))); // Force for particles
+					//long double ff =
+					//	(POWER)*r *	pow(q, ((-POWER - 2.0))); // Force for particles
 
 					//TODO: Gausian-force with sigma=1 and epsilon=1
-					//long double ff = 2 * r * exp(-r * r);
+					long double ff = 2 * r * exp(-r * r);
 
 
 					fx[i] += x * ff / r;
@@ -402,10 +406,10 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 					//TODO: Add infinity and edge correction, do same for Pc
 
 					//TODO: BIP potential
-					U += pow(q, (-POWER));
+					//U += pow(q, (-POWER));
 
 					//TODO: Gaussian Potential GCM
-					//U += exp(-r * r);
+					U += exp(-r * r);
 
 					// Radial Distribution
 					igr = round(NHIST * r / rg);
@@ -475,7 +479,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 		60
 		<< "s" << std::endl;
 	// Streams should not close, vectors should not be cleared if object is to be reused
-	//ResetValues(); // no need to call if object is not reused
+	ResetValues(); // no need to call if object is not reused
 }
 
 std::string MD::getDir() {
@@ -679,8 +683,8 @@ void MD::ShowRun(size_t step_size_show) {
 
 void MD::ResetValues() {
 	/*
-	Closes open file streams and resets sizes and values to 0
-	For multiple simulations
+	  Closes open file streams and resets sizes and values to 0
+	  For multiple simulations
 	*/
 	// Close streams at the end of run
 	Hist.close();
@@ -697,6 +701,14 @@ void MD::ResetValues() {
 	vx.clear();
 	vy.clear();
 	vz.clear();
+	density.clear();
+	temperature.clear();
+	u_en.clear();
+	k_en.clear();
+	pc.clear();
+	pk.clear();
+	msd.clear();
+	Cr.clear();
 	gr.resize(NHIST + 1, 0); // gr with Index igr
 	fx.resize(N, 0);
 	fy.resize(N, 0);

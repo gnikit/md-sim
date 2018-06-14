@@ -5,12 +5,12 @@
 #include <string>
 
 
-#define STEPS 70000	//10000
+#define STEPS 500000	//10000
 #define PARTICLES 1000 //1000
 typedef std::vector<double> vec1d;
 
 /* Windows working directory for Archives of Data */
-std::string dir_windows = "C:/Code/C++/MD-simulation/Archives of Data/testing/";
+std::string dir_windows = "C:/Code/C++/MD-simulation/Archives of Data/testing/gaussian/long_quench/";
 /* Linux working directory */
 std::string dir_linux = "/home/gn/Desktop/test_data/";
 std::string dir_crystal = "/home/gn/Desktop/crystallisation_data/";
@@ -47,15 +47,13 @@ int main() {
 		std::tie(rho_iso_l, A_iso_l) = isomorph_linr_l.GenLine(n);
 	}
 	/* Simulation Examples */
-	vec1d T_range = LinearSpacedArray(0.001, 0.01, 25);
-	for (auto i : T_range) {
-		MD* run = new MD(dir_windows, STEPS, true);
-		std::thread th1(&MD::Simulation, run, 0.05, i, 0, 0);
-		th1.join();
-		delete run;
-	}
-	//MD run(dir_windows, STEPS, true);
-	//run.Simulation(0.001, 0.1, 8, 0);
+	//vec1d T_range = LinearSpacedArray(0.001, 0.01, 10);
+	//for (auto i : T_range) {
+	//	MD* run = new MD(dir_windows, STEPS, true);
+	//	std::thread th1(&MD::Simulation, run, 0.05, i, 0, 0);
+	//	th1.join();
+	//	delete run;
+	//}
 	/*
 	* This is an isomorph line run
 	* Simulates the fluid along the line
@@ -65,28 +63,9 @@ int main() {
 	MD run(dir_windows, STEPS);
 	run.Simulation(rho_iso[i], T_iso[i], n, A_iso[i]);
 	}*/
-	/* Individual Runs */
-	//MD* run1 = new MD(dir_windows, STEPS);
-	//MD* run2 = new MD(dir_windows, STEPS);
-	//MD* run3 = new MD(dir_windows, STEPS);
-	//MD* run4 = new MD(dir_windows, STEPS);
-	//vec1d a = { 0, 0.25 };
-	//
-	//
-	//for (size_t i = 0; i < a.size(); i++) {
-	//	std::thread th1(&MD::Simulation, run1, 0.5, 1, 6, a[i]);
-	//	th1.join();
-	//}
-	//std::thread th2(&MD::Simulation, run2, 0.5, 0.5, 12,  0.75);
-	// std::thread th3(&MD::Simulation, run3, 0.6, 10, 10, 0.5);
-	// std::thread th4(&MD::Simulation, run4, 0.6, 10, 12, 0.5);
-
-	// th2.join();// th3.join(); th4.join();
-	//delete run1, run2, run3, run4;
-
 	/*-----------------------------------------------*/
 
-	//system("pause");
+	system("pause");
 }
 
 void MakeDataBase() {

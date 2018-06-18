@@ -8,6 +8,7 @@
 #define LOAD_POSITIONS LOAD_DATA_PATH"/gaussian"	//TODO: remove gaussian in future
 #else
 #define LOAD_DATA_PATH "../data"
+#define LOAD_POSITIONS LOAD_DATA_PATH"/gaussian"	//TODO: remove gaussian in future
 #endif
 
 

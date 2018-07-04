@@ -5,7 +5,7 @@
 #include <string>
 
 
-#define STEPS 500000	//10000
+#define STEPS 700000	//10000
 #define PARTICLES 1000 //1000
 typedef std::vector<double> vec1d;
 
@@ -47,13 +47,13 @@ int main() {
 		std::tie(rho_iso_l, A_iso_l) = isomorph_linr_l.GenLine(n);
 	}
 	/* Simulation Examples */
-	//vec1d T_range = LinearSpacedArray(0.001, 0.01, 10);
-	//for (auto i : T_range) {
-	//	MD* run = new MD(dir_windows, STEPS, true);
-	//	std::thread th1(&MD::Simulation, run, 0.05, i, 0, 0);
-	//	th1.join();
-	//	delete run;
-	//}
+	vec1d T_range = LinearSpacedArray(0.001, 0.01, 10);
+	for (size_t i = 5; i < T_range.size(); i++) {
+		MD* run = new MD(dir_windows, STEPS, true);
+		std::thread th1(&MD::Simulation, run, 0.05, T_range[i], 0, 0);
+		th1.join();
+		delete run;
+	}
 	/*
 	* This is an isomorph line run
 	* Simulates the fluid along the line

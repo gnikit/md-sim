@@ -4,10 +4,11 @@
 #define NHIST 300
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 #ifdef _WIN32
-#define LOAD_DATA_PATH "C:/Code/MD-simulation/data"
-#define LOAD_POSITIONS LOAD_DATA_PATH"/gaussian"	//TODO: remove gaussian in future, Loads positions from saved file
+#define LOAD_DATA_PATH "C:/Users/gn/source/repos/MD-simulation/data"
+#define LOAD_POSITIONS LOAD_DATA_PATH"/gaussian"	//TODO: remove gaussian in future
 #else
 #define LOAD_DATA_PATH "../data"
+#define LOAD_POSITIONS LOAD_DATA_PATH"/gaussian"	//TODO: remove gaussian in future
 #endif
 
 
@@ -71,7 +72,7 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 	  @param TEMPERATURE: Thermostat target temperature
 	*/
 
-	// Initialise position matrix and velocity matrix
+	// Initialise position matrix and velocity matrix from Cubic Centred Lattice
 	if (quenching_flag == false) {
 		size_t n = 0;
 		size_t i, j, k;
@@ -91,12 +92,10 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 			}
 		}
 		// Generates Maxwell-Boltzmann dist from Python script
-		// Initialieses vx, vy, vz internally
-		//TODO: add filecking method to see if file exists, else run python script
-		MBDistribution(TEMPERATURE, true);   // do not run Python script
+		MBDistribution(TEMPERATURE, true);
 	}
 
-	else if (quenching_flag == true && Q_counter == 0) {
+	if (quenching_flag == true && Q_counter == 0) {
 		FileLoading<double> load_data;
 		std::string file_name = LOAD_POSITIONS"/Positions_Velocities_particles_" + std::to_string(N) + ".txt";
 		std::vector<std::vector<double>> vel =
@@ -248,8 +247,7 @@ void MD::VelocityAutocorrelationFunction(vec1d &Cvx,
 		temp += (Cvx[i] * vx[i] + Cvy[i] * vy[i] + Cvz[i] * vz[i]);
 	}
 	temp /= N;
-	Cr.push_back(temp);	// HACK: Enable for debugging
-	//VAF << temp_ << std::endl; // writes to file
+	Cr.push_back(temp);	
 }
 
 void MD::RadialDistributionFunction(bool normalise) {
@@ -277,8 +275,7 @@ void MD::MeanSquareDisplacement(vec1d &MSDx,
 					 pow((rrz[i] - MSDz[i]), 2));
 	}
 	msd_temp /= N;
-	msd.push_back(msd_temp);	// HACK: Enable for debugging
-	//MSD << msd_temp << std::endl;
+	msd.push_back(msd_temp);
 }
 
 void MD::DensityQuenching(int steps_quench, double TEMPERATURE) {
@@ -288,8 +285,7 @@ void MD::DensityQuenching(int steps_quench, double TEMPERATURE) {
 	scale = pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS;
 	L = pow((N / _rho), 1.0 / 3.0);
 	Vol = N / _rho;
-	// TODO: possibly need to add MD::Initialise to use the **scale** var
-	Initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE); // ++quenching num
+	Initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
 
 }
 
@@ -305,7 +301,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 	L = pow((N / _rho), 1.0 / 3.0);
 	Vol = N / _rho;
 
-	//TASK: cut_off redefinition
+	// cut_off redefinition
 	cut_off = 3.0;//L / 2.;
 	rg = cut_off;
 	dr = rg / NHIST;
@@ -317,7 +313,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-	Initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE); // ++quenching num
+	Initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
 
 	double xx, yy, zz;
 	for (_STEP_INDEX = 0; _STEP_INDEX < _STEPS; _STEP_INDEX++) {
@@ -330,11 +326,11 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 		U = 0; // seting Potential U to 0
 		PC = 0;
 
-		size_t steps_quench = 3000;	// steps between each quenching
+		size_t steps_quench = 10000;	// steps between each quenching
 		if (quenching_flag == true && _STEP_INDEX != 0 && _STEP_INDEX % steps_quench == 0) {
+			++Q_counter;
 			DensityQuenching(steps_quench, TEMPERATURE);
 			std::cout << "quench: " << Q_counter << " rho: " << _rho << std::endl;
-			++Q_counter;
 		}
 
 		size_t i, j;

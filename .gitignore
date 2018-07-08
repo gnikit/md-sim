@@ -92,8 +92,6 @@ DocProject/Help/html
 # Click-Once directory
 publish/
 
-
-
 # Ignore .sln files
 *.sln
 *.json
@@ -104,13 +102,6 @@ publish/
 *.vcxproj.filters
 
 # Ignore VS project files
-/MD simulation/submit.sh
-MD simulation/runme.out
-/MD simulation/vel.csv
-/MD simulation/My Advisor Results - MD simulation
-/MD simulation/My Inspector Results - MD simulation
-/MD simulation.db3
-/Report20180224-1043.diagsession
 *.filters
 /src/mdsoftq.f90
 /My Inspector Results - MD-sim
@@ -121,3 +112,4 @@ MD simulation/runme.out
 /tests/mb_file_generation/targetver.h
 /tests/mb_file_generation/stdafx.h
 /tests/mb_file_generation/stdafx.cpp
+/data/*.txt

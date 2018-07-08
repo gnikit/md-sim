@@ -327,7 +327,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 		if (compression_flag == true && _STEP_INDEX != 0 && _STEP_INDEX % steps_quench == 0) {
 			++Q_counter;
 			DensityCompression(steps_quench, TEMPERATURE);
-			std::cout << "quench: " << Q_counter << " rho: " << _rho << std::endl;
+			std::cout << "compression: " << Q_counter << " rho: " << _rho << std::endl;
 		}
 
 		size_t i, j;

@@ -12,7 +12,7 @@ objects = Source.o MD.o stat_analysis.o \
 all: project
 
 project: $(objects)
-	icpc -std=c++17 $(objects) -lpthread -o project
+	$(CXX) -std=c++17 $(objects) -lpthread -o project
 
 
 

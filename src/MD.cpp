@@ -464,7 +464,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 			<< fz[el] << std::endl;
 	}
 
-	RadialDistributionFunction(false);	// normalisation argument
+	RadialDistributionFunction(true);	// normalisation argument
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	std::cout
 		<< "CPU run time = "

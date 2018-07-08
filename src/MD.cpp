@@ -51,7 +51,7 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool QUENCH_F) {
 	pk.reserve(_STEPS);
 	temperature.reserve(_STEPS);
 
-	quenching_flag = QUENCH_F;
+	compression_flag = QUENCH_F;
 }
 MD::~MD() {}
 
@@ -73,7 +73,7 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 	*/
 
 	// Initialise position matrix and velocity matrix from Cubic Centred Lattice
-	if (quenching_flag == false) {
+	if (compression_flag == false) {
 		size_t n = 0;
 		size_t i, j, k;
 		for (i = 0; i < Nx; i++) {
@@ -95,7 +95,7 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 		MBDistribution(TEMPERATURE, true);
 	}
 
-	if (quenching_flag == true && Q_counter == 0) {
+	if (compression_flag == true && Q_counter == 0) {
 		FileLoading<double> load_data;
 		std::string file_name = LOAD_POSITIONS"/Positions_Velocities_particles_" + std::to_string(N) + ".txt";
 		std::vector<std::vector<double>> vel =
@@ -111,14 +111,11 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 		rrz = vel[2];
 		// Start from a highly thermalised fluid state
 		// Generation of velocities with T = 10
-		//MBDistribution(10);
+		// MBDistribution(10);
 		// TODO: Not sure what follows is correct in if-loop
 		// Temperature calculation for the first step with very high T
 		// scale of x, y, z
-		// TODO: Don't think there is need to scale for the first iteration
-		// system will equilibrate after that
 	}
-
 
 	// scale of x, y, z
 	double mean_vx = 0;
@@ -126,22 +123,23 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 	double mean_vz = 0;
 
 	size_t i;
-	// Momentum conservation array
+	// Momentum conservation
 	for (i = 0; i < N; i++) {
-		mean_vx += vx[i] / N; // Calculating Average velocity for each dimension
+		mean_vx += vx[i] / N;
 		mean_vy += vy[i] / N;
 		mean_vz += vz[i] / N;
 	}
 
-	size_t tempN = N;    // Recommended opt by Intel
+	size_t tempN = N;
 #pragma parallel 
 #pragma loop count min(128)
+// Subtracting Av. velocities from each particle
 	for (i = 0; i < tempN; i++) {
-		vx[i] = vx[i] - mean_vx; // Subtracting Av. velocities from each particle
+		vx[i] = vx[i] - mean_vx; 
 		vy[i] = vy[i] - mean_vy;
 		vz[i] = vz[i] - mean_vz;
 	}
-	// T Calc
+	// Temperature calculation, statistically
 	KE = 0;
 	for (i = 0; i < N; i++) {
 		KE += 0.5 * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]);
@@ -157,12 +155,12 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 		vy[i] *= scale_v;
 		vz[i] *= scale_v;
 	}
-	// MSD initialasation
+	// MSD initialasation, storing first positions of particles
 	MSDx = x;
 	MSDy = y;
 	MSDz = z;
 
-	// VAF initialasation
+	// VAF initialasation, storing first velocities of particles
 	Cvx = vx;
 	Cvy = vy;
 	Cvz = vz;
@@ -177,7 +175,6 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 void MD::MBDistribution(double TEMPERATURE, bool run_python_script = false) {
 	std::string t = ConvertToString(TEMPERATURE, 4);
 	std::string particles = std::to_string(N);
-	//TODO: dir_str should be passed by obj MD internally or by precompiler
 	std::string dir_str = LOAD_DATA_PATH;
 
 	if (run_python_script) {
@@ -278,7 +275,7 @@ void MD::MeanSquareDisplacement(vec1d &MSDx,
 	msd.push_back(msd_temp);
 }
 
-void MD::DensityQuenching(int steps_quench, double TEMPERATURE) {
+void MD::DensityCompression(int steps_quench, double TEMPERATURE) {
 	// Increase _rho by 0.01
 	_rho += 0.01;
 	// Re-using this piece of code from MD::Simulation
@@ -327,9 +324,9 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 		PC = 0;
 
 		size_t steps_quench = 10000;	// steps between each quenching
-		if (quenching_flag == true && _STEP_INDEX != 0 && _STEP_INDEX % steps_quench == 0) {
+		if (compression_flag == true && _STEP_INDEX != 0 && _STEP_INDEX % steps_quench == 0) {
 			++Q_counter;
-			DensityQuenching(steps_quench, TEMPERATURE);
+			DensityCompression(steps_quench, TEMPERATURE);
 			std::cout << "quench: " << Q_counter << " rho: " << _rho << std::endl;
 		}
 
@@ -422,16 +419,13 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 		pc.push_back(PC / (3 * Vol));
 
 		// Isothermal Calibration
-		scale_v = sqrt(_T0 / T); // using T & KE from prev timestep
-		KE = 0; // resetting Kintetic Energy per iteration
+		scale_v = sqrt(_T0 / T);	// using T & KE from prev timestep
+		KE = 0;  // resetting Kintetic Energy per iteration
 
-		// Verlet Algorithm
 		VerletAlgorithm(rx, ry, rz, vx, vy, vz, rrx, rry, rrz);
 
-		// MSD
 		MeanSquareDisplacement(MSDx, MSDy, MSDz);
 
-		// VAF
 		VelocityAutocorrelationFunction(Cvx, Cvy, Cvz);
 
 		// Average Temperature
@@ -488,14 +482,14 @@ std::string MD::getDir() {
 void MD::InitialiseTest(double TEMPERATURE) {
 	/*
 	  Unit test for the Initialisation method.
-	  Tests whether the bool quenching_flag trigers the correct loops.
+	  Tests whether the bool compression_flag trigers the correct loops.
 	  If MBDistribution.py performs as expected.
 	  If FileLoading.LoadSingleCol() works as expected.
 	  If the file directories with preprocessor commands work.
 	*/
 	// Initialise position matrix and velocity matrix
 	//TODO: once the feature is complete remove Q_counter == 0
-	if (quenching_flag == false/* || Q_counter == 0*/) {
+	if (compression_flag == false) {
 		size_t n = 0;
 		size_t i, j, k;
 		for (i = 0; i < Nx; i++) {
@@ -515,15 +509,14 @@ void MD::InitialiseTest(double TEMPERATURE) {
 		}
 		// Generates Maxwell-Boltzmann dist from Python script
 		// Initialieses vx, vy, vz internally
-		std::cout << "No quench will be performed" << std::endl;
+		std::cout << "Compression is not configured" << std::endl;
 		MBDistribution(TEMPERATURE);
 	}
 
-	if (quenching_flag == true) {
+	if (compression_flag == true) {
 		// Start from a highly thermalised fluid state
-		std::cout << "High thermalisation for Quench prepparation" << std::endl;
+		std::cout << "High thermalisation in preparation of compression" << std::endl;
 		MBDistribution(10);
-		// TODO: Not sure if this is correct
 		// Temperature calculation for the first step with very high T
 		// scale of x, y, z
 		double mean_vx = 0;
@@ -538,7 +531,7 @@ void MD::InitialiseTest(double TEMPERATURE) {
 			mean_vz += vz[i] / N;
 		}
 
-		size_t tempN = N;    // Recommended opt by Intel
+		size_t tempN = N; 
 #pragma parallel 
 #pragma loop count min(128)
 		for (i = 0; i < tempN; i++) {
@@ -553,7 +546,7 @@ void MD::InitialiseTest(double TEMPERATURE) {
 		}
 		T = KE / (1.5 * N);
 		scale_v = sqrt(10 / T); // scalling factor
-										 // Velocity scaling
+	  // Velocity scaling
 #pragma parallel
 #pragma loop count min(128)
 		for (i = 0; i < tempN; i++) {
@@ -576,7 +569,7 @@ void MD::InitialiseTest(double TEMPERATURE) {
 		mean_vz += vz[i] / N;
 	}
 
-	size_t tempN = N;    // Recommended opt by Intel
+	size_t tempN = N; 
 #pragma parallel 
 #pragma loop count min(128)
 	for (i = 0; i < tempN; i++) {
@@ -591,7 +584,7 @@ void MD::InitialiseTest(double TEMPERATURE) {
 	}
 	T = KE / (1.5 * N);
 	scale_v = sqrt(TEMPERATURE / T); // scalling factor
-									 // Velocity scaling
+	// Velocity scaling
 #pragma parallel
 #pragma loop count min(128)
 	for (i = 0; i < tempN; i++) {
@@ -608,8 +601,6 @@ void MD::FileNaming(int POWER, double A_cst) {
 	* Generates file names for the different I/O operations
 	*/
 	std::stringstream A_stream, rho_stream, T_stream;
-
-	// setprecission function input here
 
 	T_stream << std::fixed << std::setprecision(4) << _T0;    // 4 decimal
 	A_stream << std::fixed << std::setprecision(5) << A_cst;  // 5 decimals
@@ -639,10 +630,9 @@ void MD::FileNaming(int POWER, double A_cst) {
 
 void MD::OpenFiles() {
 	/*
-	Open/Create if file does not exist
-	Overwrite existing data
+	* Open/Create if file does not exist
+	* Overwrite existing data
 	*/
-	// opens for files output and deletes prev content
 	Hist.open(HIST, std::ios::out | std::ios::trunc);
 	DATA.open(data, std::ios::out | std::ios::trunc);
 	POS.open(pos, std::ios::out | std::ios::trunc);
@@ -650,7 +640,7 @@ void MD::OpenFiles() {
 
 void MD::WriteToFiles() {
 	/*
-	Writes values of parameters to file
+	* Writes values of parameters to file
 	*/
 	for (size_t i = 0; i < _STEPS; i++) {
 		DATA << (i + 1) << '\t' << density[i] << '\t'
@@ -662,8 +652,8 @@ void MD::WriteToFiles() {
 
 void MD::ShowRun(size_t step_size_show) {
 	/*
-	Displays the system parameters every step_size_show of steps
-	Input the increment step
+	* Displays the system parameters every step_size_show of steps
+	* Input the increment step
 	*/
 	if (_STEP_INDEX == 0) {
 		std::cout << "step:\tT:\tKE:\tU:\tU+K:\tPC:\tPK:\t(PK+PC):" << std::endl;
@@ -679,42 +669,31 @@ void MD::ShowRun(size_t step_size_show) {
 
 void MD::ResetValues() {
 	/*
-	  Closes open file streams and resets sizes and values to 0
-	  For multiple simulations
+	* Closes open file streams and resets sizes and values to 0
+	* For multiple simulations
 	*/
-	// Close streams at the end of run
+	// Close streams
 	Hist.close();
 	DATA.close();
 	POS.close();
 
 	// Clear values, size, but reserve capacity
-	rx.clear();
-	ry.clear();
-	rz.clear();
-	rrx.clear();
-	rry.clear();
-	rrz.clear();
-	vx.clear();
-	vy.clear();
-	vz.clear();
+	rx.clear();	ry.clear();	rz.clear();
+	rrx.clear();	rry.clear();	rrz.clear();
+	vx.clear();	vy.clear();	vz.clear();
 	density.clear();
 	temperature.clear();
-	u_en.clear();
-	k_en.clear();
-	pc.clear();
-	pk.clear();
-	msd.clear();
-	Cr.clear();
+	u_en.clear();	k_en.clear();
+	pc.clear();	pk.clear();
+	msd.clear();	Cr.clear();
 	gr.resize(NHIST + 1, 0); // gr with Index igr
-	fx.resize(N, 0);
-	fy.resize(N, 0);
-	fz.resize(N, 0);
+	fx.resize(N, 0);	fy.resize(N, 0);	fz.resize(N, 0);
 }
 
 void MD::TimeStamp(std::ofstream& stream, std::string variables) {
 	/*
-	Dates the file and allows the input of a header
-	Input a file stream to write and string of characters to display as headers
+	* Dates the file and allows the input of a header
+	* Input a file stream to write and string of characters to display as headers
 	*/
 	std::chrono::time_point<std::chrono::system_clock> instance;
 	instance = std::chrono::system_clock::now();

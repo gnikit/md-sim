@@ -48,7 +48,7 @@ int main() {
 	vec1d power = {6, 8, 10, 12};
 	for (size_t i = 0; i < power.size(); i++) {
 		MD* run = new MD(dir_linux, STEPS, false);		// fluid compression set to false
-		std::thread th1(&MD::Simulation, run, 0.5, 0.5, power[i], 0);
+		std::thread th1(&MD::Simulation, run, 0.5, 0.5, power[i], 0.5);
 		th1.join();
 		delete run;
 	}

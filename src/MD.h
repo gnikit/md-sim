@@ -69,7 +69,7 @@ protected:
 	double scale_v;         // velocity scaling
 
 	// Quenching varibles
-	bool quenching_flag = false;
+	bool compression_flag = false;
 	size_t Q_counter = 0; // counts the number qunchings that have occured
 
 	// HISTOGRAM VARIABLES
@@ -109,7 +109,7 @@ protected:
 	void VelocityAutocorrelationFunction(vec1d &Cvx, vec1d &Cvy, vec1d &Cvz);
 	void RadialDistributionFunction(bool normalise = true);
 	void MeanSquareDisplacement(vec1d &MSDx, vec1d &MSDy, vec1d &MSDz);
-	void DensityQuenching(int steps_quench, double TEMPERATURE);
+	void DensityCompression(int steps_quench, double TEMPERATURE);
 
 	void OpenFiles();
 	void FileNaming(int POWER, double A_cst);

@@ -373,7 +373,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 
 				r = sqrt((x * x) + (y * y) + (z * z));
 				//TODO: enable q for BIP potential
-				//long double q = sqrt(r * r + A_CST * A_CST);
+				long double q = sqrt(r * r + A_CST * A_CST);
 
 				// Force loop
 				if (r < cut_off) {
@@ -381,11 +381,11 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 					//		using comment-uncomment to implement
 					// BIP potential of the form: phi = 1/[(r**2 + a**2)**(n/2)]
 					//TODO: BIP force
-					//long double ff =
-					//	(POWER)*r *	pow(q, ((-POWER - 2.0))); // Force for particles
+					long double ff =
+						(POWER)*r *	pow(q, ((-POWER - 2.0))); // Force for particles
 
 					//TODO: Gausian-force with sigma=1 and epsilon=1
-					long double ff = 2 * r * exp(-r * r);
+					//long double ff = 2 * r * exp(-r * r);
 
 
 					fx[i] += x * ff / r;
@@ -402,10 +402,10 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 					//TODO: Add infinity and edge correction, do same for Pc
 
 					//TODO: BIP potential
-					//U += pow(q, (-POWER));
+					U += pow(q, (-POWER));
 
 					//TODO: Gaussian Potential GCM
-					U += exp(-r * r);
+					//U += exp(-r * r);
 
 					// Radial Distribution
 					igr = round(NHIST * r / rg);

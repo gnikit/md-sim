@@ -5,7 +5,7 @@
 #include <string>
 
 
-#define STEPS 700000	//10000
+#define STEPS 10000	//10000
 #define PARTICLES 1000 //1000
 typedef std::vector<double> vec1d;
 
@@ -13,8 +13,6 @@ typedef std::vector<double> vec1d;
 std::string dir_windows = "C:/Code/C++/MD-simulation/Archives of Data/testing/gaussian/long_quench/";
 /* Linux working directory */
 std::string dir_linux = "/home/gn/Desktop/test_data/";
-std::string dir_crystal = "/home/gn/Desktop/crystallisation_data/";
-std::string dir_crystal_win = "C:/Code/C++/MD-simulation/Archives of Data/crystallisation/gaussian/";
 /* Working directory of the cx1 cluster */
 std::string dir = "";
 
@@ -47,10 +45,10 @@ int main() {
 		std::tie(rho_iso_l, A_iso_l) = isomorph_linr_l.GenLine(n);
 	}
 	/* Simulation Examples */
-	vec1d T_range = LinearSpacedArray(0.001, 0.01, 10);
-	for (size_t i = 5; i < T_range.size(); i++) {
-		MD* run = new MD(dir_windows, STEPS, true);
-		std::thread th1(&MD::Simulation, run, 0.05, T_range[i], 0, 0);
+	vec1d power = {6, 8, 10, 12};
+	for (size_t i = 0; i < power.size(); i++) {
+		MD* run = new MD(dir_linux, STEPS, true);
+		std::thread th1(&MD::Simulation, run, 0.5, 0.5, power[i], 0);
 		th1.join();
 		delete run;
 	}
@@ -65,7 +63,6 @@ int main() {
 	}*/
 	/*-----------------------------------------------*/
 
-	system("pause");
 }
 
 void MakeDataBase() {

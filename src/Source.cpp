@@ -12,7 +12,7 @@ typedef std::vector<double> vec1d;
 /* Windows working directory for Archives of Data */
 std::string dir_windows = "C:/Code/C++/MD-simulation/Archives of Data/testing/gaussian/long_quench/";
 /* Linux working directory */
-std::string dir_linux = "/home/gn/Desktop/test_data/";
+std::string dir_linux = "/home/in2017/Desktop/test_data/";
 /* Working directory of the cx1 cluster */
 std::string dir = "";
 
@@ -45,10 +45,10 @@ int main() {
 		std::tie(rho_iso_l, A_iso_l) = isomorph_linr_l.GenLine(n);
 	}
 	/* Simulation Examples */
-	vec1d power = {6, 8, 10, 12};
-	for (size_t i = 0; i < power.size(); i++) {
+	vec1d temp = LinearSpacedArray(0.1, 0.7, 7);
+	for (size_t i = 0; i < temp.size(); i++) {
 		MD* run = new MD(dir_linux, STEPS, false);		// fluid compression set to false
-		std::thread th1(&MD::Simulation, run, 0.5, 0.5, power[i], 0.5);
+		std::thread th1(&MD::Simulation, run, 0.5, 0.5, 12, 0.5);
 		th1.join();
 		delete run;
 	}

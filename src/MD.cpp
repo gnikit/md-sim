@@ -323,7 +323,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 		U = 0; // seting Potential U to 0
 		PC = 0;
 
-		size_t steps_quench = 10000;	// steps between each quenching
+		size_t steps_quench = 5000;	// steps between each quenching
 		if (compression_flag == true && _STEP_INDEX != 0 && _STEP_INDEX % steps_quench == 0) {
 			++Q_counter;
 			DensityCompression(steps_quench, TEMPERATURE);

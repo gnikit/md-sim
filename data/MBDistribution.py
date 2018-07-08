@@ -3,7 +3,6 @@ import sys
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.special import erf
-import matplotlib.pyplot as plt
 from scipy import stats
 
 

@@ -1,6 +1,6 @@
 #define compilers
 CC=icc
-CXX=icpc
+CXX=g++
 # CXXFLAGS=-c -std=c++17 -pthread -xHOST \
 # 				 -use-intel-optimized-headers -m64 -O3 -Wall
 # CXXFLAGS=-c -pthread -parallel -mkl=parallel -O3 -xHOST -std=c++17 -use-intel-optimized-headers -m64 -prec-sqrt -prec-div

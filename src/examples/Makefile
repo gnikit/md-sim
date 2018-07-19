@@ -1,27 +1,28 @@
 SHELL = /bin/bash
-CC  = icc
-CXX = g++
-# CXXFLAGS=-c -std=c++17 -pthread -xHOST -use-intel-optimized-headers -m64 -O3 -Wall -g
-# CXXFLAGS=-c -pthread -parallel -mkl=parallel -O3 -xHOST -std=c++17 -use-intel-optimized-headers -m64 -prec-sqrt -prec-div
-CXXFLAGS =-c -std=c++11 -pthread -O3 -Wall
+include ../Makefile.variables
 LIBDIR=../../lib
 BINDIR=../../bin
-
-all: database iso
+# TODO: This will obviously not work if isomorph.o, MD.o stat_analysis.o do not exist
+# 			at this point 'make all' has to be called and 'database' and 'iso' cannot be called independently
+all: database iso compression
 
 database: make_database.o ../MD.o ../stat_analysis.o
-	$(CXX) -std=c++11 make_database.o ../MD.o ../stat_analysis.o -lpthread -o database
+	$(CXX) -std=$(STD) make_database.o ../MD.o ../stat_analysis.o -pthread -o database
 
 iso: isomorph_line.o ../MD.o ../isomorph.o
-	$(CXX) -std=c++11 -lpthread isomorph_line.o ../MD.o ../isomorph.o -o iso
+	$(CXX) -std=$(STD) -pthread isomorph_line.o ../MD.o ../isomorph.o -o iso
 
-isomorph_line.o: isomorph_line.cpp
+compression: fluid_compression.o ../MD.o 
+	$(CXX) -std=$(STD) -pthread fluid_compression.o ../MD.o -o compression
+
+isomorph_line.o: 
 	$(CXX) $(CXXFLAGS) isomorph_line.cpp
 
-
-make_database.o: make_database.cpp
+make_database.o: 
 	$(CXX) $(CXXFLAGS) make_database.cpp
 
+fluid_compression.o:
+	$(CXX) $(CXXFLAGS) fluid_compression.cpp
 
 clean:
 	rm *.o iso database

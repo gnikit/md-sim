@@ -82,13 +82,16 @@ if __name__ == '__main__':
         NUMBER_OF_PARTICLES = 10 ** 3
         TEMPERATURE = 1
     file_id = '_particles_' + str(NUMBER_OF_PARTICLES) + '_T_' + "{:.4f}".format(TEMPERATURE) + '.txt'
-    # TODO: add os handler
-    print(os.getcwd())
+
+    print("Working directory is: ", os.getcwd())
     os.chdir('../data')
+    # TODO: add os handler
+    print("Chaning to save direcotry: ", os.getcwd())
     a = VelGen()
     vx, vy, vz = a.get_velocities()
     np.savetxt('vx' + file_id, vx, delimiter='\n')
     np.savetxt('vy' + file_id, vy, delimiter='\n')
     np.savetxt('vz' + file_id, vz, delimiter='\n')
+    print("Initial velocity files saved.")
 else:
     print("MD module loaded")

@@ -1,14 +1,14 @@
 #include "MD.h"
 #include "../lib/FileLoading.h"
-#define PARTICLES_PER_AXIS 10  // if changed, new vx,vy,vz files need to be generated
-#define NHIST 300
+#define PARTICLES_PER_AXIS 10   // if changed, new vx,vy,vz files need to be generated
+#define NHIST 300							  // Number of histogram bins
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 #ifdef _WIN32
 #define LOAD_DATA_PATH "C:/Users/gn/source/repos/MD-simulation/data"
-#define LOAD_POSITIONS LOAD_DATA_PATH	//TODO: remove gaussian in future
+#define LOAD_POSITIONS LOAD_DATA_PATH
 #else
 #define LOAD_DATA_PATH "../data"
-#define LOAD_POSITIONS LOAD_DATA_PATH	//TODO: remove gaussian in future
+#define LOAD_POSITIONS LOAD_DATA_PATH
 #endif
 
 
@@ -98,6 +98,7 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 	if (compression_flag == true && Q_counter == 0) {
 		FileLoading<double> load_data;
 		std::string file_name = LOAD_POSITIONS"/Positions_Velocities_particles_" + std::to_string(N) + ".txt";
+		std::cout << "Try and read file: " << file_name << std::endl;
 		std::vector<std::vector<double>> vel =
 			load_data.LoadTxt(file_name, 9, '#');
 		x = vel[0];
@@ -109,6 +110,7 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 		rrx = vel[0];
 		rry = vel[1];
 		rrz = vel[2];
+		std::cout << "Read successful" << std::endl;
 		// Start from a highly thermalised fluid state
 		// Generation of velocities with T = 10
 		// MBDistribution(10);
@@ -290,6 +292,9 @@ void MD::DensityCompression(int steps_quench, double TEMPERATURE) {
 void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST) {
 	// Initialise scalling variables
 	// If Simulation(...) is not run, _T0, _rho need to be initialised elsewhere
+	std::cout << "***************************\n"
+							 "** MD Simulation started **\n"
+							 "***************************\n" <<	std::endl;
 	_T0 = TEMPERATURE;
 	_rho = DENSITY;
 	dt /= sqrt(_T0);
@@ -323,11 +328,11 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 		U = 0; // seting Potential U to 0
 		PC = 0;
 
-		size_t steps_quench = 5000;	// steps between each quenching
+		size_t steps_quench = 10;	// steps between each quenching
 		if (compression_flag == true && _STEP_INDEX != 0 && _STEP_INDEX % steps_quench == 0) {
 			++Q_counter;
 			DensityCompression(steps_quench, TEMPERATURE);
-			std::cout << "compression: " << Q_counter << " rho: " << _rho << std::endl;
+			std::cout << "Compressing fluid, run: " << Q_counter << " rho: " << _rho << std::endl;
 		}
 
 		size_t i, j;
@@ -468,6 +473,9 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 		<< std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() %
 		60
 		<< "s" << std::endl;
+		std::cout << "******************************\n"
+							   "** MD Simulation terminated **\n"
+							 	 "******************************\n" <<	std::endl;
 	// Streams should not close, vectors should not be cleared if object is to be reused
 	ResetValues(); // no need to call if object is not reused
 }
@@ -478,7 +486,7 @@ std::string MD::getDir() {
 	*/
 	return _dir;
 }
-
+// TODO: remove this in the future
 void MD::InitialiseTest(double TEMPERATURE) {
 	/*
 	  Unit test for the Initialisation method.

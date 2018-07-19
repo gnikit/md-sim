@@ -20,55 +20,21 @@ std::vector<double> LinearSpacedArray(double a, double b, std::size_t N);
 
 int main() {
 	
-	// {/* Potential power strength */
-	// 	size_t n = 8;
-	// 	/* Generate Temperature vector for isomorph */
-	// 	vec1d T_iso = LinearSpacedArray(0.5, 3, 5);
-	// 	/* Empty containers for density and a_par */
-	// 	vec1d rho_iso, A_iso;
-	// 	vec1d rho_iso_h, A_iso_h;
-	// 	vec1d rho_iso_k, A_iso_k;
-	// 	vec1d rho_iso_l, A_iso_l;
-	// 	/* Generate Density and A isomorph vectors */
-	// 	Isomorph isomorph_line(0.5, 0.5, 1, T_iso);
-	// 	std::tie(rho_iso, A_iso) = isomorph_line.GenLine(n);
-	//
-	// 	Isomorph isomorph_line_h(0.5, 0.5, 0.75, T_iso);
-	// 	std::tie(rho_iso_h, A_iso_h) = isomorph_line_h.GenLine(n);
-	//
-	// 	Isomorph isomorph_line_k(0.5, 0.5, 1.25, T_iso);
-	// 	std::tie(rho_iso_k, A_iso_k) = isomorph_line_k.GenLine(n);
-	//
-	// 	Isomorph isomorph_linr_l(0.5, 0.5, 2.00, T_iso);
-	// 	std::tie(rho_iso_l, A_iso_l) = isomorph_linr_l.GenLine(n);
-	// }
-	/* Simulation Examples */
 	vec1d temp = LinearSpacedArray(0.001, 0.01, 10);
 	for (size_t i = 0; i < temp.size(); i++) {
-		MD* run1 = new MD(dir_linux, STEPS, true);		// fluid compression set to false
+		MD* run1 = new MD(dir_linux, STEPS, false);		// fluid compression set to false
 		MD* run2 = new MD(dir_linux, STEPS, true);
 		MD* run3 = new MD(dir_linux, STEPS, true);
 		MD* run4 = new MD(dir_linux, STEPS, true);
 
 		std::thread th1(&MD::Simulation, run1, 0.05, 0.5, 12, 0.0);
-		std::thread th2(&MD::Simulation, run2, 0.05, 0.5, 12, 0.5);
+		/* std::thread th2(&MD::Simulation, run2, 0.05, 0.5, 12, 0.5);
 		std::thread th3(&MD::Simulation, run3, 0.05, 0.5, 12, 0.1);
 		std::thread th4(&MD::Simulation, run4, 0.05, 0.5, 12, 1.5);
-
-		th1.join();th2.join(); th3.join(); th4.join();
+ */
+		th1.join();/* th2.join(); th3.join(); th4.join(); */
 		delete run1, run2, run3, run4;
 	}
-	/*
-	* This is an isomorph line run
-	* Simulates the fluid along the line
-	*/
-	/* for (size_t i = 0; i < T_iso.size(); i++) {
-	std::cout << "T: " << T_iso[i] << " rho: " << rho_iso[i] << " A: " << A_iso[i] << std::endl;
-	MD run(dir_windows, STEPS);
-	run.Simulation(rho_iso[i], T_iso[i], n, A_iso[i]);
-	}*/
-	/*-----------------------------------------------*/
-
 }
 
 void MakeDataBase() {

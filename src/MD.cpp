@@ -5,10 +5,10 @@
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 #ifdef _WIN32
 #define LOAD_DATA_PATH "C:/Users/gn/source/repos/MD-simulation/data"
-#define LOAD_POSITIONS LOAD_DATA_PATH"/gaussian"	//TODO: remove gaussian in future
+#define LOAD_POSITIONS LOAD_DATA_PATH	//TODO: remove gaussian in future
 #else
 #define LOAD_DATA_PATH "../data"
-#define LOAD_POSITIONS LOAD_DATA_PATH"/gaussian"	//TODO: remove gaussian in future
+#define LOAD_POSITIONS LOAD_DATA_PATH	//TODO: remove gaussian in future
 #endif
 
 

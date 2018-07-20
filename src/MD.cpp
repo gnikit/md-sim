@@ -9,8 +9,8 @@
   	char result[ MAX_PATH ];
   	return std::string( result, GetModuleFileName( NULL, result, MAX_PATH ) );
   }
-	#define LOAD_DATA_PATH "C:/Users/gn/source/repos/MD-simulation/data"
-	#define LOAD_POSITIONS LOAD_DATA_PATH		// TODO: these need fixing
+	//#define LOAD_DATA_PATH "C:/Users/gn/source/repos/MD-simulation/data"
+	//#define LOAD_POSITIONS LOAD_DATA_PATH		// TODO: these need fixing
 #else
 	#include <limits.h>
   #include <unistd.h>
@@ -19,8 +19,8 @@
   	ssize_t count = readlink( "/proc/self/exe", result, PATH_MAX );
   	return std::string( result, (count > 0) ? count : 0 );
   }
-	#define LOAD_DATA_PATH "../data"
-	#define LOAD_POSITIONS LOAD_DATA_PATH		// TODO: these need fixing
+	//#define LOAD_DATA_PATH "../data"
+	//#define LOAD_POSITIONS LOAD_DATA_PATH		// TODO: these need fixing
 #endif
 
 
@@ -83,7 +83,6 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 	  @param &vx, &vy, &vz: Vx, Vy, Vz vector points
 	  @param TEMPERATURE: Thermostat target temperature
 	*/
-
 	// Initialise position matrix and velocity matrix from Cubic Centred Lattice
 	if (compression_flag == false) {
 		size_t n = 0;
@@ -109,7 +108,8 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 
 	if (compression_flag == true && Q_counter == 0) {
 		FileLoading<double> load_data;
-		std::string file_name = LOAD_POSITIONS"/Positions_Velocities_particles_" + std::to_string(N) + ".txt";
+		getDir();  // initialises top_exe_dir
+		std::string file_name = top_exe_dir + "/data/Positions_Velocities_particles_" + std::to_string(N) + ".txt";
 		std::cout << "Try and read file: " << file_name << std::endl;
 		std::vector<std::vector<double>> vel =
 			load_data.LoadTxt(file_name, 9, '#');
@@ -186,24 +186,44 @@ void MD::Initialise(vec1d &x, vec1d &y, vec1d &z,
 	Cr.push_back(first_val);
 }
 
+std::string MD::getDir(){
+	/*
+	*	Returns the absolute, top working direcory of the git repo.
+	* Also, when called, the full path of the executable, along with its name
+	*	will be stored in the full_exe_dir string.
+	*/
+	full_exe_dir = getExePath();
+	size_t stride= full_exe_dir.rfind("/MD-simulation");
+	top_exe_dir = full_exe_dir.substr(0, stride) + "/MD-simulation";
+	std::string rel_path = full_exe_dir.substr(stride+1);
+
+	std::cout << "Full executable directory: " << full_exe_dir << std::endl;
+	std::cout << "Absolute top level directory: " << top_exe_dir << std::endl;
+
+	return top_exe_dir;
+}
+
+
 void MD::MBDistribution(double TEMPERATURE, bool run_python_script = false) {
 	std::string t = ConvertToString(TEMPERATURE, 4);
 	std::string particles = std::to_string(N);
-	std::string dir_str = LOAD_DATA_PATH;
+	std::string dir_str = getDir();
+	dir_str += "/data";
 
 	if (run_python_script) {
 		// Could be stored as variables and passed into FileNaming
 		// rather than repeating the process
 		// store in _particles_to_str, _T_to_str
-		std::string command = "python " + dir_str + "/MBDistribution.py " + particles + " " + t;
+		// taking care of the idiots that use spaces in paths
+		std::string command = "python \"" + dir_str + "/MBDistribution.py\" " + particles + " " + t;
 		system(command.c_str());  // Creates files with MD velocities 
 	}
 
 	std::string vel_id = "_particles_" + particles + "_T_" + t + ".txt";
 	FileLoading<double> obj;
-	vx = obj.LoadSingleCol(LOAD_DATA_PATH"/vx" + vel_id);
-	vy = obj.LoadSingleCol(LOAD_DATA_PATH"/vy" + vel_id);
-	vz = obj.LoadSingleCol(LOAD_DATA_PATH"/vz" + vel_id);
+	vx = obj.LoadSingleCol(dir_str + "/vx" + vel_id);
+	vy = obj.LoadSingleCol(dir_str + "/vy" + vel_id);
+	vz = obj.LoadSingleCol(dir_str + "/vz" + vel_id);
 	//TODO: define in heap and delete FileLoading obj
 }
 
@@ -492,12 +512,6 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
 	ResetValues(); // no need to call if object is not reused
 }
 
-std::string MD::getDir() {
-	/*
-	* Returns the directory in a string
-	*/
-	return _dir;
-}
 // TODO: remove this in the future
 void MD::InitialiseTest(double TEMPERATURE) {
 	/*

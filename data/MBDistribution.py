@@ -84,9 +84,11 @@ if __name__ == '__main__':
     file_id = '_particles_' + str(NUMBER_OF_PARTICLES) + '_T_' + "{:.4f}".format(TEMPERATURE) + '.txt'
 
     print("Working directory is: ", os.getcwd())
-    os.chdir('../data')
-    # TODO: add os handler
-    print("Chaning to save direcotry: ", os.getcwd())
+    # CD to location of the file, file should be located in ./MD-simulation/data
+    abspath = os.path.abspath(__file__)
+    dname = os.path.dirname(abspath)
+    os.chdir(dname)
+    
     a = VelGen()
     vx, vy, vz = a.get_velocities()
     np.savetxt('vx' + file_id, vx, delimiter='\n')

@@ -22,7 +22,7 @@ int main() {
 	
 	vec1d temp = LinearSpacedArray(0.001, 0.01, 10);
 	for (size_t i = 0; i < temp.size(); i++) {
-		MD* run1 = new MD(dir_linux, STEPS, false);		// fluid compression set to false
+		MD* run1 = new MD(dir_linux, STEPS, true);		// fluid compression set to false
 		MD* run2 = new MD(dir_linux, STEPS, true);
 		MD* run3 = new MD(dir_linux, STEPS, true);
 		MD* run4 = new MD(dir_linux, STEPS, true);

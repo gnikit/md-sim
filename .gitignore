@@ -113,3 +113,4 @@ publish/
 /tests/mb_file_generation/stdafx.h
 /tests/mb_file_generation/stdafx.cpp
 /data/*.txt
+/src/examples/example_data/*.txt

@@ -4,14 +4,11 @@
 #include <string>
 
 
-#define STEPS 100	//10000
-#define PARTICLES 1000 //1000
+#define STEPS 100
+#define PARTICLES 1000
 typedef std::vector<double> vec1d;
 
-/* Windows working directory for Archives of Data */
-std::string dir_windows = "C:/Code/C++/MD-simulation/Archives of Data/testing/gaussian/long_quench/";
-/* Linux working directory */
-std::string dir_linux = "/home/gn/Desktop/test_data/delete/";
+std::string dir_linux = "./example_data/";
 
 void MakeDataBase();
 
@@ -43,7 +40,7 @@ int main() {
 	*/
 	for (size_t i = 0; i < T_iso.size(); i++) {
 	std::cout << "T: " << T_iso[i] << " rho: " << rho_iso[i] << " A: " << A_iso[i] << std::endl;
-	MD run(dir_windows, STEPS);
+	MD run(dir_linux, STEPS);
 	run.Simulation(rho_iso[i], T_iso[i], n, A_iso[i]);
 	}
 

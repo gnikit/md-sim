@@ -8,10 +8,7 @@
 #define PARTICLES 1000 //1000
 typedef std::vector<double> vec1d;
 
-/* Windows working directory for Archives of Data */
-std::string dir_windows = "C:/Code/C++/MD-simulation/Archives of Data/testing/gaussian/long_quench/";
-/* Linux working directory */
-std::string dir_linux = "/home/gn/Desktop/test_data/delete/";
+std::string dir_linux = "./example_data/";
 
 void MakeDataBase();
 
@@ -45,10 +42,10 @@ void MakeDataBase() {
 					std::cout << "rho: " << rho[d] << " T: " << T[t] <<
 						"n: " << n[i] << " A: " << A1[j] << " run num: " << num << std::endl;
 
-					MD* run1 = new MD(dir_windows, STEPS);
-					MD* run2 = new MD(dir_windows, STEPS);
-					MD* run3 = new MD(dir_windows, STEPS);
-					MD* run4 = new MD(dir_windows, STEPS);
+					MD* run1 = new MD(dir_linux, STEPS);
+					MD* run2 = new MD(dir_linux, STEPS);
+					MD* run3 = new MD(dir_linux, STEPS);
+					MD* run4 = new MD(dir_linux, STEPS);
 
 					std::thread th1(&MD::Simulation, run1, rho[d], T[t], n[i], A1[j]);
 					std::thread th2(&MD::Simulation, run2, rho[d], T[t], n[i], A2[j]);
@@ -77,7 +74,7 @@ void MakeDataBase() {
 	for (size_t d = 0; d < rho.size(); d++) {
 		for (size_t t = 0; t < T.size(); t++) {
 			// Defining in Heap to avoid obj corruption due to multiple optimisation
-			Stat_Analysis* data_averaging = new Stat_Analysis(dir_windows, STEPS, PARTICLES, 2.0, 1.5, a);
+			Stat_Analysis* data_averaging = new Stat_Analysis(dir_linux, STEPS, PARTICLES, 2.0, 1.5, a);
 			for (size_t i = 0; i < n.size(); i++) {
 				data_averaging->StaticDataProcessing(n[i]);
 			}

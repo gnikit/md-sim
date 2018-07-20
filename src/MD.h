@@ -82,6 +82,7 @@ private:
 	const long double PI = acos(-1.0);
 	std::string _FILE_EXT;      // output file extension
 	/* Variables for storing inside the object the file ID */
+	std::string full_exe_dir, top_exe_dir;
 	std::string _step_to_str, _particles_to_str, _rho_to_str, _T_to_str, _n_to_str, _A_to_str;
 	std::string HIST, data, pos;
 	std::string _dir, _FILE_ID;

@@ -1,14 +1,26 @@
 #include "MD.h"
-#include "../lib/FileLoading.h"
+#include "FileLoading.h"	      // TODO: this is far from ideal
 #define PARTICLES_PER_AXIS 10   // if changed, new vx,vy,vz files need to be generated
 #define NHIST 300							  // Number of histogram bins
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 #ifdef _WIN32
-#define LOAD_DATA_PATH "C:/Users/gn/source/repos/MD-simulation/data"
-#define LOAD_POSITIONS LOAD_DATA_PATH
+	#include <windows.h>
+	std::string getexepath() {
+  	char result[ MAX_PATH ];
+  	return std::string( result, GetModuleFileName( NULL, result, MAX_PATH ) );
+  }
+	#define LOAD_DATA_PATH "C:/Users/gn/source/repos/MD-simulation/data"
+	#define LOAD_POSITIONS LOAD_DATA_PATH		// TODO: these need fixing
 #else
-#define LOAD_DATA_PATH "../data"
-#define LOAD_POSITIONS LOAD_DATA_PATH
+	#include <limits.h>
+  #include <unistd.h>
+  std::string getExePath() {
+  	char result[ PATH_MAX ];
+  	ssize_t count = readlink( "/proc/self/exe", result, PATH_MAX );
+  	return std::string( result, (count > 0) ? count : 0 );
+  }
+	#define LOAD_DATA_PATH "../data"
+	#define LOAD_POSITIONS LOAD_DATA_PATH		// TODO: these need fixing
 #endif
 
 

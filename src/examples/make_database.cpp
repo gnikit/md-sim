@@ -4,7 +4,7 @@
 #include <string>
 
 
-#define STEPS 1000	//10000
+#define STEPS 100	//10000
 #define PARTICLES 1000 //1000
 typedef std::vector<double> vec1d;
 
@@ -48,11 +48,11 @@ void MakeDataBase() {
 					MD* run4 = new MD(dir_linux, STEPS);
 
 					std::thread th1(&MD::Simulation, run1, rho[d], T[t], n[i], A1[j]);
-					std::thread th2(&MD::Simulation, run2, rho[d], T[t], n[i], A2[j]);
-					std::thread th3(&MD::Simulation, run3, rho[d], T[t], n[i], A3[j]);
-					std::thread th4(&MD::Simulation, run4, rho[d], T[t], n[i], A4[j]);
+					//std::thread th2(&MD::Simulation, run2, rho[d], T[t], n[i], A2[j]);
+					// std::thread th3(&MD::Simulation, run3, rho[d], T[t], n[i], A3[j]);
+					// std::thread th4(&MD::Simulation, run4, rho[d], T[t], n[i], A4[j]);
 
-					th1.join(); th2.join(); th3.join(); th4.join();
+					th1.join(); //th2.join(); //th3.join(); th4.join();
 					delete run1, run2, run3, run4;
 
 					++num;

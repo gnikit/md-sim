@@ -6,7 +6,7 @@
 //	Smoothed Particle Hydrodynamics                                 //
 //                                                                  //
 //	University: Royal Holloway University of London                 //
-//                                                                  // 
+//                                                                  //
 //	A program meant to simulate a MD fluid with an only             //
 //	repulsive pair-potential. Increasing the parameter A            //
 //	creates a coarse-graining effect for the system allowing it     //
@@ -16,106 +16,105 @@
 //                                                                  //
 //////////////////////////////////////////////////////////////////////
 #pragma once
-#if defined (__INTEL_COMPILER)
-	#include <mathimf.h>  // Intel Math library
-	#define COMPILER "INTEL"
-#elif defined (__GNUC__)
-	#include <math.h>
-	#define COMPILER "G++"
+#if defined(__INTEL_COMPILER)
+#include <mathimf.h>  // Intel Math library
+#define COMPILER "INTEL"
+#elif defined(__GNUC__)
+#include <math.h>
+#define COMPILER "G++"
 #else
-	#include <math.h>
-	#define COMPILER "WHO CARES"
+#include <math.h>
+#define COMPILER "WHO CARES"
 #endif
 
-#include <iostream>
-#include <iomanip>    // setprecision
-#include <vector>
-#include <chrono>     // CPU run-time
-#include <ctime>	  // std::chrono
-#include <fstream>    // file writing
-#include <iterator>
-#include <sstream>	  // stringstream
+#include <chrono>  // CPU run-time
 #include <cstdint>
+#include <ctime>    // std::chrono
+#include <fstream>  // file writing
+#include <iomanip>  // setprecision
+#include <iostream>
+#include <iterator>
+#include <sstream>  // stringstream
+#include <vector>
 
 class MD {
-protected:
-	typedef std::vector<double> vec1d;	// short-hand notation, use with care
+ protected:
+  //typedef std::vector<double> std::vector<double>;	// short-hand notation, use with care
 
-	vec1d rx, ry, rz;	      // Position Arrays
-	vec1d vx, vy, vz;	      // Velocity Arrays
-	vec1d fx, fy, fz;		  // Force arrays
-	vec1d Cvx, Cvy, Cvz;      // VAF arrays
-	vec1d rrx, rry, rrz;	  // used in MSD calculation
-	vec1d MSDx, MSDy, MSDz;   // MSD arrays
-	vec1d Cr, msd, u_en, k_en,
-		pc, pk, temperature, density;	// vectors used as buffers
+  std::vector<double> rx, ry, rz;        // Position Arrays
+  std::vector<double> vx, vy, vz;        // Velocity Arrays
+  std::vector<double> fx, fy, fz;        // Force arrays
+  std::vector<double> Cvx, Cvy, Cvz;     // VAF arrays
+  std::vector<double> rrx, rry, rrz;     // used in MSD calculation
+  std::vector<double> MSDx, MSDy, MSDz;  // MSD arrays
+  std::vector<double> Cr, msd, u_en, k_en,
+      pc, pk, temperature, density;  // vectors used as buffers
 
-	size_t Nx, Ny, Nz;   // Particles in x, y, z
-	size_t N, _STEP_INDEX, _STEPS;  // Total particles, step index, maximum steps
-	double _T0;		        // Target Temperature. Desired T for the system to operate
-	double dt = 0.005;	    // time step This applies: dt = 0.005/sqrt(T0)
-	double x, y, z;			// distance between particle i and j
-	double r;				// distance in polar
-	double _rho;			// density
-	double scale;			// box scaling parameter
-	double KE = 0.0;		// Kinetic Energy
-	double T;				// Temperature
-	double L;				// Length of the box after scaling
-	double Vol;				// Volume
-	double cut_off = 3.0;	// simulation runs only within cutoff
-	double U = 0;			// Potential Energy
-	double PC = 0;			// Configurational Pressure
-	double PK;              // Kinetic Pressure
-	double scale_v;         // velocity scaling
+  size_t Nx, Ny, Nz;              // Particles in x, y, z
+  size_t N, _STEP_INDEX, _STEPS;  // Total particles, step index, maximum steps
+  double _T0;                     // Target Temperature. Desired T for the system to operate
+  double dt = 0.005;              // time step This applies: dt = 0.005/sqrt(T0)
+  double x, y, z;                 // distance between particle i and j
+  double r;                       // distance in polar
+  double _rho;                    // density
+  double scale;                   // box scaling parameter
+  double KE = 0.0;                // Kinetic Energy
+  double T;                       // Temperature
+  double L;                       // Length of the box after scaling
+  double Vol;                     // Volume
+  double cut_off = 3.0;           // simulation runs only within cutoff
+  double U = 0;                   // Potential Energy
+  double PC = 0;                  // Configurational Pressure
+  double PK;                      // Kinetic Pressure
+  double scale_v;                 // velocity scaling
 
-	// Quenching varibles
-	bool compression_flag = false;
-	size_t Q_counter = 0; // counts the number qunchings that have occured
+  // Quenching varibles
+  bool compression_flag = false;
+  size_t Q_counter = 0;  // counts the number qunchings that have occured
 
-	// HISTOGRAM VARIABLES
-	int igr;		// Index of Hist
-	double rg;
-	double dr;
-	vec1d gr;   // RDF vector container
+  // HISTOGRAM VARIABLES
+  int igr;  // Index of Hist
+  double rg;
+  double dr;
+  std::vector<double> gr;  // RDF vector container
 
-private:
-	const long double PI = acos(-1.0);
-	std::string _FILE_EXT;      // output file extension
-	/* Variables for storing inside the object the file ID */
-	std::string full_exe_dir, top_exe_dir;
-	std::string _step_to_str, _particles_to_str, _rho_to_str, _T_to_str, _n_to_str, _A_to_str;
-	std::string HIST, data, pos;
-	std::string _dir, _FILE_ID;
-	std::ofstream Hist, DATA, POS;
+ private:
+  const long double PI = acos(-1.0);
+  std::string _FILE_EXT;  // output file extension
+  /* Variables for storing inside the object the file ID */
+  std::string full_exe_dir, top_exe_dir;
+  std::string _step_to_str, _particles_to_str, _rho_to_str, _T_to_str, _n_to_str, _A_to_str;
+  std::string HIST, data, pos;
+  std::string _dir, _FILE_ID;
+  std::ofstream Hist, DATA, POS;
 
-public:
+ public:
+  MD(std::string DIRECTORY, size_t run_number);
+  MD(std::string DIRECTORY, size_t run_number, bool QUENCH_F);
+  ~MD();
 
-	MD(std::string DIRECTORY, size_t run_number);
-	MD(std::string DIRECTORY, size_t run_number, bool QUENCH_F);
-	~MD();
+  void Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST);
+  std::string getDir();
+  void InitialiseTest(double TEMPERATURE);
+  void ResetValues();
 
-	void Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST);
-	std::string getDir();
-	void InitialiseTest(double TEMPERATURE);
-	void ResetValues();
+ protected:
+  void Initialise(std::vector<double> &x, std::vector<double> &y, std::vector<double> &z,
+                  std::vector<double> &vx, std::vector<double> &vy, std::vector<double> &vz,
+                  double TEMPERATURE);
+  void MBDistribution(double TEMPERATURE, bool run_python_script);
+  void VerletAlgorithm(std::vector<double> &rx, std::vector<double> &ry, std::vector<double> &rz,
+                       std::vector<double> &vx, std::vector<double> &vy, std::vector<double> &vz,
+                       std::vector<double> &rrx, std::vector<double> &rry, std::vector<double> &rrz);
+  void VelocityAutocorrelationFunction(std::vector<double> &Cvx, std::vector<double> &Cvy, std::vector<double> &Cvz);
+  void RadialDistributionFunction(bool normalise = true);
+  void MeanSquareDisplacement(std::vector<double> &MSDx, std::vector<double> &MSDy, std::vector<double> &MSDz);
+  void DensityCompression(int steps_quench, double TEMPERATURE);
 
-protected:
-	void Initialise(vec1d &x, vec1d &y, vec1d &z,
-					vec1d &vx, vec1d &vy, vec1d &vz,
-					double TEMPERATURE);
-	void MBDistribution(double TEMPERATURE, bool run_python_script);
-	void VerletAlgorithm(vec1d &rx, vec1d &ry, vec1d &rz,
-						 vec1d &vx, vec1d &vy, vec1d &vz,
-						 vec1d &rrx, vec1d &rry, vec1d &rrz);
-	void VelocityAutocorrelationFunction(vec1d &Cvx, vec1d &Cvy, vec1d &Cvz);
-	void RadialDistributionFunction(bool normalise = true);
-	void MeanSquareDisplacement(vec1d &MSDx, vec1d &MSDy, vec1d &MSDz);
-	void DensityCompression(int steps_quench, double TEMPERATURE);
-
-	void OpenFiles();
-	void FileNaming(int POWER, double A_cst);
-	void WriteToFiles();
-	void ShowRun(size_t step_size_show);
-	void TimeStamp(std::ofstream&, std::string variables);
-	std::string ConvertToString(const double & x, const int & precision);
+  void OpenFiles();
+  void FileNaming(int POWER, double A_cst);
+  void WriteToFiles();
+  void ShowRun(size_t step_size_show);
+  void TimeStamp(std::ofstream &, std::string variables);
+  std::string ConvertToString(const double &x, const int &precision);
 };

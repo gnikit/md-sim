@@ -66,7 +66,7 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool QUENCH_F) {
 MD::~MD() {}
 
 // Methods for MD Analysis
-void MD::Initialise(std::vector<double> &x, std::vector<double> &y, std::vector<double> &z,
+void MD::initialise(std::vector<double> &x, std::vector<double> &y, std::vector<double> &z,
                     std::vector<double> &vx, std::vector<double> &vy, std::vector<double> &vz,
                     double TEMPERATURE) {
   /*
@@ -101,12 +101,12 @@ void MD::Initialise(std::vector<double> &x, std::vector<double> &y, std::vector<
       }
     }
     // Generates Maxwell-Boltzmann dist from Python script
-    MBDistribution(TEMPERATURE, true);
+    mb_distribution(TEMPERATURE, true);
   }
 
   if (compression_flag == true && Q_counter == 0) {
     FileLoading<double> load_data;
-    getDir();  // initialises top_exe_dir
+    get_dir();  // initialises top_exe_dir
     std::string file_name = top_exe_dir + "/data/Positions_Velocities_particles_" + std::to_string(N) + ".txt";
     std::cout << "Try and read file: " << file_name << std::endl;
     std::vector<std::vector<double>> vel =
@@ -184,13 +184,18 @@ void MD::Initialise(std::vector<double> &x, std::vector<double> &y, std::vector<
   Cr.push_back(first_val);
 }
 
-std::string MD::getDir() {
+std::string MD::get_dir() {
   /*
-	*	Returns the absolute, top working direcory of the git repo.
-	* Also, when called, the full path of the executable, along with its name
-	*	will be stored in the full_exe_dir string.
-	*/
+  *	Returns the absolute, top working direcory of the git repo.
+  * Also, when called, the full path of the executable, along with its name
+  *	will be stored in the full_exe_dir string.
+  */
   full_exe_dir = getExePath();
+	std::string str;
+	if (_WIN32) {
+		// takes care of the windows backslashes
+		str = find_and_replace(full_exe_dir, "\\", "/");
+	}
   size_t stride = full_exe_dir.rfind("/MD-simulation");
   top_exe_dir = full_exe_dir.substr(0, stride) + "/MD-simulation";
   std::string rel_path = full_exe_dir.substr(stride + 1);
@@ -201,10 +206,10 @@ std::string MD::getDir() {
   return top_exe_dir;
 }
 
-void MD::MBDistribution(double TEMPERATURE, bool run_python_script = false) {
-  std::string t = ConvertToString(TEMPERATURE, 4);
+void MD::mb_distribution(double TEMPERATURE, bool run_python_script = false) {
+  std::string t = convert_to_string(TEMPERATURE, 4);
   std::string particles = std::to_string(N);
-  std::string dir_str = getDir();
+  std::string dir_str = get_dir();
   dir_str += "/data";
 
   if (run_python_script) {
@@ -221,10 +226,11 @@ void MD::MBDistribution(double TEMPERATURE, bool run_python_script = false) {
   vx = obj.LoadSingleCol(dir_str + "/vx" + vel_id);
   vy = obj.LoadSingleCol(dir_str + "/vy" + vel_id);
   vz = obj.LoadSingleCol(dir_str + "/vz" + vel_id);
+	std::cout << "Files loaded successfuly." << std::endl;
   //TODO: define in heap and delete FileLoading obj
 }
 
-void MD::VerletAlgorithm(std::vector<double> &rx, std::vector<double> &ry, std::vector<double> &rz,
+void MD::verlet_algorithm(std::vector<double> &rx, std::vector<double> &ry, std::vector<double> &rz,
                          std::vector<double> &vx, std::vector<double> &vy, std::vector<double> &vz,
                          std::vector<double> &rrx, std::vector<double> &rry, std::vector<double> &rrz) {
   size_t i;
@@ -265,7 +271,7 @@ void MD::VerletAlgorithm(std::vector<double> &rx, std::vector<double> &ry, std::
   }
 }
 
-void MD::VelocityAutocorrelationFunction(std::vector<double> &Cvx,
+void MD::velocity_autocorrelation_function(std::vector<double> &Cvx,
                                          std::vector<double> &Cvy,
                                          std::vector<double> &Cvz) {
   double temp = 0;  // resets every time step
@@ -277,7 +283,7 @@ void MD::VelocityAutocorrelationFunction(std::vector<double> &Cvx,
   Cr.push_back(temp);
 }
 
-void MD::RadialDistributionFunction(bool normalise) {
+void MD::radial_distribution_function(bool normalise) {
   /*normalise by default is TRUE*/
   double R = 0;
   double norm = 1;
@@ -293,7 +299,7 @@ void MD::RadialDistributionFunction(bool normalise) {
   }
 }
 
-void MD::MeanSquareDisplacement(std::vector<double> &MSDx,
+void MD::mean_square_displacement(std::vector<double> &MSDx,
                                 std::vector<double> &MSDy,
                                 std::vector<double> &MSDz) {
   double msd_temp = 0;
@@ -305,14 +311,14 @@ void MD::MeanSquareDisplacement(std::vector<double> &MSDx,
   msd.push_back(msd_temp);
 }
 
-void MD::DensityCompression(int steps_quench, double TEMPERATURE) {
+void MD::density_compression(int steps_quench, double TEMPERATURE) {
   // Increase _rho by 0.01
   _rho += 0.01;
   // Re-using this piece of code from MD::Simulation
   scale = pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS;
   L = pow((N / _rho), 1.0 / 3.0);
   Vol = N / _rho;
-  Initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
+  initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
 }
 
 // MD Simulation
@@ -337,13 +343,13 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
   dr = rg / NHIST;
 
   // Filenaming should not be called
-  FileNaming(POWER, A_CST);
-  OpenFiles();
-  TimeStamp(DATA, "# step \t rho \t U \t K \t Pc \t Pk \t MSD \t VAF");
+  file_naming(POWER, A_CST);
+  open_files();
+  time_stamp(DATA, "# step \t rho \t U \t K \t Pc \t Pk \t MSD \t VAF");
 
   std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-  Initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
+  initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
 
   double xx, yy, zz;
   for (_STEP_INDEX = 0; _STEP_INDEX < _STEPS; _STEP_INDEX++) {
@@ -359,7 +365,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
     size_t steps_quench = 10;  // steps between each quenching
     if (compression_flag == true && _STEP_INDEX != 0 && _STEP_INDEX % steps_quench == 0) {
       ++Q_counter;
-      DensityCompression(steps_quench, TEMPERATURE);
+      density_compression(steps_quench, TEMPERATURE);
       std::cout << "Compressing fluid, run: " << Q_counter << " rho: " << _rho << std::endl;
     }
 
@@ -454,11 +460,11 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
     scale_v = sqrt(_T0 / T);  // using T & KE from prev timestep
     KE = 0;                   // resetting Kintetic Energy per iteration
 
-    VerletAlgorithm(rx, ry, rz, vx, vy, vz, rrx, rry, rrz);
+    verlet_algorithm(rx, ry, rz, vx, vy, vz, rrx, rry, rrz);
 
-    MeanSquareDisplacement(MSDx, MSDy, MSDz);
+    mean_square_displacement(MSDx, MSDy, MSDz);
 
-    VelocityAutocorrelationFunction(Cvx, Cvy, Cvz);
+    velocity_autocorrelation_function(Cvx, Cvy, Cvz);
 
     // Average Temperature
     T = KE / (1.5 * N);
@@ -479,9 +485,9 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
   }
   // Simulation Ends HERE
 
-  WriteToFiles();
+  write_to_files();
   // Saving Last Position
-  TimeStamp(POS, "# X\tY\tZ\tVx\tVy\tVz\tFx\tFy\tFz");
+  time_stamp(POS, "# X\tY\tZ\tVx\tVy\tVz\tFx\tFy\tFz");
   for (size_t el = 0; el < rx.size(); el++) {
     POS << rx[el] << '\t' << ry[el] << '\t'
         << rz[el] << '\t' << vx[el] << '\t'
@@ -490,7 +496,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
         << fz[el] << std::endl;
   }
 
-  RadialDistributionFunction(true);  // normalisation argument
+  radial_distribution_function(true);  // normalisation argument
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   std::cout
       << "CPU run time = "
@@ -505,11 +511,11 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST)
                "******************************\n"
             << std::endl;
   // Streams should not close, vectors should not be cleared if object is to be reused
-  ResetValues();  // no need to call if object is not reused
+  reset_values();  // no need to call if object is not reused
 }
 
 // File Handling
-void MD::FileNaming(int POWER, double A_cst) {
+void MD::file_naming(int POWER, double A_cst) {
   /*
 	* Generates file names for the different I/O operations
 	*/
@@ -541,7 +547,7 @@ void MD::FileNaming(int POWER, double A_cst) {
   HIST = _dir + HIST + _FILE_ID + _FILE_EXT;
 }
 
-void MD::OpenFiles() {
+void MD::open_files() {
   /*
 	* Open/Create if file does not exist
 	* Overwrite existing data
@@ -551,7 +557,7 @@ void MD::OpenFiles() {
   POS.open(pos, std::ios::out | std::ios::trunc);
 }
 
-void MD::WriteToFiles() {
+void MD::write_to_files() {
   /*
 	* Writes values of parameters to file
 	*/
@@ -563,7 +569,7 @@ void MD::WriteToFiles() {
   }
 }
 
-void MD::ShowRun(size_t step_size_show) {
+void MD::show_run(size_t step_size_show) {
   /*
 	* Displays the system parameters every step_size_show of steps
 	* Input the increment step
@@ -580,7 +586,7 @@ void MD::ShowRun(size_t step_size_show) {
   }
 }
 
-void MD::ResetValues() {
+void MD::reset_values() {
   /*
 	* Closes open file streams and resets sizes and values to 0
 	* For multiple simulations
@@ -614,7 +620,7 @@ void MD::ResetValues() {
   fz.resize(N, 0);
 }
 
-void MD::TimeStamp(std::ofstream &stream, std::string variables) {
+void MD::time_stamp(std::ofstream &stream, std::string variables) {
   /*
 	* Dates the file and allows the input of a header
 	* Input a file stream to write and string of characters to display as headers
@@ -626,10 +632,18 @@ void MD::TimeStamp(std::ofstream &stream, std::string variables) {
   stream << variables << std::endl;
 }
 
-std::string MD::ConvertToString(const double &x, const int &precision) {
+std::string MD::convert_to_string(const double &x, const int &precision) {
   static std::ostringstream ss;
   ss.str(std::string());  // don't forget to empty the stream
   ss << std::fixed << std::setprecision(precision) << x;
 
   return ss.str();
+}
+
+std::string MD::find_and_replace(std::string & source,  const std::string & find, const std::string & replace) {
+	for (std::string::size_type i = 0; (i = source.find(find, i)) != std::string::npos;) {
+		source.replace(i, find.length(), replace);
+		i += replace.length();
+	}
+	return source;
 }

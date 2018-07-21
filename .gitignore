@@ -112,4 +112,6 @@ publish/
 /tests/mb_file_generation/stdafx.h
 /tests/mb_file_generation/stdafx.cpp
 /data/*.txt
+# Not ignoring the compression start files
+!data/Positions_Velocities_particles_*
 /src/examples/example_data/*.txt

@@ -90,10 +90,18 @@ if __name__ == '__main__':
     os.chdir(dname)
     
     a = VelGen()
-    vx, vy, vz = a.get_velocities()
-    np.savetxt('vx' + file_id, vx, delimiter='\n')
-    np.savetxt('vy' + file_id, vy, delimiter='\n')
-    np.savetxt('vz' + file_id, vz, delimiter='\n')
-    print("Initial velocity files saved.")
+    vx_file = 'vx' + file_id
+    vy_file = 'vy' + file_id
+    vz_file = 'vz' + file_id
+	# TODO: improve statement so only the ones missing are produced
+	#       but this case should never occur anyway
+    if os.path.isfile(vx_file) is False:
+        vx, vy, vz = a.get_velocities()
+        np.savetxt(vx_file, vx, delimiter='\n')
+        np.savetxt(vy_file, vy, delimiter='\n')
+        np.savetxt(vz_file, vz, delimiter='\n')
+        print("Initial velocity files saved.")
+    else:
+        print("Velocity files already exist.")
 else:
     print("MD module loaded")

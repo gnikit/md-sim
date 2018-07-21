@@ -94,27 +94,27 @@ class MD {
   ~MD();
 
   void Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST);
-  std::string getDir();
-  void InitialiseTest(double TEMPERATURE);
-  void ResetValues();
+  std::string get_dir();
+  void reset_values();
 
  protected:
-  void Initialise(std::vector<double> &x, std::vector<double> &y, std::vector<double> &z,
+  void initialise(std::vector<double> &x, std::vector<double> &y, std::vector<double> &z,
                   std::vector<double> &vx, std::vector<double> &vy, std::vector<double> &vz,
                   double TEMPERATURE);
-  void MBDistribution(double TEMPERATURE, bool run_python_script);
-  void VerletAlgorithm(std::vector<double> &rx, std::vector<double> &ry, std::vector<double> &rz,
+  void mb_distribution(double TEMPERATURE, bool run_python_script);
+  void verlet_algorithm(std::vector<double> &rx, std::vector<double> &ry, std::vector<double> &rz,
                        std::vector<double> &vx, std::vector<double> &vy, std::vector<double> &vz,
                        std::vector<double> &rrx, std::vector<double> &rry, std::vector<double> &rrz);
-  void VelocityAutocorrelationFunction(std::vector<double> &Cvx, std::vector<double> &Cvy, std::vector<double> &Cvz);
-  void RadialDistributionFunction(bool normalise = true);
-  void MeanSquareDisplacement(std::vector<double> &MSDx, std::vector<double> &MSDy, std::vector<double> &MSDz);
-  void DensityCompression(int steps_quench, double TEMPERATURE);
+  void velocity_autocorrelation_function(std::vector<double> &Cvx, std::vector<double> &Cvy, std::vector<double> &Cvz);
+  void radial_distribution_function(bool normalise = true);
+  void mean_square_displacement(std::vector<double> &MSDx, std::vector<double> &MSDy, std::vector<double> &MSDz);
+  void density_compression(int steps_quench, double TEMPERATURE);
 
-  void OpenFiles();
-  void FileNaming(int POWER, double A_cst);
-  void WriteToFiles();
-  void ShowRun(size_t step_size_show);
-  void TimeStamp(std::ofstream &, std::string variables);
-  std::string ConvertToString(const double &x, const int &precision);
+  void open_files();
+  void file_naming(int POWER, double A_cst);
+  void write_to_files();
+  void show_run(size_t step_size_show);
+  void time_stamp(std::ofstream &, std::string variables);
+  std::string convert_to_string(const double &x, const int &precision);
+	std::string find_and_replace(std::string& source, const std::string& find, const std::string& replace);
 };

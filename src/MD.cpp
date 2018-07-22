@@ -1,24 +1,42 @@
 #include "MD.h"
 #include "FileLoading.h"         // TODO: this is far from ideal
+#include <chrono> // CPU run-time
+#include <cstdint>
+#include <ctime>   // std::chrono
+#include <iomanip> // setprecision
+#include <iostream>
+#include <iterator>
+#include <sstream> // stringstream
+#if defined(__INTEL_COMPILER)
+  #include <mathimf.h> // Intel Math library
+  #define COMPILER "INTEL"
+#elif defined(__GNUC__)
+  #include <math.h>
+  #define COMPILER "G++"
+#else
+  #include <math.h>
+  #define COMPILER "WHO CARES"
+#endif
+
 #define PARTICLES_PER_AXIS 10    // if changed, new vx,vy,vz files need to be generated
 #define NHIST 300                // Number of histogram bins
 #pragma warning(disable : 4996)  //_CRT_SECURE_NO_WARNINGS
 #ifdef _WIN32
-#define _WIN32 _WIN32
-#include <windows.h>
-std::string getExePath() {
-  char result[MAX_PATH];
-  return std::string(result, GetModuleFileName(NULL, result, MAX_PATH));
-}
+  #define _WIN32 _WIN32
+  #include <windows.h>
+  std::string getExePath() {
+    char result[MAX_PATH];
+    return std::string(result, GetModuleFileName(NULL, result, MAX_PATH));
+  }
 #else
-#define _WIN32 0
-#include <limits.h>
-#include <unistd.h>
-std::string getExePath() {
-  char result[PATH_MAX];
-  ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
-  return std::string(result, (count > 0) ? count : 0);
-}
+  #define _WIN32 0
+  #include <limits.h>
+  #include <unistd.h>
+  std::string getExePath() {
+    char result[PATH_MAX];
+    ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
+    return std::string(result, (count > 0) ? count : 0);
+  }
 #endif
 
 //TODO: Boltzmann Dist normalisation of the particles velocities in the beggining make it C++
@@ -42,6 +60,8 @@ MD::MD(std::string DIRECTORY, size_t run_number) {
   pc.reserve(_STEPS);
   pk.reserve(_STEPS);
   temperature.reserve(_STEPS);
+  PI = acos(-1.0);
+
 }
 
 MD::MD(std::string DIRECTORY, size_t run_number, bool QUENCH_F) {
@@ -64,6 +84,8 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool QUENCH_F) {
   temperature.reserve(_STEPS);
 
   compression_flag = QUENCH_F;
+  PI = acos(-1.0);
+
 }
 MD::~MD() {}
 
@@ -192,8 +214,10 @@ std::string MD::get_dir() {
   * Also, when called, the full path of the executable, along with its name
   *	will be stored in the full_exe_dir string.
   */
-   
+   // TODO: this is obvious duplication but see what happens to memory of full_exe_path 
+   //      if nothing happens remove str
 	std::string str = getExePath();
+  full_exe_dir = getExePath();
 	if (_WIN32) {
 		// takes care of the windows backslashes
 		full_exe_dir = find_and_replace(str, "\\", "/");

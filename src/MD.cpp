@@ -190,11 +190,11 @@ std::string MD::get_dir() {
   * Also, when called, the full path of the executable, along with its name
   *	will be stored in the full_exe_dir string.
   */
-  full_exe_dir = getExePath();
-	std::string str;
+   
+	std::string str = getExePath();
 	if (_WIN32) {
 		// takes care of the windows backslashes
-		str = find_and_replace(full_exe_dir, "\\", "/");
+		full_exe_dir = find_and_replace(str, "\\", "/");
 	}
   size_t stride = full_exe_dir.rfind("/MD-simulation");
   top_exe_dir = full_exe_dir.substr(0, stride) + "/MD-simulation";
@@ -633,7 +633,7 @@ void MD::time_stamp(std::ofstream &stream, std::string variables) {
 }
 
 std::string MD::convert_to_string(const double &x, const int &precision) {
-  static std::ostringstream ss;
+  std::ostringstream ss;
   ss.str(std::string());  // don't forget to empty the stream
   ss << std::fixed << std::setprecision(precision) << x;
 

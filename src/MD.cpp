@@ -4,12 +4,14 @@
 #define NHIST 300                // Number of histogram bins
 #pragma warning(disable : 4996)  //_CRT_SECURE_NO_WARNINGS
 #ifdef _WIN32
+#define _WIN32 _WIN32
 #include <windows.h>
 std::string getExePath() {
   char result[MAX_PATH];
   return std::string(result, GetModuleFileName(NULL, result, MAX_PATH));
 }
 #else
+#define _WIN32 0
 #include <limits.h>
 #include <unistd.h>
 std::string getExePath() {

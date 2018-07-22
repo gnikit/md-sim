@@ -1,14 +1,7 @@
-1. Runing 'project' from any other directory except /bin results 
-   the Python script not being executed due tothe incorrect path '../data/MBDistribution.py'
-   that is supplied in the C++ code. The fix should include getting the CWD 
-   (the dir from where 'project' is called, should include some dynamic voodoo)
-
-2. In the currect Makefile setup the example binaries cannot be created 
+1. In the currect Makefile setup the example binaries cannot be created 
    unless 'make all' is called, which is slightly counter intuitive.
    Examples should be compiled in a seperate make option on the top makefile.
    (On a side note, the current makefile structure is terrible.)
 
-3. The LoadTxt method from the library, will also fail for the same reason
-   that is listed in  (1).
 
 

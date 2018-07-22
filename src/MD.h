@@ -16,25 +16,7 @@
 //                                                                  //
 //////////////////////////////////////////////////////////////////////
 #pragma once
-#if defined(__INTEL_COMPILER)
-#include <mathimf.h>  // Intel Math library
-#define COMPILER "INTEL"
-#elif defined(__GNUC__)
-#include <math.h>
-#define COMPILER "G++"
-#else
-#include <math.h>
-#define COMPILER "WHO CARES"
-#endif
-
-#include <chrono>  // CPU run-time
-#include <cstdint>
-#include <ctime>    // std::chrono
-#include <fstream>  // file writing
-#include <iomanip>  // setprecision
-#include <iostream>
-#include <iterator>
-#include <sstream>  // stringstream
+#include <fstream> // file writing
 #include <vector>
 
 class MD {
@@ -79,7 +61,7 @@ class MD {
   std::vector<double> gr;  // RDF vector container
 
  private:
-  const long double PI = acos(-1.0);
+  long double PI;
   std::string _FILE_EXT;  // output file extension
   /* Variables for storing inside the object the file ID */
   std::string full_exe_dir, top_exe_dir;

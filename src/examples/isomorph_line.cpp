@@ -1,5 +1,6 @@
 #include <string>
 #include <thread>
+#include <iostream>
 #include "../MD.h"
 #include "../isomorph.h"
 

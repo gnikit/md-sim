@@ -1,6 +1,6 @@
+#include <iostream>
 #include <string>
 #include <thread>
-#include <iostream>
 #include "../MD.h"
 #include "../isomorph.h"
 
@@ -34,9 +34,9 @@ int main() {
   Isomorph isomorph_linr_l(0.5, 0.5, 2.00, T_iso);
   std::tie(rho_iso_l, A_iso_l) = isomorph_linr_l.GenLine(n);
   /*
-	* This is an isomorph line run
-	* Simulates the fluid along the line
-	*/
+	 * This is an isomorph line run
+	 * Simulates the fluid along the line
+	 */
   for (size_t i = 0; i < T_iso.size(); i++) {
     std::cout << "T: " << T_iso[i] << " rho: " << rho_iso[i] << " A: " << A_iso[i] << std::endl;
     MD run(dir_linux, STEPS);
@@ -46,9 +46,9 @@ int main() {
 
 std::vector<double> LinearSpacedArray(double a, double b, std::size_t N) {
   /*
-	* Produces an equally spaced vector of N increments
-	* in the inclusive range of [a, b]
-	*/
+	 * Produces an equally spaced vector of N increments
+	 * in the inclusive range of [a, b]
+	 */
   double h = (b - a) / static_cast<double>(N - 1);
   std::vector<double> xs(N);
   std::vector<double>::iterator x;

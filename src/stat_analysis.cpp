@@ -1,4 +1,8 @@
 #include "stat_analysis.h"
+// TODO: This class needs serious editting, many methods are obsolete and not
+// needed. Other methods, use fixed number of inputs while the inputs could be
+// passed into vectors in the same way FileLoading.h handles variable column
+// reading
 
 Stat_Analysis::Stat_Analysis(std::string PATH, size_t STEPS, size_t PARTICLES,
                              double DENSITY, double T, vec1d A_LIST) {
@@ -13,11 +17,11 @@ Stat_Analysis::Stat_Analysis(std::string PATH, size_t STEPS, size_t PARTICLES,
 Stat_Analysis::~Stat_Analysis() {}
 
 void Stat_Analysis::ReadFromFile(vec1d &x, const std::string &file_name) {
-  //TODO: this could be inherited from MD.cpp
+  // TODO: this could be inherited from MD.cpp
   /*
-	Reads from a stream that already exists for a file that is already placed in the
-	directory and appends the data into a 1D vector.
-	*/
+   *  Reads from a stream that already exists for a file that is already
+   *  placed in the directory and appends the data into a 1D vector.
+   */
   std::ifstream read_file(file_name);
   assert(read_file.is_open());
 
@@ -27,28 +31,29 @@ void Stat_Analysis::ReadFromFile(vec1d &x, const std::string &file_name) {
   read_file.close();
 }
 
-void Stat_Analysis::ReadFromFile(vec1d &T, vec1d &K, vec1d &U,
-                                 vec1d &E, vec1d &Pc, vec1d &Pk, vec1d &P,
+void Stat_Analysis::ReadFromFile(vec1d &T, vec1d &K, vec1d &U, vec1d &E,
+                                 vec1d &Pc, vec1d &Pk, vec1d &P,
                                  const std::string &file_name) {
   /*
-	  Reads from a stream that already exists for a file that is already placed in the
-	  directory and appends the data into a 1D vector.
-	*/
+          Reads from a stream that already exists for a file that is already
+     placed in the directory and appends the data into a 1D vector.
+        */
   std::ifstream read_file(file_name);
   try {
     if (read_file.is_open() == false) {
       throw "File Not Found";
     }
     // TODO: Fix exception throwing, currently exception is not caught properly.
-    //assert(read_file.is_open()); // Evaluates false if file does not exist
+    // assert(read_file.is_open()); // Evaluates false if file does not exist
     long double a, b, c, d, e, f, g;
     std::string line;
     while (!read_file.eof()) {  // Stops when End Of File is reached
       std::getline(read_file, line);
 
-      //TODO: the IF and ELSE statements should be reversed and then ELSE should be removed
+      // TODO: the IF and ELSE statements should be reversed and then ELSE
+      // should be removed
       if (line.length() == 0 || line[0] == '#') {
-        //std::cout << "IGNORE LINE" << std::endl;
+        // std::cout << "IGNORE LINE" << std::endl;
       } else {
         std::stringstream ss(line);
         ss >> a;
@@ -70,8 +75,8 @@ void Stat_Analysis::ReadFromFile(vec1d &T, vec1d &K, vec1d &U,
   read_file.close();
 }
 
-void Stat_Analysis::Mean(vec1d &T, vec1d &K, vec1d &U,
-                         vec1d &E, vec1d &Pc, vec1d &Pk, vec1d &P) {
+void Stat_Analysis::Mean(vec1d &T, vec1d &K, vec1d &U, vec1d &E, vec1d &Pc,
+                         vec1d &Pk, vec1d &P) {
   size_t n = 0;
 
   for (size_t i = 0; i < T.size(); i++) {
@@ -118,8 +123,8 @@ strength
   _n_to_str = "_n_" + std::to_string(POWER);
   _A_to_str = "_A_" + A_stream.str();
 
-  _FILE_ID = _step_to_str + _particles_to_str + _rho_to_str +
-             _T_to_str + _n_to_str;
+  _FILE_ID =
+      _step_to_str + _particles_to_str + _rho_to_str + _T_to_str + _n_to_str;
 
   std::ofstream data;
   std::string _FILE_NAME, sep, power, a, TXT;
@@ -152,7 +157,8 @@ strength
     Mean(T_vec, K_vec, U_vec, E_vec, Pc_vec, Pk_vec, P_vec);
     data.precision(5);
     // File writting
-    data << _A_list[i] << '\t' << _temp0 << '\t' << _temp1 << '\t' << _temp2 << '\t' << _temp3 << '\t' << _temp4 << std::endl;
+    data << _A_list[i] << '\t' << _temp0 << '\t' << _temp1 << '\t' << _temp2
+         << '\t' << _temp3 << '\t' << _temp4 << std::endl;
     // consider excluding usless vectors like PK, PTOT
   }
 }

@@ -51,8 +51,8 @@ void MakeDataBase() {
 
           th1.join();
           th2.join();
-          th3.join();  
-					// th4.join();
+          th3.join();
+          // th4.join();
           delete run1, run2, run3, run4;
 
           ++num;

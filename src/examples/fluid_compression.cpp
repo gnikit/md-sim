@@ -34,9 +34,9 @@ int main() {
 
 std::vector<double> LinearSpacedArray(double a, double b, std::size_t N) {
   /*
-	* Produces an equally spaced vector of N increments
-	* in the inclusive range of [a, b]
-	*/
+   * Produces an equally spaced vector of N increments
+   * in the inclusive range of [a, b]
+   */
   double h = (b - a) / static_cast<double>(N - 1);
   std::vector<double> xs(N);
   std::vector<double>::iterator x;

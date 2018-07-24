@@ -1,32 +1,17 @@
 SHELL = /bin/bash
-include Makefile.variables
+include ../Makefile.variables
+CXX = g++
+LIB =../lib
+BIN =../bin
 
-LIBDIR=../lib
-BINDIR=../bin
-objects = Source.o \
-          MD.o \
-          stat_analysis.o \
-          isomorph.o
+all: project $(LIB)/libmd.a
 
-all: project
-
-project: $(objects)
-	$(CXX) -std=$(STD) $(objects) -pthread -o $(BINDIR)/project
+project: Source.o $(LIB)/libmd.a
+		$(CXX) $(FLAGS) Source.o $(LINKER) -o $(BIN)/project
 
 Source.o: Source.cpp
-#	$(CXX) $(CXXFLAGS) Source.cpp
-
-MD.o: MD.h FileLoading.h
-#	$(CXX) $(CXXFLAGS) MD.cpp
-
-isomorph.o: isomorph.h
-#	$(CXX) $(CXXFLAGS) isomorph.cpp
-
-stat_analysis.o: stat_analysis.h
-#	$(CXX) $(CXXFLAGS) stat_analysis.cpp
+	$(CXX) $(CXXFLAGS) -I$(LIB) Source.cpp -o Source.o
 
 clean:
-	rm $(objects)
-
-
+	rm $(BIN)/project Source.o
 

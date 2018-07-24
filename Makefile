@@ -2,15 +2,17 @@ SHELL = /bin/bash
 
 
 all:
+	@echo "MAKE lib"
+	@cd lib && $(MAKE)
 	@echo "MAKE MD src"
 	@cd src && $(MAKE)
 	@echo "MAKE MD examples"
-	cd src/examples && $(MAKE)
+	@cd examples && $(MAKE)
 
 clean:
-	@echo "Cleaning MD ./src"
+	@echo "Cleaning lib"
+	@cd lib && $(MAKE) clean
+	@echo "Cleaning MD src and bin"
 	@cd  src && $(MAKE) clean
-	@echo "Cleaning MD ./bin"
-	@cd bin && $(MAKE) clean
-	@echo "Cleaning MD Examples ./src/examples"
-	@cd src/examples && $(MAKE) clean
+	@echo "Cleaning MD Examples src/examples"
+	@cd examples && $(MAKE) clean

@@ -1,8 +1,8 @@
 #include <iostream>
 #include <string>
 #include <thread>
-#include "../MD.h"
-#include "../isomorph.h"
+#include "MD.h"
+#include "isomorph.h"
 
 #define STEPS 100
 #define PARTICLES 1000

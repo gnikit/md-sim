@@ -1,6 +1,6 @@
 #include <string>
 #include <thread>
-#include "../MD.h"
+#include "MD.h"
 
 #define STEPS 1000
 #define PARTICLES 1000

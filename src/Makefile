@@ -1,6 +1,5 @@
 SHELL = /bin/bash
 include ../Makefile.variables
-CXX = g++
 LIB =../lib
 BIN =../bin
 

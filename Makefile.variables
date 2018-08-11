@@ -1,9 +1,8 @@
 CC  = icc
-CXX = g++
-STD = -std=c++11
-# CXXFLAGS=-c -std=c++17 -pthread -xHOST -use-intel-optimized-headers -m64 -O3 -Wall -g
-# CXXFLAGS=-c -pthread -parallel -mkl=parallel -O3 -xHOST -std=c++17 -use-intel-optimized-headers -m64 -prec-sqrt -prec-div
-CXXFLAGS = -c $(STD) -O3 -Wall -pthread
-FLAGS = $(STD) -pthread -O3 -Wall
+CXX = icpc
+STD = -std=c++17
+FLAGS = $(STD) -pthread -xHOST -use-intel-optimized-headers -m64 -Ofast -Wall
+# FLAGS = $(STD) -pthread -O3 -Wall
+CXXFLAGS = -c $(FLAGS)
 LINKER = -I$(LIB) -L$(LIB) -lmd
 

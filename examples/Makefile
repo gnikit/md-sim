@@ -27,4 +27,4 @@ fluid_compression.o: fluid_compression.cpp
 
 
 clean:
-	rm isomorphic_surface database fluid_compression
+	rm isomorphic_surface database fluid_compression *.o

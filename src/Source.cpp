@@ -4,7 +4,7 @@
 #include "isomorph.h"
 #include "stat_analysis.h"
 
-#define STEPS 1000      //10000
+#define STEPS 10000      //10000
 #define PARTICLES 1000  //1000
 typedef std::vector<double> vec1d;
 

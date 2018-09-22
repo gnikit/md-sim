@@ -6,7 +6,9 @@
 #include <iostream>
 #include <iterator>
 #include <sstream>        // stringstream
-#include "FileLoading.h"  // TODO: this is far from ideal
+#include "FileLoading.h"  // FileLoading class
+
+// Detects compiler and uses appropriate library
 #if defined(__INTEL_COMPILER)
 #include <mathimf.h>  // Intel Math library
 #define COMPILER "INTEL"
@@ -18,10 +20,13 @@
 #define COMPILER "WHO CARES"
 #endif
 
-#define PARTICLES_PER_AXIS \
-  10                             // if changed, new vx,vy,vz files need to be generated
+// if changed, new vx,vy,vz files need to be generated
+#define PARTICLES_PER_AXIS 10
 #define NHIST 300                // Number of histogram bins
 #pragma warning(disable : 4996)  //_CRT_SECURE_NO_WARNINGS
+
+// Detects the OS and fetches the executable path that is passed
+// in the FileLoadding.h class
 #ifdef _WIN32
 #define _WIN32 _WIN32
 #include <windows.h>
@@ -42,7 +47,10 @@ std::string getExePath() {
 
 // TODO: Boltzmann Dist normalisation of the particles velocities in the
 // beggining make it C++
-// TODO: Calls to Python script are not multithread safe!
+// TODO: Calls to Python script are not multithread safe, calling a Py script
+//       and reading from a file from multiple process could potentially lead to
+//       undefined behaviour. Further testing required to prove this is not an
+//       issue.
 
 MD::MD(std::string DIRECTORY, size_t run_number) {
   _dir = DIRECTORY;
@@ -213,7 +221,7 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
 std::string MD::get_dir() {
   /*
    *	Returns the absolute, top working direcory of the git repo.
-   * Also, when called, the full path of the executable, along with its name
+   *  Also, when called, the full path of the executable, along with its name
    *	will be stored in the full_exe_dir string.
    */
   // TODO: this is obvious duplication but see what happens to memory of
@@ -366,9 +374,9 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
                     double A_CST) {
   /*
    *  Executes the fluid simulation. It includes all statistical methods
-   *  defined in this class. It monitors the following quantities 
+   *  defined in this class. It monitors the following quantities
    *  RDF, MSD, VAF, average particle energies & pressures.
-   * 
+   *
    *  @param DENSITY: the density rho of fluid.
    *  @param TEMPERATURE: the temperature of the thermostat.
    *  @param POWER: the power n that the pair potential will be using
@@ -378,11 +386,12 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
    *                'a' reuslts into softening of the pair potential.
    */
   // Initialise scalling variables
-  // If Simulation(...) is not run, _T0, _rho need to be initialised elsewhere
   std::cout << "***************************\n"
                "** MD Simulation started **\n"
                "***************************\n"
             << std::endl;
+  std::cout << "Fluid parameters: rho: " << DENSITY << " T: " << TEMPERATURE
+            << " n: " << POWER << " a: " << A_CST << std::endl;
   _T0 = TEMPERATURE;
   _rho = DENSITY;
   dt /= sqrt(_T0);
@@ -392,6 +401,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
   Vol = N / _rho;
 
   // cut_off redefinition
+  // Large cut offs increase the runtime exponentially
   cut_off = 3.0;  // L / 2.;
   rg = cut_off;
   dr = rg / NHIST;
@@ -480,9 +490,11 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
           // TODO: Gausian-force with sigma=1 and epsilon=1
           // long double ff = 2 * r * exp(-r * r);
 
+          // Canceling the ij and ji pairs
+          // Taking the lower triangular matrix
           fx[i] += x * ff / r;
-          fx[j] -= x * ff / r;  // Canceling the ij and ji pairs
-          fy[i] += y * ff / r;  // Taking the lower triangular matrix
+          fx[j] -= x * ff / r;
+          fy[i] += y * ff / r;
           fy[j] -= y * ff / r;
           fz[i] += z * ff / r;
           fz[j] -= z * ff / r;
@@ -573,7 +585,9 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
 // File Handling
 void MD::file_naming(int POWER, double A_cst) {
   /*
-   * Generates file names for the different I/O operations
+   * Generates a unique filename for the simulation results to be stored.
+   * Three filenames are created for the RDF, last particles' states (position
+   * ,velocity, acceleration) and statistical data.
    */
   std::stringstream A_stream, rho_stream, T_stream;
 

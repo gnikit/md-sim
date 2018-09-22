@@ -1,10 +1,9 @@
 CC  = icc
-CXX = g++
+CXX = icpc
 STD = -std=c++17
 # INTEL compiler flags
-# FLAGS = $(STD) -pthread -xHOST -use-intel-optimized-headers -m64 -Ofast -Wall
-FLAGS = $(STD) -pthread -O3 -Wall
+FLAGS = $(STD) -pthread -xHOST -use-intel-optimized-headers -m64 -Ofast -Wall
+# FLAGS = $(STD) -pthread -O3 -Wall
 CXXFLAGS = -c $(FLAGS)
 # LIB has to be defined in the Makefile 
 LINKER = -I$(LIB) -L$(LIB) -lmd
-

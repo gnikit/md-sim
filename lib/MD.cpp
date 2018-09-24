@@ -17,12 +17,13 @@
 #define COMPILER "G++"
 #else
 #include <math.h>
-#define COMPILER "WHO CARES"
+#define COMPILER "OTHER COMPILER"
 #endif
 
 // if changed, new vx,vy,vz files need to be generated
 #define PARTICLES_PER_AXIS 10
-#define NHIST 300                // Number of histogram bins
+// TODO: Increase the number of bins to find RDF intersects
+#define NHIST 1000                // Number of histogram bins
 #pragma warning(disable : 4996)  //_CRT_SECURE_NO_WARNINGS
 
 // Detects the OS and fetches the executable path that is passed
@@ -115,6 +116,7 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
    *  @param TEMPERATURE: Thermostat target temperature
    */
   // Initialise position matrix and velocity matrix from Cubic Centred Lattice
+  // TODO: Initialise from last position, FIX
   if (compression_flag == false) {
     size_t n = 0;
     size_t i, j, k;
@@ -333,6 +335,7 @@ void MD::velocity_autocorrelation_function(std::vector<double> &Cvx,
 
 void MD::radial_distribution_function(bool normalise) {
   /*normalise by default is TRUE*/
+  // TODO: save raw RDF and normalisation factors & distance!
   double R = 0;
   double norm = 1;
   double cor_rho = _rho * (N - 1) / N;

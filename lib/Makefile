@@ -20,24 +20,3 @@ isomorph.o: isomorph.cpp
 
 clean:
 	rm MD.o stat_analysis.o isomorph.o libmd.a
-# all: project
-
-# project: $(objects)
-# 	$(CXX) -std=$(STD) $(objects) -pthread -o $(BINDIR)/project
-
-
-
-# MD.o: MD.h FileLoading.h
-# #	$(CXX) $(CXXFLAGS) MD.cpp
-
-# isomorph.o: isomorph.h
-# #	$(CXX) $(CXXFLAGS) isomorph.cpp
-
-# stat_analysis.o: stat_analysis.h
-# #	$(CXX) $(CXXFLAGS) stat_analysis.cpp
-
-# clean:
-# 	rm $(objects)
-
-
-

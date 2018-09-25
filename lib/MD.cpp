@@ -341,17 +341,19 @@ void MD::radial_distribution_function(bool normalise) {
   double cor_rho = _rho * (N - 1) / N;
   double dr = rg / NHIST;
   size_t i;
-  Hist << "#particles (N): " << N << " steps: " << _STEPS << " rho: " << _rho << " bin (NHIST): " << NHIST << " cut_off (rg): "
-       << rg << " dr: " << dr << std::endl;
+  Hist << "#particles (N): " << N << " steps: " << _STEPS << " rho: " << _rho
+       << " bin (NHIST): " << NHIST << " cut_off (rg): " << rg << " dr: " << dr
+       << std::endl;
   Hist << "#Unormalised" << '\t' << "Normalised" << std::endl;
   for (i = 1; i < NHIST; i++) {  // Changed initial loop value from 0 -> 1
     if (normalise) {
       R = rg * i / NHIST;
       // norm = (cor_rho * 2 * PI * R * R * N * _STEPS * dr);
-      norm = cor_rho * (2.0 * PI * (pow((R + dr / 2.0), 3) - pow((R - dr / 2.0), 3)));
+      norm = cor_rho *
+             (2.0 * PI * (pow((R + dr / 2.0), 3) - pow((R - dr / 2.0), 3)));
     }
     // gr[i] /= norm;  // not really needed
-    Hist << gr[i] << std::endl;
+    Hist << gr[i] << '\t' << gr[i] / norm << std::endl;
   }
 }
 

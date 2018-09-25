@@ -339,14 +339,18 @@ void MD::radial_distribution_function(bool normalise) {
   double R = 0;
   double norm = 1;
   double cor_rho = _rho * (N - 1) / N;
+  double dr = rg / NHIST;
   size_t i;
+  Hist << "#particles (N): " << N << " steps: " << _STEPS << " rho: " << _rho << " bin (NHIST): " << NHIST << " cut_off (rg): "
+       << rg << " dr: " << dr << std::endl;
+  Hist << "#Unormalised" << '\t' << "Normalised" << std::endl;
   for (i = 1; i < NHIST; i++) {  // Changed initial loop value from 0 -> 1
     if (normalise) {
       R = rg * i / NHIST;
       // norm = (cor_rho * 2 * PI * R * R * N * _STEPS * dr);
-      norm = cor_rho * (2.0 * PI * pow(R, 3)/3.0 * (pow((R + dr/2.0), 3) - pow((R - dr/2.0), 3)));
+      norm = cor_rho * (2.0 * PI * (pow((R + dr / 2.0), 3) - pow((R - dr / 2.0), 3)));
     }
-    gr[i] /= norm;  // not really needed
+    // gr[i] /= norm;  // not really needed
     Hist << gr[i] << std::endl;
   }
 }
@@ -613,7 +617,7 @@ void MD::file_naming(int POWER, double A_cst) {
   _FILE_EXT = ".txt";
   data = "Data";
   pos = "Positions_Velocities";
-  HIST = "Hist";
+  HIST = "RDF";
 
   // Path addition
   data = _dir + data + _FILE_ID + _FILE_EXT;

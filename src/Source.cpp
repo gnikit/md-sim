@@ -23,34 +23,37 @@ int main() {
   // std::vector<double> A3 = LinearSpacedArray(2.50, 4.50, 5);
   std::vector<double> A4 = {0.70, 0.80, 0.90, 0.95, 1.10};
 
-  for (size_t d = 0; d < rho.size(); d++) {
-    for (size_t t = 0; t < T.size(); t++) {
-      for (size_t i = 0; i < n.size(); i++) {
-        for (size_t j = 0; j < A1.size(); j++) {
-          std::cout << "rho: " << rho[d] << " T: " << T[t] << "n: " << n[i]
-                    << " A: " << A1[j] << " run num: " << num << std::endl;
+  // for (size_t d = 0; d < rho.size(); d++) {
+  //   for (size_t t = 0; t < T.size(); t++) {
+  //     for (size_t i = 0; i < n.size(); i++) {
+  //       for (size_t j = 0; j < A1.size(); j++) {
+  //         std::cout << "rho: " << rho[d] << " T: " << T[t] << "n: " << n[i]
+  //                   << " A: " << A1[j] << " run num: " << num << std::endl;
 
-          MD* run1 = new MD(dir_linux, STEPS);
-          MD* run2 = new MD(dir_linux, STEPS);
-          MD* run3 = new MD(dir_linux, STEPS);
-          MD* run4 = new MD(dir_linux, STEPS); 
+  //         MD* run1 = new MD(dir_linux, STEPS);
+  //         MD* run2 = new MD(dir_linux, STEPS);
+  //         MD* run3 = new MD(dir_linux, STEPS);
+  //         MD* run4 = new MD(dir_linux, STEPS); 
 
-          std::thread th1(&MD::Simulation, run1, rho[d], T[t], n[i], A1[j]);
-          std::thread th2(&MD::Simulation, run2, rho[d], T[t], n[i], A2[j]);
+          // std::thread th1(&MD::Simulation, run1, rho[d], T[t], n[i], A1[j]);
+          // std::thread th2(&MD::Simulation, run2, rho[d], T[t], n[i], A2[j]);
           // std::thread th3(&MD::Simulation, run3, rho[d], T[t], n[i], A3[j]);
-          std::thread th4(&MD::Simulation, run4, rho[d], T[t], n[i], A4[j]);
+          // std::thread th4(&MD::Simulation, run4, rho[d], T[t], n[i], A4[j]);
 
-          th1.join();
-          th2.join();
+          // th1.join();
+          // th2.join();
           // th3.join();
-          th4.join();
-          delete run1, run2, run3, run4;
-
-          ++num;
-        }
-      }
-    }
-  }
+          // th4.join();
+//           delete run1, run2, run3, run4;
+//
+//           ++num;
+//         }
+//       }
+//     }
+//   }
+  MD* run1 = new MD(dir_linux, STEPS);
+  std::thread th1(&MD::Simulation, run1, 0.5, 0.5, 6, 0);
+  th1.join();
 
 }
 

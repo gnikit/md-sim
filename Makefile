@@ -16,3 +16,11 @@ clean:
 	@cd  src && $(MAKE) clean
 	@echo "Cleaning MD Examples src/examples"
 	@cd examples && $(MAKE) clean
+
+clean_keep_data:
+	@echo "Cleaning lib"
+	@cd lib && $(MAKE) clean
+	@echo "Cleaning MD src and bin"
+	@cd  src && $(MAKE) clean
+	@echo "Cleaning MD Examples src/examples"
+	@cd examples && $(MAKE) clean_keep_data

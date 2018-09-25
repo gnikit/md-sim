@@ -4,11 +4,11 @@ LIB =../lib
 BIN =../bin
 # TODO: This will obviously not work if isomorph.o, MD.o stat_analysis.o do not exist
 # 			at this point 'make all' has to be called and 'database' and 'iso' cannot be called independently
-all: database isomorphic_surface fluid_compression $(LIB)/libmd.a
+all: make_database isomorphic_surface fluid_compression $(LIB)/libmd.a
 
-database: make_database.o $(LIB)/libmd.a
-	$(CXX) $(FLAGS) make_database.o $(LINKER) -o database
-
+make_database: make_database.o $(LIB)/libmd.a
+	$(CXX) $(FLAGS) make_database.o $(LINKER) -o make_database
+	
 isomorphic_surface: isomorph_line.o $(LIB)/libmd.a
 	$(CXX) $(FLAGS) isomorph_line.o $(LINKER) -o isomorphic_surface
 
@@ -27,4 +27,7 @@ fluid_compression.o: fluid_compression.cpp
 
 
 clean:
-	rm isomorphic_surface database fluid_compression *.o
+	rm isomorphic_surface make_database fluid_compression *.o example_data/*
+
+clean_keep_data:
+	rm isomorphic_surface make_database fluid_compression *.o

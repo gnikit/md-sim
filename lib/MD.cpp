@@ -3,12 +3,12 @@
 #include <cstdint>
 #include <ctime>    // std::chrono
 #include <iomanip>  // setprecision
-#include <iostream>
-#include <iterator>
+// #include <iostream>  // i/o operations
+// #include <iterator>
 #include <sstream>        // stringstream
 #include "FileLoading.h"  // FileLoading class
 
-// Detects compiler and uses appropriate library
+// Detects compiler and uses appropriate math library
 #if defined(__INTEL_COMPILER)
 #include <mathimf.h>  // Intel Math library
 #define COMPILER "INTEL"
@@ -27,7 +27,7 @@
 #pragma warning(disable : 4996)  //_CRT_SECURE_NO_WARNINGS
 
 // Detects the OS and fetches the executable path that is passed
-// in the FileLoadding.h class
+// in the FileIO.h class
 #ifdef _WIN32
 #define _WIN32 _WIN32
 #include <windows.h>

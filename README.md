@@ -5,35 +5,44 @@ A program simulating a Molecular Dynamics (MD) fluid under the influence of an o
 ![first eq](http://latex.codecogs.com/gif.latex?%5Cphi_%7Bij%7D%20%28r%29%20%3D%20%5Cvarepsilon%5Cbigg%28%5Cdfrac%7B%5Csigma%7D%7B%28r%5E%7B2%7D%20&plus;%20A%29%7D%5Cbigg%29%5E%5Cfrac%7Bn%7D%7B2%7D)
 
 
-
 ## Description
 A program written to investigate the transition of a fluid from MD to SPH. The C++ files **MD.cpp** and **MD.h** contain the core of the fluid simulation while **FileLoadingPlotting.py** contains the analysis methods. The files **Source.cpp** and **Run.py** are used to execute the fluid simulation and the fluid analysis, repsectively.
 
 ## Getting Started
-Download, **MD.cpp, MD.h, FileLoadingPlotting.py** and **Run.py**. **Source.cpp**, provides insight on how the simulation is supposed to be run.
+Firstly, the **FileIO** header file is required, which can be found [here](https://github.com/GiannisNikiteas/FileIO.git), clone it to the top directory of this repository, like so:
+```
+# In the MD-simulation directory
+git clone https://github.com/GiannisNikiteas/FileIO.git
+```
+
+Then build the library and the test cases with, (change the compiler in **Makefile.variables** if needed):
+```
+make -j
+```
 
 ### Path
 * Change *path* in the constructor of **MD** to choose where the files will be saved.
 
 
 ### Run
-Code to run the program can be found in **Source.cpp**. The example above, demonstrates the basic idea.
+Code to run the program can be found in **src/Source.cpp** and in the **examples** directory.
+A minimal working example of how to use the **libmd.a** is shown below:
 
 ```
 #include "MD.h"
 
 int main()
 {
-  int steps = 5000; 	// number of steps
-  float A = 0.75; 	// softness parameter
-  int n = 6;  	// potential strength
-  int density = 0.5 	// fluid density
-  std::string dir = "/Desired/Path/"; // existing directory for file export
+  int steps = 5000; 	// number of iterations
+  double a = 0.75; 	  // softness parameter
+  int n = 6;  	      // potential strength
+  double rho = 0.5; 	// fluid density
+  double t = 0.5;     // fluid temperature
+  // Files will be saved to
+  std::string dir = "/Desired/Path/"; // The directory has to exist
   
-  MD run(dir, density, steps);
-  run.Simulation(n, A);
-
-  return 0;
+  MD run(dir, steps);
+  run.Simulation(rho, t, n, a);
 }
 ```
 

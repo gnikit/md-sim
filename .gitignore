@@ -114,5 +114,6 @@ publish/
 /data/*.txt
 # Not ignoring the compression start files
 !data/Positions_Velocities_particles_*
+FileIO/
 
 # /examples/example_data/*.txt

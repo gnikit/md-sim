@@ -42,7 +42,7 @@ void MakeDataBase() {
           MD* run1 = new MD(dir_linux, STEPS);
           MD* run2 = new MD(dir_linux, STEPS);
           MD* run3 = new MD(dir_linux, STEPS);
-          MD* run4 = new MD(dir_linux, STEPS); 
+          MD* run4 = new MD(dir_linux, STEPS);
 
           std::thread th1(&MD::Simulation, run1, rho[d], T[t], n[i], A1[j]);
           std::thread th2(&MD::Simulation, run2, rho[d], T[t], n[i], A2[j]);

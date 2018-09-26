@@ -6,7 +6,7 @@
 // #include <iostream>  // i/o operations
 // #include <iterator>
 #include <sstream>        // stringstream
-#include "FileLoading.h"  // FileLoading class
+#include "FileIO.h"  // FileLoading class
 
 // Detects compiler and uses appropriate math library
 #if defined(__INTEL_COMPILER)
@@ -140,13 +140,13 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
   }
 
   if (compression_flag == true && Q_counter == 0) {
-    FileLoading<double> load_data;
+    FileIO<double> load_data;
     get_dir();  // initialises top_exe_dir
     std::string file_name = top_exe_dir +
                             "/data/Positions_Velocities_particles_" +
                             std::to_string(N) + ".txt";
     std::cout << "Try and read file: " << file_name << std::endl;
-    std::vector<std::vector<double>> vel = load_data.LoadTxt(file_name, 9, '#');
+    std::vector<std::vector<double>> vel = load_data.ReadFile(file_name, 9, '#');
     x = vel[0];
     y = vel[1];
     z = vel[2];
@@ -262,7 +262,7 @@ void MD::mb_distribution(double TEMPERATURE, bool run_python_script = false) {
   }
 
   std::string vel_id = "_particles_" + particles + "_T_" + t + ".txt";
-  FileLoading<double> obj;
+  FileIO<double> obj;
   vx = obj.LoadSingleCol(dir_str + "/vx" + vel_id);
   vy = obj.LoadSingleCol(dir_str + "/vy" + vel_id);
   vz = obj.LoadSingleCol(dir_str + "/vz" + vel_id);

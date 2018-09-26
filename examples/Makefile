@@ -25,9 +25,9 @@ fluid_compression.o: fluid_compression.cpp
 	$(CXX) $(CXXFLAGS) -I$(LIB) fluid_compression.cpp -o fluid_compression.o
 
 
-
 clean:
-	rm isomorphic_surface make_database fluid_compression *.o example_data/*
+	rm isomorphic_surface make_database fluid_compression *.o 
+	rm ./example_data/*.txt
 
 clean_keep_data:
 	rm isomorphic_surface make_database fluid_compression *.o

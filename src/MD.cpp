@@ -5,7 +5,7 @@
 #include <iomanip>  // setprecision
 // #include <iostream>  // i/o operations
 // #include <iterator>
-#include <sstream>        // stringstream
+#include <sstream>   // stringstream
 #include "FileIO.h"  // FileLoading class
 
 // Detects compiler and uses appropriate math library
@@ -23,7 +23,7 @@
 // if changed, new vx,vy,vz files need to be generated
 #define PARTICLES_PER_AXIS 10
 // TODO: Increase the number of bins to find RDF intersects
-#define NHIST 300                // Number of histogram bins
+#define NHIST 500                // Number of histogram bins
 #pragma warning(disable : 4996)  //_CRT_SECURE_NO_WARNINGS
 
 // Detects the OS and fetches the executable path that is passed

@@ -335,7 +335,6 @@ void MD::velocity_autocorrelation_function(std::vector<double> &Cvx,
 
 void MD::radial_distribution_function(bool normalise) {
   /*normalise by default is TRUE*/
-  // TODO: save raw RDF and normalisation factors & distance!
   double R = 0;
   double norm = 1;
   double cor_rho = _rho * (N - 1) / N;
@@ -351,9 +350,10 @@ void MD::radial_distribution_function(bool normalise) {
       // norm = (cor_rho * 2 * PI * R * R * N * _STEPS * dr);
       // Volume between 2 spheres, accounting for double counting
       // hence the 2/3*pi*((R+dr)**3 - R**3)
+      // TODO: remove the first 3000 time steps
       norm = cor_rho *
-             (2.0/3.0 * PI * N * _STEPS *
-              (pow((R + dr), 3) - pow((R), 3)));
+             (2.0 / 3.0 * PI * N * (_STEPS-3000) *
+              (pow((R + (dr / 2.0)), 3) - pow((R - (dr / 2.0)), 3)));
     }
     // gr[i] /= norm;  // not really needed
     Hist << gr[i] << '\t' << gr[i] / norm << std::endl;
@@ -489,7 +489,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
 
         r = sqrt((x * x) + (y * y) + (z * z));
         // TODO: enable q for BIP potential
-        long double q = sqrt(r * r + A_CST * A_CST);
+        double q = sqrt(r * r + A_CST * A_CST);
 
         // Force loop
         if (r < cut_off) {
@@ -497,11 +497,11 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
           //		using comment-uncomment to implement
           // BIP potential of the form: phi = 1/[(r**2 + a**2)**(n/2)]
           // TODO: BIP force
-          long double ff =
+          double ff =
               (POWER)*r * pow(q, ((-POWER - 2.0)));  // Force for particles
 
           // TODO: Gausian-force with sigma=1 and epsilon=1
-          // long double ff = 2 * r * exp(-r * r);
+          // double ff = 2 * r * exp(-r * r);
 
           // Canceling the ij and ji pairs
           // Taking the lower triangular matrix
@@ -525,8 +525,12 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
           // U += exp(-r * r);
 
           // Radial Distribution
-          igr = round(NHIST * r / rg);
-          gr[igr] += 1;
+          // Allow the crystal to melt
+          // TODO: minus the
+          if (_STEP_INDEX > 3000) {
+            igr = round(NHIST * r / rg);
+            gr[igr] += 1;
+          }
           // rn = (igr - 0.5)*dr;
         }
       }

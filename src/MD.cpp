@@ -136,7 +136,7 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
       }
     }
     // Generates Maxwell-Boltzmann dist from Python script
-    mb_distribution(TEMPERATURE, true);
+    mb_distribution(TEMPERATURE);
   }
 
   if (compression_flag == true && Q_counter == 0) {
@@ -146,7 +146,9 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
                             "/data/Positions_Velocities_particles_" +
                             std::to_string(N) + ".txt";
     std::cout << "Try and read file: " << file_name << std::endl;
-    std::vector<std::vector<double>> vel = load_data.ReadFile(file_name, 9, '#');
+    std::vector<std::vector<double>> vel =
+        load_data.ReadFile(file_name, 9, '#');
+    // TODO: Ideally return a tuple of N vectors, where N == column #
     x = vel[0];
     y = vel[1];
     z = vel[2];
@@ -245,29 +247,31 @@ std::string MD::get_dir() {
   return top_exe_dir;
 }
 
-void MD::mb_distribution(double TEMPERATURE, bool run_python_script = false) {
+void MD::mb_distribution(double TEMPERATURE) {
   std::string t = convert_to_string(TEMPERATURE, 4);
   std::string particles = std::to_string(N);
   std::string dir_str = get_dir();
   dir_str += "/data";
 
-  if (run_python_script) {
-    // Could be stored as variables and passed into FileNaming
-    // rather than repeating the process
-    // store in _particles_to_str, _T_to_str
-    // taking care of the idiots that use spaces in paths
+  // Try to load velocity files if not already present call
+  // Python script to generate them.
+  try {
+    std::string vel_id = "_particles_" + particles + "_T_" + t + ".txt";
+    FileIO<double> obj;
+    // TODO: define in heap and delete FileLoading obj
+    std::cout << "Velocity files already present, no need to generate."
+              << std::endl;
+    vx = obj.LoadSingleCol(dir_str + "/vx" + vel_id);
+    vy = obj.LoadSingleCol(dir_str + "/vy" + vel_id);
+    vz = obj.LoadSingleCol(dir_str + "/vz" + vel_id);
+    std::cout << "Files loaded successfuly." << std::endl;
+  } catch (...) {
+    std::cerr << "Files not present, Python script will be executed."
+              << std::endl;
     std::string command =
         "python \"" + dir_str + "/MBDistribution.py\" " + particles + " " + t;
     system(command.c_str());  // Creates files with MD velocities
   }
-
-  std::string vel_id = "_particles_" + particles + "_T_" + t + ".txt";
-  FileIO<double> obj;
-  vx = obj.LoadSingleCol(dir_str + "/vx" + vel_id);
-  vy = obj.LoadSingleCol(dir_str + "/vy" + vel_id);
-  vz = obj.LoadSingleCol(dir_str + "/vz" + vel_id);
-  std::cout << "Files loaded successfuly." << std::endl;
-  // TODO: define in heap and delete FileLoading obj
 }
 
 void MD::verlet_algorithm(std::vector<double> &rx, std::vector<double> &ry,
@@ -351,9 +355,8 @@ void MD::radial_distribution_function(bool normalise) {
       // Volume between 2 spheres, accounting for double counting
       // hence the 2/3*pi*((R+dr)**3 - R**3)
       // TODO: remove the first 3000 time steps
-      norm = cor_rho *
-             (2.0 / 3.0 * PI * N * (_STEPS-3000) *
-              (pow((R + (dr / 2.0)), 3) - pow((R - (dr / 2.0)), 3)));
+      norm = cor_rho * (2.0 / 3.0 * PI * N * (_STEPS - 3000) *
+                        (pow((R + (dr / 2.0)), 3) - pow((R - (dr / 2.0)), 3)));
     }
     // gr[i] /= norm;  // not really needed
     Hist << gr[i] << '\t' << gr[i] / norm << std::endl;

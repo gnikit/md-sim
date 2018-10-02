@@ -1,7 +1,8 @@
 SHELL = /bin/bash
 include ../Makefile.variables
-LIB =../lib
-BIN =../bin
+LIB = ../lib
+BIN = ../bin
+SRC = ../src
 # TODO: This will obviously not work if isomorph.o, MD.o stat_analysis.o do not exist
 # 			at this point 'make all' has to be called and 'database' and 'iso' cannot be called independently
 all: make_database isomorphic_surface fluid_compression $(LIB)/libmd.a
@@ -16,13 +17,13 @@ fluid_compression: fluid_compression.o $(LIB)/libmd.a
 	$(CXX) $(FLAGS) fluid_compression.o $(LINKER) -o fluid_compression
 
 make_database.o: make_database.cpp
-	$(CXX) $(CXXFLAGS) -I$(LIB) make_database.cpp -o make_database.o
+	$(CXX) $(CXXFLAGS) -I$(SRC) make_database.cpp -o make_database.o
 
 isomorph_line.o: isomorph_line.cpp
-	$(CXX) $(CXXFLAGS) -I$(LIB) isomorph_line.cpp -o isomorph_line.o
+	$(CXX) $(CXXFLAGS) -I$(SRC) isomorph_line.cpp -o isomorph_line.o
 
 fluid_compression.o: fluid_compression.cpp
-	$(CXX) $(CXXFLAGS) -I$(LIB) fluid_compression.cpp -o fluid_compression.o
+	$(CXX) $(CXXFLAGS) -I$(SRC) fluid_compression.cpp -o fluid_compression.o
 
 
 clean:

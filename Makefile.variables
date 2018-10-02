@@ -8,4 +8,7 @@ CXXFLAGS = -c $(FLAGS)
 # LIB has to be defined in the Makefile 
 # For future reference use 2 variables, one for include one for linker
 # in those vars include the flag e.g. INC=-I../bin -I../lib -I../src
-LINKER = -I$(LIB) -L$(LIB) -lmd
+INC = -I ../lib -I ../src -I ../FileIO
+LN = -L ../lib -L ../src -L ../FileIO
+
+LINKER = $(INC) $(LN) -lmd

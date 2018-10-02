@@ -35,21 +35,21 @@ class MD {
 
   size_t Nx, Ny, Nz;              // Particles in x, y, z
   size_t N, _STEP_INDEX, _STEPS;  // Total particles, step index, maximum steps
-  double _T0;         // Target Temperature. Desired T for the system to operate
-  double dt = 0.005;  // time step This applies: dt = 0.005/sqrt(T0)
-  double x, y, z;     // distance between particle i and j
-  double r;           // distance in polar
-  double _rho;        // density
-  double scale;       // box scaling parameter
-  double KE = 0.0;    // Kinetic Energy
-  double T;           // Temperature
-  double L;           // Length of the box after scaling
-  double Vol;         // Volume
-  double cut_off = 3.0;  // simulation runs only within cutoff
-  double U = 0;          // Potential Energy
-  double PC = 0;         // Configurational Pressure
-  double PK;             // Kinetic Pressure
-  double scale_v;        // velocity scaling
+  double _T0;                     // Target Temperature. Desired T for the system to operate
+  double dt = 0.005;              // time step This applies: dt = 0.005/sqrt(T0)
+  double x, y, z;                 // distance between particle i and j
+  double r;                       // distance in polar
+  double _rho;                    // density
+  double scale;                   // box scaling parameter
+  double KE = 0.0;                // Kinetic Energy
+  double T;                       // Temperature
+  double L;                       // Length of the box after scaling
+  double Vol;                     // Volume
+  double cut_off = 3.0;           // simulation runs only within cutoff
+  double U = 0;                   // Potential Energy
+  double PC = 0;                  // Configurational Pressure
+  double PK;                      // Kinetic Pressure
+  double scale_v;                 // velocity scaling
 
   // Quenching varibles
   bool compression_flag = false;
@@ -86,7 +86,7 @@ class MD {
                   std::vector<double> &z, std::vector<double> &vx,
                   std::vector<double> &vy, std::vector<double> &vz,
                   double TEMPERATURE);
-  void mb_distribution(double TEMPERATURE, bool run_python_script);
+  void mb_distribution(double TEMPERATURE);
   void verlet_algorithm(std::vector<double> &rx, std::vector<double> &ry,
                         std::vector<double> &rz, std::vector<double> &vx,
                         std::vector<double> &vy, std::vector<double> &vz,

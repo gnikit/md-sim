@@ -21,9 +21,6 @@
 
 class MD {
  protected:
-  // typedef std::vector<double> std::vector<double>;	// short-hand notation,
-  // use with care
-
   std::vector<double> rx, ry, rz;        // Position Arrays
   std::vector<double> vx, vy, vz;        // Velocity Arrays
   std::vector<double> fx, fy, fz;        // Force arrays

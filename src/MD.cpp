@@ -1,14 +1,12 @@
 #include "MD.h"
 #include <chrono>  // CPU run-time
 #include <cstdint>
-#include <ctime>    // std::chrono
-#include <iomanip>  // setprecision
-// #include <iostream>  // i/o operations
-// #include <iterator>
+#include <ctime>     // std::chrono
+#include <iomanip>   // setprecision
 #include <sstream>   // stringstream
 #include "FileIO.h"  // FileLoading class
 
-// Detects compiler and uses appropriate math library
+// Load appropriate math library
 #if defined(__INTEL_COMPILER)
 #include <mathimf.h>  // Intel Math library
 #define COMPILER "INTEL"
@@ -106,7 +104,7 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
   /*
    *  Initialises the:
    *  + Position Arrays
-   *  + Velocity Arrays (assign random velocities)
+   *  + Velocity Arrays
    *  + Conserves/ Scales momentum == 0
    *  + Temperature
    *  + Velocity Autocorrelaion Function
@@ -116,7 +114,6 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
    *  @param TEMPERATURE: Thermostat target temperature
    */
   // Initialise position matrix and velocity matrix from Cubic Centred Lattice
-  // TODO: Initialise from last position, FIX
   if (compression_flag == false) {
     size_t n = 0;
     size_t i, j, k;
@@ -141,7 +138,8 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
 
   if (compression_flag == true && Q_counter == 0) {
     FileIO<double> load_data;
-    get_dir();  // initialises top_exe_dir
+    // Initialises top_exe_dir variable
+    get_dir();
     std::string file_name = top_exe_dir +
                             "/data/Positions_Velocities_particles_" +
                             std::to_string(N) + ".txt";
@@ -161,7 +159,7 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
     std::cout << "Read successful" << std::endl;
     // Start from a highly thermalised fluid state
     // Generation of velocities with T = 10
-    // MBDistribution(10);
+    // mb_distribution(10);
     // TODO: Not sure what follows is correct in if-loop
     // Temperature calculation for the first step with very high T
     // scale of x, y, z
@@ -271,6 +269,15 @@ void MD::mb_distribution(double TEMPERATURE) {
     std::string command =
         "python \"" + dir_str + "/MBDistribution.py\" " + particles + " " + t;
     system(command.c_str());  // Creates files with MD velocities
+
+    std::string vel_id = "_particles_" + particles + "_T_" + t + ".txt";
+    FileIO<double> obj;
+    std::cout << "Velocity files already present, no need to generate."
+              << std::endl;
+    // Load the newline generated files
+    vx = obj.LoadSingleCol(dir_str + "/vx" + vel_id);
+    vy = obj.LoadSingleCol(dir_str + "/vy" + vel_id);
+    vz = obj.LoadSingleCol(dir_str + "/vz" + vel_id);
   }
 }
 
@@ -351,14 +358,12 @@ void MD::radial_distribution_function(bool normalise) {
   for (i = 1; i < NHIST; i++) {  // Changed initial loop value from 0 -> 1
     if (normalise) {
       R = rg * i / NHIST;
-      // norm = (cor_rho * 2 * PI * R * R * N * _STEPS * dr);
       // Volume between 2 spheres, accounting for double counting
       // hence the 2/3*pi*((R+dr)**3 - R**3)
       // TODO: remove the first 3000 time steps
       norm = cor_rho * (2.0 / 3.0 * PI * N * (_STEPS - 3000) *
                         (pow((R + (dr / 2.0)), 3) - pow((R - (dr / 2.0)), 3)));
     }
-    // gr[i] /= norm;  // not really needed
     Hist << gr[i] << '\t' << gr[i] / norm << std::endl;
   }
 }
@@ -490,16 +495,13 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
           zz = zz + L;
         }
 
+        // Pair potential
         r = sqrt((x * x) + (y * y) + (z * z));
-        // TODO: enable q for BIP potential
         double q = sqrt(r * r + A_CST * A_CST);
 
         // Force loop
         if (r < cut_off) {
-          // TODO: implement functionally different potentials, currently
-          //		using comment-uncomment to implement
           // BIP potential of the form: phi = 1/[(r**2 + a**2)**(n/2)]
-          // TODO: BIP force
           double ff =
               (POWER)*r * pow(q, ((-POWER - 2.0)));  // Force for particles
 
@@ -515,26 +517,22 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
           fz[i] += z * ff / r;
           fz[j] -= z * ff / r;
 
+          // Configurational pressure
           PC += r * ff;
-          // TODO:Gaussian-Potential configurational Pressure
-          // integral not evaluated
 
-          // TODO: Add infinity and edge correction, do same for Pc
-
-          // TODO: BIP potential
+          // Average potential energy
           U += pow(q, (-POWER));
 
           // TODO: Gaussian Potential GCM
           // U += exp(-r * r);
 
           // Radial Distribution
-          // Allow the crystal to melt
-          // TODO: minus the
+          // measured with a delay, since the system requires a few thousand time-steps
+          // to reach equilibrium
           if (_STEP_INDEX > 3000) {
             igr = round(NHIST * r / rg);
             gr[igr] += 1;
           }
-          // rn = (igr - 0.5)*dr;
         }
       }
     }
@@ -597,9 +595,8 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
                "** MD Simulation terminated **\n"
                "******************************\n"
             << std::endl;
-  // Streams should not close, vectors should not be cleared if object is to be
-  // reused
-  reset_values();  // no need to call if object is not reused
+  // Close file streams and reset vectors
+  reset_values();
 }
 
 // File Handling

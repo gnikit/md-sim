@@ -27,8 +27,8 @@ fluid_compression.o: fluid_compression.cpp
 
 
 clean:
-	rm isomorphic_surface make_database fluid_compression *.o 
-	rm ./example_data/*.txt
+	$(RM) isomorphic_surface make_database fluid_compression *.o 
+	$(RM) ./example_data/*.txt
 
 clean_keep_data:
-	rm isomorphic_surface make_database fluid_compression *.o
+	$(RM) isomorphic_surface make_database fluid_compression *.o

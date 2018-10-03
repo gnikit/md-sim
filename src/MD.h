@@ -27,8 +27,8 @@ class MD {
   std::vector<double> Cvx, Cvy, Cvz;     // VAF arrays
   std::vector<double> rrx, rry, rrz;     // used in MSD calculation
   std::vector<double> MSDx, MSDy, MSDz;  // MSD arrays
-  std::vector<double> Cr, msd, u_en, k_en, pc, pk, temperature,
-      density;  // vectors used as buffers
+  std::vector<double> Cr, msd, u_en, k_en, pc, pk,
+      temperature, density;  // vectors used as buffers
 
   size_t Nx, Ny, Nz;              // Particles in x, y, z
   size_t N, _STEP_INDEX, _STEPS;  // Total particles, step index, maximum steps

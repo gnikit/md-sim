@@ -117,9 +117,9 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
   if (compression_flag == false) {
     size_t n = 0;
     size_t i, j, k;
-    for (i = 0; i < Nx; i++) {
-      for (j = 0; j < Ny; j++) {
-        for (k = 0; k < Nz; k++) {
+    for (i = 0; i < Nx; ++i) {
+      for (j = 0; j < Ny; ++j) {
+        for (k = 0; k < Nz; ++k) {
           x.push_back((i + 0.5) * scale);
           y.push_back((j + 0.5) * scale);
           z.push_back((k + 0.5) * scale);
@@ -172,7 +172,7 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
 
   size_t i;
   // Momentum conservation
-  for (i = 0; i < N; i++) {
+  for (i = 0; i < N; ++i) {
     mean_vx += vx[i] / N;
     mean_vy += vy[i] / N;
     mean_vz += vz[i] / N;
@@ -182,14 +182,14 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
 #pragma parallel
 #pragma loop count min(128)
   // Subtracting Av. velocities from each particle
-  for (i = 0; i < tempN; i++) {
+  for (i = 0; i < tempN; ++i) {
     vx[i] = vx[i] - mean_vx;
     vy[i] = vy[i] - mean_vy;
     vz[i] = vz[i] - mean_vz;
   }
   // Temperature calculation, statistically
   KE = 0;
-  for (i = 0; i < N; i++) {
+  for (i = 0; i < N; ++i) {
     KE += 0.5 * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]);
   }
   T = KE / (1.5 * N);
@@ -198,7 +198,7 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
   // Velocity scaling
 #pragma parallel
 #pragma loop count min(128)
-  for (i = 0; i < tempN; i++) {
+  for (i = 0; i < tempN; ++i) {
     vx[i] *= scale_v;
     vy[i] *= scale_v;
     vz[i] *= scale_v;
@@ -213,7 +213,7 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
   Cvy = vy;
   Cvz = vz;
   double first_val = 0;
-  for (i = 0; i < N; i++) {
+  for (i = 0; i < N; ++i) {
     first_val += (Cvx[i] * Cvx[i] + Cvy[i] * Cvy[i] + Cvz[i] * Cvz[i]) / N;
   }
   first_val /= N;
@@ -295,7 +295,7 @@ void MD::verlet_algorithm(std::vector<double> &rx, std::vector<double> &ry,
 	 *                           square displacement arrays.
 	 */
   size_t i;
-  for (i = 0; i < N; i++) {
+  for (i = 0; i < N; ++i) {
     vx[i] = vx[i] * scale_v + fx[i] * dt;
     vy[i] = vy[i] * scale_v + fy[i] * dt;
     vz[i] = vz[i] * scale_v + fz[i] * dt;
@@ -313,20 +313,17 @@ void MD::verlet_algorithm(std::vector<double> &rx, std::vector<double> &ry,
     // Boundary conditions Updated
     if (rx[i] > L) {
       rx[i] = rx[i] - L;
+    } else if (rx[i] < 0.0) {
+      rx[i] = rx[i] + L;
     }
     if (ry[i] > L) {
       ry[i] = ry[i] - L;
+    } else if (ry[i] < 0.0) {
+      ry[i] = ry[i] + L;
     }
     if (rz[i] > L) {
       rz[i] = rz[i] - L;
-    }
-    if (rx[i] < 0.0) {
-      rx[i] = rx[i] + L;
-    }
-    if (ry[i] < 0.0) {
-      ry[i] = ry[i] + L;
-    }
-    if (rz[i] < 0.0) {
+    } else if (rz[i] < 0.0) {
       rz[i] = rz[i] + L;
     }
   }
@@ -355,7 +352,7 @@ void MD::radial_distribution_function(bool normalise) {
        << " bin (NHIST): " << NHIST << " cut_off (rg): " << rg << " dr: " << dr
        << std::endl;
   Hist << "#Unormalised" << '\t' << "Normalised" << std::endl;
-  for (i = 1; i < NHIST; i++) {  // Changed initial loop value from 0 -> 1
+  for (i = 1; i < NHIST; ++i) {  // Changed initial loop value from 0 -> 1
     if (normalise) {
       R = rg * i / NHIST;
       // Volume between 2 spheres, accounting for double counting
@@ -373,11 +370,13 @@ void MD::mean_square_displacement(std::vector<double> &MSDx,
                                   std::vector<double> &MSDz) {
   double msd_temp = 0;
   for (size_t i = 0; i < N; ++i) {
-    msd_temp += (pow((rrx[i] - MSDx[i]), 2) + pow((rry[i] - MSDy[i]), 2) +
-                 pow((rrz[i] - MSDz[i]), 2));
+    // msd_temp += (pow((rrx[i] - MSDx[i]), 2) + pow((rry[i] - MSDy[i]), 2) +
+    //              pow((rrz[i] - MSDz[i]), 2));
+    msd_temp += (((rrx[i] - MSDx[i]) * (rrx[i] - MSDx[i])) +
+                 ((rry[i] - MSDy[i]) * (rry[i] - MSDy[i])) +
+                 ((rrz[i] - MSDz[i]) * (rrz[i] - MSDz[i])));
   }
-  msd_temp /= N;
-  msd.push_back(msd_temp);
+  msd.push_back(msd_temp/N);
 }
 
 void MD::density_compression(int steps_quench, double TEMPERATURE) {
@@ -437,7 +436,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
 
   initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
 
-  for (_STEP_INDEX = 0; _STEP_INDEX < _STEPS; _STEP_INDEX++) {
+  for (_STEP_INDEX = 0; _STEP_INDEX < _STEPS; ++_STEP_INDEX) {
     // Forces loop
     // Resetting forces
     std::fill(fx.begin(), fx.end(), 0);
@@ -457,8 +456,8 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
     }
 
     size_t i, j;
-    for (i = 0; i < N - 1; i++) {
-      for (j = i + 1; j < N; j++) {
+    for (i = 0; i < N - 1; ++i) {
+      for (j = i + 1; j < N; ++j) {
         x = rx[i] - rx[j];  // Separation distance
         y = ry[i] - ry[j];  // between particles i and j
         z = rz[i] - rz[j];  // in Cartesian
@@ -466,30 +465,27 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
         // Transposing elements with Periodic BC
         if (x > (0.5 * L)) {
           x = x - L;
+        } else if (x < (-0.5 * L)) {
+          x = x + L;
         }
         if (y > (0.5 * L)) {
           y = y - L;
+        } else if (y < (-0.5 * L)) {
+          y = y + L;
         }
         if (z > (0.5 * L)) {
           z = z - L;
-        }
-        if (x < (-0.5 * L)) {
-          x = x + L;
-        }
-        if (y < (-0.5 * L)) {
-          y = y + L;
-        }
-        if (z < (-0.5 * L)) {
+        } else if (z < (-0.5 * L)) {
           z = z + L;
         }
 
         // Pair potential
         r = sqrt((x * x) + (y * y) + (z * z));
-        double q = sqrt(r * r + A_CST * A_CST);
 
         // Force loop
         if (r < cut_off) {
           // BIP potential of the form: phi = 1/[(r**2 + a**2)**(n/2)]
+          double q = sqrt(r * r + A_CST * A_CST);
           double ff =
               (POWER)*r * pow(q, ((-POWER - 2.0)));  // Force for particles
 
@@ -563,7 +559,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
   write_to_files();
   // Saving Last Position
   time_stamp(POS, "# X\tY\tZ\tVx\tVy\tVz\tFx\tFy\tFz");
-  for (size_t el = 0; el < rx.size(); el++) {
+  for (size_t el = 0; el < rx.size(); ++el) {
     POS << rx[el] << '\t' << ry[el] << '\t' << rz[el] << '\t' << vx[el] << '\t'
         << vy[el] << '\t' << vz[el] << '\t' << fx[el] << '\t' << fy[el] << '\t'
         << fz[el] << std::endl;
@@ -636,7 +632,7 @@ void MD::write_to_files() {
   /*
 	 * Writes values of parameters to file
 	 */
-  for (size_t i = 0; i < _STEPS; i++) {
+  for (size_t i = 0; i < _STEPS; ++i) {
     DATA << (i + 1) << '\t' << density[i] << '\t' << temperature[i] << '\t'
          << u_en[i] << '\t' << k_en[i] << '\t' << pc[i] << '\t' << pk[i] << '\t'
          << msd[i] << '\t' << Cr[i] << std::endl;

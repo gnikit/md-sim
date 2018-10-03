@@ -2,6 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.animation as animation
+"""
+    To use visualise, first enable VISUALISE = true in the MD object e.g.
+    MD run (dir, steps);
+    run.VISUALISE = true;
+    // Now run MD simulation
+    run.Simulation(...)
+
+    Then change dir to the dir of the files
+"""
 
 # TODO: Make filename searcher
 # TODO: Use a more optimised file format/higher read/writes?

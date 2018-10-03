@@ -70,6 +70,7 @@ MD::MD(std::string DIRECTORY, size_t run_number) {
   pk.reserve(_STEPS);
   temperature.reserve(_STEPS);
   PI = acos(-1.0);
+  VISUALISE = false;
 }
 
 MD::MD(std::string DIRECTORY, size_t run_number, bool QUENCH_F) {
@@ -93,6 +94,7 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool QUENCH_F) {
 
   compression_flag = QUENCH_F;
   PI = acos(-1.0);
+  VISUALISE = false;
 }
 MD::~MD() {}
 
@@ -563,6 +565,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
     density.push_back(_rho);
 
     // Save positions
+    // TODO: find a way to enable/disable this or port it to Python
     (*pos_x)[_STEP_INDEX] = rx;
     (*pos_y)[_STEP_INDEX] = ry;
     (*pos_z)[_STEP_INDEX] = rz;
@@ -571,12 +574,15 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
   }
   // Simulation Ends HERE
 
-  // Save particle positions to files
-  FileIO<double> f;
-  // Write the arrays as jagged,(hence transposed), this creates rows=STEPS and columns=PARTICLES
-  f.Write2File(*pos_x, _dir + "x_data.dat", "\t", true);
-  f.Write2File(*pos_y, _dir + "y_data.dat", "\t", true);
-  f.Write2File(*pos_z, _dir + "z_data.dat", "\t", true);
+  if (VISUALISE) {
+    // Save particle positions to files
+    FileIO<double> f;
+    // TODO: create a descriptive filename. Maybe invoke python for compact data type
+    // Write the arrays as jagged,(hence transposed), this creates rows=STEPS and columns=PARTICLES
+    f.Write2File(*pos_x, _dir + "x_data.dat", "\t", true);
+    f.Write2File(*pos_y, _dir + "y_data.dat", "\t", true);
+    f.Write2File(*pos_z, _dir + "z_data.dat", "\t", true);
+  }
 
   write_to_files();
   // Saving Last Position

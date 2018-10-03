@@ -1,14 +1,12 @@
 #include "MD.h"
 #include <chrono>  // CPU run-time
 #include <cstdint>
-#include <ctime>    // std::chrono
-#include <iomanip>  // setprecision
-// #include <iostream>  // i/o operations
-// #include <iterator>
+#include <ctime>     // std::chrono
+#include <iomanip>   // setprecision
 #include <sstream>   // stringstream
 #include "FileIO.h"  // FileLoading class
 
-// Detects compiler and uses appropriate math library
+// Load appropriate math library
 #if defined(__INTEL_COMPILER)
 #include <mathimf.h>  // Intel Math library
 #define COMPILER "INTEL"
@@ -100,87 +98,87 @@ MD::~MD() {}
 
 // Methods for MD Analysis
 void MD::initialise(std::vector<double> &x, std::vector<double> &y,
-	std::vector<double> &z, std::vector<double> &vx,
-	std::vector<double> &vy, std::vector<double> &vz,
-	double TEMPERATURE) {
-	/*
-	 *  Initialises the:
-	 *  + Position Arrays
-	 *  + Velocity Arrays (assign random velocities)
-	 *  + Conserves/ Scales momentum == 0
-	 *  + Temperature
-	 *  + Velocity Autocorrelaion Function
-	 *
-	 *  @param &x, &y, &z: X, Y, Z vector points
-	 *  @param &vx, &vy, &vz: Vx, Vy, Vz vector points
-	 *  @param TEMPERATURE: Thermostat target temperature
-	 */
-	 // Initialise position matrix and velocity matrix from Cubic Centred Lattice
-	 // TODO: Initialise from last position, FIX
-	if (compression_flag == false) {
-		size_t n = 0;
-		size_t i, j, k;
-		for (i = 0; i < Nx; i++) {
-			for (j = 0; j < Ny; j++) {
-				for (k = 0; k < Nz; k++) {
-					x.push_back((i + 0.5) * scale);
-					y.push_back((j + 0.5) * scale);
-					z.push_back((k + 0.5) * scale);
+                    std::vector<double> &z, std::vector<double> &vx,
+                    std::vector<double> &vy, std::vector<double> &vz,
+                    double TEMPERATURE) {
+  /*
+   *  Initialises the:
+   *  + Position Arrays
+   *  + Velocity Arrays
+   *  + Conserves/ Scales momentum == 0
+   *  + Temperature
+   *  + Velocity Autocorrelaion Function
+   *
+   *  @param &x, &y, &z: X, Y, Z vector points
+   *  @param &vx, &vy, &vz: Vx, Vy, Vz vector points
+   *  @param TEMPERATURE: Thermostat target temperature
+   */
+  // Initialise position matrix and velocity matrix from Cubic Centred Lattice
+  if (compression_flag == false) {
+    size_t n = 0;
+    size_t i, j, k;
+    for (i = 0; i < Nx; i++) {
+      for (j = 0; j < Ny; j++) {
+        for (k = 0; k < Nz; k++) {
+          x.push_back((i + 0.5) * scale);
+          y.push_back((j + 0.5) * scale);
+          z.push_back((k + 0.5) * scale);
 
-					rrx.push_back((i + 0.5) * scale);
-					rry.push_back((j + 0.5) * scale);
-					rrz.push_back((k + 0.5) * scale);
+          rrx.push_back((i + 0.5) * scale);
+          rry.push_back((j + 0.5) * scale);
+          rrz.push_back((k + 0.5) * scale);
 
-					++n;
-				}
-			}
-		}
-		// Generates Maxwell-Boltzmann dist from Python script
-		mb_distribution(TEMPERATURE);
-	}
+          ++n;
+        }
+      }
+    }
+    // Generates Maxwell-Boltzmann dist from Python script
+    mb_distribution(TEMPERATURE);
+  }
 
-	if (compression_flag == true && Q_counter == 0) {
-		FileIO<double> load_data;
-		get_dir();  // initialises top_exe_dir
-		std::string file_name = top_exe_dir +
-			"/data/Positions_Velocities_particles_" +
-			std::to_string(N) + ".txt";
-		std::cout << "Try and read file: " << file_name << std::endl;
-		std::vector<std::vector<double>> vel =
-			load_data.ReadFile(file_name, 9, '#');
-		// TODO: Ideally return a tuple of N vectors, where N == column #
-		x = vel[0];
-		y = vel[1];
-		z = vel[2];
-		vx = vel[3];
-		vy = vel[4];
-		vz = vel[5];
-		rrx = vel[0];
-		rry = vel[1];
-		rrz = vel[2];
-		std::cout << "Read successful" << std::endl;
-		// Start from a highly thermalised fluid state
-		// Generation of velocities with T = 10
-		// MBDistribution(10);
-		// TODO: Not sure what follows is correct in if-loop
-		// Temperature calculation for the first step with very high T
-		// scale of x, y, z
-	}
+  if (compression_flag == true && Q_counter == 0) {
+    FileIO<double> load_data;
+    // Initialises top_exe_dir variable
+    get_dir();
+    std::string file_name = top_exe_dir +
+                            "/data/Positions_Velocities_particles_" +
+                            std::to_string(N) + ".txt";
+    std::cout << "Try and read file: " << file_name << std::endl;
+    std::vector<std::vector<double>> vel =
+        load_data.ReadFile(file_name, 9, '#');
+    // TODO: Ideally return a tuple of N vectors, where N == column #
+    x = vel[0];
+    y = vel[1];
+    z = vel[2];
+    vx = vel[3];
+    vy = vel[4];
+    vz = vel[5];
+    rrx = vel[0];
+    rry = vel[1];
+    rrz = vel[2];
+    std::cout << "Read successful" << std::endl;
+    // Start from a highly thermalised fluid state
+    // Generation of velocities with T = 10
+    // mb_distribution(10);
+    // TODO: Not sure what follows is correct in if-loop
+    // Temperature calculation for the first step with very high T
+    // scale of x, y, z
+  }
 
-	// scale of x, y, z
-	double mean_vx = 0;
-	double mean_vy = 0;
-	double mean_vz = 0;
+  // scale of x, y, z
+  double mean_vx = 0;
+  double mean_vy = 0;
+  double mean_vz = 0;
 
-	size_t i;
-	// Momentum conservation
-	for (i = 0; i < N; i++) {
-		mean_vx += vx[i] / N;
-		mean_vy += vy[i] / N;
-		mean_vz += vz[i] / N;
-	}
+  size_t i;
+  // Momentum conservation
+  for (i = 0; i < N; i++) {
+    mean_vx += vx[i] / N;
+    mean_vy += vy[i] / N;
+    mean_vz += vz[i] / N;
+  }
 
-	size_t tempN = N;
+  size_t tempN = N;
 #pragma parallel
 #pragma loop count min(128)
 	// Subtracting Av. velocities from each particle
@@ -248,31 +246,39 @@ std::string MD::get_dir() {
 }
 
 void MD::mb_distribution(double TEMPERATURE) {
-	std::string t = convert_to_string(TEMPERATURE, 4);
-	std::string particles = std::to_string(N);
-	std::string dir_str = get_dir();
-	dir_str += "/data";
+  std::string t = convert_to_string(TEMPERATURE, 4);
+  std::string particles = std::to_string(N);
+  std::string dir_str = get_dir();
+  dir_str += "/data";
 
-	// Try to load velocity files if not already present call
-	// Python script to generate them.
-	try {
-		std::string vel_id = "_particles_" + particles + "_T_" + t + ".txt";
-		FileIO<double> obj;
-		// TODO: define in heap and delete FileLoading obj
-		std::cout << "Velocity files already present, no need to generate."
-			<< std::endl;
-		vx = obj.LoadSingleCol(dir_str + "/vx" + vel_id);
-		vy = obj.LoadSingleCol(dir_str + "/vy" + vel_id);
-		vz = obj.LoadSingleCol(dir_str + "/vz" + vel_id);
-		std::cout << "Files loaded successfuly." << std::endl;
-	}
-	catch (...) {
-		std::cerr << "Files not present, Python script will be executed."
-			<< std::endl;
-		std::string command =
-			"python \"" + dir_str + "/MBDistribution.py\" " + particles + " " + t;
-		system(command.c_str());  // Creates files with MD velocities
-	}
+  // Try to load velocity files if not already present call
+  // Python script to generate them.
+  try {
+    std::string vel_id = "_particles_" + particles + "_T_" + t + ".txt";
+    FileIO<double> obj;
+    // TODO: define in heap and delete FileLoading obj
+    std::cout << "Velocity files already present, no need to generate."
+              << std::endl;
+    vx = obj.LoadSingleCol(dir_str + "/vx" + vel_id);
+    vy = obj.LoadSingleCol(dir_str + "/vy" + vel_id);
+    vz = obj.LoadSingleCol(dir_str + "/vz" + vel_id);
+    std::cout << "Files loaded successfuly." << std::endl;
+  } catch (...) {
+    std::cerr << "Files not present, Python script will be executed."
+              << std::endl;
+    std::string command =
+        "python \"" + dir_str + "/MBDistribution.py\" " + particles + " " + t;
+    system(command.c_str());  // Creates files with MD velocities
+
+    std::string vel_id = "_particles_" + particles + "_T_" + t + ".txt";
+    FileIO<double> obj;
+    std::cout << "Velocity files already present, no need to generate."
+              << std::endl;
+    // Load the newline generated files
+    vx = obj.LoadSingleCol(dir_str + "/vx" + vel_id);
+    vy = obj.LoadSingleCol(dir_str + "/vy" + vel_id);
+    vz = obj.LoadSingleCol(dir_str + "/vz" + vel_id);
+  }
 }
 
 void MD::verlet_algorithm(std::vector<double> &rx, std::vector<double> &ry,
@@ -339,29 +345,27 @@ void MD::velocity_autocorrelation_function(std::vector<double> &Cvx,
 }
 
 void MD::radial_distribution_function(bool normalise) {
-	/*normalise by default is TRUE*/
-	double R = 0;
-	double norm = 1;
-	double cor_rho = _rho * (N - 1) / N;
-	double dr = rg / NHIST;
-	size_t i;
-	Hist << "#particles (N): " << N << " steps: " << _STEPS << " rho: " << _rho
-		<< " bin (NHIST): " << NHIST << " cut_off (rg): " << rg << " dr: " << dr
-		<< std::endl;
-	Hist << "#Unormalised" << '\t' << "Normalised" << std::endl;
-	for (i = 1; i < NHIST; i++) {  // Changed initial loop value from 0 -> 1
-		if (normalise) {
-			R = rg * i / NHIST;
-			// norm = (cor_rho * 2 * PI * R * R * N * _STEPS * dr);
-			// Volume between 2 spheres, accounting for double counting
-			// hence the 2/3*pi*((R+dr)**3 - R**3)
-			// TODO: remove the first 3000 time steps
-			norm = cor_rho * (2.0 / 3.0 * PI * N * (_STEPS - 3000) *
-				(pow((R + (dr / 2.0)), 3) - pow((R - (dr / 2.0)), 3)));
-		}
-		// gr[i] /= norm;  // not really needed
-		Hist << gr[i] << '\t' << gr[i] / norm << std::endl;
-	}
+  /*normalise by default is TRUE*/
+  double R = 0;
+  double norm = 1;
+  double cor_rho = _rho * (N - 1) / N;
+  double dr = rg / NHIST;
+  size_t i;
+  Hist << "#particles (N): " << N << " steps: " << _STEPS << " rho: " << _rho
+       << " bin (NHIST): " << NHIST << " cut_off (rg): " << rg << " dr: " << dr
+       << std::endl;
+  Hist << "#Unormalised" << '\t' << "Normalised" << std::endl;
+  for (i = 1; i < NHIST; i++) {  // Changed initial loop value from 0 -> 1
+    if (normalise) {
+      R = rg * i / NHIST;
+      // Volume between 2 spheres, accounting for double counting
+      // hence the 2/3*pi*((R+dr)**3 - R**3)
+      // TODO: remove the first 3000 time steps
+      norm = cor_rho * (2.0 / 3.0 * PI * N * (_STEPS - 3000) *
+                        (pow((R + (dr / 2.0)), 3) - pow((R - (dr / 2.0)), 3)));
+    }
+    Hist << gr[i] << '\t' << gr[i] / norm << std::endl;
+  }
 }
 
 void MD::mean_square_displacement(std::vector<double> &MSDx,
@@ -388,219 +392,211 @@ void MD::density_compression(int steps_quench, double TEMPERATURE) {
 
 // MD Simulation
 void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
-	double A_CST) {
-	/*
-	 *  Executes the fluid simulation. It includes all statistical methods
-	 *  defined in this class. It monitors the following quantities
-	 *  RDF, MSD, VAF, average particle energies & pressures.
-	 *
-	 *  @param DENSITY: the density rho of fluid.
-	 *  @param TEMPERATURE: the temperature of the thermostat.
-	 *  @param POWER: the power n that the pair potential will be using
-	 *                typical values are in the range of 6-18.
-	 *  @param A_CST: softening constant 'a' of the pair potential.
-	 *                When 'a' = 0, then fluid is pure MD, increasing
-	 *                'a' reuslts into softening of the pair potential.
-	 */
-	 // Initialise scalling variables
-	std::cout << "***************************\n"
-		"** MD Simulation started **\n"
-		"***************************\n"
-		<< std::endl;
-	std::cout << "Fluid parameters: rho: " << DENSITY << " T: " << TEMPERATURE
-		<< " n: " << POWER << " a: " << A_CST << std::endl;
-	_T0 = TEMPERATURE;
-	_rho = DENSITY;
-	dt /= sqrt(_T0);
-	// Box length scalling
-	scale = pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS;
-	L = pow((N / _rho), 1.0 / 3.0);
-	Vol = N / _rho;
+                    double A_CST) {
+  /*
+   *  Executes the fluid simulation. It includes all statistical methods
+   *  defined in this class. It monitors the following quantities
+   *  RDF, MSD, VAF, average particle energies & pressures.
+   *
+   *  @param DENSITY: the density rho of fluid.
+   *  @param TEMPERATURE: the temperature of the thermostat.
+   *  @param POWER: the power n that the pair potential will be using
+   *                typical values are in the range of 6-18.
+   *  @param A_CST: softening constant 'a' of the pair potential.
+   *                When 'a' = 0, then fluid is pure MD, increasing
+   *                'a' reuslts into softening of the pair potential.
+   */
+  // Initialise scalling variables
+  std::cout << "***************************\n"
+               "** MD Simulation started **\n"
+               "***************************\n"
+            << std::endl;
+  std::cout << "Fluid parameters: rho: " << DENSITY << " T: " << TEMPERATURE
+            << " n: " << POWER << " a: " << A_CST << std::endl;
+  _T0 = TEMPERATURE;
+  _rho = DENSITY;
+  dt /= sqrt(_T0);
+  // Box length scalling
+  scale = pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS;
+  L = pow((N / _rho), 1.0 / 3.0);
+  Vol = N / _rho;
 
-	// cut_off redefinition
-	// Large cut offs increase the runtime exponentially
-	cut_off = 3.0;  // L / 2.;
-	rg = cut_off;
-	dr = rg / NHIST;
+  // cut_off redefinition
+  // Large cut offs increase the runtime exponentially
+  cut_off = 3.0;  // L / 2.;
+  rg = cut_off;
+  dr = rg / NHIST;
 
-	// Filenaming should not be called
-	file_naming(POWER, A_CST);
-	open_files();
-	time_stamp(DATA, "# step \t rho \t U \t K \t Pc \t Pk \t MSD \t VAF");
+  // Filenaming should not be called
+  file_naming(POWER, A_CST);
+  open_files();
+  time_stamp(DATA, "# step \t rho \t U \t K \t Pc \t Pk \t MSD \t VAF");
 
-	std::chrono::steady_clock::time_point begin =
-		std::chrono::steady_clock::now();
+  std::chrono::steady_clock::time_point begin =
+      std::chrono::steady_clock::now();
 
-	initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
+  initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
 
-	double xx, yy, zz;
-	for (_STEP_INDEX = 0; _STEP_INDEX < _STEPS; _STEP_INDEX++) {
-		// Forces loop
-		// Resetting forces
-		std::fill(fx.begin(), fx.end(), 0);
-		std::fill(fy.begin(), fy.end(), 0);
-		std::fill(fz.begin(), fz.end(), 0);
+  double xx, yy, zz;
+  for (_STEP_INDEX = 0; _STEP_INDEX < _STEPS; _STEP_INDEX++) {
+    // Forces loop
+    // Resetting forces
+    std::fill(fx.begin(), fx.end(), 0);
+    std::fill(fy.begin(), fy.end(), 0);
+    std::fill(fz.begin(), fz.end(), 0);
 
-		U = 0;  // seting Potential U to 0
-		PC = 0;
+    U = 0;  // seting Potential U to 0
+    PC = 0;
 
-		size_t steps_quench = 10;  // steps between each quenching
-		if (compression_flag == true && _STEP_INDEX != 0 &&
-			_STEP_INDEX % steps_quench == 0) {
-			++Q_counter;
-			density_compression(steps_quench, TEMPERATURE);
-			std::cout << "Compressing fluid, run: " << Q_counter << " rho: " << _rho
-				<< std::endl;
-		}
+    size_t steps_quench = 10;  // steps between each quenching
+    if (compression_flag == true && _STEP_INDEX != 0 &&
+        _STEP_INDEX % steps_quench == 0) {
+      ++Q_counter;
+      density_compression(steps_quench, TEMPERATURE);
+      std::cout << "Compressing fluid, run: " << Q_counter << " rho: " << _rho
+                << std::endl;
+    }
 
-		size_t i, j;
-		for (i = 0; i < N - 1; i++) {
-			for (j = i + 1; j < N; j++) {
-				x = rx[i] - rx[j];  // Separation distance
-				y = ry[i] - ry[j];  // between particles i and j
-				z = rz[i] - rz[j];  // in Cartesian
+    size_t i, j;
+    for (i = 0; i < N - 1; i++) {
+      for (j = i + 1; j < N; j++) {
+        x = rx[i] - rx[j];  // Separation distance
+        y = ry[i] - ry[j];  // between particles i and j
+        z = rz[i] - rz[j];  // in Cartesian
 
-				xx = x;
-				yy = y;
-				zz = z;
+        xx = x;
+        yy = y;
+        zz = z;
 
-				// Transposing elements with Periodic BC
-				// xx, yy, zz are for the MSD calculation
-				if (x > (0.5 * L)) {
-					x = x - L;
-					xx = xx - L;
-				}
-				if (y > (0.5 * L)) {
-					y = y - L;
-					yy = yy - L;
-				}
-				if (z > (0.5 * L)) {
-					z = z - L;
-					zz = zz - L;
-				}
-				if (x < (-0.5 * L)) {
-					x = x + L;
-					xx = xx + L;
-				}
-				if (y < (-0.5 * L)) {
-					y = y + L;
-					yy = yy + L;
-				}
-				if (z < (-0.5 * L)) {
-					z = z + L;
-					zz = zz + L;
-				}
+        // Transposing elements with Periodic BC
+        // xx, yy, zz are for the MSD calculation
+        if (x > (0.5 * L)) {
+          x = x - L;
+          xx = xx - L;
+        }
+        if (y > (0.5 * L)) {
+          y = y - L;
+          yy = yy - L;
+        }
+        if (z > (0.5 * L)) {
+          z = z - L;
+          zz = zz - L;
+        }
+        if (x < (-0.5 * L)) {
+          x = x + L;
+          xx = xx + L;
+        }
+        if (y < (-0.5 * L)) {
+          y = y + L;
+          yy = yy + L;
+        }
+        if (z < (-0.5 * L)) {
+          z = z + L;
+          zz = zz + L;
+        }
 
-				r = sqrt((x * x) + (y * y) + (z * z));
-				// TODO: enable q for BIP potential
-				double q = sqrt(r * r + A_CST * A_CST);
+        // Pair potential
+        r = sqrt((x * x) + (y * y) + (z * z));
+        double q = sqrt(r * r + A_CST * A_CST);
 
-				// Force loop
-				if (r < cut_off) {
-					// TODO: implement functionally different potentials, currently
-					//		using comment-uncomment to implement
-					// BIP potential of the form: phi = 1/[(r**2 + a**2)**(n/2)]
-					// TODO: BIP force
-					double ff =
-						(POWER)*r * pow(q, ((-POWER - 2.0)));  // Force for particles
+        // Force loop
+        if (r < cut_off) {
+          // BIP potential of the form: phi = 1/[(r**2 + a**2)**(n/2)]
+          double ff =
+              (POWER)*r * pow(q, ((-POWER - 2.0)));  // Force for particles
 
-				// TODO: Gausian-force with sigma=1 and epsilon=1
-				// double ff = 2 * r * exp(-r * r);
+          // TODO: Gausian-force with sigma=1 and epsilon=1
+          // double ff = 2 * r * exp(-r * r);
 
-				// Canceling the ij and ji pairs
-				// Taking the lower triangular matrix
-					fx[i] += x * ff / r;
-					fx[j] -= x * ff / r;
-					fy[i] += y * ff / r;
-					fy[j] -= y * ff / r;
-					fz[i] += z * ff / r;
-					fz[j] -= z * ff / r;
+          // Canceling the ij and ji pairs
+          // Taking the lower triangular matrix
+          fx[i] += x * ff / r;
+          fx[j] -= x * ff / r;
+          fy[i] += y * ff / r;
+          fy[j] -= y * ff / r;
+          fz[i] += z * ff / r;
+          fz[j] -= z * ff / r;
 
-					PC += r * ff;
-					// TODO:Gaussian-Potential configurational Pressure
-					// integral not evaluated
+          // Configurational pressure
+          PC += r * ff;
 
-					// TODO: Add infinity and edge correction, do same for Pc
+          // Average potential energy
+          U += pow(q, (-POWER));
 
-					// TODO: BIP potential
-					U += pow(q, (-POWER));
+          // TODO: Gaussian Potential GCM
+          // U += exp(-r * r);
 
-					// TODO: Gaussian Potential GCM
-					// U += exp(-r * r);
+          // Radial Distribution
+          // measured with a delay, since the system requires a few thousand time-steps
+          // to reach equilibrium
+          if (_STEP_INDEX > 3000) {
+            igr = round(NHIST * r / rg);
+            gr[igr] += 1;
+          }
+        }
+      }
+    }
 
-					// Radial Distribution
-					// Allow the crystal to melt
-					// TODO: minus the
-					if (_STEP_INDEX > 3000) {
-						igr = round(NHIST * r / rg);
-						gr[igr] += 1;
-					}
-					// rn = (igr - 0.5)*dr;
-				}
-			}
-		}
+    // Average Potential Energy per particle
+    u_en.push_back(U / N);
 
-		// Average Potential Energy per particle
-		u_en.push_back(U / N);
+    // Average Configurational Pressure Pc
+    pc.push_back(PC / (3 * Vol));
 
-		// Average Configurational Pressure Pc
-		pc.push_back(PC / (3 * Vol));
+    // Isothermal Calibration
+    scale_v = sqrt(_T0 / T);  // using T & KE from prev timestep
+    KE = 0;                   // resetting Kintetic Energy per iteration
 
-		// Isothermal Calibration
-		scale_v = sqrt(_T0 / T);  // using T & KE from prev timestep
-		KE = 0;                   // resetting Kintetic Energy per iteration
+    verlet_algorithm(rx, ry, rz, vx, vy, vz, rrx, rry, rrz);
 
-		verlet_algorithm(rx, ry, rz, vx, vy, vz, rrx, rry, rrz);
+    mean_square_displacement(MSDx, MSDy, MSDz);
 
-		mean_square_displacement(MSDx, MSDy, MSDz);
+    velocity_autocorrelation_function(Cvx, Cvy, Cvz);
 
-		velocity_autocorrelation_function(Cvx, Cvy, Cvz);
+    // Average Temperature
+    T = KE / (1.5 * N);
+    temperature.push_back(T);
 
-		// Average Temperature
-		T = KE / (1.5 * N);
-		temperature.push_back(T);
+    // Kinetic Pressure
+    PK = _rho * T;
+    pk.push_back(PK);
 
-		// Kinetic Pressure
-		PK = _rho * T;
-		pk.push_back(PK);
+    // Average Kintetic Energy
+    KE /= N;
+    k_en.push_back(KE);
 
-		// Average Kintetic Energy
-		KE /= N;
-		k_en.push_back(KE);
+    // Density
+    density.push_back(_rho);
 
-		// Density
-		density.push_back(_rho);
+    // ShowRun(500);  // shows every 500 steps
+  }
+  // Simulation Ends HERE
 
-		// ShowRun(500);  // shows every 500 steps
-	}
-	// Simulation Ends HERE
+  write_to_files();
+  // Saving Last Position
+  time_stamp(POS, "# X\tY\tZ\tVx\tVy\tVz\tFx\tFy\tFz");
+  for (size_t el = 0; el < rx.size(); el++) {
+    POS << rx[el] << '\t' << ry[el] << '\t' << rz[el] << '\t' << vx[el] << '\t'
+        << vy[el] << '\t' << vz[el] << '\t' << fx[el] << '\t' << fy[el] << '\t'
+        << fz[el] << std::endl;
+  }
 
-	write_to_files();
-	// Saving Last Position
-	time_stamp(POS, "# X\tY\tZ\tVx\tVy\tVz\tFx\tFy\tFz");
-	for (size_t el = 0; el < rx.size(); el++) {
-		POS << rx[el] << '\t' << ry[el] << '\t' << rz[el] << '\t' << vx[el] << '\t'
-			<< vy[el] << '\t' << vz[el] << '\t' << fx[el] << '\t' << fy[el] << '\t'
-			<< fz[el] << std::endl;
-	}
-
-	radial_distribution_function(true);  // normalisation argument
-	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-	std::cout
-		<< "CPU run time = "
-		<< std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() /
-		60
-		<< " min "
-		<< std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() %
-		60
-		<< "s" << std::endl;
-	std::cout << "******************************\n"
-		"** MD Simulation terminated **\n"
-		"******************************\n"
-		<< std::endl;
-	// Streams should not close, vectors should not be cleared if object is to be
-	// reused
-	reset_values();  // no need to call if object is not reused
+  radial_distribution_function(true);  // normalisation argument
+  std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+  std::cout
+      << "CPU run time = "
+      << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() /
+             60
+      << " min "
+      << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() %
+             60
+      << "s" << std::endl;
+  std::cout << "******************************\n"
+               "** MD Simulation terminated **\n"
+               "******************************\n"
+            << std::endl;
+  // Close file streams and reset vectors
+  reset_values();
 }
 
 // File Handling

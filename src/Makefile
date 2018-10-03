@@ -28,5 +28,5 @@ Source.o: Source.cpp
 	$(CXX) $(CXXFLAGS) -I$(LIB) Source.cpp -o Source.o
 
 clean:
-	rm *.o $(BIN)/md $(LIB)/libmd.a
+	$(RM) *.o $(BIN)/md $(LIB)/libmd.a
 

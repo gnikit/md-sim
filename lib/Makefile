@@ -8,4 +8,4 @@ all:
 	@echo "Nothing to do here"
 	
 clean:
-	rm libmd.a
+	$(RM) libmd.a

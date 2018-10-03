@@ -376,7 +376,7 @@ void MD::mean_square_displacement(std::vector<double> &MSDx,
                  ((rry[i] - MSDy[i]) * (rry[i] - MSDy[i])) +
                  ((rrz[i] - MSDz[i]) * (rrz[i] - MSDz[i])));
   }
-  msd.push_back(msd_temp/N);
+  msd.push_back(msd_temp / N);
 }
 
 void MD::density_compression(int steps_quench, double TEMPERATURE) {
@@ -420,6 +420,11 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
   L = pow((N / _rho), 1.0 / 3.0);
   Vol = N / _rho;
 
+  // Position vectors
+  std::vector<std::vector<double>> *pos_x = new std::vector<std::vector<double>>(_STEPS);
+  std::vector<std::vector<double>> *pos_y = new std::vector<std::vector<double>>(_STEPS);
+  std::vector<std::vector<double>> *pos_z = new std::vector<std::vector<double>>(_STEPS);
+
   // cut_off redefinition
   // Large cut offs increase the runtime exponentially
   cut_off = 3.0;  // L / 2.;
@@ -442,6 +447,11 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
     std::fill(fx.begin(), fx.end(), 0);
     std::fill(fy.begin(), fy.end(), 0);
     std::fill(fz.begin(), fz.end(), 0);
+
+    // Reserve memory for the position vectors
+    (*pos_x)[_STEP_INDEX].reserve(N);
+    (*pos_y)[_STEP_INDEX].reserve(N);
+    (*pos_z)[_STEP_INDEX].reserve(N);
 
     U = 0;  // seting Potential U to 0
     PC = 0;
@@ -552,9 +562,21 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
     // Density
     density.push_back(_rho);
 
+    // Save positions
+    (*pos_x)[_STEP_INDEX] = rx;
+    (*pos_y)[_STEP_INDEX] = ry;
+    (*pos_z)[_STEP_INDEX] = rz;
+
     // ShowRun(500);  // shows every 500 steps
   }
   // Simulation Ends HERE
+
+  // Save particle positions to files
+  FileIO<double> f;
+  // Write the arrays as jagged,(hence transposed), this creates rows=STEPS and columns=PARTICLES
+  f.Write2File(*pos_x, _dir + "x_data.dat", "\t", true);
+  f.Write2File(*pos_y, _dir + "y_data.dat", "\t", true);
+  f.Write2File(*pos_z, _dir + "z_data.dat", "\t", true);
 
   write_to_files();
   // Saving Last Position

@@ -30,17 +30,17 @@
 #define _WIN32 _WIN32
 #include <windows.h>
 std::string getExePath() {
-	char result[MAX_PATH];
-	return std::string(result, GetModuleFileName(NULL, result, MAX_PATH));
+  char result[MAX_PATH];
+  return std::string(result, GetModuleFileName(NULL, result, MAX_PATH));
 }
 #else
 #define _WIN32 0
 #include <linux/limits.h>
 #include <unistd.h>
 std::string getExePath() {
-	char result[PATH_MAX];
-	ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
-	return std::string(result, (count > 0) ? count : 0);
+  char result[PATH_MAX];
+  ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
+  return std::string(result, (count > 0) ? count : 0);
 }
 #endif
 
@@ -52,47 +52,47 @@ std::string getExePath() {
 //       issue.
 
 MD::MD(std::string DIRECTORY, size_t run_number) {
-	_dir = DIRECTORY;
-	_STEPS = run_number;
+  _dir = DIRECTORY;
+  _STEPS = run_number;
 
-	Nx = Ny = Nz = PARTICLES_PER_AXIS;  // Number of particles per axis
-	N = Nx * Ny * Nz;
+  Nx = Ny = Nz = PARTICLES_PER_AXIS;  // Number of particles per axis
+  N = Nx * Ny * Nz;
 
-	gr.resize(NHIST + 1, 0);  // gr with Index igr
-	fx.resize(N, 0);
-	fy.resize(N, 0);
-	fz.resize(N, 0);
-	Cr.reserve(_STEPS);
-	msd.reserve(_STEPS);
-	u_en.reserve(_STEPS);
-	k_en.reserve(_STEPS);
-	pc.reserve(_STEPS);
-	pk.reserve(_STEPS);
-	temperature.reserve(_STEPS);
-	PI = acos(-1.0);
+  gr.resize(NHIST + 1, 0);  // gr with Index igr
+  fx.resize(N, 0);
+  fy.resize(N, 0);
+  fz.resize(N, 0);
+  Cr.reserve(_STEPS);
+  msd.reserve(_STEPS);
+  u_en.reserve(_STEPS);
+  k_en.reserve(_STEPS);
+  pc.reserve(_STEPS);
+  pk.reserve(_STEPS);
+  temperature.reserve(_STEPS);
+  PI = acos(-1.0);
 }
 
 MD::MD(std::string DIRECTORY, size_t run_number, bool QUENCH_F) {
-	_dir = DIRECTORY;
-	_STEPS = run_number;
+  _dir = DIRECTORY;
+  _STEPS = run_number;
 
-	Nx = Ny = Nz = PARTICLES_PER_AXIS;  // Number of particles per axis
-	N = Nx * Ny * Nz;
+  Nx = Ny = Nz = PARTICLES_PER_AXIS;  // Number of particles per axis
+  N = Nx * Ny * Nz;
 
-	gr.resize(NHIST + 1, 0);  // gr with Index igr
-	fx.resize(N, 0);
-	fy.resize(N, 0);
-	fz.resize(N, 0);
-	Cr.reserve(_STEPS);
-	msd.reserve(_STEPS);
-	u_en.reserve(_STEPS);
-	k_en.reserve(_STEPS);
-	pc.reserve(_STEPS);
-	pk.reserve(_STEPS);
-	temperature.reserve(_STEPS);
+  gr.resize(NHIST + 1, 0);  // gr with Index igr
+  fx.resize(N, 0);
+  fy.resize(N, 0);
+  fz.resize(N, 0);
+  Cr.reserve(_STEPS);
+  msd.reserve(_STEPS);
+  u_en.reserve(_STEPS);
+  k_en.reserve(_STEPS);
+  pc.reserve(_STEPS);
+  pk.reserve(_STEPS);
+  temperature.reserve(_STEPS);
 
-	compression_flag = QUENCH_F;
-	PI = acos(-1.0);
+  compression_flag = QUENCH_F;
+  PI = acos(-1.0);
 }
 MD::~MD() {}
 
@@ -181,68 +181,68 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
   size_t tempN = N;
 #pragma parallel
 #pragma loop count min(128)
-	// Subtracting Av. velocities from each particle
-	for (i = 0; i < tempN; i++) {
-		vx[i] = vx[i] - mean_vx;
-		vy[i] = vy[i] - mean_vy;
-		vz[i] = vz[i] - mean_vz;
-	}
-	// Temperature calculation, statistically
-	KE = 0;
-	for (i = 0; i < N; i++) {
-		KE += 0.5 * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]);
-	}
-	T = KE / (1.5 * N);
-	scale_v = sqrt(TEMPERATURE / T);  // scalling factor
+  // Subtracting Av. velocities from each particle
+  for (i = 0; i < tempN; i++) {
+    vx[i] = vx[i] - mean_vx;
+    vy[i] = vy[i] - mean_vy;
+    vz[i] = vz[i] - mean_vz;
+  }
+  // Temperature calculation, statistically
+  KE = 0;
+  for (i = 0; i < N; i++) {
+    KE += 0.5 * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]);
+  }
+  T = KE / (1.5 * N);
+  scale_v = sqrt(TEMPERATURE / T);  // scalling factor
 
-	// Velocity scaling
+  // Velocity scaling
 #pragma parallel
 #pragma loop count min(128)
-	for (i = 0; i < tempN; i++) {
-		vx[i] *= scale_v;
-		vy[i] *= scale_v;
-		vz[i] *= scale_v;
-	}
-	// MSD initialasation, storing first positions of particles
-	MSDx = x;
-	MSDy = y;
-	MSDz = z;
+  for (i = 0; i < tempN; i++) {
+    vx[i] *= scale_v;
+    vy[i] *= scale_v;
+    vz[i] *= scale_v;
+  }
+  // MSD initialasation, storing first positions of particles
+  MSDx = x;
+  MSDy = y;
+  MSDz = z;
 
-	// VAF initialasation, storing first velocities of particles
-	Cvx = vx;
-	Cvy = vy;
-	Cvz = vz;
-	double first_val = 0;
-	for (i = 0; i < N; i++) {
-		first_val += (Cvx[i] * Cvx[i] + Cvy[i] * Cvy[i] + Cvz[i] * Cvz[i]) / N;
-	}
-	first_val /= N;
-	Cr.push_back(first_val);
+  // VAF initialasation, storing first velocities of particles
+  Cvx = vx;
+  Cvy = vy;
+  Cvz = vz;
+  double first_val = 0;
+  for (i = 0; i < N; i++) {
+    first_val += (Cvx[i] * Cvx[i] + Cvy[i] * Cvy[i] + Cvz[i] * Cvz[i]) / N;
+  }
+  first_val /= N;
+  Cr.push_back(first_val);
 }
 
 std::string MD::get_dir() {
-	/*
+  /*
 	 *	Returns the absolute, top working direcory of the git repo.
 	 *  Also, when called, the full path of the executable, along with its name
 	 *	will be stored in the full_exe_dir string.
 	 */
-	 // TODO: this is obvious duplication but see what happens to memory of
-	 // full_exe_path
-	 //      if nothing happens remove str
-	std::string str = getExePath();
-	full_exe_dir = getExePath();
-	if (_WIN32) {
-		// takes care of the windows backslashes
-		full_exe_dir = find_and_replace(str, "\\", "/");
-	}
-	size_t stride = full_exe_dir.rfind("/MD-simulation");
-	top_exe_dir = full_exe_dir.substr(0, stride) + "/MD-simulation";
-	std::string rel_path = full_exe_dir.substr(stride + 1);
+  // TODO: this is obvious duplication but see what happens to memory of
+  // full_exe_path
+  //      if nothing happens remove str
+  std::string str = getExePath();
+  full_exe_dir = getExePath();
+  if (_WIN32) {
+    // takes care of the windows backslashes
+    full_exe_dir = find_and_replace(str, "\\", "/");
+  }
+  size_t stride = full_exe_dir.rfind("/MD-simulation");
+  top_exe_dir = full_exe_dir.substr(0, stride) + "/MD-simulation";
+  std::string rel_path = full_exe_dir.substr(stride + 1);
 
-	std::cout << "Full executable directory: " << full_exe_dir << std::endl;
-	std::cout << "Absolute top level directory: " << top_exe_dir << std::endl;
+  std::cout << "Full executable directory: " << full_exe_dir << std::endl;
+  std::cout << "Absolute top level directory: " << top_exe_dir << std::endl;
 
-	return top_exe_dir;
+  return top_exe_dir;
 }
 
 void MD::mb_distribution(double TEMPERATURE) {
@@ -282,11 +282,11 @@ void MD::mb_distribution(double TEMPERATURE) {
 }
 
 void MD::verlet_algorithm(std::vector<double> &rx, std::vector<double> &ry,
-	std::vector<double> &rz, std::vector<double> &vx,
-	std::vector<double> &vy, std::vector<double> &vz,
-	std::vector<double> &rrx, std::vector<double> &rry,
-	std::vector<double> &rrz) {
-	/*
+                          std::vector<double> &rz, std::vector<double> &vx,
+                          std::vector<double> &vy, std::vector<double> &vz,
+                          std::vector<double> &rrx, std::vector<double> &rry,
+                          std::vector<double> &rrz) {
+  /*
 	 *  An iterative leap-frog Verlet Algorithm
 	 *
 	 *  @params <r> (x,y,z): position vector of particles.
@@ -294,54 +294,54 @@ void MD::verlet_algorithm(std::vector<double> &rx, std::vector<double> &ry,
 	 *  @params <rr> (xx,yy,zz): position vectors for the fluid in the
 	 *                           square displacement arrays.
 	 */
-	size_t i;
-	for (i = 0; i < N; i++) {
-		vx[i] = vx[i] * scale_v + fx[i] * dt;
-		vy[i] = vy[i] * scale_v + fy[i] * dt;
-		vz[i] = vz[i] * scale_v + fz[i] * dt;
-		rx[i] = rx[i] + vx[i] * dt;
-		ry[i] = ry[i] + vy[i] * dt;
-		rz[i] = rz[i] + vz[i] * dt;
+  size_t i;
+  for (i = 0; i < N; i++) {
+    vx[i] = vx[i] * scale_v + fx[i] * dt;
+    vy[i] = vy[i] * scale_v + fy[i] * dt;
+    vz[i] = vz[i] * scale_v + fz[i] * dt;
+    rx[i] = rx[i] + vx[i] * dt;
+    ry[i] = ry[i] + vy[i] * dt;
+    rz[i] = rz[i] + vz[i] * dt;
 
-		rrx[i] = rrx[i] + vx[i] * dt;
-		rry[i] = rry[i] + vy[i] * dt;
-		rrz[i] = rrz[i] + vz[i] * dt;
+    rrx[i] = rrx[i] + vx[i] * dt;
+    rry[i] = rry[i] + vy[i] * dt;
+    rrz[i] = rrz[i] + vz[i] * dt;
 
-		// Kinetic Energy Calculation
-		KE += 0.5 * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]);
+    // Kinetic Energy Calculation
+    KE += 0.5 * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]);
 
-		// Boundary conditions Updated
-		if (rx[i] > L) {
-			rx[i] = rx[i] - L;
-		}
-		if (ry[i] > L) {
-			ry[i] = ry[i] - L;
-		}
-		if (rz[i] > L) {
-			rz[i] = rz[i] - L;
-		}
-		if (rx[i] < 0.0) {
-			rx[i] = rx[i] + L;
-		}
-		if (ry[i] < 0.0) {
-			ry[i] = ry[i] + L;
-		}
-		if (rz[i] < 0.0) {
-			rz[i] = rz[i] + L;
-		}
-	}
+    // Boundary conditions Updated
+    if (rx[i] > L) {
+      rx[i] = rx[i] - L;
+    }
+    if (ry[i] > L) {
+      ry[i] = ry[i] - L;
+    }
+    if (rz[i] > L) {
+      rz[i] = rz[i] - L;
+    }
+    if (rx[i] < 0.0) {
+      rx[i] = rx[i] + L;
+    }
+    if (ry[i] < 0.0) {
+      ry[i] = ry[i] + L;
+    }
+    if (rz[i] < 0.0) {
+      rz[i] = rz[i] + L;
+    }
+  }
 }
 
 void MD::velocity_autocorrelation_function(std::vector<double> &Cvx,
-	std::vector<double> &Cvy,
-	std::vector<double> &Cvz) {
-	double temp = 0;  // resets every time step
-	size_t i;
-	for (i = 0; i < N; i++) {
-		temp += (Cvx[i] * vx[i] + Cvy[i] * vy[i] + Cvz[i] * vz[i]);
-	}
-	temp /= N;
-	Cr.push_back(temp);
+                                           std::vector<double> &Cvy,
+                                           std::vector<double> &Cvz) {
+  double temp = 0;  // resets every time step
+  size_t i;
+  for (i = 0; i < N; i++) {
+    temp += (Cvx[i] * vx[i] + Cvy[i] * vy[i] + Cvz[i] * vz[i]);
+  }
+  temp /= N;
+  Cr.push_back(temp);
 }
 
 void MD::radial_distribution_function(bool normalise) {
@@ -369,25 +369,25 @@ void MD::radial_distribution_function(bool normalise) {
 }
 
 void MD::mean_square_displacement(std::vector<double> &MSDx,
-	std::vector<double> &MSDy,
-	std::vector<double> &MSDz) {
-	double msd_temp = 0;
-	for (size_t i = 0; i < N; ++i) {
-		msd_temp += (pow((rrx[i] - MSDx[i]), 2) + pow((rry[i] - MSDy[i]), 2) +
-			pow((rrz[i] - MSDz[i]), 2));
-	}
-	msd_temp /= N;
-	msd.push_back(msd_temp);
+                                  std::vector<double> &MSDy,
+                                  std::vector<double> &MSDz) {
+  double msd_temp = 0;
+  for (size_t i = 0; i < N; ++i) {
+    msd_temp += (pow((rrx[i] - MSDx[i]), 2) + pow((rry[i] - MSDy[i]), 2) +
+                 pow((rrz[i] - MSDz[i]), 2));
+  }
+  msd_temp /= N;
+  msd.push_back(msd_temp);
 }
 
 void MD::density_compression(int steps_quench, double TEMPERATURE) {
-	// Increase _rho by 0.01
-	_rho += 0.01;
-	// Re-using this piece of code from MD::Simulation
-	scale = pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS;
-	L = pow((N / _rho), 1.0 / 3.0);
-	Vol = N / _rho;
-	initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
+  // Increase _rho by 0.01
+  _rho += 0.01;
+  // Re-using this piece of code from MD::Simulation
+  scale = pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS;
+  L = pow((N / _rho), 1.0 / 3.0);
+  Vol = N / _rho;
+  initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
 }
 
 // MD Simulation
@@ -464,15 +464,9 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
         y = ry[i] - ry[j];  // between particles i and j
         z = rz[i] - rz[j];  // in Cartesian
 
-        xx = x;
-        yy = y;
-        zz = z;
-
         // Transposing elements with Periodic BC
-        // xx, yy, zz are for the MSD calculation
         if (x > (0.5 * L)) {
           x = x - L;
-          xx = xx - L;
         }
         if (y > (0.5 * L)) {
           y = y - L;
@@ -480,19 +474,15 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
         }
         if (z > (0.5 * L)) {
           z = z - L;
-          zz = zz - L;
         }
         if (x < (-0.5 * L)) {
           x = x + L;
-          xx = xx + L;
         }
         if (y < (-0.5 * L)) {
           y = y + L;
-          yy = yy + L;
         }
         if (z < (-0.5 * L)) {
           z = z + L;
-          zz = zz + L;
         }
 
         // Pair potential
@@ -601,137 +591,137 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
 
 // File Handling
 void MD::file_naming(int POWER, double A_cst) {
-	/*
+  /*
 	 * Generates a unique filename for the simulation results to be stored.
 	 * Three filenames are created for the RDF, last particles' states (position
 	 * ,velocity, acceleration) and statistical data.
 	 */
-	std::stringstream A_stream, rho_stream, T_stream;
+  std::stringstream A_stream, rho_stream, T_stream;
 
-	T_stream << std::fixed << std::setprecision(4) << _T0;     // 4 decimal
-	A_stream << std::fixed << std::setprecision(5) << A_cst;   // 5 decimals
-	rho_stream << std::fixed << std::setprecision(4) << _rho;  // 4 decimal
+  T_stream << std::fixed << std::setprecision(4) << _T0;     // 4 decimal
+  A_stream << std::fixed << std::setprecision(5) << A_cst;   // 5 decimals
+  rho_stream << std::fixed << std::setprecision(4) << _rho;  // 4 decimal
 
-	_step_to_str = "_step_" + std::to_string(_STEPS);
-	_particles_to_str = "_particles_" + std::to_string(N);
-	_rho_to_str = "_rho_" + rho_stream.str();
-	_T_to_str = "_T_" + T_stream.str();
-	_n_to_str = "_n_" + std::to_string(POWER);
-	_A_to_str = "_A_" + A_stream.str();
+  _step_to_str = "_step_" + std::to_string(_STEPS);
+  _particles_to_str = "_particles_" + std::to_string(N);
+  _rho_to_str = "_rho_" + rho_stream.str();
+  _T_to_str = "_T_" + T_stream.str();
+  _n_to_str = "_n_" + std::to_string(POWER);
+  _A_to_str = "_A_" + A_stream.str();
 
-	_FILE_ID = _step_to_str + _particles_to_str + _rho_to_str + _T_to_str +
-		_n_to_str + _A_to_str;
+  _FILE_ID = _step_to_str + _particles_to_str + _rho_to_str + _T_to_str +
+             _n_to_str + _A_to_str;
 
-	// Explicit defitions
-	_FILE_EXT = ".txt";
-	data = "Data";
-	pos = "Positions_Velocities";
-	HIST = "RDF";
+  // Explicit defitions
+  _FILE_EXT = ".txt";
+  data = "Data";
+  pos = "Positions_Velocities";
+  HIST = "RDF";
 
-	// Path addition
-	data = _dir + data + _FILE_ID + _FILE_EXT;
-	pos = _dir + pos + _FILE_ID + _FILE_EXT;
-	HIST = _dir + HIST + _FILE_ID + _FILE_EXT;
+  // Path addition
+  data = _dir + data + _FILE_ID + _FILE_EXT;
+  pos = _dir + pos + _FILE_ID + _FILE_EXT;
+  HIST = _dir + HIST + _FILE_ID + _FILE_EXT;
 }
 
 void MD::open_files() {
-	/*
+  /*
 	 * Open/Create if file does not exist
 	 * Overwrite existing data
 	 */
-	Hist.open(HIST, std::ios::out | std::ios::trunc);
-	DATA.open(data, std::ios::out | std::ios::trunc);
-	POS.open(pos, std::ios::out | std::ios::trunc);
+  Hist.open(HIST, std::ios::out | std::ios::trunc);
+  DATA.open(data, std::ios::out | std::ios::trunc);
+  POS.open(pos, std::ios::out | std::ios::trunc);
 }
 
 void MD::write_to_files() {
-	/*
+  /*
 	 * Writes values of parameters to file
 	 */
-	for (size_t i = 0; i < _STEPS; i++) {
-		DATA << (i + 1) << '\t' << density[i] << '\t' << temperature[i] << '\t'
-			<< u_en[i] << '\t' << k_en[i] << '\t' << pc[i] << '\t' << pk[i] << '\t'
-			<< msd[i] << '\t' << Cr[i] << std::endl;
-	}
+  for (size_t i = 0; i < _STEPS; i++) {
+    DATA << (i + 1) << '\t' << density[i] << '\t' << temperature[i] << '\t'
+         << u_en[i] << '\t' << k_en[i] << '\t' << pc[i] << '\t' << pk[i] << '\t'
+         << msd[i] << '\t' << Cr[i] << std::endl;
+  }
 }
 
 void MD::show_run(size_t step_size_show) {
-	/*
+  /*
 	 * Displays the system parameters every step_size_show of steps
 	 * Input the increment step
 	 */
-	if (_STEP_INDEX == 0) {
-		std::cout << "step:\tT:\tKE:\tU:\tU+K:\tPC:\tPK:\t(PK+PC):" << std::endl;
-	}
+  if (_STEP_INDEX == 0) {
+    std::cout << "step:\tT:\tKE:\tU:\tU+K:\tPC:\tPK:\t(PK+PC):" << std::endl;
+  }
 
-	if (_STEP_INDEX % step_size_show == 0 || _STEP_INDEX == 1) {
-		std::cout.precision(5);
-		std::cout << _STEP_INDEX << "\t" << T << "\t" << KE << "\t" << U << "\t"
-			<< (U + KE) << "\t" << PC << "\t" << PK << "\t" << (PK + PC)
-			<< std::endl;
-	}
+  if (_STEP_INDEX % step_size_show == 0 || _STEP_INDEX == 1) {
+    std::cout.precision(5);
+    std::cout << _STEP_INDEX << "\t" << T << "\t" << KE << "\t" << U << "\t"
+              << (U + KE) << "\t" << PC << "\t" << PK << "\t" << (PK + PC)
+              << std::endl;
+  }
 }
 
 void MD::reset_values() {
-	/*
+  /*
 	 * Closes open file streams and resets sizes and values to 0
 	 * For multiple simulations
 	 */
-	 // Close streams
-	Hist.close();
-	DATA.close();
-	POS.close();
+  // Close streams
+  Hist.close();
+  DATA.close();
+  POS.close();
 
-	// Clear values, size, but reserve capacity
-	rx.clear();
-	ry.clear();
-	rz.clear();
-	rrx.clear();
-	rry.clear();
-	rrz.clear();
-	vx.clear();
-	vy.clear();
-	vz.clear();
-	density.clear();
-	temperature.clear();
-	u_en.clear();
-	k_en.clear();
-	pc.clear();
-	pk.clear();
-	msd.clear();
-	Cr.clear();
-	gr.resize(NHIST + 1, 0);  // gr with Index igr
-	fx.resize(N, 0);
-	fy.resize(N, 0);
-	fz.resize(N, 0);
+  // Clear values, size, but reserve capacity
+  rx.clear();
+  ry.clear();
+  rz.clear();
+  rrx.clear();
+  rry.clear();
+  rrz.clear();
+  vx.clear();
+  vy.clear();
+  vz.clear();
+  density.clear();
+  temperature.clear();
+  u_en.clear();
+  k_en.clear();
+  pc.clear();
+  pk.clear();
+  msd.clear();
+  Cr.clear();
+  gr.resize(NHIST + 1, 0);  // gr with Index igr
+  fx.resize(N, 0);
+  fy.resize(N, 0);
+  fz.resize(N, 0);
 }
 
 void MD::time_stamp(std::ofstream &stream, std::string variables) {
-	/*
+  /*
 	 * Dates the file and allows the input of a header
 	 * Input a file stream to write and string of characters to display as headers
 	 */
-	std::chrono::time_point<std::chrono::system_clock> instance;
-	instance = std::chrono::system_clock::now();
-	std::time_t date_time = std::chrono::system_clock::to_time_t(instance);
-	stream << "# Created on: " << std::ctime(&date_time);
-	stream << variables << std::endl;
+  std::chrono::time_point<std::chrono::system_clock> instance;
+  instance = std::chrono::system_clock::now();
+  std::time_t date_time = std::chrono::system_clock::to_time_t(instance);
+  stream << "# Created on: " << std::ctime(&date_time);
+  stream << variables << std::endl;
 }
 
 std::string MD::convert_to_string(const double &x, const int &precision) {
-	std::ostringstream ss;
-	ss.str(std::string());  // don't forget to empty the stream
-	ss << std::fixed << std::setprecision(precision) << x;
+  std::ostringstream ss;
+  ss.str(std::string());  // don't forget to empty the stream
+  ss << std::fixed << std::setprecision(precision) << x;
 
-	return ss.str();
+  return ss.str();
 }
 
 std::string MD::find_and_replace(std::string &source, const std::string &find,
-	const std::string &replace) {
-	for (std::string::size_type i = 0;
-		(i = source.find(find, i)) != std::string::npos;) {
-		source.replace(i, find.length(), replace);
-		i += replace.length();
-	}
-	return source;
+                                 const std::string &replace) {
+  for (std::string::size_type i = 0;
+       (i = source.find(find, i)) != std::string::npos;) {
+    source.replace(i, find.length(), replace);
+    i += replace.length();
+  }
+  return source;
 }

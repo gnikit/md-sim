@@ -70,6 +70,7 @@ class MD {
   std::ofstream Hist, DATA, POS;
 
  public:
+  bool VISUALISE;
   MD(std::string DIRECTORY, size_t run_number);
   MD(std::string DIRECTORY, size_t run_number, bool QUENCH_F);
   ~MD();

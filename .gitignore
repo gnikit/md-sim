@@ -116,4 +116,12 @@ publish/
 !data/Positions_Velocities_particles_*
 FileIO/
 
-# /examples/example_data/*.txt
+# Ignore executables, binaries and libs
+*.o
+*.out
+*.a
+*.so
+
+# Ignore binaries with no extension
+# *
+# !*.*

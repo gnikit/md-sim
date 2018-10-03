@@ -53,7 +53,6 @@ int main() {
   // }
   MD run1(dir_linux, STEPS);
   run1.Simulation(0.5, 0.5, 6, 0.5);
-
 }
 
 std::vector<double> LinearSpacedArray(double a, double b, std::size_t N) {

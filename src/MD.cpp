@@ -437,7 +437,6 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
 
   initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
 
-  double xx, yy, zz;
   for (_STEP_INDEX = 0; _STEP_INDEX < _STEPS; _STEP_INDEX++) {
     // Forces loop
     // Resetting forces
@@ -470,7 +469,6 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
         }
         if (y > (0.5 * L)) {
           y = y - L;
-          yy = yy - L;
         }
         if (z > (0.5 * L)) {
           z = z - L;

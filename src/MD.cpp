@@ -20,21 +20,21 @@
 
 // if changed, new vx,vy,vz files need to be generated
 #define PARTICLES_PER_AXIS 10
-// TODO: Increase the number of bins to find RDF intersects
+// Increase the number of bins to find RDF intersects
 #define NHIST 500                // Number of histogram bins
 #pragma warning(disable : 4996)  //_CRT_SECURE_NO_WARNINGS
 
 // Detects the OS and fetches the executable path that is passed
 // in the FileIO.h class
 #ifdef _WIN32
-#define _WIN32 _WIN32
+#define _WIN32 true
 #include <windows.h>
 std::string getExePath() {
   char result[MAX_PATH];
   return std::string(result, GetModuleFileName(NULL, result, MAX_PATH));
 }
 #else
-#define _WIN32 0
+#define _WIN32 false
 #include <linux/limits.h>
 #include <unistd.h>
 std::string getExePath() {
@@ -73,7 +73,7 @@ MD::MD(std::string DIRECTORY, size_t run_number) {
   VISUALISE = false;
 }
 
-MD::MD(std::string DIRECTORY, size_t run_number, bool QUENCH_F) {
+MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG) {
   _dir = DIRECTORY;
   _STEPS = run_number;
 
@@ -92,7 +92,7 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool QUENCH_F) {
   pk.reserve(_STEPS);
   temperature.reserve(_STEPS);
 
-  compression_flag = QUENCH_F;
+  compression_flag = COMPRESS_FLAG;
   PI = acos(-1.0);
   VISUALISE = false;
 }
@@ -350,10 +350,10 @@ void MD::radial_distribution_function(bool normalise) {
   double cor_rho = _rho * (N - 1) / N;
   double dr = rg / NHIST;
   size_t i;
-  Hist << "#particles (N): " << N << " steps: " << _STEPS << " rho: " << _rho
+  Hist << "# particles (N): " << N << " steps: " << _STEPS << " rho: " << _rho
        << " bin (NHIST): " << NHIST << " cut_off (rg): " << rg << " dr: " << dr
        << std::endl;
-  Hist << "#Unormalised" << '\t' << "Normalised" << std::endl;
+  Hist << "# Unormalised" << '\t' << "Normalised" << std::endl;
   for (i = 1; i < NHIST; ++i) {  // Changed initial loop value from 0 -> 1
     if (normalise) {
       R = rg * i / NHIST;
@@ -372,11 +372,8 @@ void MD::mean_square_displacement(std::vector<double> &MSDx,
                                   std::vector<double> &MSDz) {
   double msd_temp = 0;
   for (size_t i = 0; i < N; ++i) {
-    // msd_temp += (pow((rrx[i] - MSDx[i]), 2) + pow((rry[i] - MSDy[i]), 2) +
-    //              pow((rrz[i] - MSDz[i]), 2));
-    msd_temp += (((rrx[i] - MSDx[i]) * (rrx[i] - MSDx[i])) +
-                 ((rry[i] - MSDy[i]) * (rry[i] - MSDy[i])) +
-                 ((rrz[i] - MSDz[i]) * (rrz[i] - MSDz[i])));
+    msd_temp += (pow((rrx[i] - MSDx[i]), 2) + pow((rry[i] - MSDy[i]), 2) +
+                 pow((rrz[i] - MSDz[i]), 2));
   }
   msd.push_back(msd_temp / N);
 }
@@ -566,9 +563,11 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
 
     // Save positions
     // TODO: find a way to enable/disable this or port it to Python
-    (*pos_x)[_STEP_INDEX] = rx;
-    (*pos_y)[_STEP_INDEX] = ry;
-    (*pos_z)[_STEP_INDEX] = rz;
+    if (VISUALISE) {
+      (*pos_x)[_STEP_INDEX] = rx;
+      (*pos_y)[_STEP_INDEX] = ry;
+      (*pos_z)[_STEP_INDEX] = rz;
+    }
 
     // ShowRun(500);  // shows every 500 steps
   }

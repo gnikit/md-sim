@@ -2,12 +2,10 @@ CC  = icc
 CXX = icpc
 STD = -std=c++17
 # INTEL compiler flags
-FLAGS = $(STD) -pthread -xHOST -use-intel-optimized-headers -m64 -Ofast -Wall -ffinite-math-only
+FLAGS = $(STD) -pthread -Ofast -xHOST
+# -use-intel-optimized-headers -m64 -Wall -ffinite-math-only -ipp=common -mkl=parallel -tbb -intel-extensions -qopt-matmul
 # FLAGS = $(STD) -pthread -O3 -Wall
 CXXFLAGS = -c $(FLAGS)
-# LIB has to be defined in the Makefile 
-# For future reference use 2 variables, one for include one for linker
-# in those vars include the flag e.g. INC=-I../bin -I../lib -I../src
 INC = -I ../lib -I ../src -I ../FileIO
 LN = -L ../lib -L ../src -L ../FileIO
 

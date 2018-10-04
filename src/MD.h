@@ -72,7 +72,7 @@ class MD {
  public:
   bool VISUALISE;
   MD(std::string DIRECTORY, size_t run_number);
-  MD(std::string DIRECTORY, size_t run_number, bool QUENCH_F);
+  MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG);
   ~MD();
 
   void Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST);

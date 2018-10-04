@@ -1,0 +1,1 @@
+<input_variables><constructor><dir name="ouput_dir">/home/gn/Code/MD-simulation/examples/</dir><steps name="steps_N">10000</steps></constructor><simulation_input><rho name="density_rho">0.5</rho><T name="temperature_T">0.5</T><n name="potential_strenght_n">6</n><A name="softening_parameter_a">0.5</A></simulation_input></input_variables>

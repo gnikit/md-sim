@@ -41,7 +41,8 @@ def update_figure(num):
     x = X_ALL[num]
     y = Y_ALL[num]
     z = Z_ALL[num]
-    text.set_text(f"{num}")
+    # TODO: NN calculation between all particles & -> assign colormap
+    text.set_text(f"Frame: {num}")
     graph._offsets3d = (x, y, z)
     return graph
 

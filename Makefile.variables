@@ -6,7 +6,7 @@ FLAGS = $(STD) -pthread -Ofast -xHOST
 # -use-intel-optimized-headers -m64 -Wall -ffinite-math-only -ipp=common -mkl=parallel -tbb -intel-extensions -qopt-matmul
 # FLAGS = $(STD) -pthread -O3 -Wall
 CXXFLAGS = -c $(FLAGS)
-INC = -I ../lib -I ../src -I ../tools/FileIO
-LN = -L ../lib -L ../src -L ../tools/FileIO
+INC = -I ../lib -I ../src -I ../tools/FileIO -I ../tools/tinyxml2
+LN = -L ../lib -L ../src -L ../tools/FileIO -L ../tools/tinyxml2
 
-LINKER = $(INC) $(LN) -lmd
+LINKER = $(INC) $(LN) -lmd -ltinyxml2

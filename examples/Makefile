@@ -3,8 +3,7 @@ include ../Makefile.variables
 LIB = ../lib
 BIN = ../bin
 SRC = ../src
-# TODO: This will obviously not work if isomorph.o, MD.o stat_analysis.o do not exist
-# 			at this point 'make all' has to be called and 'database' and 'iso' cannot be called independently
+
 all: database isomorph fluid_compression $(LIB)/libmd.a
 
 database: database.o $(LIB)/libmd.a

@@ -123,5 +123,4 @@ FileIO/
 *.so
 
 # Ignore binaries with no extension
-# *
-# !*.*
+.vscode

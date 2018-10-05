@@ -22,16 +22,16 @@ root = ET.Element("input_variables")
 # Input paramters for the constructor of MD
 input = ET.SubElement(root, "constructor")
 
-ET.SubElement(input, "dir", name="ouput_dir").text = str(DIR)
-ET.SubElement(input, "steps", name="steps_N").text = str(STEPS)
+ET.SubElement(input, "output_dir").text = str(DIR)
+ET.SubElement(input, "steps").text = str(STEPS)
 
 # Input parameters for MD::Simulation
 sim = ET.SubElement(root, "simulation_input")
 
-ET.SubElement(sim, "rho", name="density_rho").text = str(RHO)
-ET.SubElement(sim, "T", name="temperature_T").text = str(TEMPERATURE)
-ET.SubElement(sim, "n", name="potential_strenght_n").text = str(POWER)
-ET.SubElement(sim, "A", name="softening_parameter_a").text = str(A)
+ET.SubElement(sim, "rho").text = str(RHO)
+ET.SubElement(sim, "T").text = str(TEMPERATURE)
+ET.SubElement(sim, "n").text = str(POWER)
+ET.SubElement(sim, "A").text = str(A)
 
 # Build tree in xml file
 tree = ET.ElementTree(root)

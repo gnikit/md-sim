@@ -1,3 +1,6 @@
 [submodule "tools/FileIO"]
 	path = tools/FileIO
 	url = https://github.com/GiannisNikiteas/FileIO.git
+[submodule "tools/tinyxml2"]
+	path = tools/tinyxml2
+	url = https://github.com/leethomason/tinyxml2.git

@@ -10,5 +10,5 @@ int main(int argc, char const* argv[]) {
   /* Path and name of the XML schema file */
 
   XMLDocument doc;
-  doc.LoadFile("input_schema.xml");
+  doc.LoadFile("/home/gn/Code/MD-simulation/input_schema.xml");
 }

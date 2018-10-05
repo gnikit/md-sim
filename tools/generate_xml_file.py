@@ -1,3 +1,4 @@
+import os
 import sys
 import xml.etree.ElementTree as ET
 
@@ -10,7 +11,7 @@ import xml.etree.ElementTree as ET
 # TODO: add exception handling 
 # TODO: add int __main__ for file execution from the terminal
 
-DIR = "/home/gn/Code/MD-simulation/examples/"
+DIR = "/home/gn/Code/MD-simulation/examples/example_data"
 STEPS = 10000
 RHO = 0.5
 TEMPERATURE = 0.5
@@ -35,4 +36,4 @@ ET.SubElement(sim, "A").text = str(A)
 
 # Build tree in xml file
 tree = ET.ElementTree(root)
-tree.write("tools/input_schema.xml")
+tree.write("schemas/input_schema.xml")

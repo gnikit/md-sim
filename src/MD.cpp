@@ -635,9 +635,9 @@ void MD::file_naming(int POWER, double A_cst) {
 
   // Explicit defitions
   _FILE_EXT = ".txt";
-  data = "Data";
-  pos = "Positions_Velocities";
-  HIST = "RDF";
+  data = "/Data";
+  pos = "/Positions_Velocities";
+  HIST = "/RDF";
 
   // Path addition
   data = _dir + data + _FILE_ID + _FILE_EXT;

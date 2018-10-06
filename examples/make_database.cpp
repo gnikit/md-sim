@@ -3,7 +3,7 @@
 #include <thread>
 #include "MD.h"
 
-#define STEPS 10000     // 10000
+#define STEPS 5000     // 10000
 #define PARTICLES 1000  // 1000
 typedef std::vector<double> vec1d;
 
@@ -25,7 +25,7 @@ void MakeDataBase() {
    */
   size_t num = 1;
   std::vector<size_t> n = {6, 8, 10, 12};
-  std::vector<double> rho = {0.5, 1.0, 1.5, 2.0};
+  std::vector<double> rho = {0.5, 1.0, 2.0};
   std::vector<double> T = {0.5, 1.0, 1.5, 2.0};
   std::vector<double> A1 = LinearSpacedArray(0, 1, 5);
   std::vector<double> A2 = LinearSpacedArray(1.25, 2.25, 5);

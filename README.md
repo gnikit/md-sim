@@ -9,9 +9,9 @@ A program simulating a Molecular Dynamics (MD) fluid under the influence of an o
 A program written to investigate the transition of a fluid from MD to SPH. The C++ files **MD.cpp** and **MD.h** contain the core of the fluid simulation while **FileLoadingPlotting.py** contains the analysis methods. The files **Source.cpp** and **Run.py** are used to execute the fluid simulation and the fluid analysis, repsectively.
 
 ## Getting Started
-Firstly, the **FileIO** header file is required, which can be found [here](https://github.com/GiannisNikiteas/FileIO.git), clone it to the top directory of this repository, like so:
+Firstly, the **FileIO** header file is required, which can be found [here](https://github.com/GiannisNikiteas/FileIO.git), clone it to the tools directory of this repository, like so:
 ```
-# In the MD-simulation directory
+# In the MD-simulation/tools directory
 git clone https://github.com/GiannisNikiteas/FileIO.git
 ```
 

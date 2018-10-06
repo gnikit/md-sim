@@ -2,11 +2,9 @@ SHELL = /bin/bash
 include ../Makefile.variables
 LIB = ../lib
 BIN = ../bin
-# LN = -I../FileIO -L../FileIO
 OBJS = MD.o stat_analysis.o isomorph.o
 
-# If header files are (and cpp files) are ever separated from
-# the libmd.a then -I /dir/to/headers should be used
+
 all: libmd.a md
 
 md: Source.o libmd.a
@@ -24,9 +22,10 @@ stat_analysis.o: stat_analysis.cpp
 isomorph.o: isomorph.cpp
 	$(CXX) $(CXXFLAGS) isomorph.cpp
 
-Source.o: Source.cpp
-	$(CXX) $(CXXFLAGS) -I$(LIB) Source.cpp -o Source.o
+Source.o: Source.cpp 
+	$(CXX) $(CXXFLAGS) $(INC) Source.cpp -o Source.o
+
 
 clean:
-	rm *.o $(BIN)/md $(LIB)/libmd.a
+	$(RM) *.o $(BIN)/md $(LIB)/libmd.a
 

@@ -1,0 +1,5 @@
+# Ignore all executables with no extensions
+*
+!*.*
+*.o
+*.out

@@ -259,8 +259,6 @@ void MD::mb_distribution(double TEMPERATURE) {
     std::string vel_id = "_particles_" + particles + "_T_" + t + ".txt";
     FileIO<double> obj;
     // TODO: define in heap and delete FileLoading obj
-    std::cout << "Velocity files already present, no need to generate."
-              << std::endl;
     vx = obj.LoadSingleCol(dir_str + "/vx" + vel_id);
     vy = obj.LoadSingleCol(dir_str + "/vy" + vel_id);
     vz = obj.LoadSingleCol(dir_str + "/vz" + vel_id);
@@ -274,8 +272,6 @@ void MD::mb_distribution(double TEMPERATURE) {
 
     std::string vel_id = "_particles_" + particles + "_T_" + t + ".txt";
     FileIO<double> obj;
-    std::cout << "Velocity files already present, no need to generate."
-              << std::endl;
     // Load the newline generated files
     vx = obj.LoadSingleCol(dir_str + "/vx" + vel_id);
     vy = obj.LoadSingleCol(dir_str + "/vy" + vel_id);

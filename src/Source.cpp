@@ -18,7 +18,7 @@ int main(int argc, char const* argv[]) {
   /* Path and name of the XML schema file */
 
   XMLDocument schema;
-  XMLError eReuslt = schema.LoadFile("schemas/input_schema.xml");
+  XMLError eReuslt = schema.LoadFile(argv[1]);
   /* Check if file exists */
   XMLCheckResult(eReuslt);
   /* Pointer to the root of the file */

@@ -22,6 +22,7 @@
 #define PARTICLES_PER_AXIS 10
 // Increase the number of bins to find RDF intersects
 #define NHIST 500                // Number of histogram bins
+#define RDF_WAIT 2000            // Iterations after which RDF will be collected
 #pragma warning(disable : 4996)  //_CRT_SECURE_NO_WARNINGS
 
 // Detects the OS and fetches the executable path that is passed
@@ -46,10 +47,6 @@ std::string getExePath() {
 
 // TODO: Boltzmann Dist normalisation of the particles velocities in the
 // beggining make it C++
-// TODO: Calls to Python script are not multithread safe, calling a Py script
-//       and reading from a file from multiple process could potentially lead to
-//       undefined behaviour. Further testing required to prove this is not an
-//       issue.
 
 MD::MD(std::string DIRECTORY, size_t run_number) {
   _dir = DIRECTORY;
@@ -57,8 +54,10 @@ MD::MD(std::string DIRECTORY, size_t run_number) {
 
   Nx = Ny = Nz = PARTICLES_PER_AXIS;  // Number of particles per axis
   N = Nx * Ny * Nz;
-
-  gr.resize(NHIST + 1, 0);  // gr with Index igr
+  nhist = NHIST;
+  rdf_wait = RDF_WAIT;
+  gr.resize(nhist + 1, 0);  // gr with Index igr
+  // For efficiency memory in the containers is reserved before use
   fx.resize(N, 0);
   fy.resize(N, 0);
   fz.resize(N, 0);
@@ -80,7 +79,10 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG) {
   Nx = Ny = Nz = PARTICLES_PER_AXIS;  // Number of particles per axis
   N = Nx * Ny * Nz;
 
-  gr.resize(NHIST + 1, 0);  // gr with Index igr
+  nhist = NHIST;
+  rdf_wait = RDF_WAIT;
+  // For efficiency memory in the containers is reserved before use
+  gr.resize(nhist + 1, 0);  // gr with Index igr
   fx.resize(N, 0);
   fy.resize(N, 0);
   fz.resize(N, 0);
@@ -95,6 +97,44 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG) {
   compression_flag = COMPRESS_FLAG;
   PI = acos(-1.0);
   VISUALISE = false;
+}
+
+MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
+       size_t rdf_bins, size_t particles_per_axis, bool track_particles,
+       size_t collect_rdf_after) {
+  /* 
+   * This constructor allows for increased constrol over the internal
+   * parameters of the fluid.
+   */
+
+  _dir = DIRECTORY;
+  _STEPS = run_number;
+
+  Nx = Ny = Nz = particles_per_axis;  // Number of particles per axis
+  N = Nx * Ny * Nz;
+  // Save all the positions for the fluid
+  VISUALISE = track_particles;
+  // Accuracy of RDF
+  nhist = rdf_bins;
+  // The number of iterations the data collection of RDF is postponed
+  // in order to allow the fluid to lose its internal cubic lattice
+  rdf_wait = collect_rdf_after;
+
+  // For efficiency memory in the containers is reserved before use
+  gr.resize(nhist + 1, 0);  // gr with Index igr
+  fx.resize(N, 0);
+  fy.resize(N, 0);
+  fz.resize(N, 0);
+  Cr.reserve(_STEPS);
+  msd.reserve(_STEPS);
+  u_en.reserve(_STEPS);
+  k_en.reserve(_STEPS);
+  pc.reserve(_STEPS);
+  pk.reserve(_STEPS);
+  temperature.reserve(_STEPS);
+
+  compression_flag = COMPRESS_FLAG;
+  PI = acos(-1.0);
 }
 MD::~MD() {}
 
@@ -344,19 +384,20 @@ void MD::radial_distribution_function(bool normalise) {
   double R = 0;
   double norm = 1;
   double cor_rho = _rho * (N - 1) / N;
-  double dr = rg / NHIST;
+  double dr = rg / nhist;
   size_t i;
   Hist << "# particles (N): " << N << " steps: " << _STEPS << " rho: " << _rho
-       << " bin (NHIST): " << NHIST << " cut_off (rg): " << rg << " dr: " << dr
+       << " bin (NHIST): " << nhist << " cut_off (rg): " << rg << " dr: " << dr
        << std::endl;
   Hist << "# Unormalised" << '\t' << "Normalised" << std::endl;
-  for (i = 1; i < NHIST; ++i) {  // Changed initial loop value from 0 -> 1
+  for (i = 1; i < nhist; ++i) {  // Changed initial loop value from 0 -> 1
     if (normalise) {
-      R = rg * i / NHIST;
+      R = rg * i / nhist;
       // Volume between 2 spheres, accounting for double counting
       // hence the 2/3*pi*((R+dr)**3 - R**3)
-      // TODO: remove the first 3000 time steps
-      norm = cor_rho * (2.0 / 3.0 * PI * N * (_STEPS - 3000) *
+      // TODO: remove the first rdf_wait time steps
+
+      norm = cor_rho * (2.0 / 3.0 * PI * N * (_STEPS - rdf_wait) *
                         (pow((R + (dr / 2.0)), 3) - pow((R - (dr / 2.0)), 3)));
     }
     Hist << gr[i] << '\t' << gr[i] / norm << std::endl;
@@ -378,7 +419,7 @@ void MD::density_compression(int steps_quench, double TEMPERATURE) {
   // Increase _rho by 0.01
   _rho += 0.01;
   // Re-using this piece of code from MD::Simulation
-  scale = pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS;
+  scale = pow((N / _rho), (1.0 / 3.0)) / Nx;
   L = pow((N / _rho), 1.0 / 3.0);
   Vol = N / _rho;
   initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
@@ -411,7 +452,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
   _rho = DENSITY;
   dt /= sqrt(_T0);
   // Box length scalling
-  scale = pow((N / _rho), (1.0 / 3.0)) / PARTICLES_PER_AXIS;
+  scale = pow((N / _rho), (1.0 / 3.0)) / Nx;
   L = pow((N / _rho), 1.0 / 3.0);
   Vol = N / _rho;
 
@@ -424,7 +465,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
   // Large cut offs increase the runtime exponentially
   cut_off = 3.0;  // L / 2.;
   rg = cut_off;
-  dr = rg / NHIST;
+  dr = rg / nhist;
 
   // Filenaming should not be called
   file_naming(POWER, A_CST);
@@ -518,8 +559,8 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
           // Radial Distribution
           // measured with a delay, since the system requires a few thousand time-steps
           // to reach equilibrium
-          if (_STEP_INDEX > 3000) {
-            igr = round(NHIST * r / rg);
+          if (_STEP_INDEX > rdf_wait) {
+            igr = round(nhist * r / rg);
             gr[igr] += 1;
           }
         }
@@ -707,7 +748,7 @@ void MD::reset_values() {
   pk.clear();
   msd.clear();
   Cr.clear();
-  gr.resize(NHIST + 1, 0);  // gr with Index igr
+  gr.resize(nhist + 1, 0);  // gr with Index igr
   fx.resize(N, 0);
   fy.resize(N, 0);
   fz.resize(N, 0);

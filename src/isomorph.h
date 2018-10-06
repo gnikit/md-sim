@@ -18,7 +18,6 @@ class Isomorph {
   double _rho_r;       // Reference density
   double _T_r;         // Reference temperature
   double _A_r;         // Reference A
-                       /*----------------------------------*/
   double _rho_out;     // Output density
   double _T_out;       // Output temperature
   double _A_out;       // Output A

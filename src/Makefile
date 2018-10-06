@@ -2,7 +2,7 @@ SHELL = /bin/bash
 include ../Makefile.variables
 LIB = ../lib
 BIN = ../bin
-OBJS = MD.o stat_analysis.o isomorph.o
+OBJS = MD.o isomorph.o
 
 
 all: libmd.a md
@@ -15,9 +15,6 @@ libmd.a: $(OBJS)
 
 MD.o: MD.cpp
 	$(CXX) $(CXXFLAGS) $(LINKER) MD.cpp
-
-stat_analysis.o: stat_analysis.cpp
-	$(CXX) $(CXXFLAGS) stat_analysis.cpp
 
 isomorph.o: isomorph.cpp
 	$(CXX) $(CXXFLAGS) isomorph.cpp

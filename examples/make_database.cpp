@@ -1,7 +1,7 @@
+#include <iostream>
 #include <string>
 #include <thread>
 #include "MD.h"
-#include "stat_analysis.h"
 
 #define STEPS 10000     // 10000
 #define PARTICLES 1000  // 1000
@@ -60,28 +60,6 @@ void MakeDataBase() {
       }
     }
   }
-  // This could be performed at the end of the T-loop above
-  // Check stability before implementing
-  // std::vector<double> a;
-  // a.reserve(A1.size() + A2.size() + A3.size() + A4.size());
-  // a.reserve(A1.size() + A2.size());
-  // a.insert(a.end(), A1.begin(), A1.end());
-  // a.insert(a.end(), A2.begin(), A2.end());
-  // a.insert(a.end(), A3.begin(), A3.end());
-  // a.insert(a.end(), A4.begin(), A4.end());
-
-  // // This bit of code has not been tested in its current 2-loop 1-loop format
-  // for (size_t d = 0; d < rho.size(); d++) {
-  //   for (size_t t = 0; t < T.size(); t++) {
-  //     // Defining in Heap to avoid obj corruption due to multiple
-  //     optimisation Stat_Analysis* data_averaging = new
-  //     Stat_Analysis(dir_linux, STEPS, PARTICLES, 2.0, 1.5, a); for (size_t i
-  //     = 0; i < n.size(); i++) {
-  //       data_averaging->StaticDataProcessing(n[i]);
-  //     }
-  //     delete data_averaging;
-  //   }
-  // }
 }
 
 std::vector<double> LinearSpacedArray(double a, double b, std::size_t N) {

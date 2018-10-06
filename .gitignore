@@ -101,12 +101,6 @@ publish/
 *.vcxproj.filters
 
 # Ignore VS project files
-*.filters
-/src/mdsoftq.f90
-/My Inspector Results - MD-sim
-/Report20180603-2255.vspx
-/Report20180603-2255.diagsession
-/My Advisor Results - MD-sim
 /tests/mb_file_generation/unittest1.cpp
 /tests/mb_file_generation/targetver.h
 /tests/mb_file_generation/stdafx.h
@@ -114,6 +108,12 @@ publish/
 /data/*.txt
 # Not ignoring the compression start files
 !data/Positions_Velocities_particles_*
-FileIO/
 
-# /examples/example_data/*.txt
+# Ignore executables, binaries and libs
+*.o
+*.out
+*.a
+*.so
+
+# Ignore binaries with no extension
+.vscode

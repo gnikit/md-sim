@@ -29,6 +29,7 @@ int main(int argc, char const* argv[]) {
   /* Pointer to the 1st child of root, constructor */
   XMLElement* xml_dir = root->FirstChildElement("constructor")->FirstChildElement("output_dir");
   XMLElement* xml_steps = root->FirstChildElement("constructor")->FirstChildElement("steps");
+  XMLElement* xml_comp = root->FirstChildElement("constructor")->FirstChildElement("compression");
 
   /* Pointer to the 2nd child of root, simulation_input */
   XMLElement* xml_rho = root->FirstChildElement("simulation_input")->FirstChildElement("rho");
@@ -43,23 +44,28 @@ int main(int argc, char const* argv[]) {
   if (xml_T == nullptr) return XML_ERROR_PARSING_ELEMENT;
   if (xml_n == nullptr) return XML_ERROR_PARSING_ELEMENT;
   if (xml_A == nullptr) return XML_ERROR_PARSING_ELEMENT;
+  if (xml_comp == nullptr) return XML_ERROR_PARSING_ELEMENT;
 
   /* Convert xml input to usable variables */
   std::string dir;
+  bool comp;
   unsigned int steps, n;
   double rho, T, A;
 
-  dir = xml_dir->GetText();
-  eReuslt = xml_steps->QueryUnsignedText(&steps);
+  dir = xml_dir->GetText();                        // Parse output directory
+  eReuslt = xml_steps->QueryUnsignedText(&steps);  // Parse number of steps
   XMLCheckResult(eReuslt);
-  eReuslt = xml_rho->QueryDoubleText(&rho);
+  eReuslt = xml_comp->QueryBoolText(&comp);  // Parse compression flag
   XMLCheckResult(eReuslt);
-  eReuslt = xml_T->QueryDoubleText(&T);
+  eReuslt = xml_rho->QueryDoubleText(&rho);  // Parse density
   XMLCheckResult(eReuslt);
-  eReuslt = xml_n->QueryUnsignedText(&n);
+  eReuslt = xml_T->QueryDoubleText(&T);  // Parse temperature
   XMLCheckResult(eReuslt);
-  eReuslt = xml_A->QueryDoubleText(&A);
+  eReuslt = xml_n->QueryUnsignedText(&n);  // Parse potential power
+  XMLCheckResult(eReuslt);
+  eReuslt = xml_A->QueryDoubleText(&A);  // Parse softening parameter
 
+  /* Run MD simulation */
   MD run(dir, steps);
   run.Simulation(rho, T, n, A);
 }

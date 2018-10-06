@@ -13,6 +13,7 @@ import xml.etree.ElementTree as ET
 
 DIR = "/home/gn/Code/MD-simulation/examples/example_data"
 STEPS = 10000
+COMPRESSION = "false"
 RHO = 0.5
 TEMPERATURE = 0.5
 POWER = 6
@@ -25,6 +26,7 @@ input = ET.SubElement(root, "constructor")
 
 ET.SubElement(input, "output_dir").text = str(DIR)
 ET.SubElement(input, "steps").text = str(STEPS)
+ET.SubElement(input, "compression").text = COMPRESSION
 
 # Input parameters for MD::Simulation
 sim = ET.SubElement(root, "simulation_input")

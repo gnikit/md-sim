@@ -1,0 +1,1 @@
+<input_variables><constructor><output_dir>/home/gn/Code/MD-simulation/examples/example_data</output_dir><steps>10000</steps></constructor><simulation_input><rho>0.5</rho><T>0.5</T><n>6</n><A>0.5</A></simulation_input></input_variables>

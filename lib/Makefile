@@ -1,11 +1,15 @@
 SHELL = /bin/bash
 include ../Makefile.variables
-LIB = ../bin
-OBJS = MD.o stat_analysis.o isomorph.o
+tinyxml = ../tools/tinyxml2
 
 
 all:
-	@echo "Nothing to do here"
+	@echo "MAKE tools/TinyXML2"
+	@cd $(tinyxml) && $(MAKE)
+	@mv $(tinyxml)/libtinyxml2.a .
+	@mv $(tinyxml)/xmltest ../bin
 	
+
 clean:
-	rm libmd.a
+	$(RM) libmd.a libtinyxml2.a
+	$(RM) *.o

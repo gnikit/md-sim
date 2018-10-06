@@ -1,0 +1,7 @@
+# Ignore binaries with no extensions
+*
+!*.*
+*.o
+*.out
+*.a
+*.so

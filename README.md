@@ -43,15 +43,3 @@ int main() {
   run.Simulation(rho, t, n, a);
 }
 ```
-
-## Results
-Snapshot of the fluid in 2D
-![2Dsnap](https://github.com/GiannisNikiteas/MD-simulation/blob/master/snap_n6_a075.png?raw=true)
-
-3D snapshot of the fluid
-![3Dsnap](https://github.com/GiannisNikiteas/MD-simulation/blob/master/3d075.png?raw=true)
-
-![2d-many-particles](https://github.com/GiannisNikiteas/MD-simulation/blob/master/snap_2744_n6_a4.png?raw=true)
-
-<!-- 2D Animation of the fluid with time
-![vid]() -->

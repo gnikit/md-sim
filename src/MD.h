@@ -30,23 +30,23 @@ class MD {
   std::vector<double> Cr, msd, u_en, k_en, pc, pk,
       temperature, density;  // vectors used as buffers
 
-  size_t Nx, Ny, Nz;              // Particles in x, y, z
-  size_t N, _STEP_INDEX, _STEPS;  // Total particles, step index, maximum steps
-  double _T0;                     // Target Temperature. Desired T for the system to operate
-  double dt = 0.005;              // time step This applies: dt = 0.005/sqrt(T0)
-  double x, y, z;                 // distance between particle i and j
-  double r;                       // distance in polar
-  double _rho;                    // density
-  double scale;                   // box scaling parameter
-  double KE = 0.0;                // Kinetic Energy
-  double T;                       // Temperature
-  double L;                       // Length of the box after scaling
-  double Vol;                     // Volume
-  double cut_off = 3.0;           // simulation runs only within cutoff
-  double U = 0;                   // Potential Energy
-  double PC = 0;                  // Configurational Pressure
-  double PK;                      // Kinetic Pressure
-  double scale_v;                 // velocity scaling
+  size_t Nx, Ny, Nz, nhist, rdf_wait;  // Particles in x, y, z
+  size_t N, _STEP_INDEX, _STEPS;       // Total particles, step index, maximum steps
+  double _T0;                          // Target Temperature. Desired T for the system to operate
+  double dt = 0.005;                   // time step This applies: dt = 0.005/sqrt(T0)
+  double x, y, z;                      // distance between particle i and j
+  double r;                            // distance in polar
+  double _rho;                         // density
+  double scale;                        // box scaling parameter
+  double KE = 0.0;                     // Kinetic Energy
+  double T;                            // Temperature
+  double L;                            // Length of the box after scaling
+  double Vol;                          // Volume
+  double cut_off = 3.0;                // simulation runs only within cutoff
+  double U = 0;                        // Potential Energy
+  double PC = 0;                       // Configurational Pressure
+  double PK;                           // Kinetic Pressure
+  double scale_v;                      // velocity scaling
 
   // Quenching varibles
   bool compression_flag = false;
@@ -73,6 +73,10 @@ class MD {
   bool VISUALISE;
   MD(std::string DIRECTORY, size_t run_number);
   MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG);
+  MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
+     size_t rdf_bins, size_t particles_per_axis, bool track_particles,
+     size_t collect_rdf_after);
+
   ~MD();
 
   void Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST);

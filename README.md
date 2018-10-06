@@ -9,34 +9,32 @@ A program simulating a Molecular Dynamics (MD) fluid under the influence of an o
 A program written to investigate the transition of a fluid from MD to SPH. The C++ files **MD.cpp** and **MD.h** contain the core of the fluid simulation while **FileLoadingPlotting.py** contains the analysis methods. The files **Source.cpp** and **Run.py** are used to execute the fluid simulation and the fluid analysis, repsectively.
 
 ## Getting Started
-Firstly, the **FileIO** header file is required, which can be found [here](https://github.com/GiannisNikiteas/FileIO.git), clone it to the tools directory of this repository, like so:
-```
-# In the MD-simulation/tools directory
-git clone https://github.com/GiannisNikiteas/FileIO.git
-```
-
-Then build the library and the test cases with, (change the compiler in **Makefile.variables** if needed):
+Build the library and the test cases with:
 ```
 make -j
 ```
-
-### Path
-* Change *path* in the constructor of **MD** to choose where the files will be saved.
+The current configuration uses the Intel* compilers for C++, change the **Makefile.variables** to suit your compiler and compiler flags.
 
 
 ### Run
-Code to run the program can be found in **src/Source.cpp** and in the **examples** directory.
-A minimal working example of how to use the **libmd.a** is shown below:
+Code to run the program with an xml script can be found in **src/Source.cpp** and should be executed by:
+```
+./bin/md schemas/input_schema.xml
+// ^--executable    ^-- input variables
+```
+Code without the use of the xml parser can be found in the **examples** directory.
+
+### Use libmd in your project
+A minimal working example of how to use the **libmd.a** is shown below, make sure to link and include the static library and the header file **MD.h** to your program.
 
 ```
 #include "MD.h"
 
-int main()
-{
-  int steps = 5000; 	// number of iterations
-  double a = 0.75; 	  // softness parameter
-  int n = 6;  	      // potential strength
-  double rho = 0.5; 	// fluid density
+int main() {
+  int steps = 5000;   // number of iterations
+  double a = 0.75;    // softness parameter
+  int n = 6;          // potential strength
+  double rho = 0.5;   // fluid density
   double t = 0.5;     // fluid temperature
   // Files will be saved to
   std::string dir = "/Desired/Path/"; // The directory has to exist

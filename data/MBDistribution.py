@@ -70,7 +70,9 @@ if __name__ == '__main__':
     K_BOLTZMANN = 1.
     MASS = 1.
     NUMBER_OF_DIMENSIONS = 3
+    # Print out the input arguments
     print(str(sys.argv))
+    
     try:
         if len(sys.argv) != 3:
             NUMBER_OF_PARTICLES = 10 ** 3
@@ -83,23 +85,26 @@ if __name__ == '__main__':
         TEMPERATURE = 1
     file_id = '_particles_' + str(NUMBER_OF_PARTICLES) + '_T_' + "{:.4f}".format(TEMPERATURE) + '.txt'
 
-    print("Working directory is: ", os.getcwd())
-    # CD to location of the file, file should be located in ./MD-simulation/data
+    print("Python working directory is: ", os.getcwd())
+    # Get the absolute path of the file
     abspath = os.path.abspath(__file__)
+    # Get the absolute path to the directory of the file
     dname = os.path.dirname(abspath)
+    # CD into the dir where the file is
     os.chdir(dname)
     
     a = VelGen()
-    vx_file = 'vx' + file_id
-    vy_file = 'vy' + file_id
-    vz_file = 'vz' + file_id
-	# TODO: improve statement so only the ones missing are produced
-	#       but this case should never occur anyway
-    if os.path.isfile(vx_file) is False:
+    # vx_file = 'vx' + file_id
+    # vy_file = 'vy' + file_id
+    # vz_file = 'vz' + file_id
+    v_file = "initial_velocities" + file_id
+
+    if os.path.isfile(v_file) is False:
         vx, vy, vz = a.get_velocities()
-        np.savetxt(vx_file, vx, delimiter='\n')
-        np.savetxt(vy_file, vy, delimiter='\n')
-        np.savetxt(vz_file, vz, delimiter='\n')
+        np.savetxt(v_file, np.transpose([vx, vy, vz]))
+        # np.savetxt(vx_file, vx, delimiter='\n')
+        # np.savetxt(vy_file, vy, delimiter='\n')
+        # np.savetxt(vz_file, vz, delimiter='\n')
         print("Initial velocity files saved.")
     else:
         print("Velocity files already exist.")

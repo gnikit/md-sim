@@ -28,6 +28,8 @@ fluid_compression.o:
 clean:
 	$(RM) isomorph database fluid_compression *.o 
 	$(RM) ./example_data/*.txt
+	$(RM) ../data/vx* ../data/vy* ../data/vz*
+
 
 clean_keep_data:
 	$(RM) isomorph database fluid_compression *.o

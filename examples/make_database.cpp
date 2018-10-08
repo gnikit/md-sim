@@ -3,12 +3,9 @@
 #include <thread>
 #include "MD.h"
 
-#define STEPS 5000     // 10000
-#define PARTICLES 1000  // 1000
-typedef std::vector<double> vec1d;
+#define STEPS 10000  // 10000
 
-// Add backslash at the end of the directory path!
-std::string dir_linux = "/home/gn/Desktop/test_data/";
+std::string dir_linux = "/home/gn/Desktop/test_data/sample";
 
 void MakeDataBase();
 
@@ -25,8 +22,8 @@ void MakeDataBase() {
    */
   size_t num = 1;
   std::vector<size_t> n = {6, 8, 10, 12};
-  std::vector<double> rho = {0.5, 1.0, 2.0};
-  std::vector<double> T = {0.5, 1.0, 1.5, 2.0};
+  std::vector<double> rho = {0.3, 0.5, 1.0, 1.5, 2.0};
+  std::vector<double> T = {0.5, 1.0, 2.0};
   std::vector<double> A1 = LinearSpacedArray(0, 1, 5);
   std::vector<double> A2 = LinearSpacedArray(1.25, 2.25, 5);
   std::vector<double> A3 = LinearSpacedArray(2.50, 4.50, 5);
@@ -36,13 +33,12 @@ void MakeDataBase() {
     for (size_t t = 0; t < T.size(); t++) {
       for (size_t i = 0; i < n.size(); i++) {
         for (size_t j = 0; j < A1.size(); j++) {
-          std::cout << "rho: " << rho[d] << " T: " << T[t] << "n: " << n[i]
-                    << " A: " << A1[j] << " run num: " << num << std::endl;
+          std::cout << " run num: " << num << std::endl;
 
-          MD* run1 = new MD(dir_linux, STEPS);
-          MD* run2 = new MD(dir_linux, STEPS);
-          MD* run3 = new MD(dir_linux, STEPS);
-          MD* run4 = new MD(dir_linux, STEPS);
+          MD* run1 = new MD(dir_linux, STEPS, false, 500, 10, false, 2000);
+          MD* run2 = new MD(dir_linux, STEPS, false, 500, 10, false, 2000);
+          MD* run3 = new MD(dir_linux, STEPS, false, 500, 10, false, 2000);
+          MD* run4 = new MD(dir_linux, STEPS, false, 500, 10, false, 2000);
 
           std::thread th1(&MD::Simulation, run1, rho[d], T[t], n[i], A1[j]);
           std::thread th2(&MD::Simulation, run2, rho[d], T[t], n[i], A2[j]);
@@ -53,7 +49,11 @@ void MakeDataBase() {
           th2.join();
           th3.join();
           th4.join();
-          delete run1, run2, run3, run4;
+
+          delete run1;
+          delete run2;
+          delete run3;
+          delete run4;
 
           ++num;
         }

@@ -221,8 +221,6 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
   }
 
   size_t tempN = N;
-#pragma parallel
-#pragma loop count min(128)
   // Subtracting Av. velocities from each particle
   for (i = 0; i < tempN; ++i) {
     vx[i] = vx[i] - mean_vx;
@@ -238,8 +236,6 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
   scale_v = sqrt(TEMPERATURE / T);  // scalling factor
 
   // Velocity scaling
-#pragma parallel
-#pragma loop count min(128)
   for (i = 0; i < tempN; ++i) {
     vx[i] *= scale_v;
     vy[i] *= scale_v;
@@ -295,28 +291,18 @@ void MD::mb_distribution(double TEMPERATURE) {
 
   // Try to load velocity files if not already present call
   // Python script to generate them.
-  try {
-    std::string vel_id = "_particles_" + particles + "_T_" + t + ".txt";
-    FileIO<double> obj;
-    // TODO: define in heap and delete FileLoading obj
-    vx = obj.LoadSingleCol(dir_str + "/vx" + vel_id);
-    vy = obj.LoadSingleCol(dir_str + "/vy" + vel_id);
-    vz = obj.LoadSingleCol(dir_str + "/vz" + vel_id);
-    std::cout << "Files loaded successfuly." << std::endl;
-  } catch (...) {
-    std::cerr << "Files not present, Python script will be executed."
-              << std::endl;
-    std::string command =
-        "python \"" + dir_str + "/MBDistribution.py\" " + particles + " " + t;
-    system(command.c_str());  // Creates files with MD velocities
+  std::string vel_id = "_particles_" + particles + "_T_" + t + ".txt";
+  FileIO<double> obj;
 
-    std::string vel_id = "_particles_" + particles + "_T_" + t + ".txt";
-    FileIO<double> obj;
-    // Load the newline generated files
-    vx = obj.LoadSingleCol(dir_str + "/vx" + vel_id);
-    vy = obj.LoadSingleCol(dir_str + "/vy" + vel_id);
-    vz = obj.LoadSingleCol(dir_str + "/vz" + vel_id);
-  }
+  std::cout << "Executing Python script for initial velocities" << std::endl;
+  std::string command =
+      "python \"" + dir_str + "/MBDistribution.py\" " + particles + " " + t;
+  system(command.c_str());
+  std::string name = dir_str + "/initial_velocities" + vel_id;
+  std::vector<std::vector<double>> temp = obj.ReadFile(name, 3);
+  vx = temp[0];
+  vy = temp[1];
+  vz = temp[2];
 }
 
 void MD::verlet_algorithm(std::vector<double> &rx, std::vector<double> &ry,

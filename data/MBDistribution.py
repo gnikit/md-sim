@@ -93,18 +93,12 @@ if __name__ == '__main__':
     # CD into the dir where the file is
     os.chdir(dname)
     
-    a = VelGen()
-    # vx_file = 'vx' + file_id
-    # vy_file = 'vy' + file_id
-    # vz_file = 'vz' + file_id
     v_file = "initial_velocities" + file_id
 
     if os.path.isfile(v_file) is False:
+        a = VelGen()
         vx, vy, vz = a.get_velocities()
         np.savetxt(v_file, np.transpose([vx, vy, vz]))
-        # np.savetxt(vx_file, vx, delimiter='\n')
-        # np.savetxt(vy_file, vy, delimiter='\n')
-        # np.savetxt(vz_file, vz, delimiter='\n')
         print("Initial velocity files saved.")
     else:
         print("Velocity files already exist.")

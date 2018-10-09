@@ -23,7 +23,7 @@
 #define PARTICLES_PER_AXIS 10
 // Increase the number of bins to find RDF intersects
 #define NHIST 500                // Number of histogram bins
-#define RDF_WAIT 2000            // Iterations after which RDF will be collected
+#define RDF_WAIT 0               // Iterations after which RDF will be collected
 #pragma warning(disable : 4996)  //_CRT_SECURE_NO_WARNINGS
 
 // Detects the OS and fetches the executable path that is passed

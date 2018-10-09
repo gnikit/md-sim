@@ -28,7 +28,7 @@ fluid_compression.o:
 clean:
 	$(RM) isomorph database fluid_compression *.o 
 	$(RM) ./example_data/*.txt
-	$(RM) ../data/vx* ../data/vy* ../data/vz*
+	$(RM) ../data/initial_velocities*
 
 
 clean_keep_data:

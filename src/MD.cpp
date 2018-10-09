@@ -86,8 +86,40 @@ MD::MD(std::string DIRECTORY, size_t run_number) {
 }
 
 MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG) {
-  MD(DIRECTORY, run_number);
+  _dir = DIRECTORY;
+  STEPS = run_number;
+
+  Nx = Ny = Nz = PARTICLES_PER_AXIS;  // Number of particles per axis
+  N = Nx * Ny * Nz;
+  nhist = NHIST;
+  rdf_wait = RDF_WAIT;
   compression_flag = COMPRESS_FLAG;
+  // For efficiency, memory in the containers is reserved before use
+  /* Positions */
+  rx.reserve(N);
+  ry.reserve(N);
+  rz.reserve(N);
+  /* Velocities */
+  vx.reserve(N);
+  vy.reserve(N);
+  vz.reserve(N);
+  /* RDF */
+  gr.resize(nhist + 1, 0);  // gr with Index igr
+  /* Forces/Acceleration */
+  fx.resize(N, 0);
+  fy.resize(N, 0);
+  fz.resize(N, 0);
+  /* Observed Quantities */
+  Cr.reserve(STEPS);
+  msd.reserve(STEPS);
+  u_en.reserve(STEPS);
+  k_en.reserve(STEPS);
+  pc.reserve(STEPS);
+  pk.reserve(STEPS);
+  temperature.reserve(STEPS);
+
+  PI = acos(-1.0);
+  VISUALISE = false;
 }
 
 MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
@@ -97,12 +129,13 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
    * This constructor allows for increased constrol over the internal
    * parameters of the fluid.
    */
-
-  MD(DIRECTORY, run_number, COMPRESS_FLAG);
-
+  _dir = DIRECTORY;
+  STEPS = run_number;
   // Total number of particles
   Nx = Ny = Nz = particles_per_axis;
   N = Nx * Ny * Nz;
+  compression_flag = COMPRESS_FLAG;
+
   // Save all the positions for the fluid
   VISUALISE = track_particles;
   // Accuracy of RDF
@@ -110,8 +143,39 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
   // The number of iterations the data collection of RDF is postponed
   // in order to allow the fluid to lose its internal cubic lattice
   rdf_wait = collect_rdf_after;
+
+  // For efficiency, memory in the containers is reserved before use
+  /* Positions */
+  rx.reserve(N);
+  ry.reserve(N);
+  rz.reserve(N);
+  /* Velocities */
+  vx.reserve(N);
+  vy.reserve(N);
+  vz.reserve(N);
+  /* RDF */
+  gr.resize(nhist + 1, 0);  // gr with Index igr
+  /* Forces/Acceleration */
+  fx.resize(N, 0);
+  fy.resize(N, 0);
+  fz.resize(N, 0);
+  /* Observed Quantities */
+  Cr.reserve(STEPS);
+  msd.reserve(STEPS);
+  u_en.reserve(STEPS);
+  k_en.reserve(STEPS);
+  pc.reserve(STEPS);
+  pk.reserve(STEPS);
+  temperature.reserve(STEPS);
+
+  PI = acos(-1.0);
+  VISUALISE = false;
 }
-MD::~MD() {}
+MD::~MD() {
+  // delete pos_x;
+  // delete pos_y;
+  // delete pos_z;
+}
 
 // Methods for MD Analysis
 void MD::initialise(std::vector<double> &x, std::vector<double> &y,
@@ -154,6 +218,9 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
   }
 
   if (compression_flag == true && Q_counter == 0) {
+    // TODO: this can be re-written with the new mb_distribution
+    // no need to not start from lattice, just allow it to melt,
+    // hence remove this if-loop all together
     FileIO<double> load_data;
     // Initialises top_exe_dir variable
     get_dir();
@@ -174,12 +241,6 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
     rry = vel[1];
     rrz = vel[2];
     std::cout << "Read successful" << std::endl;
-    // Start from a highly thermalised fluid state
-    // Generation of velocities with T = 10
-    // mb_distribution(10);
-    // TODO: Not sure what follows is correct in if-loop
-    // Temperature calculation for the first step with very high T
-    // scale of x, y, z
   }
 
   // scale of x, y, z
@@ -216,7 +277,7 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
     vy[i] *= scale_v;
     vz[i] *= scale_v;
   }
-  // MSD initialasation, storing first positions of particles
+  // MSD initialisation, storing first positions of particles
   MSDx = x;
   MSDy = y;
   MSDz = z;
@@ -415,11 +476,6 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
   L = pow((N / _rho), 1.0 / 3.0);
   Vol = N / _rho;
 
-  // Position vectors
-  std::vector<std::vector<double>> *pos_x = new std::vector<std::vector<double>>(STEPS);
-  std::vector<std::vector<double>> *pos_y = new std::vector<std::vector<double>>(STEPS);
-  std::vector<std::vector<double>> *pos_z = new std::vector<std::vector<double>>(STEPS);
-
   // cut_off redefinition
   // Large cut offs increase the runtime exponentially
   cut_off = 3.0;  // L / 2.;
@@ -442,11 +498,6 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
     std::fill(fx.begin(), fx.end(), 0);
     std::fill(fy.begin(), fy.end(), 0);
     std::fill(fz.begin(), fz.end(), 0);
-
-    // Reserve memory for the position vectors
-    (*pos_x)[_STEP_INDEX].reserve(N);
-    (*pos_y)[_STEP_INDEX].reserve(N);
-    (*pos_z)[_STEP_INDEX].reserve(N);
 
     U = 0;  // seting Potential U to 0
     PC = 0;
@@ -560,9 +611,14 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
     // Save positions
     // TODO: find a way to enable/disable this or port it to Python
     if (VISUALISE) {
-      (*pos_x)[_STEP_INDEX] = rx;
-      (*pos_y)[_STEP_INDEX] = ry;
-      (*pos_z)[_STEP_INDEX] = rz;
+      // Reserve memory for the position vectors
+      // (*pos_x)[_STEP_INDEX].reserve(N);
+      // (*pos_y)[_STEP_INDEX].reserve(N);
+      // (*pos_z)[_STEP_INDEX].reserve(N);
+
+      // (*pos_x)[_STEP_INDEX] = rx;
+      // (*pos_y)[_STEP_INDEX] = ry;
+      // (*pos_z)[_STEP_INDEX] = rz;
     }
 
     // ShowRun(500);  // shows every 500 steps
@@ -574,9 +630,9 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
     FileIO<double> f;
     // TODO: create a descriptive filename. Maybe invoke python for compact data type
     // Write the arrays as jagged,(hence transposed), this creates rows=STEPS and columns=PARTICLES
-    f.Write2File(*pos_x, _dir + "x_data.dat", "\t", true);
-    f.Write2File(*pos_y, _dir + "y_data.dat", "\t", true);
-    f.Write2File(*pos_z, _dir + "z_data.dat", "\t", true);
+    // f.Write2File(*pos_x, _dir + "x_data.dat", "\t", true);
+    // f.Write2File(*pos_y, _dir + "y_data.dat", "\t", true);
+    // f.Write2File(*pos_z, _dir + "z_data.dat", "\t", true);
   }
 
   write_to_files();
@@ -688,7 +744,6 @@ void MD::reset_values() {
   Hist.close();
   DATA.close();
   POS.close();
-
   // Clear values, size, but reserve capacity
   rx.clear();
   ry.clear();

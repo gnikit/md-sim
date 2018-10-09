@@ -3,7 +3,7 @@
 #include <thread>
 #include "MD.h"
 
-#define STEPS 10000  // 10000
+#define STEPS 100  // 10000
 
 std::string dir_linux = "/home/gn/Desktop/test_data/sample";
 
@@ -36,26 +36,27 @@ void MakeDataBase() {
       for (size_t i = 0; i < n.size(); i++) {
         for (size_t j = 0; j < A1.size(); j++) {
           std::cout << " run num: " << num << std::endl;
+          //TODO: throw exception if rdf_wait > STEPS
 
-          MD* run1 = new MD(dir_linux, STEPS);
-          MD* run2 = new MD(dir_linux, STEPS);
-          MD* run3 = new MD(dir_linux, STEPS);
-          MD* run4 = new MD(dir_linux, STEPS);
+          MD* run1 = new MD(dir_linux, STEPS, false, 500, 10, false, 0);
+          MD* run2 = new MD(dir_linux, STEPS, false, 500, 10, false, 0);
+          // MD* run3 = new MD(dir_linux, STEPS, false, 500, 10, false, 0);
+          // MD* run4 = new MD(dir_linux, STEPS, false, 500, 10, false, 0);
+
           // static_run.Simulation(rho[d], T[t], n[i], A1[j]);
           std::thread th1(&MD::Simulation, run1, rho[d], T[t], n[i], A1[j]);
           std::thread th2(&MD::Simulation, run2, rho[d], T[t], n[i], A2[j]);
-          std::thread th3(&MD::Simulation, run3, rho[d], T[t], n[i], A3[j]);
-          std::thread th4(&MD::Simulation, run4, rho[d], T[t], n[i], A4[j]);
-
+          // std::thread th3(&MD::Simulation, run3, rho[d], T[t], n[i], A3[j]);
+          // std::thread th4(&MD::Simulation, run4, rho[d], T[t], n[i], A4[j]);
           th1.join();
           th2.join();
-          th3.join();
-          th4.join();
+          // th3.join();
+          // th4.join();
 
           delete run1;
           delete run2;
-          delete run3;
-          delete run4;
+          // delete run3;
+          // delete run4;
 
           ++num;
         }

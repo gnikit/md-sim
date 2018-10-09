@@ -31,7 +31,7 @@ class MD {
       temperature, density;  // vectors used as buffers
 
   size_t Nx, Ny, Nz, nhist, rdf_wait;  // Particles in x, y, z
-  size_t N, _STEP_INDEX, _STEPS;       // Total particles, step index, maximum steps
+  size_t N, _STEP_INDEX, STEPS;        // Total particles, step index, maximum steps
   double _T0;                          // Target Temperature. Desired T for the system to operate
   double dt = 0.005;                   // time step This applies: dt = 0.005/sqrt(T0)
   double x, y, z;                      // distance between particle i and j

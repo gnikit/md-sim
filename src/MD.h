@@ -48,6 +48,13 @@ class MD {
   double PK;                           // Kinetic Pressure
   double scale_v;                      // velocity scaling
 
+  // Position vectors
+  // TODO: super sketchy, seems to be causing the memory leak
+  // TODO: NOT SURE IF STEPS WILL BE UPDATED FROM THE CONSTRUCTOR OR IT WILL REMAIN 0 
+//   std::vector<std::vector<double>> *pos_x = new std::vector<std::vector<double>>(STEPS);
+//   std::vector<std::vector<double>> *pos_y = new std::vector<std::vector<double>>(STEPS);
+//   std::vector<std::vector<double>> *pos_z = new std::vector<std::vector<double>>(STEPS);
+
   // Quenching varibles
   bool compression_flag = false;
   size_t Q_counter = 0;  // counts the number qunchings that have occured
@@ -77,7 +84,7 @@ class MD {
      size_t rdf_bins, size_t particles_per_axis, bool track_particles,
      size_t collect_rdf_after);
 
-  ~MD();
+    ~MD();
 
   void Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST);
   std::string get_dir();

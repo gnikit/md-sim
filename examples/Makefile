@@ -3,6 +3,10 @@ include ../Makefile.variables
 LIB = ../lib
 BIN = ../bin
 SRC = ../src
+INC = -I ../lib -I ../src -I ../tools/FileIO
+LN = -L ../lib -L ../src -L ../tools/FileIO
+
+LINKER = $(INC) $(LN) -lmd
 
 all: database isomorph fluid_compression $(LIB)/libmd.a
 

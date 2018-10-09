@@ -46,8 +46,6 @@ std::string getExePath() {
 }
 #endif
 
-// TODO: Boltzmann Dist normalisation of the particles velocities in the
-// beggining make it C++
 
 MD::MD(std::string DIRECTORY, size_t run_number) {
   _dir = DIRECTORY;
@@ -57,6 +55,7 @@ MD::MD(std::string DIRECTORY, size_t run_number) {
   N = Nx * Ny * Nz;
   nhist = NHIST;
   rdf_wait = RDF_WAIT;
+
   // For efficiency, memory in the containers is reserved before use
   /* Positions */
   rx.reserve(N);
@@ -80,6 +79,10 @@ MD::MD(std::string DIRECTORY, size_t run_number) {
   pc.reserve(STEPS);
   pk.reserve(STEPS);
   temperature.reserve(STEPS);
+  /* Visualisation vectors on the heap*/
+  pos_x = new std::vector<std::vector<double>>(STEPS);
+  pos_y = new std::vector<std::vector<double>>(STEPS);
+  pos_z = new std::vector<std::vector<double>>(STEPS);
 
   PI = acos(-1.0);
   VISUALISE = false;
@@ -117,6 +120,10 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG) {
   pc.reserve(STEPS);
   pk.reserve(STEPS);
   temperature.reserve(STEPS);
+  /* Visualisation vectors on the heap*/
+  pos_x = new std::vector<std::vector<double>>(STEPS);
+  pos_y = new std::vector<std::vector<double>>(STEPS);
+  pos_z = new std::vector<std::vector<double>>(STEPS);
 
   PI = acos(-1.0);
   VISUALISE = false;
@@ -167,14 +174,18 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
   pc.reserve(STEPS);
   pk.reserve(STEPS);
   temperature.reserve(STEPS);
+  /* Visualisation vectors on the heap*/
+  pos_x = new std::vector<std::vector<double>>(STEPS);
+  pos_y = new std::vector<std::vector<double>>(STEPS);
+  pos_z = new std::vector<std::vector<double>>(STEPS);
 
   PI = acos(-1.0);
-  VISUALISE = false;
 }
 MD::~MD() {
-  // delete pos_x;
-  // delete pos_y;
-  // delete pos_z;
+  // Destroy the vectors allocated on the heap
+  delete pos_x;
+  delete pos_y;
+  delete pos_z;
 }
 
 // Methods for MD Analysis
@@ -443,6 +454,8 @@ void MD::density_compression(int steps_quench, double TEMPERATURE) {
   L = pow((N / _rho), 1.0 / 3.0);
   Vol = N / _rho;
   initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
+  // TODO: box rescalling is required which means that all the radiai have to
+  //       be scalled by the factor which L is scalled
 }
 
 // MD Simulation
@@ -478,7 +491,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
 
   // cut_off redefinition
   // Large cut offs increase the runtime exponentially
-  cut_off = 3.0;  // L / 2.;
+  cut_off = 3.0;
   rg = cut_off;
   dr = rg / nhist;
 
@@ -612,16 +625,15 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
     // TODO: find a way to enable/disable this or port it to Python
     if (VISUALISE) {
       // Reserve memory for the position vectors
-      // (*pos_x)[_STEP_INDEX].reserve(N);
-      // (*pos_y)[_STEP_INDEX].reserve(N);
-      // (*pos_z)[_STEP_INDEX].reserve(N);
+      (*pos_x)[_STEP_INDEX].reserve(N);
+      (*pos_y)[_STEP_INDEX].reserve(N);
+      (*pos_z)[_STEP_INDEX].reserve(N);
 
-      // (*pos_x)[_STEP_INDEX] = rx;
-      // (*pos_y)[_STEP_INDEX] = ry;
-      // (*pos_z)[_STEP_INDEX] = rz;
+      // Populate the vectors with the current positions
+      (*pos_x)[_STEP_INDEX] = rx;
+      (*pos_y)[_STEP_INDEX] = ry;
+      (*pos_z)[_STEP_INDEX] = rz;
     }
-
-    // ShowRun(500);  // shows every 500 steps
   }
   // Simulation Ends HERE
 
@@ -630,9 +642,9 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
     FileIO<double> f;
     // TODO: create a descriptive filename. Maybe invoke python for compact data type
     // Write the arrays as jagged,(hence transposed), this creates rows=STEPS and columns=PARTICLES
-    // f.Write2File(*pos_x, _dir + "x_data.dat", "\t", true);
-    // f.Write2File(*pos_y, _dir + "y_data.dat", "\t", true);
-    // f.Write2File(*pos_z, _dir + "z_data.dat", "\t", true);
+    f.Write2File(*pos_x, _dir + "x_data.dat", "\t", true);
+    f.Write2File(*pos_y, _dir + "y_data.dat", "\t", true);
+    f.Write2File(*pos_z, _dir + "z_data.dat", "\t", true);
   }
 
   write_to_files();

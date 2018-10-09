@@ -20,11 +20,10 @@ void MakeDataBase() {
    * quantities such as Pc, U, K, E, Pk.
    * NOTE: It takes a long time to complete and generates multiple files!
    */
-  // MD static_run(dir_linux, STEPS);
 
   size_t num = 1;
   std::vector<size_t> n = {6, 8, 10, 12};
-  std::vector<double> rho = {0.3, 0.5, 1.0, 1.5, 2.0};
+  std::vector<double> rho = {0.3, 0.5, 1.0, 1.5};
   std::vector<double> T = {0.5, 1.0, 2.0};
   std::vector<double> A1 = LinearSpacedArray(0, 1, 5);
   std::vector<double> A2 = LinearSpacedArray(1.25, 2.25, 5);
@@ -40,23 +39,23 @@ void MakeDataBase() {
 
           MD* run1 = new MD(dir_linux, STEPS, false, 500, 10, false, 0);
           MD* run2 = new MD(dir_linux, STEPS, false, 500, 10, false, 0);
-          // MD* run3 = new MD(dir_linux, STEPS, false, 500, 10, false, 0);
-          // MD* run4 = new MD(dir_linux, STEPS, false, 500, 10, false, 0);
+          MD* run3 = new MD(dir_linux, STEPS, false, 500, 10, false, 0);
+          MD* run4 = new MD(dir_linux, STEPS, false, 500, 10, false, 0);
 
-          // static_run.Simulation(rho[d], T[t], n[i], A1[j]);
           std::thread th1(&MD::Simulation, run1, rho[d], T[t], n[i], A1[j]);
           std::thread th2(&MD::Simulation, run2, rho[d], T[t], n[i], A2[j]);
-          // std::thread th3(&MD::Simulation, run3, rho[d], T[t], n[i], A3[j]);
-          // std::thread th4(&MD::Simulation, run4, rho[d], T[t], n[i], A4[j]);
+          std::thread th3(&MD::Simulation, run3, rho[d], T[t], n[i], A3[j]);
+          std::thread th4(&MD::Simulation, run4, rho[d], T[t], n[i], A4[j]);
+
           th1.join();
           th2.join();
-          // th3.join();
-          // th4.join();
+          th3.join();
+          th4.join();
 
           delete run1;
           delete run2;
-          // delete run3;
-          // delete run4;
+          delete run3;
+          delete run4;
 
           ++num;
         }

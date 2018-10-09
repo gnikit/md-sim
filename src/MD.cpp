@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <ctime>     // std::chrono
 #include <iomanip>   // setprecision
+#include <random>    // normal_dist
 #include <sstream>   // stringstream
 #include "FileIO.h"  // FileLoading class
 
@@ -56,11 +57,22 @@ MD::MD(std::string DIRECTORY, size_t run_number) {
   N = Nx * Ny * Nz;
   nhist = NHIST;
   rdf_wait = RDF_WAIT;
+  // For efficiency, memory in the containers is reserved before use
+  /* Positions */
+  rx.reserve(N);
+  ry.reserve(N);
+  rz.reserve(N);
+  /* Velocities */
+  vx.reserve(N);
+  vy.reserve(N);
+  vz.reserve(N);
+  /* RDF */
   gr.resize(nhist + 1, 0);  // gr with Index igr
-  // For efficiency memory in the containers is reserved before use
+  /* Forces/Acceleration */
   fx.resize(N, 0);
   fy.resize(N, 0);
   fz.resize(N, 0);
+  /* Observed Quantities */
   Cr.reserve(_STEPS);
   msd.reserve(_STEPS);
   u_en.reserve(_STEPS);
@@ -68,6 +80,7 @@ MD::MD(std::string DIRECTORY, size_t run_number) {
   pc.reserve(_STEPS);
   pk.reserve(_STEPS);
   temperature.reserve(_STEPS);
+  
   PI = acos(-1.0);
   VISUALISE = false;
 }
@@ -81,11 +94,22 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG) {
 
   nhist = NHIST;
   rdf_wait = RDF_WAIT;
-  // For efficiency memory in the containers is reserved before use
+  // For efficiency, memory in the containers is reserved before use
+  /* Positions */
+  rx.reserve(N);
+  ry.reserve(N);
+  rz.reserve(N);
+  /* Velocities */
+  vx.reserve(N);
+  vy.reserve(N);
+  vz.reserve(N);
+  /* RDF */
   gr.resize(nhist + 1, 0);  // gr with Index igr
+  /* Forces/Acceleration */
   fx.resize(N, 0);
   fy.resize(N, 0);
   fz.resize(N, 0);
+  /* Observed Quantities */
   Cr.reserve(_STEPS);
   msd.reserve(_STEPS);
   u_en.reserve(_STEPS);
@@ -110,7 +134,8 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
   _dir = DIRECTORY;
   _STEPS = run_number;
 
-  Nx = Ny = Nz = particles_per_axis;  // Number of particles per axis
+  // Total number of particles
+  Nx = Ny = Nz = particles_per_axis;
   N = Nx * Ny * Nz;
   // Save all the positions for the fluid
   VISUALISE = track_particles;
@@ -120,11 +145,22 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
   // in order to allow the fluid to lose its internal cubic lattice
   rdf_wait = collect_rdf_after;
 
-  // For efficiency memory in the containers is reserved before use
+  // For efficiency, memory in the containers is reserved before use
+  /* Positions */
+  rx.reserve(N);
+  ry.reserve(N);
+  rz.reserve(N);
+  /* Velocities */
+  vx.reserve(N);
+  vy.reserve(N);
+  vz.reserve(N);
+  /* RDF */
   gr.resize(nhist + 1, 0);  // gr with Index igr
+  /* Forces/Acceleration */
   fx.resize(N, 0);
   fy.resize(N, 0);
   fz.resize(N, 0);
+  /* Observed Quantities */
   Cr.reserve(_STEPS);
   msd.reserve(_STEPS);
   u_en.reserve(_STEPS);
@@ -284,33 +320,22 @@ std::string MD::get_dir() {
 }
 
 void MD::mb_distribution(double TEMPERATURE) {
-  std::string t = convert_to_string(TEMPERATURE, 4);
-  std::string particles = std::to_string(N);
-  std::string dir_str = get_dir();
-  dir_str += "/data";
+  double kb = 1.0;
+  double m = 1.0;
 
-  try {
-    std::string vel_id = "_particles_" + particles + "_T_" + t + ".txt";
-    FileIO<double> obj;
+  double var = sqrt(TEMPERATURE * kb / m);
+  double mean = 0;
 
-    vx = obj.LoadSingleCol(dir_str + "/vx" + vel_id);
-    vy = obj.LoadSingleCol(dir_str + "/vy" + vel_id);
-    vz = obj.LoadSingleCol(dir_str + "/vz" + vel_id);
-    std::cout << "Files loaded successfuly." << std::endl;
+  // TODO: this needs a seed to randomise every time, FIX
+  std::default_random_engine generator;
+  std::normal_distribution<double> g_x(mean, var);
+  std::normal_distribution<double> g_y(mean, var);
+  std::normal_distribution<double> g_z(mean, var);
 
-  } catch (...) {
-    std::cout << "Files not present, Python script will be executed."
-              << std::endl;
-    std::string command =
-        "python \"" + dir_str + "/MBDistribution.py\" " + particles + " " + t;
-    system(command.c_str());  // Creates files with MD velocities
-
-    std::string vel_id = "_particles_" + particles + "_T_" + t + ".txt";
-    FileIO<double> obj;
-    // Load the newline generated files
-    vx = obj.LoadSingleCol(dir_str + "/vx" + vel_id);
-    vy = obj.LoadSingleCol(dir_str + "/vy" + vel_id);
-    vz = obj.LoadSingleCol(dir_str + "/vz" + vel_id);
+  for (size_t i = 0; i < N; ++i) {
+    vx.push_back(g_x(generator));
+    vy.push_back(g_y(generator));
+    vz.push_back(g_z(generator));
   }
 }
 

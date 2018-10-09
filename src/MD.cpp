@@ -205,7 +205,7 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
    *  @param TEMPERATURE: Thermostat target temperature
    */
   // Initialise position matrix and velocity matrix from Cubic Centred Lattice
-  if (compression_flag == false) {
+  if (compression_flag == false || (compression_flag == true && Q_counter == 0)) {
     size_t n = 0;
     size_t i, j, k;
     for (i = 0; i < Nx; ++i) {
@@ -225,32 +225,6 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
     }
     // Generates Maxwell-Boltzmann dist from Python script
     mb_distribution(TEMPERATURE);
-  }
-
-  if (compression_flag == true && Q_counter == 0) {
-    // TODO: this can be re-written with the new mb_distribution
-    // no need to not start from lattice, just allow it to melt,
-    // hence remove this if-loop all together
-    FileIO<double> load_data;
-    // Initialises top_exe_dir variable
-    get_dir();
-    std::string file_name = top_exe_dir +
-                            "/data/Positions_Velocities_particles_" +
-                            std::to_string(N) + ".txt";
-    std::cout << "Try and read file: " << file_name << std::endl;
-    std::vector<std::vector<double>> vel =
-        load_data.ReadFile(file_name, 9, '#');
-    // TODO: Ideally return a tuple of N vectors, where N == column #
-    x = vel[0];
-    y = vel[1];
-    z = vel[2];
-    vx = vel[3];
-    vy = vel[4];
-    vz = vel[5];
-    rrx = vel[0];
-    rry = vel[1];
-    rrz = vel[2];
-    std::cout << "Read successful" << std::endl;
   }
 
   // scale of x, y, z

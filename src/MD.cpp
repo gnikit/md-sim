@@ -51,7 +51,7 @@ std::string getExePath() {
 
 MD::MD(std::string DIRECTORY, size_t run_number) {
   _dir = DIRECTORY;
-  _STEPS = run_number;
+  STEPS = run_number;
 
   Nx = Ny = Nz = PARTICLES_PER_AXIS;  // Number of particles per axis
   N = Nx * Ny * Nz;
@@ -73,54 +73,21 @@ MD::MD(std::string DIRECTORY, size_t run_number) {
   fy.resize(N, 0);
   fz.resize(N, 0);
   /* Observed Quantities */
-  Cr.reserve(_STEPS);
-  msd.reserve(_STEPS);
-  u_en.reserve(_STEPS);
-  k_en.reserve(_STEPS);
-  pc.reserve(_STEPS);
-  pk.reserve(_STEPS);
-  temperature.reserve(_STEPS);
-  
+  Cr.reserve(STEPS);
+  msd.reserve(STEPS);
+  u_en.reserve(STEPS);
+  k_en.reserve(STEPS);
+  pc.reserve(STEPS);
+  pk.reserve(STEPS);
+  temperature.reserve(STEPS);
+
   PI = acos(-1.0);
   VISUALISE = false;
 }
 
 MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG) {
-  _dir = DIRECTORY;
-  _STEPS = run_number;
-
-  Nx = Ny = Nz = PARTICLES_PER_AXIS;  // Number of particles per axis
-  N = Nx * Ny * Nz;
-
-  nhist = NHIST;
-  rdf_wait = RDF_WAIT;
-  // For efficiency, memory in the containers is reserved before use
-  /* Positions */
-  rx.reserve(N);
-  ry.reserve(N);
-  rz.reserve(N);
-  /* Velocities */
-  vx.reserve(N);
-  vy.reserve(N);
-  vz.reserve(N);
-  /* RDF */
-  gr.resize(nhist + 1, 0);  // gr with Index igr
-  /* Forces/Acceleration */
-  fx.resize(N, 0);
-  fy.resize(N, 0);
-  fz.resize(N, 0);
-  /* Observed Quantities */
-  Cr.reserve(_STEPS);
-  msd.reserve(_STEPS);
-  u_en.reserve(_STEPS);
-  k_en.reserve(_STEPS);
-  pc.reserve(_STEPS);
-  pk.reserve(_STEPS);
-  temperature.reserve(_STEPS);
-
+  MD(DIRECTORY, run_number);
   compression_flag = COMPRESS_FLAG;
-  PI = acos(-1.0);
-  VISUALISE = false;
 }
 
 MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
@@ -131,8 +98,7 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
    * parameters of the fluid.
    */
 
-  _dir = DIRECTORY;
-  _STEPS = run_number;
+  MD(DIRECTORY, run_number, COMPRESS_FLAG);
 
   // Total number of particles
   Nx = Ny = Nz = particles_per_axis;
@@ -144,33 +110,6 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
   // The number of iterations the data collection of RDF is postponed
   // in order to allow the fluid to lose its internal cubic lattice
   rdf_wait = collect_rdf_after;
-
-  // For efficiency, memory in the containers is reserved before use
-  /* Positions */
-  rx.reserve(N);
-  ry.reserve(N);
-  rz.reserve(N);
-  /* Velocities */
-  vx.reserve(N);
-  vy.reserve(N);
-  vz.reserve(N);
-  /* RDF */
-  gr.resize(nhist + 1, 0);  // gr with Index igr
-  /* Forces/Acceleration */
-  fx.resize(N, 0);
-  fy.resize(N, 0);
-  fz.resize(N, 0);
-  /* Observed Quantities */
-  Cr.reserve(_STEPS);
-  msd.reserve(_STEPS);
-  u_en.reserve(_STEPS);
-  k_en.reserve(_STEPS);
-  pc.reserve(_STEPS);
-  pk.reserve(_STEPS);
-  temperature.reserve(_STEPS);
-
-  compression_flag = COMPRESS_FLAG;
-  PI = acos(-1.0);
 }
 MD::~MD() {}
 
@@ -406,7 +345,7 @@ void MD::radial_distribution_function(bool normalise) {
   double cor_rho = _rho * (N - 1) / N;
   double dr = rg / nhist;
   size_t i;
-  Hist << "# particles (N): " << N << " steps: " << _STEPS << " rho: " << _rho
+  Hist << "# particles (N): " << N << " steps: " << STEPS << " rho: " << _rho
        << " bin (NHIST): " << nhist << " cut_off (rg): " << rg << " dr: " << dr
        << std::endl;
   Hist << "# Unormalised" << '\t' << "Normalised" << std::endl;
@@ -417,7 +356,7 @@ void MD::radial_distribution_function(bool normalise) {
       // hence the 2/3*pi*((R+dr)**3 - R**3)
       // TODO: remove the first rdf_wait time steps
 
-      norm = cor_rho * (2.0 / 3.0 * PI * N * (_STEPS - rdf_wait) *
+      norm = cor_rho * (2.0 / 3.0 * PI * N * (STEPS - rdf_wait) *
                         (pow((R + (dr / 2.0)), 3) - pow((R - (dr / 2.0)), 3)));
     }
     Hist << gr[i] << '\t' << gr[i] / norm << std::endl;
@@ -477,9 +416,9 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
   Vol = N / _rho;
 
   // Position vectors
-  std::vector<std::vector<double>> *pos_x = new std::vector<std::vector<double>>(_STEPS);
-  std::vector<std::vector<double>> *pos_y = new std::vector<std::vector<double>>(_STEPS);
-  std::vector<std::vector<double>> *pos_z = new std::vector<std::vector<double>>(_STEPS);
+  std::vector<std::vector<double>> *pos_x = new std::vector<std::vector<double>>(STEPS);
+  std::vector<std::vector<double>> *pos_y = new std::vector<std::vector<double>>(STEPS);
+  std::vector<std::vector<double>> *pos_z = new std::vector<std::vector<double>>(STEPS);
 
   // cut_off redefinition
   // Large cut offs increase the runtime exponentially
@@ -497,7 +436,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
 
   initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
 
-  for (_STEP_INDEX = 0; _STEP_INDEX < _STEPS; ++_STEP_INDEX) {
+  for (_STEP_INDEX = 0; _STEP_INDEX < STEPS; ++_STEP_INDEX) {
     // Forces loop
     // Resetting forces
     std::fill(fx.begin(), fx.end(), 0);
@@ -680,7 +619,7 @@ void MD::file_naming(int POWER, double A_cst) {
   A_stream << std::fixed << std::setprecision(5) << A_cst;   // 5 decimals
   rho_stream << std::fixed << std::setprecision(4) << _rho;  // 4 decimal
 
-  _step_to_str = "_step_" + std::to_string(_STEPS);
+  _step_to_str = "_step_" + std::to_string(STEPS);
   _particles_to_str = "_particles_" + std::to_string(N);
   _rho_to_str = "_rho_" + rho_stream.str();
   _T_to_str = "_T_" + T_stream.str();
@@ -716,7 +655,7 @@ void MD::write_to_files() {
   /*
 	 * Writes values of parameters to file
 	 */
-  for (size_t i = 0; i < _STEPS; ++i) {
+  for (size_t i = 0; i < STEPS; ++i) {
     DATA << (i + 1) << '\t' << density[i] << '\t' << temperature[i] << '\t'
          << u_en[i] << '\t' << k_en[i] << '\t' << pc[i] << '\t' << pk[i] << '\t'
          << msd[i] << '\t' << Cr[i] << std::endl;

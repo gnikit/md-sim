@@ -109,7 +109,7 @@ class MD {
   void density_compression(int steps_quench, double TEMPERATURE);
 
   void open_files();
-  void file_naming(int POWER, double A_cst);
+  std::string file_naming(std::string prefix, int POWER, double A_cst);
   void write_to_files();
   void show_run(size_t step_size_show);
   void time_stamp(std::ofstream &, std::string variables);

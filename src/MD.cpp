@@ -46,7 +46,6 @@ std::string getExePath() {
 }
 #endif
 
-
 MD::MD(std::string DIRECTORY, size_t run_number) {
   _dir = DIRECTORY;
   STEPS = run_number;
@@ -311,9 +310,7 @@ std::string MD::get_dir() {
 	 *  Also, when called, the full path of the executable, along with its name
 	 *	will be stored in the full_exe_dir string.
 	 */
-  // TODO: this is obvious duplication but see what happens to memory of
-  // full_exe_path
-  //      if nothing happens remove str
+
   std::string str = getExePath();
   full_exe_dir = getExePath();
   if (_WIN32) {
@@ -426,8 +423,7 @@ void MD::radial_distribution_function(bool normalise) {
       R = rg * i / nhist;
       // Volume between 2 spheres, accounting for double counting
       // hence the 2/3*pi*((R+dr)**3 - R**3)
-      // TODO: remove the first rdf_wait time steps
-
+      // Accounting for the rdf_wait time steps
       norm = cor_rho * (2.0 / 3.0 * PI * N * (STEPS - rdf_wait) *
                         (pow((R + (dr / 2.0)), 3) - pow((R - (dr / 2.0)), 3)));
     }
@@ -495,8 +491,11 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
   rg = cut_off;
   dr = rg / nhist;
 
-  // Filenaming should not be called
-  file_naming(POWER, A_CST);
+  // Generating the filenames for the output
+  data = file_naming("/Data", POWER, A_CST);
+  pos = file_naming("/Positions_Velocities", POWER, A_CST);
+  HIST = file_naming("/RDF", POWER, A_CST);
+
   open_files();
   time_stamp(DATA, "# step \t rho \t U \t K \t Pc \t Pk \t MSD \t VAF");
 
@@ -621,8 +620,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
     // Density
     density.push_back(_rho);
 
-    // Save positions
-    // TODO: find a way to enable/disable this or port it to Python
+    // Save positions for visualisation with Python
     if (VISUALISE) {
       // Reserve memory for the position vectors
       (*pos_x)[_STEP_INDEX].reserve(N);
@@ -640,11 +638,10 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
   if (VISUALISE) {
     // Save particle positions to files
     FileIO<double> f;
-    // TODO: create a descriptive filename. Maybe invoke python for compact data type
     // Write the arrays as jagged,(hence transposed), this creates rows=STEPS and columns=PARTICLES
-    f.Write2File(*pos_x, _dir + "x_data.dat", "\t", true);
-    f.Write2File(*pos_y, _dir + "y_data.dat", "\t", true);
-    f.Write2File(*pos_z, _dir + "z_data.dat", "\t", true);
+    f.Write2File(*pos_x, file_naming("/x_data", POWER, A_CST), "\t", true);
+    f.Write2File(*pos_y, file_naming("/y_data", POWER, A_CST), "\t", true);
+    f.Write2File(*pos_z, file_naming("/z_data", POWER, A_CST), "\t", true);
   }
 
   write_to_files();
@@ -675,7 +672,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
 }
 
 // File Handling
-void MD::file_naming(int POWER, double A_cst) {
+std::string MD::file_naming(std::string prefix, int POWER, double A_cst) {
   /*
 	 * Generates a unique filename for the simulation results to be stored.
 	 * Three filenames are created for the RDF, last particles' states (position
@@ -699,14 +696,9 @@ void MD::file_naming(int POWER, double A_cst) {
 
   // Explicit defitions
   _FILE_EXT = ".txt";
-  data = "/Data";
-  pos = "/Positions_Velocities";
-  HIST = "/RDF";
 
   // Path addition
-  data = _dir + data + _FILE_ID + _FILE_EXT;
-  pos = _dir + pos + _FILE_ID + _FILE_EXT;
-  HIST = _dir + HIST + _FILE_ID + _FILE_EXT;
+  return _dir + prefix + _FILE_ID + _FILE_EXT;
 }
 
 void MD::open_files() {

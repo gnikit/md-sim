@@ -5,3 +5,6 @@
 *.out
 *.a
 *.so
+
+# Intel Optimisation reports
+*.optrpt

@@ -5,7 +5,15 @@
 #include <iomanip>   // setprecision
 #include <random>    // normal_dist
 #include <sstream>   // stringstream
-#include "FileIO.h"  // FileLoading class
+
+/* 
+ * 1. Move the FileIO.h after the math.h preprocessor
+ * 2. Incrementally add to the FileIO the features
+ *    1. The getExePath()
+ *    2. The inbuild getExecutablePath()
+ *    3. Change the class to typename
+ *    4. Change the Template from the class to the methods of the class 
+ */
 
 // Load appropriate math library
 #if defined(__INTEL_COMPILER)
@@ -18,6 +26,7 @@
 #include <math.h>
 #define COMPILER "OTHER COMPILER"
 #endif
+#include "FileIO.h"  // FileLoading class
 
 // if changed, new vx,vy,vz files need to be generated
 #define PARTICLES_PER_AXIS 10
@@ -568,11 +577,11 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
 
   if (VISUALISE) {
     // Save particle positions to files
-    FileIO<double> f;
+    FileIO f;
     // Write the arrays as jagged,(hence transposed), this creates rows=STEPS and columns=PARTICLES
-    f.Write2File(*pos_x, file_naming("/x_data", POWER, A_CST), "\t", true);
-    f.Write2File(*pos_y, file_naming("/y_data", POWER, A_CST), "\t", true);
-    f.Write2File(*pos_z, file_naming("/z_data", POWER, A_CST), "\t", true);
+    f.Write2File<double>(*pos_x, file_naming("/x_data", POWER, A_CST), "\t", true);
+    f.Write2File<double>(*pos_y, file_naming("/y_data", POWER, A_CST), "\t", true);
+    f.Write2File<double>(*pos_z, file_naming("/z_data", POWER, A_CST), "\t", true);
   }
 
   write_to_files();

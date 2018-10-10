@@ -1,19 +1,10 @@
 #include "MD.h"
 #include <chrono>  // CPU run-time
 #include <cstdint>
-#include <ctime>     // std::chrono
-#include <iomanip>   // setprecision
-#include <random>    // normal_dist
-#include <sstream>   // stringstream
-
-/* 
- * 1. Move the FileIO.h after the math.h preprocessor
- * 2. Incrementally add to the FileIO the features
- *    1. The getExePath()
- *    2. The inbuild getExecutablePath()
- *    3. Change the class to typename
- *    4. Change the Template from the class to the methods of the class 
- */
+#include <ctime>    // std::chrono
+#include <iomanip>  // setprecision
+#include <random>   // normal_dist
+#include <sstream>  // stringstream
 
 // Load appropriate math library
 #if defined(__INTEL_COMPILER)
@@ -26,6 +17,8 @@
 #include <math.h>
 #define COMPILER "OTHER COMPILER"
 #endif
+
+// FileIO has to be loaded after the math libraries
 #include "FileIO.h"  // FileLoading class
 
 // if changed, new vx,vy,vz files need to be generated

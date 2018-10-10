@@ -26,6 +26,7 @@
 #define RDF_WAIT 0               // Iterations after which RDF will be collected
 #pragma warning(disable : 4996)  //_CRT_SECURE_NO_WARNINGS
 
+// TODO: move to namespace
 // Detects the OS and fetches the executable path that is passed
 // in the FileIO.h class
 #ifdef _WIN32
@@ -278,6 +279,7 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
   Cr.push_back(first_val);
 }
 
+// TODO: move to nanespace
 std::string MD::get_dir() {
   /*
 	 *	Returns the absolute, top working direcory of the git repo.
@@ -765,7 +767,7 @@ std::string MD::convert_to_string(const double &x, const int &precision) {
 
   return ss.str();
 }
-
+// TODO: move to namespace
 std::string MD::find_and_replace(std::string &source, const std::string &find,
                                  const std::string &replace) {
   for (std::string::size_type i = 0;

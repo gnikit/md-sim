@@ -117,3 +117,6 @@ publish/
 
 # Ignore binaries with no extension
 .vscode
+
+# Intel Optimisation reports
+*.optrpt

@@ -3,7 +3,7 @@
 #include <thread>
 #include "MD.h"
 
-#define STEPS 50  // 10000
+#define STEPS 5000  // 10000
 
 std::string dir_linux = "/home/gn/Desktop/test_data/sample";
 

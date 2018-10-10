@@ -85,7 +85,6 @@ class MD {
   ~MD();
 
   void Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST);
-  std::string get_dir();
   void reset_values();
 
  protected:
@@ -114,6 +113,4 @@ class MD {
   void show_run(size_t step_size_show);
   void time_stamp(std::ofstream &, std::string variables);
   std::string convert_to_string(const double &x, const int &precision);
-  std::string find_and_replace(std::string &source, const std::string &find,
-                               const std::string &replace);
 };

@@ -58,6 +58,6 @@ ax.set_ylim3d(0, BOX_LENGTH)
 ax.set_zlim3d(0, BOX_LENGTH)
 
 # Creating the Animation object
-ani = animation.FuncAnimation(fig, update_figure, frames=10000, interval=0, blit=False)
+ani = animation.FuncAnimation(fig, update_figure, frames=STEPS, interval=0, blit=False)
 # ani.save("/home/gn/Desktop/test_data/sample/animation.mp4", fps=60)
 plt.show()

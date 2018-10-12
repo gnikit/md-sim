@@ -12,7 +12,7 @@ import xml.etree.ElementTree as ET
 # TODO: add int __main__ for file execution from the terminal
 
 DIR = "/home/gn/Code/MD-simulation/examples/example_data"
-STEPS = 10000
+STEPS = 5000
 COMPRESSION = "false"
 RHO = 0.5
 TEMPERATURE = 0.5

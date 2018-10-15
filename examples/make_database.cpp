@@ -3,9 +3,9 @@
 #include <thread>
 #include "MD.h"
 
-#define STEPS 5000  // 10000
+#define STEPS 10000  // 10000
 
-std::string dir_linux = "/home/gn/Desktop/test_data/sample";
+std::string dir_linux = "/home/gn/Desktop/test_data";
 
 void MakeDataBase();
 
@@ -30,17 +30,17 @@ void MakeDataBase() {
   std::vector<double> A3 = LinearSpacedArray(2.50, 4.50, 5);
   std::vector<double> A4 = {0.70, 0.80, 0.90, 0.95, 1.10};
 
-  for (size_t d = 0; d < rho.size(); d++) {
-    for (size_t t = 0; t < T.size(); t++) {
-      for (size_t i = 0; i < n.size(); i++) {
-        for (size_t j = 0; j < A1.size(); j++) {
+  for (size_t d = 0; d < rho.size(); ++d) {
+    for (size_t t = 0; t < T.size(); ++t) {
+      for (size_t i = 0; i < n.size(); ++i) {
+        for (size_t j = 0; j < A1.size(); ++j) {
           std::cout << " run num: " << num << std::endl;
           //TODO: throw exception if rdf_wait > STEPS
 
-          MD* run1 = new MD(dir_linux, STEPS, false, 500, 10, false, 0);
-          MD* run2 = new MD(dir_linux, STEPS, false, 500, 10, false, 0);
-          MD* run3 = new MD(dir_linux, STEPS, false, 500, 10, false, 0);
-          MD* run4 = new MD(dir_linux, STEPS, false, 500, 10, false, 0);
+          MD* run1 = new MD(dir_linux, STEPS, false, 500, 10, false, 2000);
+          MD* run2 = new MD(dir_linux, STEPS, false, 500, 10, false, 2000);
+          MD* run3 = new MD(dir_linux, STEPS, false, 500, 10, false, 2000);
+          MD* run4 = new MD(dir_linux, STEPS, false, 500, 10, false, 2000);
 
           std::thread th1(&MD::Simulation, run1, rho[d], T[t], n[i], A1[j]);
           std::thread th2(&MD::Simulation, run2, rho[d], T[t], n[i], A2[j]);

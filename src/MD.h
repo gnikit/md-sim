@@ -47,6 +47,7 @@ class MD {
   double PC = 0;                       // Configurational Pressure
   double PK;                           // Kinetic Pressure
   double scale_v;                      // velocity scaling
+  double density_increment;            // Ammount which density is altered in compression
 
   // Visualisation vectors initialised in constructor
   std::vector<std::vector<double>> *pos_x;
@@ -85,6 +86,9 @@ class MD {
   ~MD();
 
   void Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST);
+  // TODO: bug with overloaded functions when passed to threads!, requires max # of args in the thread
+  //   void Simulation(double DENSITY, double TEMPERATURE, int POWER,
+  //                   double A_CST, double DENSITY_INCREMENT);
   void reset_values();
 
  protected:
@@ -105,7 +109,7 @@ class MD {
   void mean_square_displacement(std::vector<double> &MSDx,
                                 std::vector<double> &MSDy,
                                 std::vector<double> &MSDz);
-  void density_compression(int steps_quench, double TEMPERATURE);
+  void density_compression(int steps_quench, double TEMPERATURE, double density_increment);
 
   void open_files();
   std::string file_naming(std::string prefix, int POWER, double A_cst);

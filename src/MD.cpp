@@ -108,7 +108,7 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG) {
 
   PI = acos(-1.0);
   VISUALISE = false;
-  density_increment = 0.01;
+  _density_increment = 0.01;
 }
 
 MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
@@ -162,7 +162,7 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
   pos_z = new std::vector<std::vector<double>>(STEPS);
 
   PI = acos(-1.0);
-  density_increment = 0.01;
+  _density_increment = 0.01;
 }
 MD::~MD() {
   // Destroy the vectors allocated on the heap
@@ -465,7 +465,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
     if (compression_flag == true && _STEP_INDEX != 0 &&
         _STEP_INDEX % steps_quench == 0) {
       ++Q_counter;
-      density_compression(steps_quench, TEMPERATURE, density_increment);
+      density_compression(steps_quench, TEMPERATURE, _density_increment);
       std::cout << "Compressing fluid, run: " << Q_counter << " rho: " << _rho
                 << std::endl;
     }

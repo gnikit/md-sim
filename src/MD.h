@@ -47,7 +47,7 @@ class MD {
   double PC = 0;                       // Configurational Pressure
   double PK;                           // Kinetic Pressure
   double scale_v;                      // velocity scaling
-  double density_increment;            // Ammount which density is altered in compression
+  double _density_increment;           // Ammount which density is altered in compression
 
   // Visualisation vectors initialised in constructor
   std::vector<std::vector<double>> *pos_x;

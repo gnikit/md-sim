@@ -108,6 +108,7 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG) {
 
   PI = acos(-1.0);
   VISUALISE = false;
+  density_increment = 0.01;
 }
 
 MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
@@ -161,6 +162,7 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
   pos_z = new std::vector<std::vector<double>>(STEPS);
 
   PI = acos(-1.0);
+  density_increment = 0.01;
 }
 MD::~MD() {
   // Destroy the vectors allocated on the heap
@@ -375,16 +377,28 @@ void MD::mean_square_displacement(std::vector<double> &MSDx,
   msd.push_back(msd_temp / N);
 }
 
-void MD::density_compression(int steps_quench, double TEMPERATURE) {
-  // Increase _rho by 0.01
-  _rho += 0.01;
+void MD::density_compression(int steps_quench, double TEMPERATURE, double density_increment) {
+  double old_box_length = L;
+
+  // Density incrementation
+  _rho += density_increment;
+
   // Re-using this piece of code from MD::Simulation
   scale = pow((N / _rho), (1.0 / 3.0)) / Nx;
   L = pow((N / _rho), 1.0 / 3.0);
+  double box_length_ratio = L / old_box_length;
+
+  // Rescalling the positional vectors
+  for (size_t i = 0; i < N; ++i) {
+    rx[i] *= box_length_ratio;
+    ry[i] *= box_length_ratio;
+    rz[i] *= box_length_ratio;
+  }
   Vol = N / _rho;
+
+  // Rescalling the positional vector according to the newly defined volume
+
   initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
-  // TODO: box rescalling is required which means that all the radiai have to
-  //       be scalled by the factor which L is scalled
 }
 
 // MD Simulation
@@ -451,7 +465,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
     if (compression_flag == true && _STEP_INDEX != 0 &&
         _STEP_INDEX % steps_quench == 0) {
       ++Q_counter;
-      density_compression(steps_quench, TEMPERATURE);
+      density_compression(steps_quench, TEMPERATURE, density_increment);
       std::cout << "Compressing fluid, run: " << Q_counter << " rho: " << _rho
                 << std::endl;
     }
@@ -603,6 +617,14 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
   // Close file streams and reset vectors
   reset_values();
 }
+
+// MD simulation with density increment as a parameter
+// void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
+//                     double A_CST, double DENSITY_INCREMENT) {
+//   compression_flag = true;
+//   density_increment = DENSITY_INCREMENT;
+//   Simulation(DENSITY, TEMPERATURE, POWER, A_CST);
+// }
 
 // File Handling
 std::string MD::file_naming(std::string prefix, int POWER, double A_cst) {

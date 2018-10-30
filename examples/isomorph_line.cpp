@@ -4,13 +4,11 @@
 #include "MD.h"
 #include "isomorph.h"
 
-#define STEPS 100
+#define STEPS 15000
 #define PARTICLES 1000
 typedef std::vector<double> vec1d;
 
-std::string dir_linux = "./example_data/";
-
-void MakeDataBase();
+std::string dir_linux = "/home/gn/Desktop/test_data/isomorph";
 
 std::vector<double> LinearSpacedArray(double a, double b, std::size_t N);
 
@@ -18,14 +16,14 @@ int main() {
   /* Potential power strength */
   size_t n = 8;
   /* Generate Temperature vector for isomorph */
-  vec1d T_iso = LinearSpacedArray(0.5, 3, 5);
+  vec1d T_iso = LinearSpacedArray(0.5, 2, 5);
   /* Empty containers for density and a_par */
   vec1d rho_iso, A_iso;
   vec1d rho_iso_h, A_iso_h;
   vec1d rho_iso_k, A_iso_k;
   vec1d rho_iso_l, A_iso_l;
   /* Generate Density and A isomorph vectors */
-  Isomorph isomorph_line(0.5, 0.5, 1, T_iso);
+  Isomorph isomorph_line(0.5, 0.5, 0.5, T_iso);
   std::tie(rho_iso, A_iso) = isomorph_line.GenLine(n);
   Isomorph isomorph_line_h(0.5, 0.5, 0.75, T_iso);
   std::tie(rho_iso_h, A_iso_h) = isomorph_line_h.GenLine(n);
@@ -37,10 +35,8 @@ int main() {
    * This is an isomorph line run
    * Simulates the fluid along the line
    */
-  for (size_t i = 0; i < T_iso.size(); i++) {
-    std::cout << "T: " << T_iso[i] << " rho: " << rho_iso[i]
-              << " A: " << A_iso[i] << std::endl;
-    MD run(dir_linux, STEPS);
+  for (size_t i = 0; i < T_iso.size(); ++i) {
+    MD run(dir_linux, STEPS, false, 500, 10, false, 2000);
     run.Simulation(rho_iso[i], T_iso[i], n, A_iso[i]);
   }
 }

@@ -24,11 +24,12 @@ void MakeDataBase() {
   size_t num = 1;
   std::vector<size_t> n = {6, 8, 10, 12};
   std::vector<double> rho = {0.3, 0.5, 1.0, 1.5};
+  /* Test temperature smaller than 1 line 0.75 */
   std::vector<double> T = {0.5, 1.0, 2.0};
   std::vector<double> A1 = LinearSpacedArray(0, 1, 5);
   std::vector<double> A2 = LinearSpacedArray(1.25, 2.25, 5);
   std::vector<double> A3 = LinearSpacedArray(2.50, 4.50, 5);
-  std::vector<double> A4 = {0.70, 0.80, 0.90, 0.95, 1.10};
+  std::vector<double> A4 = {0.20, 0.40, 0.70, 0.80, 0.90};
 
   for (size_t d = 0; d < rho.size(); ++d) {
     for (size_t t = 0; t < T.size(); ++t) {

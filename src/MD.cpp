@@ -254,12 +254,6 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
   Cvx = vx;
   Cvy = vy;
   Cvz = vz;
-  double first_val = 0;
-  for (i = 0; i < N; ++i) {
-    first_val += (Cvx[i] * Cvx[i] + Cvy[i] * Cvy[i] + Cvz[i] * Cvz[i]) / N;
-  }
-  first_val /= N;
-  Cr.push_back(first_val);
 }
 
 void MD::mb_distribution(double TEMPERATURE) {
@@ -333,13 +327,16 @@ void MD::verlet_algorithm(std::vector<double> &rx, std::vector<double> &ry,
 void MD::velocity_autocorrelation_function(std::vector<double> &Cvx,
                                            std::vector<double> &Cvy,
                                            std::vector<double> &Cvz) {
-  double temp = 0;  // resets every time step
+  double cr_temp = 0;  // resets the sum every time step
+  double kb = 1.0;     // Boltzmann constant
+  double m = 1.0;      // particle mass
   size_t i;
+  /* The peak of the VAF is located at 3kb*T/m */
+  double norm = 3 * _T0 / m;
   for (i = 0; i < N; i++) {
-    temp += (Cvx[i] * vx[i] + Cvy[i] * vy[i] + Cvz[i] * vz[i]);
+    cr_temp += (Cvx[i] * vx[i] + Cvy[i] * vy[i] + Cvz[i] * vz[i]);
   }
-  temp /= N;
-  Cr.push_back(temp);
+  Cr.push_back((cr_temp / N)/norm);
 }
 
 void MD::radial_distribution_function(bool normalise) {

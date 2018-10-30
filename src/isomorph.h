@@ -7,7 +7,7 @@
 #define COMPILER "G++"
 #else
 #include <math.h>
-#define COMPILER "YOU KNOW NOTHING JOHN SNOW"
+#define COMPILER "OTHER COMPILER"
 #endif
 #include <tuple>
 #include <vector>

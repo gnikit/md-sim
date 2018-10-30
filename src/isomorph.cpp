@@ -36,7 +36,7 @@ std::tuple<vec1d, vec1d> Isomorph::GenLine(size_t n) {
    *  @return tuple(_RHO, _A): Two 1D vectors with the densities and As of
    *                          an isomorphic state.
    */
-  for (size_t i = 0; i < _T.size(); i++) {
+  for (size_t i = 0; i < _T.size(); ++i) {
     _T_out = _T[i];  // reduntant step
     _rho_out = getRho(_rho_r, _T_r, _T_out, n);
     _A_out = getA(_A_r, _rho_r, _rho_out, n);

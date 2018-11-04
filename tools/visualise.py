@@ -1,9 +1,13 @@
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.animation as animation
+import importlib.util as util
+sys.path.append("/home/gn/Code/MD-simulation/tools/MD-Simulation-Data-Analysis")
+from md import FileNaming
+
 """
-    To use visualise, first enable VISUALISE = true in the MD object e.g.
     MD run (dir, steps);
     run.VISUALISE = true;
     // Now run MD simulation
@@ -12,27 +16,30 @@ import matplotlib.animation as animation
     Then change dir to the dir of the files
 """
 
-# TODO: Make filename searcher
 # TODO: Use a more optimised file format/higher read/writes?
 
 # Read file
-dir = "/home/gn/Desktop/test_data/sample"
+dir = "/home/gn/Code/MD-simulation/examples/example_data"
 PARTICLES = 1000
-STEPS = 10000
+STEPS = 15000
 RHO = 0.5
 TEMPERATURE = 0.5
 A = 0.5
 POWER = 6
 BOX_LENGTH = (PARTICLES / RHO) ** (1./3.0)
 
-
+file_id = FileNaming(STEPS, PARTICLES)
+name_id = file_id.file_searcher(RHO, TEMPERATURE, POWER, A)
 # Read files into vectors of vectors
+
+
 def load_data(dir):
     # each line corresponds to a single step
     # hence each line has N particles (1000) by default
-    x_all = np.loadtxt(f"{dir}/x_data.dat")
-    y_all = np.loadtxt(f"{dir}/y_data.dat")
-    z_all = np.loadtxt(f"{dir}/z_data.dat")
+
+    x_all = np.loadtxt(f"{dir}/x_data{name_id}.txt")
+    y_all = np.loadtxt(f"{dir}/y_data{name_id}.txt")
+    z_all = np.loadtxt(f"{dir}/z_data{name_id}.txt")
 
     return x_all, y_all, z_all
 
@@ -46,6 +53,7 @@ def update_figure(num):
     graph._offsets3d = (x, y, z)
     return graph
 
+
 X_ALL, Y_ALL, Z_ALL = load_data(dir)
 
 fig = plt.figure(figsize=(15, 15))
@@ -58,6 +66,7 @@ ax.set_ylim3d(0, BOX_LENGTH)
 ax.set_zlim3d(0, BOX_LENGTH)
 
 # Creating the Animation object
-ani = animation.FuncAnimation(fig, update_figure, frames=STEPS, interval=0, blit=False)
+ani = animation.FuncAnimation(
+    fig, update_figure, frames=STEPS, interval=0, blit=False)
 # ani.save("/home/gn/Desktop/test_data/sample/animation.mp4", fps=60)
 plt.show()

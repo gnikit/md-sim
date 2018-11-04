@@ -29,7 +29,7 @@ void MakeDataBase() {
   std::vector<double> A1 = LinearSpacedArray(0, 1, 5);
   std::vector<double> A2 = LinearSpacedArray(1.25, 2.25, 5);
   std::vector<double> A3 = LinearSpacedArray(2.50, 4.50, 5);
-  std::vector<double> A4 = {0.20, 0.40, 0.70, 0.80, 0.90};
+  std::vector<double> A4 = {0.20, 0.40, 0.60, 0.80, 0.90};
 
   for (size_t d = 0; d < rho.size(); ++d) {
     for (size_t t = 0; t < T.size(); ++t) {

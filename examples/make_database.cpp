@@ -3,7 +3,7 @@
 #include <thread>
 #include "MD.h"
 
-#define STEPS 15000  // 10000
+#define STEPS 20000  // 10000
 
 std::string dir_linux = "/home/gn/Desktop/test_data";
 
@@ -23,13 +23,13 @@ void MakeDataBase() {
 
   size_t num = 1;
   std::vector<size_t> n = {8, 10, 12};
-  std::vector<double> rho = {0.20, 0.3, 0.5, 0.75, 1.0};
+  std::vector<double> rho = {0.20, /* 0.3, 0.5, 0.75, 1.0 */};
   /* Test temperature smaller than 1 line 0.75 */
   std::vector<double> T = {0.5, 1.0, 2.0};
   std::vector<double> A1 = LinearSpacedArray(0, 1, 5);
   std::vector<double> A2 = LinearSpacedArray(1.25, 2.25, 5);
   std::vector<double> A3 = LinearSpacedArray(2.50, 4.50, 5);
-  std::vector<double> A4 = {0.20, 0.40, 0.60, 0.80, 0.90};
+  std::vector<double> A4 = {0.20, 0.40, 0.60, 0.70, 0.90};  // TODO: change 0.70 to 0.80
 
   for (size_t d = 0; d < rho.size(); ++d) {
     for (size_t t = 0; t < T.size(); ++t) {
@@ -39,23 +39,23 @@ void MakeDataBase() {
           //TODO: throw exception if rdf_wait > STEPS
 
           MD* run1 = new MD(dir_linux, STEPS, false, 500, 10, false, 2000);
-          MD* run2 = new MD(dir_linux, STEPS, false, 500, 10, false, 2000);
-          MD* run3 = new MD(dir_linux, STEPS, false, 500, 10, false, 2000);
+          // MD* run2 = new MD(dir_linux, STEPS, false, 500, 10, false, 2000);
+          // MD* run3 = new MD(dir_linux, STEPS, false, 500, 10, false, 2000);
           MD* run4 = new MD(dir_linux, STEPS, false, 500, 10, false, 2000);
 
           std::thread th1(&MD::Simulation, run1, rho[d], T[t], n[i], A1[j]);
-          std::thread th2(&MD::Simulation, run2, rho[d], T[t], n[i], A2[j]);
-          std::thread th3(&MD::Simulation, run3, rho[d], T[t], n[i], A3[j]);
+          // std::thread th2(&MD::Simulation, run2, rho[d], T[t], n[i], A2[j]);
+          // std::thread th3(&MD::Simulation, run3, rho[d], T[t], n[i], A3[j]);
           std::thread th4(&MD::Simulation, run4, rho[d], T[t], n[i], A4[j]);
 
           th1.join();
-          th2.join();
-          th3.join();
+          // th2.join();
+          // th3.join();
           th4.join();
 
           delete run1;
-          delete run2;
-          delete run3;
+          // delete run2;
+          // delete run3;
           delete run4;
 
           ++num;

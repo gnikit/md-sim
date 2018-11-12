@@ -6,10 +6,21 @@ A program simulating a Molecular Dynamics (MD) fluid under the influence of an o
 
 
 ## Description
-A program written to investigate the transition of a fluid from MD to SPH. The C++ files **MD.cpp** and **MD.h** contain the core of the fluid simulation while **FileLoadingPlotting.py** contains the analysis methods. The files **Source.cpp** and **Run.py** are used to execute the fluid simulation and the fluid analysis, repsectively.
+A program written to investigate the transition of a fluid from MD to SPH. The C++ files **MD.cpp** and **MD.h** contain the core of the fluid simulation while **tools/MD-Simulation-Data-Analysis** contains the analysis methods written in Python. The files **bin/md** execuatable in combination with the script under **tools/generate_xml_file.py** can be used to simulate a fluid with any initial parameters, by simply changinh the xml file passed to **md**. 
+
+Examples are listed under the **examples** directory 
+
 
 ## Getting Started
-Build the library and the test cases with:
+
+### Clone
+You can clone the project with all its submodules with:
+```
+git clone --recurse-submodules -j4 https://github.com/GiannisNikiteas/MD-simulation.git
+```
+
+### Build
+Build the library, the executables and the test cases with:
 ```
 make -j
 ```

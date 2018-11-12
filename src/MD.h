@@ -105,14 +105,15 @@ class MD {
   void velocity_autocorrelation_function(std::vector<double> &Cvx,
                                          std::vector<double> &Cvy,
                                          std::vector<double> &Cvz);
-  void radial_distribution_function(bool normalise = true);
+  void radial_distribution_function();
   void mean_square_displacement(std::vector<double> &MSDx,
                                 std::vector<double> &MSDy,
                                 std::vector<double> &MSDz);
   void density_compression(int steps_quench, double TEMPERATURE, double density_increment);
 
   void open_files();
-  std::string file_naming(std::string prefix, int POWER, double A_cst);
+  std::string file_naming(std::string prefix, double DENSITY,
+                          double TEMPERATURE, int POWER, double A_cst);
   void write_to_files();
   void show_run(size_t step_size_show);
   void time_stamp(std::ofstream &, std::string variables);

@@ -183,12 +183,13 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
    *  + Velocity Arrays
    *  + Conserves/ Scales momentum == 0
    *  + Temperature
-   *  + Velocity Autocorrelaion Function
+   *  + Velocity Autocorrelation Function
    *
    *  @param &x, &y, &z: X, Y, Z vector points
    *  @param &vx, &vy, &vz: Vx, Vy, Vz vector points
    *  @param TEMPERATURE: Thermostat target temperature
    */
+
   // Initialise position matrix and velocity matrix from Cubic Centred Lattice
   if (compression_flag == false || (compression_flag == true && Q_counter == 0)) {
     size_t n = 0;
@@ -200,6 +201,7 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
           y.push_back((j + 0.5) * scale);
           z.push_back((k + 0.5) * scale);
 
+          // Position vectors used for MSD
           rrx.push_back((i + 0.5) * scale);
           rry.push_back((j + 0.5) * scale);
           rrz.push_back((k + 0.5) * scale);
@@ -208,7 +210,7 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
         }
       }
     }
-    // Generates Maxwell-Boltzmann dist from Python script
+    // Generates Maxwell-Boltzmann distribution
     mb_distribution(TEMPERATURE);
   }
 
@@ -238,7 +240,7 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
     KE += 0.5 * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]);
   }
   T = KE / (1.5 * N);
-  scale_v = sqrt(TEMPERATURE / T);  // scalling factor
+  scale_v = sqrt(TEMPERATURE / T);  // scaling factor
 
   // Velocity scaling
   for (i = 0; i < tempN; ++i) {
@@ -251,13 +253,24 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
   MSDy = y;
   MSDz = z;
 
-  // VAF initialasation, storing first velocities of particles
+  // VAF initialisation, storing first velocities of particles
   Cvx = vx;
   Cvy = vy;
   Cvz = vz;
 }
 
 void MD::mb_distribution(double TEMPERATURE) {
+  /* 
+   * Generates velocities for based on the Maxwell Boltzmann 
+   * distribution. The MB distribution in 3D is effectively the 
+   * triple product of 3 normal distributions.
+   * 
+   * The method populates the velocity vectors vx, vy, vz.
+   * All the constants are assumed to be 1.
+   * 
+   * @ param TEMPERATURE: Temperature of the MB distribution
+   */
+
   double kb = 1.0;
   double m = 1.0;
 
@@ -283,13 +296,14 @@ void MD::verlet_algorithm(std::vector<double> &rx, std::vector<double> &ry,
                           std::vector<double> &rrx, std::vector<double> &rry,
                           std::vector<double> &rrz) {
   /*
-	 *  An iterative leap-frog Verlet Algorithm
+	 *  An iterative leap-frog Verlet Algorithm.
 	 *
-	 *  @params <r> (x,y,z): position vector of particles.
-	 *  @params <v> <vx,vy,vz): velocity vector of particles.
+	 *  @params <r> (x,y,z): position vector of particles
+	 *  @params <v> (vx,vy,vz): velocity vector of particles
 	 *  @params <rr> (xx,yy,zz): position vectors for the fluid in the
-	 *                           square displacement arrays.
+	 *                           square displacement arrays
 	 */
+
   size_t i;
   for (i = 0; i < N; ++i) {
     vx[i] = vx[i] * scale_v + fx[i] * dt;
@@ -328,6 +342,14 @@ void MD::verlet_algorithm(std::vector<double> &rx, std::vector<double> &ry,
 void MD::velocity_autocorrelation_function(std::vector<double> &Cvx,
                                            std::vector<double> &Cvy,
                                            std::vector<double> &Cvz) {
+  /* 
+   * Calculates the Velocity Autocorrelation Function for the fluid.
+   * The method stores the values into the Cr vector and uses internally
+   * the velocities of the particles.
+   * 
+   * @param &Cvx, &Cvy, &Cvz: Reference to the initial velocity vectors.
+   */
+
   double cr_temp = 0;  // resets the sum every time step
   double kb = 1.0;     // Boltzmann constant
   double m = 1.0;      // particle mass
@@ -337,11 +359,19 @@ void MD::velocity_autocorrelation_function(std::vector<double> &Cvx,
   for (i = 0; i < N; i++) {
     cr_temp += (Cvx[i] * vx[i] + Cvy[i] * vy[i] + Cvz[i] * vz[i]);
   }
-  Cr.push_back((cr_temp / N)/norm);
+  Cr.push_back((cr_temp / N) / norm);
 }
 
-void MD::radial_distribution_function(bool normalise) {
-  /*normalise by default is TRUE*/
+void MD::radial_distribution_function() {
+  /* 
+   * Calculates the Radial Distribution Function for the fluid
+   * based on the values that are stored in the gr vector
+   * throughout the simulation. 
+   * The accuracy of the RDF is defined by the nhist variable.
+   * Saves the unormalised and normalised values of the RDF in 
+   * the corresponding filestream.
+   */
+
   double R = 0;
   double norm = 1;
   double cor_rho = _rho * (N - 1) / N;
@@ -352,14 +382,13 @@ void MD::radial_distribution_function(bool normalise) {
        << std::endl;
   Hist << "# Unormalised" << '\t' << "Normalised" << std::endl;
   for (i = 1; i < nhist; ++i) {  // Changed initial loop value from 0 -> 1
-    if (normalise) {
-      R = rg * i / nhist;
-      // Volume between 2 spheres, accounting for double counting
-      // hence the 2/3*pi*((R+dr)**3 - R**3)
-      // Accounting for the rdf_wait time steps
-      norm = cor_rho * (2.0 / 3.0 * PI * N * (STEPS - rdf_wait) *
-                        (pow((R + (dr / 2.0)), 3) - pow((R - (dr / 2.0)), 3)));
-    }
+    R = rg * i / nhist;
+    // Volume between 2 spheres, accounting for double counting
+    // hence the 2/3*pi*((R+dr)**3 - R**3)
+    // Accounting for the rdf_wait time steps
+    norm = cor_rho * (2.0 / 3.0 * PI * N * (STEPS - rdf_wait) *
+                      (pow((R + (dr / 2.0)), 3) - pow((R - (dr / 2.0)), 3)));
+
     Hist << gr[i] << '\t' << gr[i] / norm << std::endl;
   }
 }
@@ -367,6 +396,20 @@ void MD::radial_distribution_function(bool normalise) {
 void MD::mean_square_displacement(std::vector<double> &MSDx,
                                   std::vector<double> &MSDy,
                                   std::vector<double> &MSDz) {
+  /* 
+   * Performs the Mean Square Displacement calculation for the fluid.
+   * The method stores the MSD of the step in the msd vector.
+   * 
+   * The method uses the explicitly created position vectors 
+   * rrx, rry and rrz that are instantiated in the initialise method 
+   * and are a copy of the rx, ry, rz vectors without the application
+   * of the periodic boundary conditions in the Verlet algorithm.
+   * 
+   * 
+   * @param &MSDx, &MSDy, &MSDz: Reference to vectors containing the 
+   *                             initial positions of the particles
+   */
+
   double msd_temp = 0;
   for (size_t i = 0; i < N; ++i) {
     msd_temp += (pow((rrx[i] - MSDx[i]), 2) + pow((rry[i] - MSDy[i]), 2) +
@@ -376,6 +419,17 @@ void MD::mean_square_displacement(std::vector<double> &MSDx,
 }
 
 void MD::density_compression(int steps_quench, double TEMPERATURE, double density_increment) {
+  /* 
+   * Performs repeated compressions of the fluid by periodically
+   * incrementing the density of the fluid. 
+   * As a consequence the box length, the scaling factor and the 
+   * position vectors are also scaled in order to conserve the number
+   * of particles in the box.
+   * 
+   * @param steps_quench: Number of steps over which a compression occurs
+   * @param TEMPERATURE: Temperature of the fluid
+   * @param density_increment: Amount with which the density is increased (or decreased) 
+   */
   double old_box_length = L;
 
   // Density incrementation
@@ -407,15 +461,15 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
    *  defined in this class. It monitors the following quantities
    *  RDF, MSD, VAF, average particle energies & pressures.
    *
-   *  @param DENSITY: the density rho of fluid.
-   *  @param TEMPERATURE: the temperature of the thermostat.
+   *  @param DENSITY: Density rho of fluid.
+   *  @param TEMPERATURE: Temperature of the thermostat.
    *  @param POWER: the power n that the pair potential will be using
    *                typical values are in the range of 6-18.
    *  @param A_CST: softening constant 'a' of the pair potential.
    *                When 'a' = 0, then fluid is pure MD, increasing
-   *                'a' reuslts into softening of the pair potential.
+   *                'a' results into softening of the pair potential.
    */
-  // Initialise scalling variables
+  // Initialise scaling variables
   std::cout << "***************************\n"
                "** MD Simulation started **\n"
                "***************************\n"
@@ -425,7 +479,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
   _T0 = TEMPERATURE;
   _rho = DENSITY;
   dt /= sqrt(_T0);
-  // Box length scalling
+  // Box length scaling
   scale = pow((N / _rho), (1.0 / 3.0)) / Nx;
   L = pow((N / _rho), 1.0 / 3.0);
   Vol = N / _rho;
@@ -437,9 +491,9 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
   dr = rg / nhist;
 
   // Generating the filenames for the output
-  data = file_naming("/Data", POWER, A_CST);
-  pos = file_naming("/Positions_Velocities", POWER, A_CST);
-  HIST = file_naming("/RDF", POWER, A_CST);
+  data = file_naming("/Data", DENSITY, TEMPERATURE, POWER, A_CST);
+  pos = file_naming("/Positions_Velocities", DENSITY, TEMPERATURE, POWER, A_CST);
+  HIST = file_naming("/RDF", DENSITY, TEMPERATURE, POWER, A_CST);
 
   open_files();
   time_stamp(DATA, "# step \t rho \t U \t K \t Pc \t Pk \t MSD \t VAF");
@@ -502,7 +556,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
           double ff =
               (POWER)*r * pow(q, ((-POWER - 2.0)));  // Force for particles
 
-          // TODO: Gausian-force with sigma=1 and epsilon=1
+          // TODO: Gaussian-force with sigma=1 and epsilon=1
           // double ff = 2 * r * exp(-r * r);
 
           // Canceling the ij and ji pairs
@@ -542,7 +596,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
 
     // Isothermal Calibration
     scale_v = sqrt(_T0 / T);  // using T & KE from prev timestep
-    KE = 0;                   // resetting Kintetic Energy per iteration
+    KE = 0;                   // resetting Kinetic Energy per iteration
 
     verlet_algorithm(rx, ry, rz, vx, vy, vz, rrx, rry, rrz);
 
@@ -558,7 +612,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
     PK = _rho * T;
     pk.push_back(PK);
 
-    // Average Kintetic Energy
+    // Average Kinetic Energy
     KE /= N;
     k_en.push_back(KE);
 
@@ -584,9 +638,9 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
     // Save particle positions to files
     FileIO f;
     // Write the arrays as jagged,(hence transposed), this creates rows=STEPS and columns=PARTICLES
-    f.Write2File<double>(*pos_x, file_naming("/x_data", POWER, A_CST), "\t", true);
-    f.Write2File<double>(*pos_y, file_naming("/y_data", POWER, A_CST), "\t", true);
-    f.Write2File<double>(*pos_z, file_naming("/z_data", POWER, A_CST), "\t", true);
+    f.Write2File<double>(*pos_x, file_naming("/x_data", DENSITY, TEMPERATURE, POWER, A_CST), "\t", true);
+    f.Write2File<double>(*pos_y, file_naming("/y_data", DENSITY, TEMPERATURE, POWER, A_CST), "\t", true);
+    f.Write2File<double>(*pos_z, file_naming("/z_data", DENSITY, TEMPERATURE, POWER, A_CST), "\t", true);
   }
 
   write_to_files();
@@ -598,7 +652,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
         << fz[el] << std::endl;
   }
 
-  radial_distribution_function(true);  // normalisation argument
+  radial_distribution_function();
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   std::cout
       << "CPU run time = "
@@ -616,26 +670,30 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
   reset_values();
 }
 
-// MD simulation with density increment as a parameter
-// void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
-//                     double A_CST, double DENSITY_INCREMENT) {
-//   compression_flag = true;
-//   density_increment = DENSITY_INCREMENT;
-//   Simulation(DENSITY, TEMPERATURE, POWER, A_CST);
-// }
-
 // File Handling
-std::string MD::file_naming(std::string prefix, int POWER, double A_cst) {
+std::string MD::file_naming(std::string prefix, double DENSITY,
+                            double TEMPERATURE, int POWER, double A_cst) {
   /*
 	 * Generates a unique filename for the simulation results to be stored.
-	 * Three filenames are created for the RDF, last particles' states (position
-	 * ,velocity, acceleration) and statistical data.
+   * The method infers from the constructor the number of particles used 
+   * and the duration of the simulation (steps).
+   * 
+   * @param prefix: File name preceeding the file id
+   * @param DENSITY: Fluid density
+   * @param TEMPERATURE: Fluid temperature
+   * @param POWER: Pair potential power
+   * @param A_cst: Softening parameter constant
+   * 
+   * @return: string structured as follows
+   *          INPUT_DIR/prefix_step_#_particles_#_rho_#_T_#_n_#_A_#.txt
 	 */
+
+  // Individual streams handling double to string conversions
   std::stringstream A_stream, rho_stream, T_stream;
 
-  T_stream << std::fixed << std::setprecision(4) << _T0;     // 4 decimal
-  A_stream << std::fixed << std::setprecision(5) << A_cst;   // 5 decimals
-  rho_stream << std::fixed << std::setprecision(4) << _rho;  // 4 decimal
+  rho_stream << std::fixed << std::setprecision(4) << DENSITY;    // 4 decimals
+  T_stream << std::fixed << std::setprecision(4) << TEMPERATURE;  // 4 decimals
+  A_stream << std::fixed << std::setprecision(5) << A_cst;        // 5 decimals
 
   _step_to_str = "_step_" + std::to_string(STEPS);
   _particles_to_str = "_particles_" + std::to_string(N);
@@ -656,8 +714,8 @@ std::string MD::file_naming(std::string prefix, int POWER, double A_cst) {
 
 void MD::open_files() {
   /*
-	 * Open/Create if file does not exist
-	 * Overwrite existing data
+	 * Open/Create if file does not exist.
+	 * Overwrites existing data.
 	 */
   Hist.open(HIST, std::ios::out | std::ios::trunc);
   DATA.open(data, std::ios::out | std::ios::trunc);
@@ -666,7 +724,7 @@ void MD::open_files() {
 
 void MD::write_to_files() {
   /*
-	 * Writes values of parameters to file
+	 * Writes values of parameters to Data file.
 	 */
   for (size_t i = 0; i < STEPS; ++i) {
     DATA << (i + 1) << '\t' << density[i] << '\t' << temperature[i] << '\t'
@@ -678,7 +736,10 @@ void MD::write_to_files() {
 void MD::show_run(size_t step_size_show) {
   /*
 	 * Displays the system parameters every step_size_show of steps
-	 * Input the increment step
+	 * Input the increment step.
+   * 
+   * @param step_size_show: Number of steps, every which the parameters should be
+   *                        displayed on screen     
 	 */
   if (_STEP_INDEX == 0) {
     std::cout << "step:\tT:\tKE:\tU:\tU+K:\tPC:\tPK:\t(PK+PC):" << std::endl;
@@ -695,8 +756,10 @@ void MD::show_run(size_t step_size_show) {
 void MD::reset_values() {
   /*
 	 * Closes open file streams and resets sizes and values to 0
-	 * For multiple simulations
+	 * Use it when running multiple simulations and recycling the same
+   * MD object.
 	 */
+
   // Close streams
   Hist.close();
   DATA.close();
@@ -728,7 +791,10 @@ void MD::reset_values() {
 void MD::time_stamp(std::ofstream &stream, std::string variables) {
   /*
 	 * Dates the file and allows the input of a header
-	 * Input a file stream to write and string of characters to display as headers
+	 * Input a file stream to write and string of characters to display as headers.
+   * 
+   * @param &stream: Stream that should be timestaped
+   * @param variables: A header that can be included underneath the timestamp
 	 */
   std::chrono::time_point<std::chrono::system_clock> instance;
   instance = std::chrono::system_clock::now();
@@ -738,6 +804,14 @@ void MD::time_stamp(std::ofstream &stream, std::string variables) {
 }
 
 std::string MD::convert_to_string(const double &x, const int &precision) {
+  /* 
+   * Convert doubles to a string with a variable degree of precision.
+   * 
+   * @param &x: Double number to be converted
+   * @param &precision: Precision of the double when converted to string
+   * 
+   * @return: string 
+   */
   std::ostringstream ss;
   ss.str(std::string());  // don't forget to empty the stream
   ss << std::fixed << std::setprecision(precision) << x;

@@ -28,6 +28,7 @@
 #define RDF_WAIT 0               // Iterations after which RDF will be collected
 #pragma warning(disable : 4996)  //_CRT_SECURE_NO_WARNINGS
 
+// TODO: make delegated constructors
 MD::MD(std::string DIRECTORY, size_t run_number) {
   _dir = DIRECTORY;
   STEPS = run_number;

@@ -21,11 +21,11 @@ from md import FileNaming
 # Read file
 dir = "/home/gn/Code/MD-simulation/examples/example_data"
 PARTICLES = 1000
-STEPS = 15000
+STEPS = 5000
 RHO = 0.5
 TEMPERATURE = 0.5
 A = 0.5
-POWER = 6
+POWER = 8
 BOX_LENGTH = (PARTICLES / RHO) ** (1./3.0)
 
 file_id = FileNaming(STEPS, PARTICLES)

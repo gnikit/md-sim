@@ -8,16 +8,29 @@ LN = -L ../lib -L ../src -L ../tools/FileIO
 
 LINKER = $(INC) $(LN) -lmd
 
-all: database isomorph fluid_compression $(LIB)/libmd.a
+all: database \
+			isomorph_line \
+			fluid_compression \
+			simple_run \
+			visualise_fluid \
+			$(LIB)/libmd.a
+			
 
 database: database.o $(LIB)/libmd.a
 	$(CXX) $(FLAGS) database.o $(LINKER) -o database
 	
-isomorph: isomorph_line.o $(LIB)/libmd.a
-	$(CXX) $(FLAGS) isomorph_line.o $(LINKER) -o isomorph
+isomorph_line: isomorph_line.o $(LIB)/libmd.a
+	$(CXX) $(FLAGS) isomorph_line.o $(LINKER) -o isomorph_line
 
 fluid_compression: fluid_compression.o $(LIB)/libmd.a 
 	$(CXX) $(FLAGS) fluid_compression.o $(LINKER) -o fluid_compression
+
+simple_run: simple_run.o $(LIB)/libmd.a
+	$(CXX) $(FLAGS) simple_run.o $(LINKER) -o simple_run
+
+visualise_fluid: visualise_fluid.o $(LIB)/libmd.a
+	$(CXX) $(FLAGS) visualise_fluid.o $(LINKER) -o visualise_fluid
+
 
 database.o:
 	$(CXX) $(CXXFLAGS) -I$(SRC) make_database.cpp -o database.o
@@ -28,13 +41,21 @@ isomorph_line.o:
 fluid_compression.o:
 	$(CXX) $(CXXFLAGS) -I$(SRC) fluid_compression.cpp -o fluid_compression.o
 
+simple_run.o:
+	$(CXX) $(CXXFLAGS) -I$(SRC) simple_run.cpp -o simple_run.o
+
+visualise_fluid.o:
+	$(CXX) $(CXXFLAGS) -I$(SRC) visualise_fluid.cpp -o visualise_fluid.o
+
 
 clean:
-	$(RM) isomorph database fluid_compression *.o 
+	$(RM) isomorph_line database fluid_compression 
+	$(RM) simple_run visualise_fluid *.o 
 	$(RM) ./example_data/*.txt
 	$(RM) ../data/initial_velocities*
 	$(RM) ../data/vx* ../data/vy* ../data/vz*
 
 
 clean_keep_data:
-	$(RM) isomorph database fluid_compression *.o
+	$(RM) isomorph_line database fluid_compression 
+	$(RM) simple_run visualise_fluid *.o

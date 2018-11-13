@@ -6,9 +6,9 @@
 #include <sstream>  // stringstream
 
 // Check for Compiler support
-// TODO: in future C++ versions, fs from global scope and mv to constructor
+// TODO: in future C++ versions, rm fs:: from global scope and mv in constructor
 #if __cplusplus <= 201103L
-#error This library requires at least C++11 compiler support
+#error This library requires at least C++17 compiler support
 
 // If C++ version C++2a or above use
 #elif __cplusplus >= 201709
@@ -20,7 +20,7 @@ namespace fs = std::filesystem;
 namespace fs = std::experimental::filesystem;
 #endif
 
-// Load appropriate math library
+// Load Intel math lib if available
 #if defined(__INTEL_COMPILER)
 #include <mathimf.h>  // Intel Math library
 #define COMPILER "INTEL"
@@ -37,14 +37,11 @@ namespace fs = std::experimental::filesystem;
 // FileIO has to be loaded after the math libraries
 #include "FileIO.h"  // FileLoading class
 
-// if changed, new vx,vy,vz files need to be generated
 #define PARTICLES_PER_AXIS 10
-// Increase the number of bins to find RDF intersects
+// Increase the number of bins for a more accurate RDF
 #define NHIST 500                // Number of histogram bins
 #define RDF_WAIT 0               // Iterations after which RDF will be collected
 #pragma warning(disable : 4996)  //_CRT_SECURE_NO_WARNINGS
-
-// TODO: convert the directory manipulation to use std::filesystem
 
 MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
        size_t rdf_bins, size_t particles_per_axis, bool track_particles,
@@ -111,12 +108,12 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
   fy.resize(N, 0);
   fz.resize(N, 0);
   /* Observed Quantities */
-  Cr.reserve(STEPS);
-  msd.reserve(STEPS);
-  u_en.reserve(STEPS);
-  k_en.reserve(STEPS);
-  pc.reserve(STEPS);
-  pk.reserve(STEPS);
+  Cr.reserve(STEPS);    // Velocity Autocorrelation Function
+  msd.reserve(STEPS);   // Mean Square Displacement
+  u_en.reserve(STEPS);  // Average Potential Energy
+  k_en.reserve(STEPS);  // Average Kinetic Energy
+  pc.reserve(STEPS);    // Configurational Pressure
+  pk.reserve(STEPS);    // Kinetic Pressure
   temperature.reserve(STEPS);
   /* Visualisation vectors on the heap*/
   pos_x = new std::vector<std::vector<double>>(STEPS);
@@ -632,11 +629,9 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   std::cout
       << "CPU run time = "
-      << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() /
-             60
+      << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() / 60
       << " min "
-      << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() %
-             60
+      << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() % 60
       << "s" << std::endl;
   std::cout << "******************************\n"
                "** MD Simulation terminated **\n"

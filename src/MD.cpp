@@ -28,90 +28,6 @@
 #define RDF_WAIT 0               // Iterations after which RDF will be collected
 #pragma warning(disable : 4996)  //_CRT_SECURE_NO_WARNINGS
 
-// TODO: make delegated constructors
-MD::MD(std::string DIRECTORY, size_t run_number) {
-  _dir = DIRECTORY;
-  STEPS = run_number;
-
-  Nx = Ny = Nz = PARTICLES_PER_AXIS;  // Number of particles per axis
-  N = Nx * Ny * Nz;
-  nhist = NHIST;
-  rdf_wait = RDF_WAIT;
-
-  // For efficiency, memory in the containers is reserved before use
-  /* Positions */
-  rx.reserve(N);
-  ry.reserve(N);
-  rz.reserve(N);
-  /* Velocities */
-  vx.reserve(N);
-  vy.reserve(N);
-  vz.reserve(N);
-  /* RDF */
-  gr.resize(nhist + 1, 0);  // gr with Index igr
-  /* Forces/Acceleration */
-  fx.resize(N, 0);
-  fy.resize(N, 0);
-  fz.resize(N, 0);
-  /* Observed Quantities */
-  Cr.reserve(STEPS);
-  msd.reserve(STEPS);
-  u_en.reserve(STEPS);
-  k_en.reserve(STEPS);
-  pc.reserve(STEPS);
-  pk.reserve(STEPS);
-  temperature.reserve(STEPS);
-  /* Visualisation vectors on the heap*/
-  pos_x = new std::vector<std::vector<double>>(STEPS);
-  pos_y = new std::vector<std::vector<double>>(STEPS);
-  pos_z = new std::vector<std::vector<double>>(STEPS);
-
-  PI = acos(-1.0);
-  VISUALISE = false;
-}
-
-MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG) {
-  _dir = DIRECTORY;
-  STEPS = run_number;
-
-  Nx = Ny = Nz = PARTICLES_PER_AXIS;  // Number of particles per axis
-  N = Nx * Ny * Nz;
-  nhist = NHIST;
-  rdf_wait = RDF_WAIT;
-  compression_flag = COMPRESS_FLAG;
-  // For efficiency, memory in the containers is reserved before use
-  /* Positions */
-  rx.reserve(N);
-  ry.reserve(N);
-  rz.reserve(N);
-  /* Velocities */
-  vx.reserve(N);
-  vy.reserve(N);
-  vz.reserve(N);
-  /* RDF */
-  gr.resize(nhist + 1, 0);  // gr with Index igr
-  /* Forces/Acceleration */
-  fx.resize(N, 0);
-  fy.resize(N, 0);
-  fz.resize(N, 0);
-  /* Observed Quantities */
-  Cr.reserve(STEPS);
-  msd.reserve(STEPS);
-  u_en.reserve(STEPS);
-  k_en.reserve(STEPS);
-  pc.reserve(STEPS);
-  pk.reserve(STEPS);
-  temperature.reserve(STEPS);
-  /* Visualisation vectors on the heap*/
-  pos_x = new std::vector<std::vector<double>>(STEPS);
-  pos_y = new std::vector<std::vector<double>>(STEPS);
-  pos_z = new std::vector<std::vector<double>>(STEPS);
-
-  PI = acos(-1.0);
-  VISUALISE = false;
-  _density_increment = 0.01;
-}
-
 MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
        size_t rdf_bins, size_t particles_per_axis, bool track_particles,
        size_t collect_rdf_after) {
@@ -121,7 +37,7 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
    */
   _dir = DIRECTORY;
   STEPS = run_number;
-  // Total number of particles
+  // Total number of particles N
   Nx = Ny = Nz = particles_per_axis;
   N = Nx * Ny * Nz;
   compression_flag = COMPRESS_FLAG;
@@ -130,10 +46,23 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
   VISUALISE = track_particles;
   // Accuracy of RDF
   nhist = rdf_bins;
-  // The number of iterations the data collection of RDF is postponed
-  // in order to allow the fluid to lose its internal cubic lattice
-  rdf_wait = collect_rdf_after;
 
+  // Ensuring the number of steps is greater than the rdf equilibration period
+  try {
+    // The number of iterations the data collection of RDF is postponed
+    // in order to allow the fluid to lose its internal cubic lattice
+    rdf_wait = collect_rdf_after;
+    // Substraction of size_ts if negative results into logic errors
+    // hence the use of an int temp;
+    int temp = run_number - collect_rdf_after;
+    if (temp < 0) {
+      throw "collect_rdf_after is greater than the run_number";
+    }
+  } catch (const char *msg) {
+    std::cerr << "Error: " << msg << std::endl;
+    std::cerr << "rdf_wait is set to 0" << std::endl;
+    rdf_wait = 0;
+  }
   // For efficiency, memory in the containers is reserved before use
   /* Positions */
   rx.reserve(N);
@@ -165,6 +94,21 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
   PI = acos(-1.0);
   _density_increment = 0.01;
 }
+
+// Delegating constructors with reduced number of arguments
+// https://en.wikipedia.org/wiki/C++11#Object_construction_improvement
+// Constructor to use for density compression
+MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG)
+    : MD(DIRECTORY, run_number, COMPRESS_FLAG,
+         NHIST, PARTICLES_PER_AXIS, false, RDF_WAIT) {
+}
+
+// Constructor to use for the simplest cases
+MD::MD(std::string DIRECTORY, size_t run_number)
+    : MD(DIRECTORY, run_number,
+         false, NHIST, PARTICLES_PER_AXIS, false, RDF_WAIT) {
+}
+
 MD::~MD() {
   // Destroy the vectors allocated on the heap
   delete pos_x;

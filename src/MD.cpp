@@ -116,7 +116,7 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
        size_t rdf_bins, size_t particles_per_axis, bool track_particles,
        size_t collect_rdf_after) {
   /* 
-   * This constructor allows for increased constrol over the internal
+   * This constructor allows for increased control over the internal
    * parameters of the fluid.
    */
   _dir = DIRECTORY;

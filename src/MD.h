@@ -47,21 +47,21 @@ class MD {
   double PC = 0;                       // Configurational Pressure
   double PK;                           // Kinetic Pressure
   double scale_v;                      // velocity scaling
-  double _density_increment;           // Ammount which density is altered in compression
+  double _density_increment;           // Amount which density is altered in compression
 
   // Visualisation vectors initialised in constructor
   std::vector<std::vector<double>> *pos_x;
   std::vector<std::vector<double>> *pos_y;
   std::vector<std::vector<double>> *pos_z;
 
-  // Quenching varibles
+  // Compression variables
   bool compression_flag = false;
-  size_t Q_counter = 0;  // counts the number qunchings that have occured
+  size_t Q_counter = 0;  // counts the number compression that have occurred
 
   // HISTOGRAM VARIABLES
-  int igr;  // Index of Hist
-  double rg;
-  double dr;
+  int igr;                 // Index of Hist
+  double rg;               // cut off radius
+  double dr;               // bin increment in terms of radius units
   std::vector<double> gr;  // RDF vector container
 
  private:
@@ -86,9 +86,6 @@ class MD {
   ~MD();
 
   void Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST);
-  // TODO: bug with overloaded functions when passed to threads!, requires max # of args in the thread
-  //   void Simulation(double DENSITY, double TEMPERATURE, int POWER,
-  //                   double A_CST, double DENSITY_INCREMENT);
   void reset_values();
 
  protected:

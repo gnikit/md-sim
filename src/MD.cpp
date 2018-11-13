@@ -1,18 +1,34 @@
 #include "MD.h"
-#include <chrono>  // CPU run-time
-#include <cstdint>
+#include <chrono>   // CPU run-time
 #include <ctime>    // std::chrono
 #include <iomanip>  // setprecision
 #include <random>   // normal_dist
 #include <sstream>  // stringstream
 
+// Check for Compiler support
+// TODO: in future C++ versions, fs from global scope and mv to constructor
+#if __cplusplus <= 201103L
+#error This library requires at least C++11 compiler support
+
+// If C++ version C++2a or above use
+#elif __cplusplus >= 201709
+#include <filesystem>
+namespace fs = std::filesystem;
+
+#else
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#endif
+
 // Load appropriate math library
 #if defined(__INTEL_COMPILER)
 #include <mathimf.h>  // Intel Math library
 #define COMPILER "INTEL"
+
 #elif defined(__GNUC__)
 #include <math.h>
 #define COMPILER "G++"
+
 #else
 #include <math.h>
 #define COMPILER "OTHER COMPILER"
@@ -28,6 +44,8 @@
 #define RDF_WAIT 0               // Iterations after which RDF will be collected
 #pragma warning(disable : 4996)  //_CRT_SECURE_NO_WARNINGS
 
+// TODO: convert the directory manipulation to use std::filesystem
+
 MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
        size_t rdf_bins, size_t particles_per_axis, bool track_particles,
        size_t collect_rdf_after) {
@@ -35,7 +53,21 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
    * This constructor allows for increased control over the internal
    * parameters of the fluid.
    */
-  _dir = DIRECTORY;
+
+  try {
+    _dir = DIRECTORY;
+    if (!fs::exists(_dir)) {
+      // TODO: check the exception the fs::exists throws
+      throw
+          "input DIRECTORY in MD constructor does not exist. "
+          "Use a valid directory for output files to be saved";
+    }
+
+  } catch (const char *msg) {
+    std::cerr << "Error: " << msg << std::endl;
+    exit(1);
+  }
+
   STEPS = run_number;
   // Total number of particles N
   Nx = Ny = Nz = particles_per_axis;
@@ -59,7 +91,7 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
       throw "collect_rdf_after is greater than the run_number";
     }
   } catch (const char *msg) {
-    std::cerr << "Error: " << msg << std::endl;
+    std::cerr << "Warning: " << msg << std::endl;
     std::cerr << "rdf_wait is set to 0" << std::endl;
     rdf_wait = 0;
   }

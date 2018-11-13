@@ -15,21 +15,22 @@ all: database \
 			visualise_fluid \
 			$(LIB)/libmd.a
 			
-
+# TODO: -lstdc++fs has to be added at the end
+# TODO: https://stackoverflow.com/questions/33149878/experimentalfilesystem-linker-error
 database: database.o $(LIB)/libmd.a
-	$(CXX) $(FLAGS) database.o $(LINKER) -o database
+	$(CXX) $(FLAGS) database.o $(LINKER) -o database -lstdc++fs
 	
 isomorph_line: isomorph_line.o $(LIB)/libmd.a
-	$(CXX) $(FLAGS) isomorph_line.o $(LINKER) -o isomorph_line
+	$(CXX) $(FLAGS) isomorph_line.o $(LINKER) -o isomorph_line -lstdc++fs
 
 fluid_compression: fluid_compression.o $(LIB)/libmd.a 
-	$(CXX) $(FLAGS) fluid_compression.o $(LINKER) -o fluid_compression
+	$(CXX) $(FLAGS) fluid_compression.o $(LINKER) -o fluid_compression -lstdc++fs
 
 simple_run: simple_run.o $(LIB)/libmd.a
-	$(CXX) $(FLAGS) simple_run.o $(LINKER) -o simple_run
+	$(CXX) $(FLAGS) simple_run.o $(LINKER) -o simple_run -lstdc++fs
 
 visualise_fluid: visualise_fluid.o $(LIB)/libmd.a
-	$(CXX) $(FLAGS) visualise_fluid.o $(LINKER) -o visualise_fluid
+	$(CXX) $(FLAGS) visualise_fluid.o $(LINKER) -o visualise_fluid -lstdc++fs
 
 
 database.o:

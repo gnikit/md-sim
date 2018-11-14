@@ -16,6 +16,15 @@
 #define COMPILER "OTHER COMPILER"
 #endif
 
+/* 
+ * A class responsible for implementing different 
+ * pair potentials in the MD class.
+ * 
+ * Pair potentials supported:
+ * BIP: Bounded Inverse Power
+ * GCM: Gaussian Core Model
+ */
+
 class MD_tools {
  public:
   MD_tools();

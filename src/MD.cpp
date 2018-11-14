@@ -421,8 +421,6 @@ void MD::density_compression(int steps_quench, double TEMPERATURE, double densit
   }
   Vol = N / _rho;
 
-  // Rescalling the positional vector according to the newly defined volume
-
   initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
 }
 
@@ -486,6 +484,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
     U = 0;  // seting Potential U to 0
     PC = 0;
 
+    // TODO: pass as argument steps_quench
     size_t steps_quench = 10;  // steps between each quenching
     if (compression_flag == true && _STEP_INDEX != 0 &&
         _STEP_INDEX % steps_quench == 0) {
@@ -519,7 +518,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
           z = z + L;
         }
 
-        // Pair potential
+        // Pair potential radius
         r = sqrt((x * x) + (y * y) + (z * z));
 
         // Force loop

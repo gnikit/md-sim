@@ -4,6 +4,7 @@
 #include <iomanip>  // setprecision
 #include <random>   // normal_dist
 #include <sstream>  // stringstream
+#include "md_algorithms.h"
 
 // Check for Compiler support
 // TODO: in future C++ versions, rm fs:: from global scope and mv in constructor
@@ -460,6 +461,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
   cut_off = 3.0;
   rg = cut_off;
   dr = rg / nhist;
+  MD_tools potential;  // Pair potential object
 
   // Generating the filenames for the output
   data = file_naming("/Data", DENSITY, TEMPERATURE, POWER, A_CST);
@@ -524,12 +526,14 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
         // Force loop
         if (r < cut_off) {
           // BIP potential of the form: phi = 1/[(r**2 + a**2)**(n/2)]
-          double q = sqrt(r * r + A_CST * A_CST);
-          double ff =
-              (POWER)*r * pow(q, ((-POWER - 2.0)));  // Force for particles
+          // Allows the user to choose different pair potentials
+          auto [ff, temp_u] = potential.BIP_force(r, POWER, A_CST);
 
-          // TODO: Gaussian-force with sigma=1 and epsilon=1
-          // double ff = 2 * r * exp(-r * r);
+          // Average potential energy
+          U += temp_u;
+
+          // Configurational pressure
+          PC += r * ff;
 
           // Canceling the ij and ji pairs
           // Taking the lower triangular matrix
@@ -539,15 +543,6 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
           fy[j] -= y * ff / r;
           fz[i] += z * ff / r;
           fz[j] -= z * ff / r;
-
-          // Configurational pressure
-          PC += r * ff;
-
-          // Average potential energy
-          U += pow(q, (-POWER));
-
-          // TODO: Gaussian Potential GCM
-          // U += exp(-r * r);
 
           // Radial Distribution
           // measured with a delay, since the system requires a few thousand time-steps
@@ -585,8 +580,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
     pk.push_back(PK);
 
     // Average Kinetic Energy
-    KE /= N;
-    k_en.push_back(KE);
+    k_en.push_back(KE / N);
 
     // Density
     density.push_back(_rho);

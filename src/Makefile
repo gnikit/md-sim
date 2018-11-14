@@ -2,7 +2,7 @@ SHELL = /bin/bash
 include ../Makefile.variables
 LIB = ../lib
 BIN = ../bin
-OBJS = MD.o isomorph.o
+OBJS = MD.o isomorph.o md_algorithms.o
 
 
 all: libmd.a md
@@ -13,8 +13,12 @@ md: Source.o libmd.a
 libmd.a: $(OBJS)
 	ar rcvs $(LIB)/libmd.a $(OBJS)
 
+# TODO: maybe need to include md_algorithms.cpp
 MD.o: MD.cpp
 	$(CXX) $(CXXFLAGS) $(LINKER) MD.cpp
+
+md_algorithms.o: md_algorithms.cpp
+	$(CXX) $(CXXFLAGS) $(LINKER) md_algorithms.cpp
 
 isomorph.o: isomorph.cpp
 	$(CXX) $(CXXFLAGS) isomorph.cpp

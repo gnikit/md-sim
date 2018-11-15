@@ -10,12 +10,10 @@
 // TODO: in future C++ versions, rm fs:: from global scope and mv in constructor
 #if __cplusplus <= 201103L
 #error This library requires at least C++17 compiler support
-
 // If C++ version C++2a or above use
 #elif __cplusplus >= 201709
 #include <filesystem>
 namespace fs = std::filesystem;
-
 #else
 #include <experimental/filesystem>
 namespace fs = std::experimental::filesystem;
@@ -25,18 +23,12 @@ namespace fs = std::experimental::filesystem;
 #if defined(__INTEL_COMPILER)
 #include <mathimf.h>  // Intel Math library
 #define COMPILER "INTEL"
-
-#elif defined(__GNUC__)
-#include <math.h>
-#define COMPILER "G++"
-
 #else
 #include <math.h>
-#define COMPILER "OTHER COMPILER"
 #endif
 
 // FileIO has to be loaded after the math libraries
-#include "FileIO.h"  // FileLoading class
+#include "FileIO.h"  // FileIO class
 
 #define PARTICLES_PER_AXIS 10
 // Increase the number of bins for a more accurate RDF

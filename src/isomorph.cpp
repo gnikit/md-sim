@@ -37,7 +37,7 @@ std::tuple<vec1d, vec1d> Isomorph::GenLine(size_t n) {
    *                          an isomorphic state.
    */
   for (size_t i = 0; i < _T.size(); ++i) {
-    _T_out = _T[i];  // reduntant step
+    _T_out = _T[i];  // redundant step
     _rho_out = getRho(_rho_r, _T_r, _T_out, n);
     _A_out = getA(_A_r, _rho_r, _rho_out, n);
     _RHO.push_back(_rho_out);

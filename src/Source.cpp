@@ -27,21 +27,33 @@ int main(int argc, char const* argv[]) {
   if (root == nullptr) return XML_ERROR_FILE_READ_ERROR;
 
   /* Pointer to the 1st child of root, constructor */
-  XMLElement* xml_dir = root->FirstChildElement("constructor")->FirstChildElement("output_dir");
-  XMLElement* xml_steps = root->FirstChildElement("constructor")->FirstChildElement("steps");
-  XMLElement* xml_comp = root->FirstChildElement("constructor")->FirstChildElement("compression");
-  XMLElement* xml_rdf_bins = root->FirstChildElement("constructor")->FirstChildElement("rdf_bins");
-  XMLElement* xml_particles_per_axis = root->FirstChildElement("constructor")->FirstChildElement("particles_per_axis");
-  XMLElement* xml_track_particles = root->FirstChildElement("constructor")->FirstChildElement("track_particles");
-  XMLElement* xml_rdf_wait = root->FirstChildElement("constructor")->FirstChildElement("rdf_equilibrate");
+  XMLElement* xml_dir =
+      root->FirstChildElement("constructor")->FirstChildElement("output_dir");
+  XMLElement* xml_steps =
+      root->FirstChildElement("constructor")->FirstChildElement("steps");
+  XMLElement* xml_comp =
+      root->FirstChildElement("constructor")->FirstChildElement("compression");
+  XMLElement* xml_rdf_bins =
+      root->FirstChildElement("constructor")->FirstChildElement("rdf_bins");
+  XMLElement* xml_particles_per_axis =
+      root->FirstChildElement("constructor")
+          ->FirstChildElement("particles_per_axis");
+  XMLElement* xml_track_particles = root->FirstChildElement("constructor")
+                                        ->FirstChildElement("track_particles");
+  XMLElement* xml_rdf_wait = root->FirstChildElement("constructor")
+                                 ->FirstChildElement("rdf_equilibrate");
 
   /* Pointer to the 2nd child of root, simulation_input */
-  XMLElement* xml_rho = root->FirstChildElement("simulation_input")->FirstChildElement("rho");
-  XMLElement* xml_T = root->FirstChildElement("simulation_input")->FirstChildElement("T");
-  XMLElement* xml_n = root->FirstChildElement("simulation_input")->FirstChildElement("n");
-  XMLElement* xml_A = root->FirstChildElement("simulation_input")->FirstChildElement("A");
+  XMLElement* xml_rho =
+      root->FirstChildElement("simulation_input")->FirstChildElement("rho");
+  XMLElement* xml_T =
+      root->FirstChildElement("simulation_input")->FirstChildElement("T");
+  XMLElement* xml_n =
+      root->FirstChildElement("simulation_input")->FirstChildElement("n");
+  XMLElement* xml_A =
+      root->FirstChildElement("simulation_input")->FirstChildElement("A");
 
-  /* Check if reasults exist and are readbale */
+  /* Check if results exist and are readbale */
   if (xml_dir == nullptr) return XML_ERROR_PARSING_ELEMENT;
   if (xml_steps == nullptr) return XML_ERROR_PARSING_ELEMENT;
   if (xml_comp == nullptr) return XML_ERROR_PARSING_ELEMENT;
@@ -68,11 +80,13 @@ int main(int argc, char const* argv[]) {
   XMLCheckResult(eReuslt);
   eReuslt = xml_rdf_bins->QueryUnsignedText(&rdf_bins);  // Parse RDF accuracy
   XMLCheckResult(eReuslt);
-  eReuslt = xml_particles_per_axis->QueryUnsignedText(&particles_per_axis);  // Parse particles per axis
+  eReuslt = xml_particles_per_axis->QueryUnsignedText(
+      &particles_per_axis);  // Parse particles per axis
   XMLCheckResult(eReuslt);
   eReuslt = xml_track_particles->QueryBoolText(&track_particles);
   XMLCheckResult(eReuslt);
-  eReuslt = xml_rdf_wait->QueryUnsignedText(&rdf_wait);  // Parse RDF equilibration steps
+  eReuslt = xml_rdf_wait->QueryUnsignedText(
+      &rdf_wait);  // Parse RDF equilibration steps
   XMLCheckResult(eReuslt);
 
   eReuslt = xml_rho->QueryDoubleText(&rho);  // Parse density
@@ -84,6 +98,7 @@ int main(int argc, char const* argv[]) {
   eReuslt = xml_A->QueryDoubleText(&A);  // Parse softening parameter
 
   /* Run MD simulation */
-  MD run(dir, steps, comp, rdf_bins, particles_per_axis, track_particles, rdf_wait);
+  MD run(dir, steps, comp, rdf_bins, particles_per_axis, track_particles,
+         rdf_wait);
   run.Simulation(rho, T, n, A);
 }

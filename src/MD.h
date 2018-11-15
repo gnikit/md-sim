@@ -16,7 +16,7 @@
 //                                                                  //
 //////////////////////////////////////////////////////////////////////
 #pragma once
-#include <fstream>  // file writing
+#include <fstream>
 #include <vector>
 
 class MD {
@@ -27,27 +27,27 @@ class MD {
   std::vector<double> Cvx, Cvy, Cvz;     // VAF arrays
   std::vector<double> rrx, rry, rrz;     // used in MSD calculation
   std::vector<double> MSDx, MSDy, MSDz;  // MSD arrays
-  std::vector<double> Cr, msd, u_en, k_en, pc, pk,
-      temperature, density;  // vectors used as buffers
+  // Statistical quantity vectors, VAF, MSD, Energies and pressures
+  std::vector<double> Cr, msd, u_en, k_en, pc, pk, temperature, density;
 
   size_t Nx, Ny, Nz, nhist, rdf_wait;  // Particles in x, y, z
-  size_t N, _STEP_INDEX, STEPS;        // Total particles, step index, maximum steps
-  double _T0;                          // Target Temperature. Desired T for the system to operate
-  double dt = 0.005;                   // time step This applies: dt = 0.005/sqrt(T0)
-  double x, y, z;                      // distance between particle i and j
-  double r;                            // distance in polar
-  double _rho;                         // density
-  double scale;                        // box scaling parameter
-  double KE = 0.0;                     // Kinetic Energy
-  double T;                            // Temperature
-  double L;                            // Length of the box after scaling
-  double Vol;                          // Volume
-  double cut_off = 3.0;                // simulation runs only within cutoff
-  double U = 0;                        // Potential Energy
-  double PC = 0;                       // Configurational Pressure
-  double PK;                           // Kinetic Pressure
-  double scale_v;                      // velocity scaling
-  double _density_increment;           // Amount which density is altered in compression
+  size_t N, _STEP_INDEX, STEPS;  // Total particles, step index, maximum steps
+  double _T0;                    // Target/ Thermostat temperature
+  double dt = 0.005;             // time step
+  double x, y, z;                // distance between particle i and j
+  double r;                      // distance in polar
+  double _rho;                   // density
+  double scale;                  // box scaling parameter
+  double KE = 0.0;               // Kinetic Energy
+  double T;                      // Temperature
+  double L;                      // Length of the box after scaling
+  double Vol;                    // Volume
+  double cut_off = 3.0;          // simulation runs only within cutoff
+  double U = 0;                  // Potential Energy
+  double PC = 0;                 // Configurational Pressure
+  double PK;                     // Kinetic Pressure
+  double scale_v;                // velocity scaling
+  double _density_increment;     // Amount by which density is altered
 
   // Visualisation vectors initialised in constructor
   std::vector<std::vector<double>> *pos_x;
@@ -106,7 +106,8 @@ class MD {
   void mean_square_displacement(std::vector<double> &MSDx,
                                 std::vector<double> &MSDy,
                                 std::vector<double> &MSDz);
-  void density_compression(int steps_quench, double TEMPERATURE, double density_increment);
+  void density_compression(int steps_quench, double TEMPERATURE,
+                           double density_increment);
 
   void open_files();
   std::string file_naming(std::string prefix, double DENSITY,

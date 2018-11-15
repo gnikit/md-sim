@@ -29,14 +29,14 @@ void MakeDataBase() {
   std::vector<double> A1 = LinearSpacedArray(0, 1, 5);
   std::vector<double> A2 = LinearSpacedArray(1.25, 2.25, 5);
   std::vector<double> A3 = LinearSpacedArray(2.50, 4.50, 5);
-  std::vector<double> A4 = {0.20, 0.40, 0.60, 0.70, 0.90};  // TODO: change 0.70 to 0.80
+  std::vector<double> A4 = {0.20, 0.40, 0.60, 0.80, 0.90};
 
   for (size_t d = 0; d < rho.size(); ++d) {
     for (size_t t = 0; t < T.size(); ++t) {
       for (size_t i = 0; i < n.size(); ++i) {
         for (size_t j = 0; j < A1.size(); ++j) {
           std::cout << " run num: " << num << std::endl;
-          //TODO: throw exception if rdf_wait > STEPS
+          // TODO: throw exception if rdf_wait > STEPS
 
           MD* run1 = new MD(dir_linux, STEPS, false, 500, 10, false, 2000);
           // MD* run2 = new MD(dir_linux, STEPS, false, 500, 10, false, 2000);

@@ -1,1 +1,17 @@
-<input_variables><constructor><output_dir>/home/gn/Desktop/test_data</output_dir><steps>20000</steps><compression>false</compression><rdf_bins>500</rdf_bins><particles_per_axis>10</particles_per_axis><track_particles>false</track_particles><rdf_equilibrate>2000</rdf_equilibrate></constructor><simulation_input><rho>0.5</rho><T>1.0</T><n>8</n><A>0.0</A></simulation_input></input_variables>
+<input_variables>
+  <constructor>
+    <output_dir>/home/gn/Code/MD-simulation/examples/example_data</output_dir>
+    <steps>15000</steps>
+    <compression>false</compression>
+    <rdf_bins>500</rdf_bins>
+    <particles_per_axis>10</particles_per_axis>
+    <track_particles>false</track_particles>
+    <rdf_equilibrate>2000</rdf_equilibrate>
+  </constructor>
+  <simulation_input>
+    <rho>0.5</rho>
+    <T>0.5</T>
+    <n>8</n>
+    <A>0.5</A>
+  </simulation_input>
+</input_variables>

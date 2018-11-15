@@ -1,6 +1,6 @@
 import os
 import sys
-import xml.etree.ElementTree as ET
+import lxml.etree as ET
 
 # DIR = sys.argv[1]
 # STEPS = sys.argv[2]
@@ -16,17 +16,17 @@ STEPS = 15000
 COMPRESSION = "false"
 RDF_BINS = 500
 PARTICLES_PER_AXIS = 10
-TRACK_PARTICLES = "true"
+TRACK_PARTICLES = "false"
 RDF_EQUILIBRATE = 2000
 
 RHO = 0.5
 TEMPERATURE = 0.5
-POWER = 6
+POWER = 8
 A = 0.5
 
 root = ET.Element("input_variables")
 
-# Input paramters for the constructor of MD
+# Input parameters for the constructor of MD
 input = ET.SubElement(root, "constructor")
 
 ET.SubElement(input, "output_dir").text = str(DIR)
@@ -47,4 +47,4 @@ ET.SubElement(sim, "A").text = str(A)
 
 # Build tree in xml file
 tree = ET.ElementTree(root)
-tree.write("schemas/input_schema.xml")
+tree.write("schemas/input_schema.xml", pretty_print=True)

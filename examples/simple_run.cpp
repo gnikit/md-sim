@@ -1,7 +1,7 @@
 #include <string>
 #include "MD.h"
 
-/* 
+/*
  * A demonstration of how the MD class should be used.
  * It creates 3 files in the directory.
  * One containing all the state properties of the fluid,

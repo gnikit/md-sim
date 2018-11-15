@@ -3,7 +3,8 @@
 #include <thread>
 #include "MD.h"
 
-#define STEPS 20000  // 10000
+#define STEPS 25000  // 10000
+#define RDF_EQ 5000
 
 std::string dir_linux = "/home/gn/Desktop/test_data";
 
@@ -36,11 +37,10 @@ void MakeDataBase() {
       for (size_t i = 0; i < n.size(); ++i) {
         for (size_t j = 0; j < A1.size(); ++j) {
           std::cout << " run num: " << num << std::endl;
-          // TODO: throw exception if rdf_wait > STEPS
 
-          MD* run1 = new MD(dir_linux, STEPS, false, 500, 10, false, 2000);
-          // MD* run2 = new MD(dir_linux, STEPS, false, 500, 10, false, 2000);
-          // MD* run3 = new MD(dir_linux, STEPS, false, 500, 10, false, 2000);
+          MD* run1 = new MD(dir_linux, STEPS, false, 500, 10, false, RDF_EQ);
+          // MD* run2 = new MD(dir_linux, STEPS, false, 500, 10, false, RDF_EQ);
+          // MD* run3 = new MD(dir_linux, STEPS, false, 500, 10, false, RDF_EQ);
           MD* run4 = new MD(dir_linux, STEPS, false, 500, 10, false, 2000);
 
           std::thread th1(&MD::Simulation, run1, rho[d], T[t], n[i], A1[j]);

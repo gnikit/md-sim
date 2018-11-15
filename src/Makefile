@@ -4,8 +4,12 @@ LIB = ../lib
 BIN = ../bin
 OBJS = MD.o isomorph.o md_algorithms.o
 
+# The LINKER and the INC variables contain invalid, or unnecassary paths
+# like ../src or ../tools/FileIO for the case of Source.o 
+#which cause the compilation to be slightly slower. 
+# The trade off is global-management of the linker from Makefile.variables
 
-all: libmd.a md
+all: md libmd.a
 
 md: Source.o libmd.a
 		$(CXX) $(FLAGS) Source.o $(LINKER) -o $(BIN)/md
@@ -13,7 +17,6 @@ md: Source.o libmd.a
 libmd.a: $(OBJS)
 	ar rcvs $(LIB)/libmd.a $(OBJS)
 
-# TODO: maybe need to include md_algorithms.cpp
 MD.o: MD.cpp
 	$(CXX) $(CXXFLAGS) $(LINKER) MD.cpp
 
@@ -24,7 +27,7 @@ isomorph.o: isomorph.cpp
 	$(CXX) $(CXXFLAGS) isomorph.cpp
 
 Source.o: Source.cpp 
-	$(CXX) $(CXXFLAGS) $(INC) Source.cpp -o Source.o
+	$(CXX) $(CXXFLAGS) $(INC) Source.cpp
 
 
 clean:

@@ -1,20 +1,17 @@
-//////////////////////////////////////////////////////////////////////
-// Ioannis Nikiteas 13/7/2017                                       //
-//                                                                  //
-// BSc Dissertation:                                                //
-//  Investigating the transition from Molecular Dynamics to         //
-//	Smoothed Particle Hydrodynamics                                 //
-//                                                                  //
-//	University: Royal Holloway University of London                 //
-//                                                                  //
-//	A program meant to simulate a MD fluid with an only             //
-//	repulsive pair-potential. Increasing the parameter A            //
-//	creates a coarse-graining effect for the system allowing it     //
-//	to transition to SPH                                            //
-//                                                                  //
-//                                                                  //
-//                                                                  //
-//////////////////////////////////////////////////////////////////////
+/* 
+ * Ioannis Nikiteas 13/7/2017                                      
+ *                                                                 
+ * BSc Dissertation:                                               
+ * Investigating the transition from Molecular Dynamics to        
+ * Smoothed Particle Hydrodynamics                              
+ *                                                                 
+ * University: Royal Holloway University of London              
+ *                                                                 
+ * A program meant to simulate a MD fluid with an only        
+ * repulsive BIP pair-potential. Increasing the parameter A       
+ * creates a coarse-graining effect for the system allowing it
+ * to transition to SPH                                       
+ */
 #pragma once
 #include <fstream>
 #include <vector>

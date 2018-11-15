@@ -226,7 +226,7 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
 
 void MD::mb_distribution(double TEMPERATURE) {
   /*
-   * Generates velocities for based on the Maxwell Boltzmann distribution. 
+   * Generates velocities for based on the Maxwell Boltzmann distribution.
    * The MB dist in 3D is effectively the triple product of 3 Normal dist.
    *
    * The method populates the velocity vectors vx, vy, vz.
@@ -284,22 +284,14 @@ void MD::verlet_algorithm(std::vector<double> &rx, std::vector<double> &ry,
     // Kinetic Energy Calculation
     KE += 0.5 * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]);
 
-    // Boundary conditions Updated
-    if (rx[i] > L) {
-      rx[i] = rx[i] - L;
-    } else if (rx[i] < 0.0) {
-      rx[i] = rx[i] + L;
-    }
-    if (ry[i] > L) {
-      ry[i] = ry[i] - L;
-    } else if (ry[i] < 0.0) {
-      ry[i] = ry[i] + L;
-    }
-    if (rz[i] > L) {
-      rz[i] = rz[i] - L;
-    } else if (rz[i] < 0.0) {
-      rz[i] = rz[i] + L;
-    }
+    // Apply periodic boundary conditions to ensure particles remain
+    // inside the box
+    if (rx[i] > L) rx[i] = rx[i] - L;
+    if (rx[i] < 0.0) rx[i] = rx[i] + L;
+    if (ry[i] > L) ry[i] = ry[i] - L;
+    if (ry[i] < 0.0) ry[i] = ry[i] + L;
+    if (rz[i] > L) rz[i] = rz[i] - L;
+    if (rz[i] < 0.0) rz[i] = rz[i] + L;
   }
 }
 
@@ -496,22 +488,13 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
         y = ry[i] - ry[j];  // between particles i and j
         z = rz[i] - rz[j];  // in Cartesian
 
-        // Transposing elements with Periodic BC
-        if (x > (0.5 * L)) {
-          x = x - L;
-        } else if (x < (-0.5 * L)) {
-          x = x + L;
-        }
-        if (y > (0.5 * L)) {
-          y = y - L;
-        } else if (y < (-0.5 * L)) {
-          y = y + L;
-        }
-        if (z > (0.5 * L)) {
-          z = z - L;
-        } else if (z < (-0.5 * L)) {
-          z = z + L;
-        }
+        // Ensure the particles' separation distance is within the box
+        if (x > (0.5 * L)) x = x - L;
+        if (x < (-0.5 * L)) x = x + L;
+        if (y > (0.5 * L)) y = y - L;
+        if (y < (-0.5 * L)) y = y + L;
+        if (z > (0.5 * L)) z = z - L;
+        if (z < (-0.5 * L)) z = z + L;
 
         // Pair potential radius
         r = sqrt((x * x) + (y * y) + (z * z));
@@ -559,9 +542,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
     KE = 0;                   // resetting Kinetic Energy per iteration
 
     verlet_algorithm(rx, ry, rz, vx, vy, vz, rrx, rry, rrz);
-
     mean_square_displacement(MSDx, MSDy, MSDz);
-
     velocity_autocorrelation_function(Cvx, Cvy, Cvz);
 
     // Average Temperature

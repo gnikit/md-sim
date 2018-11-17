@@ -115,6 +115,8 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
 
   PI = acos(-1.0);
   _density_increment = 0.01;
+  steps_quench = 10000;      // steps between each quenching
+
 }
 
 // Delegating constructors with reduced number of arguments
@@ -472,7 +474,6 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
     PC = 0;
 
     // TODO: pass as argument steps_quench
-    size_t steps_quench = 10;  // steps between each quenching
     if (compression_flag == true && _STEP_INDEX != 0 &&
         _STEP_INDEX % steps_quench == 0) {
       ++Q_counter;

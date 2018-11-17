@@ -1,16 +1,16 @@
-/* 
- * Ioannis Nikiteas 13/7/2017                                      
- *                                                                 
- * BSc Dissertation:                                               
- * Investigating the transition from Molecular Dynamics to        
- * Smoothed Particle Hydrodynamics                              
- *                                                                 
- * University: Royal Holloway University of London              
- *                                                                 
- * A program meant to simulate a MD fluid with an only        
- * repulsive BIP pair-potential. Increasing the parameter A       
+/*
+ * Ioannis Nikiteas 13/7/2017
+ *
+ * BSc Dissertation:
+ * Investigating the transition from Molecular Dynamics to
+ * Smoothed Particle Hydrodynamics
+ *
+ * University: Royal Holloway University of London
+ *
+ * A program meant to simulate a MD fluid with an only
+ * repulsive BIP pair-potential. Increasing the parameter A
  * creates a coarse-graining effect for the system allowing it
- * to transition to SPH                                       
+ * to transition to SPH
  */
 #pragma once
 #include <fstream>
@@ -74,6 +74,7 @@ class MD {
 
  public:
   bool VISUALISE;
+  size_t steps_quench;  // steps between each quenching
   MD(std::string DIRECTORY, size_t run_number);
   MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG);
   MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,

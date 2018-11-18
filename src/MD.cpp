@@ -42,6 +42,11 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
   /*
    * This constructor allows for increased control over the internal
    * parameters of the fluid.
+   *
+   * If the compress parameter is true, then the number of steps per simulation
+   * automatically becomes the number of steps per compression.
+   * The true duration of the simulation is the controlled by the initial and
+   * final DENISITIES passed on the get_phases method and with their increment.
    */
 
   try {
@@ -62,12 +67,9 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
   // Total number of particles N
   Nx = Ny = Nz = particles_per_axis;
   N = Nx * Ny * Nz;
+  // If compress is true, then STEPS = steps_per_compression
   compress = COMPRESS_FLAG;
-  if (COMPRESS_FLAG) {
-    rho_increment = 0.01;
-    steps_per_compress = 10000;  // steps between each quenching
-    // final_rho = 0.8;   // TODO: make an input
-  }
+
   // Save all the positions for the fluid
   VISUALISE = track_particles;
   // Accuracy of RDF
@@ -376,42 +378,6 @@ void MD::mean_square_displacement(std::vector<double> &MSDx,
   msd.push_back(msd_temp / N);
 }
 
-void MD::density_compression(int steps_per_compress, double TEMPERATURE,
-                             double density_increment) {
-  /*
-   * Performs repeated compresss of the fluid by periodically
-   * incrementing the density of the fluid.
-   * As a consequence the box length, the scaling factor and the
-   * position vectors are also scaled in order to conserve the number
-   * of particles in the box.
-   *
-   * @param steps_per_compress: Number of steps over which a compress occurs
-   * @param TEMPERATURE: Temperature of the fluid
-   * @param density_increment: Amount with which the density is increased
-   *                           (or decreased)
-   */
-  double old_box_length = L;
-
-  // Density incrementation
-  _rho += density_increment;
-
-  // Re-using this piece of code from MD::Simulation
-  // Update the box length and the box scaling
-  scale = pow((N / _rho), (1.0 / 3.0)) / Nx;
-  L = pow((N / _rho), 1.0 / 3.0);
-  double box_length_ratio = L / old_box_length;
-
-  // Rescalling the positional vectors
-  for (size_t i = 0; i < N; ++i) {
-    rx[i] *= box_length_ratio;
-    ry[i] *= box_length_ratio;
-    rz[i] *= box_length_ratio;
-  }
-  Vol = N / _rho;
-
-  initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
-}
-
 // MD Simulation
 void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
                     double A_CST) {
@@ -435,8 +401,9 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
             << std::endl;
   std::cout << "Fluid parameters: rho: " << DENSITY << " T: " << TEMPERATURE
             << " n: " << POWER << " a: " << A_CST << std::endl;
-  _T0 = TEMPERATURE;
+
   _rho = DENSITY;
+  _T0 = TEMPERATURE;
   dt /= sqrt(_T0);
   // Box length scaling
   scale = pow((N / _rho), (1.0 / 3.0)) / Nx;
@@ -473,14 +440,6 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
 
     U = 0;  // reseting <Potential> U to 0
     PC = 0;
-
-    if (compress == true && _STEP_INDEX != 0 &&
-        _STEP_INDEX % steps_per_compress == 0) {
-      ++c_counter;
-      density_compression(steps_per_compress, TEMPERATURE, rho_increment);
-      std::cout << "Compressing fluid, run: " << c_counter << " rho: " << _rho
-                << std::endl;
-    }
 
     size_t i, j;
     for (i = 0; i < N - 1; ++i) {
@@ -614,8 +573,50 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
                "** MD Simulation terminated **\n"
                "******************************\n"
             << std::endl;
-  // Close file streams and reset vectors
-  reset_values();
+
+  // Close file streams, makes Simulation reusable in loops
+  RDF.close();
+  DATA.close();
+  POS.close();
+}
+
+void MD::get_phases(double DENSITY, double FINAL_DENSITY, double DENSITY_INC,
+                    double TEMPERATURE, int POWER, double A_CST) {
+  /*
+   * Compress the fluid to get the phase boundary for a specific temperature.
+   *
+   * Performs repeated compresss of the fluid by periodically
+   * incrementing the density of the fluid.
+   * As a consequence the box length, the scaling factor and the
+   * position vectors are also scaled in order to conserve the number
+   * of particles in the box.
+   *
+   */
+  // todo: many features do not work at this moment like particle tracking
+  double current_rho = DENSITY;
+  double old_box_length;
+  size_t compression_num = ceil((FINAL_DENSITY - DENSITY) / DENSITY_INC);
+  do {
+    Simulation(current_rho, TEMPERATURE, POWER, A_CST);
+    // Holds the box length of the previous simulation just run
+    old_box_length = L;
+    // Density incrementation
+    current_rho += DENSITY_INC;
+    // Simulation updates old_box_length
+    // the updated current_rho can generate the new box length
+    // This value gets recalculated in the next Simulation
+    L = pow((N / current_rho), 1.0 / 3.0);
+    double box_length_ratio = L / old_box_length;
+
+    // Rescalling the positional vectors
+    for (size_t i = 0; i < N; ++i) {
+      rx[i] *= box_length_ratio;
+      ry[i] *= box_length_ratio;
+      rz[i] *= box_length_ratio;
+    }
+    ++c_counter;
+
+  } while (current_rho <= FINAL_DENSITY);
 }
 
 // File Handling
@@ -709,6 +710,11 @@ void MD::reset_values() {
    */
 
   // Close streams
+  /*
+    todo: add try-except block for stream closing,
+    todo bc the stream might be closed and the user might then call reset_values
+    todo: which will throw an exception
+  */
   RDF.close();
   DATA.close();
   POS.close();

@@ -44,8 +44,6 @@ class MD {
   double PC = 0;                 // Configurational Pressure
   double PK;                     // Kinetic Pressure
   double scale_v;                // velocity scaling
-  double rho_increment;     // Amount by which density is altered
-  double final_rho;              // Density upon which the compression ends
 
   // Visualisation vectors initialised in constructor
   std::vector<std::vector<double>> *pos_x;
@@ -75,7 +73,6 @@ class MD {
 
  public:
   bool VISUALISE;
-  size_t steps_per_compress;  // steps between each quenching
   MD(std::string DIRECTORY, size_t run_number);
   MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG);
   MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
@@ -85,6 +82,8 @@ class MD {
   ~MD();
 
   void Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST);
+  void get_phases(double DENSITY, double FINAL_DENSITY, double DENSITY_INC,
+                  double TEMPERATURE, int POWER, double A_CST);
   void reset_values();
 
  protected:
@@ -105,8 +104,6 @@ class MD {
   void mean_square_displacement(std::vector<double> &MSDx,
                                 std::vector<double> &MSDy,
                                 std::vector<double> &MSDz);
-  void density_compression(int steps_per_compress, double TEMPERATURE,
-                           double rho_increment);
 
   void open_files();
   std::string file_naming(std::string prefix, double DENSITY,

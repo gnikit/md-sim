@@ -1,12 +1,13 @@
 CC  = icc
-CXX = g++
+CXX = icpc
 STD = -std=c++17
-# INTEL compiler flags
-# FLAGS = $(STD) -pthread -O2 -xHOST -Wall -m64 -use-intel-optimized-headers
-# DFLAGS = $(STD) -g3 -pthread -xHOST -Wall -m64 -use-intel-optimized-headers
 
-FLAGS = $(STD) -pthread -O3 -Wall 
-DFLAGS = $(STD) -pthread -g3 -Wall 
+# INTEL compiler flags
+FLAGS = $(STD) -pthread -O2 -xHOST -Wall -m64 -use-intel-optimized-headers
+DFLAGS = $(STD) -g3 -pthread -xHOST -Wall -m64 -use-intel-optimized-headers
+# GNU C
+# FLAGS = $(STD) -pthread -O3 -Wall 
+# DFLAGS = $(STD) -pthread -g3 -Wall 
 
 CXXFLAGS = -c $(FLAGS)
 DCXXFLAGS = -c $(DFLAGS)

@@ -21,6 +21,17 @@ clean:
 	@echo "Cleaning MD Examples src/examples"
 	@cd examples && $(MAKE) clean
 
+debug:
+	@echo "DEBUG BUILD"
+	@echo "MAKE tools/TinyXML2"
+	@cd tools/tinyxml2 && $(MAKE) staticlib
+	@echo "MAKE lib"
+	@cd lib && $(MAKE)
+	@echo "MAKE MD src"
+	@cd src && $(MAKE) debug
+	@echo "MAKE MD examples"
+	@cd examples && $(MAKE) debug
+
 clean_keep_data:
 	@echo "Cleaning lib"
 	@cd lib && $(MAKE) clean

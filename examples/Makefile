@@ -15,6 +15,16 @@ all: database \
 			visualise_fluid \
 			$(LIB)/libmd.a
 			
+
+debug: CXXFLAGS = $(DCXXFLAGS)
+debug: FLAGS = $(DFLAGS)
+debug: database \
+				isomorph_line \
+				fluid_compression \
+				simple_run \
+				visualise_fluid \
+				$(LIB)/libmd.a
+
 # TODO: -lstdc++fs has to be added at the end
 # TODO: https://stackoverflow.com/questions/33149878/experimentalfilesystem-linker-error
 database: database.o $(LIB)/libmd.a

@@ -418,17 +418,19 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
   MD_tools potential;  // Pair potential object
 
   // Generating the filenames for the output
-  data = file_naming("/Data", DENSITY, TEMPERATURE, POWER, A_CST);
-  pos =
-      file_naming("/Positions_Velocities", DENSITY, TEMPERATURE, POWER, A_CST);
-  rdf = file_naming("/RDF", DENSITY, TEMPERATURE, POWER, A_CST);
+  // Start a new stream only if the fluid is not being compressed
+  if (c_counter == 0) {
+    data = file_naming("/Data", DENSITY, TEMPERATURE, POWER, A_CST);
+    pos = file_naming("/Positions_Velocities", DENSITY, TEMPERATURE, POWER,
+                      A_CST);
+    rdf = file_naming("/RDF", DENSITY, TEMPERATURE, POWER, A_CST);
 
-  open_files();
-  time_stamp(DATA, "# step \t rho \t U \t K \t Pc \t Pk \t MSD \t VAF");
+    open_files();
+    time_stamp(DATA, "# step \t rho \t U \t K \t Pc \t Pk \t MSD \t VAF");
+  }
 
   std::chrono::steady_clock::time_point begin =
       std::chrono::steady_clock::now();
-
   initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
 
   for (_STEP_INDEX = 0; _STEP_INDEX < STEPS; ++_STEP_INDEX) {
@@ -575,9 +577,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
             << std::endl;
 
   // Close file streams, makes Simulation reusable in loops
-  RDF.close();
-  DATA.close();
-  POS.close();
+  if (!compress) reset_values();
 }
 
 void MD::get_phases(double DENSITY, double FINAL_DENSITY, double DENSITY_INC,
@@ -593,9 +593,25 @@ void MD::get_phases(double DENSITY, double FINAL_DENSITY, double DENSITY_INC,
    *
    */
   // todo: many features do not work at this moment like particle tracking
+  // todo: the POS << time_stamp stream will be a mess, same with RDF
   double current_rho = DENSITY;
-  double old_box_length;
+  double old_box_length = 0;
   size_t compression_num = ceil((FINAL_DENSITY - DENSITY) / DENSITY_INC);
+
+  // Since STEPS now corresponds to the steps of a single compression
+  // the reserved storage has to be redefined
+  Cr.reserve(STEPS * compression_num);    // Velocity Autocorrelation Function
+  msd.reserve(STEPS * compression_num);   // Mean Square Displacement
+  u_en.reserve(STEPS * compression_num);  // Average Potential Energy
+  k_en.reserve(STEPS * compression_num);  // Average Kinetic Energy
+  pc.reserve(STEPS * compression_num);    // Configurational Pressure
+  pk.reserve(STEPS * compression_num);    // Kinetic Pressure
+  temperature.reserve(STEPS * compression_num);
+  /* Visualisation vectors on the heap*/
+  pos_x = new std::vector<std::vector<double>>(STEPS * compression_num);
+  pos_y = new std::vector<std::vector<double>>(STEPS * compression_num);
+  pos_z = new std::vector<std::vector<double>>(STEPS * compression_num);
+
   do {
     Simulation(current_rho, TEMPERATURE, POWER, A_CST);
     // Holds the box length of the previous simulation just run
@@ -615,8 +631,9 @@ void MD::get_phases(double DENSITY, double FINAL_DENSITY, double DENSITY_INC,
       rz[i] *= box_length_ratio;
     }
     ++c_counter;
-
+    // bug: double comparisson not accurate
   } while (current_rho <= FINAL_DENSITY);
+  reset_values();
 }
 
 // File Handling

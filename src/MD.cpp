@@ -62,8 +62,12 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
   // Total number of particles N
   Nx = Ny = Nz = particles_per_axis;
   N = Nx * Ny * Nz;
-  compression_flag = COMPRESS_FLAG;
-
+  compress = COMPRESS_FLAG;
+  if (COMPRESS_FLAG) {
+    rho_increment = 0.01;
+    steps_per_compress = 10000;  // steps between each quenching
+    // final_rho = 0.8;   // TODO: make an input
+  }
   // Save all the positions for the fluid
   VISUALISE = track_particles;
   // Accuracy of RDF
@@ -114,14 +118,11 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
   pos_z = new std::vector<std::vector<double>>(STEPS);
 
   PI = acos(-1.0);
-  _density_increment = 0.01;
-  steps_quench = 10000;      // steps between each quenching
-
 }
 
 // Delegating constructors with reduced number of arguments
 // https://en.wikipedia.org/wiki/C++11#Object_construction_improvement
-// Constructor to use for density compression
+// Constructor to use for density compress
 MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG)
     : MD(DIRECTORY, run_number, COMPRESS_FLAG, NHIST, PARTICLES_PER_AXIS, false,
          RDF_WAIT) {}
@@ -157,8 +158,7 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
    */
 
   // Initialise position matrix and velocity matrix from Cubic Centred Lattice
-  if (compression_flag == false ||
-      (compression_flag == true && Q_counter == 0)) {
+  if (compress == false || (compress == true && c_counter == 0)) {
     size_t n = 0;
     size_t i, j, k;
     for (i = 0; i < Nx; ++i) {
@@ -168,15 +168,15 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
           y.push_back((j + 0.5) * scale);
           z.push_back((k + 0.5) * scale);
 
-          // Position vectors used for MSD
-          rrx.push_back((i + 0.5) * scale);
-          rry.push_back((j + 0.5) * scale);
-          rrz.push_back((k + 0.5) * scale);
-
           ++n;
         }
       }
     }
+
+    // Position vectors used for MSD
+    rrx = x;
+    rry = y;
+    rrz = z;
     // Generates Maxwell-Boltzmann distribution
     mb_distribution(TEMPERATURE);
   }
@@ -335,10 +335,10 @@ void MD::radial_distribution_function() {
   double cor_rho = _rho * (N - 1) / N;
   double dr = rg / nhist;
   size_t i;
-  Hist << "# particles (N): " << N << " steps: " << STEPS << " rho: " << _rho
-       << " bin (NHIST): " << nhist << " cut_off (rg): " << rg << " dr: " << dr
-       << std::endl;
-  Hist << "# Unormalised" << '\t' << "Normalised" << std::endl;
+  RDF << "# particles (N): " << N << " steps: " << STEPS << " rho: " << _rho
+      << " bin (NHIST): " << nhist << " cut_off (rg): " << rg << " dr: " << dr
+      << std::endl;
+  RDF << "# Unormalised" << '\t' << "Normalised" << std::endl;
   for (i = 1; i < nhist; ++i) {  // Changed initial loop value from 0 -> 1
     R = rg * i / nhist;
     // Volume between 2 spheres, accounting for double counting
@@ -347,7 +347,7 @@ void MD::radial_distribution_function() {
     norm = cor_rho * (2.0 / 3.0 * PI * N * (STEPS - rdf_wait) *
                       (pow((R + (dr / 2.0)), 3) - pow((R - (dr / 2.0)), 3)));
 
-    Hist << gr[i] << '\t' << gr[i] / norm << std::endl;
+    RDF << gr[i] << '\t' << gr[i] / norm << std::endl;
   }
 }
 
@@ -376,19 +376,19 @@ void MD::mean_square_displacement(std::vector<double> &MSDx,
   msd.push_back(msd_temp / N);
 }
 
-void MD::density_compression(int steps_quench, double TEMPERATURE,
+void MD::density_compression(int steps_per_compress, double TEMPERATURE,
                              double density_increment) {
   /*
-   * Performs repeated compressions of the fluid by periodically
+   * Performs repeated compresss of the fluid by periodically
    * incrementing the density of the fluid.
    * As a consequence the box length, the scaling factor and the
    * position vectors are also scaled in order to conserve the number
    * of particles in the box.
    *
-   * @param steps_quench: Number of steps over which a compression occurs
+   * @param steps_per_compress: Number of steps over which a compress occurs
    * @param TEMPERATURE: Temperature of the fluid
-   * @param density_increment: Amount with which the density is increased (or
-   * decreased)
+   * @param density_increment: Amount with which the density is increased
+   *                           (or decreased)
    */
   double old_box_length = L;
 
@@ -396,6 +396,7 @@ void MD::density_compression(int steps_quench, double TEMPERATURE,
   _rho += density_increment;
 
   // Re-using this piece of code from MD::Simulation
+  // Update the box length and the box scaling
   scale = pow((N / _rho), (1.0 / 3.0)) / Nx;
   L = pow((N / _rho), 1.0 / 3.0);
   double box_length_ratio = L / old_box_length;
@@ -453,7 +454,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
   data = file_naming("/Data", DENSITY, TEMPERATURE, POWER, A_CST);
   pos =
       file_naming("/Positions_Velocities", DENSITY, TEMPERATURE, POWER, A_CST);
-  HIST = file_naming("/RDF", DENSITY, TEMPERATURE, POWER, A_CST);
+  rdf = file_naming("/RDF", DENSITY, TEMPERATURE, POWER, A_CST);
 
   open_files();
   time_stamp(DATA, "# step \t rho \t U \t K \t Pc \t Pk \t MSD \t VAF");
@@ -470,15 +471,14 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
     std::fill(fy.begin(), fy.end(), 0);
     std::fill(fz.begin(), fz.end(), 0);
 
-    U = 0;  // seting Potential U to 0
+    U = 0;  // reseting <Potential> U to 0
     PC = 0;
 
-    // TODO: pass as argument steps_quench
-    if (compression_flag == true && _STEP_INDEX != 0 &&
-        _STEP_INDEX % steps_quench == 0) {
-      ++Q_counter;
-      density_compression(steps_quench, TEMPERATURE, _density_increment);
-      std::cout << "Compressing fluid, run: " << Q_counter << " rho: " << _rho
+    if (compress == true && _STEP_INDEX != 0 &&
+        _STEP_INDEX % steps_per_compress == 0) {
+      ++c_counter;
+      density_compression(steps_per_compress, TEMPERATURE, rho_increment);
+      std::cout << "Compressing fluid, run: " << c_counter << " rho: " << _rho
                 << std::endl;
     }
 
@@ -665,7 +665,7 @@ void MD::open_files() {
    * Open/Create if file does not exist.
    * Overwrites existing data.
    */
-  Hist.open(HIST, std::ios::out | std::ios::trunc);
+  RDF.open(rdf, std::ios::out | std::ios::trunc);
   DATA.open(data, std::ios::out | std::ios::trunc);
   POS.open(pos, std::ios::out | std::ios::trunc);
 }
@@ -709,7 +709,7 @@ void MD::reset_values() {
    */
 
   // Close streams
-  Hist.close();
+  RDF.close();
   DATA.close();
   POS.close();
   // Clear values, size, but reserve capacity

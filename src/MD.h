@@ -44,7 +44,8 @@ class MD {
   double PC = 0;                 // Configurational Pressure
   double PK;                     // Kinetic Pressure
   double scale_v;                // velocity scaling
-  double _density_increment;     // Amount by which density is altered
+  double rho_increment;     // Amount by which density is altered
+  double final_rho;              // Density upon which the compression ends
 
   // Visualisation vectors initialised in constructor
   std::vector<std::vector<double>> *pos_x;
@@ -52,8 +53,8 @@ class MD {
   std::vector<std::vector<double>> *pos_z;
 
   // Compression variables
-  bool compression_flag = false;
-  size_t Q_counter = 0;  // counts the number compression that have occurred
+  bool compress = false;
+  size_t c_counter = 0;  // counts the number compression that have occurred
 
   // HISTOGRAM VARIABLES
   int igr;                 // Index of Hist
@@ -68,13 +69,13 @@ class MD {
   std::string full_exe_dir, top_exe_dir;
   std::string _step_to_str, _particles_to_str, _rho_to_str, _T_to_str,
       _n_to_str, _A_to_str;
-  std::string HIST, data, pos;
+  std::string rdf, data, pos;
   std::string _dir, _FILE_ID;
-  std::ofstream Hist, DATA, POS;
+  std::ofstream RDF, DATA, POS;
 
  public:
   bool VISUALISE;
-  size_t steps_quench;  // steps between each quenching
+  size_t steps_per_compress;  // steps between each quenching
   MD(std::string DIRECTORY, size_t run_number);
   MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG);
   MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
@@ -104,8 +105,8 @@ class MD {
   void mean_square_displacement(std::vector<double> &MSDx,
                                 std::vector<double> &MSDy,
                                 std::vector<double> &MSDz);
-  void density_compression(int steps_quench, double TEMPERATURE,
-                           double density_increment);
+  void density_compression(int steps_per_compress, double TEMPERATURE,
+                           double rho_increment);
 
   void open_files();
   std::string file_naming(std::string prefix, double DENSITY,

@@ -1,38 +1,38 @@
-#include <string>
 #include <thread>
 #include "MD.h"
-
-#define STEPS 1000
+// BUG: potential bug, including 2 different math libraries if intel compiler
+#include <math.h>
+#include <iostream>
 #define PARTICLES 1000
 typedef std::vector<double> vec1d;
 
 /* Linux working directory */
-std::string dir_linux = "/home/gn/Code/MD-simulation/examples/example_data";
+std::string dir_linux = "/home/gn/Desktop/test_data/gaussian";
 
 std::vector<double> LinearSpacedArray(double a, double b, std::size_t N);
 
+// TODO: Insert the individual number of steps per compression and the initial
+// and final compression limits, along with increments. Then let the simulation
+// run
 int main() {
   vec1d temperature_array = LinearSpacedArray(0.001, 0.01, 10);
+
+  unsigned int COMPRESS_EVERY = 1000;
+  double rho = 0.05;
+  double final_rho = 0.8;
+  double rho_increment = 0.001;
+  unsigned int compression_num = ceil((final_rho - rho) / rho_increment);
+  unsigned int STEPS = compression_num * COMPRESS_EVERY;
+
+  std::cout << "Initial density: " << rho << "\nFinal density: " << final_rho
+            << "\nDensity increment: " << rho_increment
+            << "\nTotal steps: " << STEPS
+            << "\nCompress every: " << COMPRESS_EVERY << std::endl;
+
   for (const auto& i : temperature_array) {
     MD* run1 = new MD(dir_linux, STEPS, true);  // fluid compression set to true
-    MD* run2 = new MD(dir_linux, STEPS, true);
-    MD* run3 = new MD(dir_linux, STEPS, true);
-    MD* run4 = new MD(dir_linux, STEPS, true);
-
-    std::thread th1(&MD::Simulation, run1, 0.05, i, 12, 0.25);
-    std::thread th2(&MD::Simulation, run2, 0.05, i, 12, 0.5);
-    std::thread th3(&MD::Simulation, run3, 0.05, i, 12, 0.1);
-    std::thread th4(&MD::Simulation, run4, 0.05, i, 12, 1.25);
-
-    th1.join();
-    th2.join();
-    th3.join();
-    th4.join();
-
-    delete run1;
-    delete run2;
-    delete run3;
-    delete run4;
+    run1->steps_per_compress = COMPRESS_EVERY;
+    run1->Simulation(rho, i, 12, 0);
   }
 }
 

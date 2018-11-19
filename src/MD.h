@@ -30,7 +30,7 @@ class MD {
   size_t Nx, Ny, Nz, nhist, rdf_wait;  // Particles in x, y, z
   size_t N, _STEP_INDEX, STEPS;  // Total particles, step index, maximum steps
   double _T0;                    // Target/ Thermostat temperature
-  double dt = 0.005;             // time step
+  double dt;                     // time step
   double x, y, z;                // distance between particle i and j
   double r;                      // distance in polar
   double _rho;                   // density

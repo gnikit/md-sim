@@ -2,6 +2,7 @@
 #include <chrono>   // CPU run-time
 #include <ctime>    // std::chrono
 #include <iomanip>  // setprecision
+#include <numeric>  // accumulate
 #include <random>   // normal_dist
 #include <sstream>  // stringstream
 #include "md_algorithms.h"
@@ -178,20 +179,19 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
     mb_distribution(TEMPERATURE);
   }
 
-  // scale of x, y, z
-  double mean_vx = 0;
-  double mean_vy = 0;
-  double mean_vz = 0;
+  // Calculate the average velocities
+  double mean_vx = std::accumulate(vx.begin(), vx.end(), 0.0) / N;
+  double mean_vy = std::accumulate(vy.begin(), vy.end(), 0.0) / N;
+  double mean_vz = std::accumulate(vz.begin(), vz.end(), 0.0) / N;
+  // Conserve the momentum of the fluid by subsracting the average velocities
+  // using a lambda expression
+  std::for_each(vx.begin(), vx.end(), [mean_vx](double &d) { d -= mean_vx; });
+  std::for_each(vy.begin(), vy.end(), [mean_vy](double &d) { d -= mean_vy; });
+  std::for_each(vz.begin(), vz.end(), [mean_vz](double &d) { d -= mean_vz; });
 
-  size_t i;
-  // Momentum conservation
-  for (i = 0; i < N; ++i) {
-    mean_vx += vx[i] / N;
-    mean_vy += vy[i] / N;
-    mean_vz += vz[i] / N;
-  }
   // ! Check the values of mean_vx, mean_vy, mean_vz after a compression
   size_t tempN = N;
+  size_t i;
   // Subtracting Av. velocities from each particle
   for (i = 0; i < tempN; ++i) {
     vx[i] = vx[i] - mean_vx;

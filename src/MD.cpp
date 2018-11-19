@@ -174,11 +174,6 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
         }
       }
     }
-
-    // Position vectors used for MSD
-    rrx = x;
-    rry = y;
-    rrz = z;
     // Generates Maxwell-Boltzmann distribution
     mb_distribution(TEMPERATURE);
   }
@@ -195,7 +190,7 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
     mean_vy += vy[i] / N;
     mean_vz += vz[i] / N;
   }
-
+  // ! Check the values of mean_vx, mean_vy, mean_vz after a compression
   size_t tempN = N;
   // Subtracting Av. velocities from each particle
   for (i = 0; i < tempN; ++i) {
@@ -208,6 +203,7 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
   for (i = 0; i < N; ++i) {
     KE += 0.5 * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]);
   }
+  // ! Check the value of KE after a compression
   T = KE / (1.5 * N);
   scale_v = sqrt(TEMPERATURE / T);  // scaling factor
 
@@ -217,6 +213,10 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
     vy[i] *= scale_v;
     vz[i] *= scale_v;
   }
+  // A copy of the r vectors where the BC will not be applied
+  rrx = x;
+  rry = y;
+  rrz = z;
   // MSD initialisation, storing first positions of particles
   MSDx = x;
   MSDy = y;
@@ -311,7 +311,6 @@ void MD::velocity_autocorrelation_function(std::vector<double> &Cvx,
    */
 
   double cr_temp = 0;  // resets the sum every time step
-  double kb = 1.0;     // Boltzmann constant
   double m = 1.0;      // particle mass
   size_t i;
   /* The peak of the VAF is located at 3kb*T/m */
@@ -404,14 +403,14 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
 
   _rho = DENSITY;
   _T0 = TEMPERATURE;
-  dt /= sqrt(_T0);
+  dt = 0.005 / sqrt(_T0);  // Time-step, defined here and reused in the Verlet
   // Box length scaling
   scale = pow((N / _rho), (1.0 / 3.0)) / Nx;
   L = pow((N / _rho), 1.0 / 3.0);
   Vol = N / _rho;
 
   // cut_off redefinition
-  // Large cut offs increase the runtime exponentially
+  // * Large cut offs increase the runtime exponentially
   cut_off = 3.0;
   rg = cut_off;
   dr = rg / nhist;
@@ -426,7 +425,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
     rdf = file_naming("/RDF", DENSITY, TEMPERATURE, POWER, A_CST);
 
     open_files();
-    time_stamp(DATA, "# step \t rho \t U \t K \t Pc \t Pk \t MSD \t VAF");
+    time_stamp(DATA, "# step \t rho \t T \t U \t K \t Pc \t Pk \t MSD \t VAF");
   }
 
   std::chrono::steady_clock::time_point begin =
@@ -465,7 +464,8 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
         if (r < cut_off) {
           // BIP potential of the form: phi = 1/[(r**2 + a**2)**(n/2)]
           // Allows the user to choose different pair potentials
-          auto [ff, temp_u] = potential.BIP_force(r, POWER, A_CST);
+          // auto [ff, temp_u] = potential.BIP_force(r, POWER, A_CST);
+          auto [ff, temp_u] = potential.GCM_force(r);
 
           // Average potential energy
           U += temp_u;
@@ -494,10 +494,12 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
     }
 
     // Average Potential Energy per particle
-    u_en.push_back(U / N);
+    U /= N;  // Ensuring that variables are not optimised away
+    u_en.push_back(U);
 
     // Average Configurational Pressure Pc
-    pc.push_back(PC / (3 * Vol));
+    PC /= (3 * Vol);  // Ensuring that variables are not optimised away
+    pc.push_back(PC);
 
     // Isothermal Calibration
     scale_v = sqrt(_T0 / T);  // using T & KE from prev timestep
@@ -554,6 +556,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
 
   write_to_files();
   // Saving Last Position
+  // todo: saves the same shit
   time_stamp(POS, "# X\tY\tZ\tVx\tVy\tVz\tFx\tFy\tFz");
   for (size_t el = 0; el < rx.size(); ++el) {
     POS << rx[el] << '\t' << ry[el] << '\t' << rz[el] << '\t' << vx[el] << '\t'
@@ -577,7 +580,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
             << std::endl;
 
   // Close file streams, makes Simulation reusable in loops
-  if (!compress) reset_values();
+  reset_values();
 }
 
 void MD::get_phases(double DENSITY, double FINAL_DENSITY, double DENSITY_INC,
@@ -596,21 +599,7 @@ void MD::get_phases(double DENSITY, double FINAL_DENSITY, double DENSITY_INC,
   // todo: the POS << time_stamp stream will be a mess, same with RDF
   double current_rho = DENSITY;
   double old_box_length = 0;
-  size_t compression_num = ceil((FINAL_DENSITY - DENSITY) / DENSITY_INC);
-
-  // Since STEPS now corresponds to the steps of a single compression
-  // the reserved storage has to be redefined
-  Cr.reserve(STEPS * compression_num);    // Velocity Autocorrelation Function
-  msd.reserve(STEPS * compression_num);   // Mean Square Displacement
-  u_en.reserve(STEPS * compression_num);  // Average Potential Energy
-  k_en.reserve(STEPS * compression_num);  // Average Kinetic Energy
-  pc.reserve(STEPS * compression_num);    // Configurational Pressure
-  pk.reserve(STEPS * compression_num);    // Kinetic Pressure
-  temperature.reserve(STEPS * compression_num);
-  /* Visualisation vectors on the heap*/
-  pos_x = new std::vector<std::vector<double>>(STEPS * compression_num);
-  pos_y = new std::vector<std::vector<double>>(STEPS * compression_num);
-  pos_z = new std::vector<std::vector<double>>(STEPS * compression_num);
+  // size_t compression_num = ceil((FINAL_DENSITY - DENSITY) / DENSITY_INC);
 
   do {
     Simulation(current_rho, TEMPERATURE, POWER, A_CST);
@@ -631,8 +620,7 @@ void MD::get_phases(double DENSITY, double FINAL_DENSITY, double DENSITY_INC,
       rz[i] *= box_length_ratio;
     }
     ++c_counter;
-    // bug: double comparisson not accurate
-  } while (current_rho <= FINAL_DENSITY);
+  } while (abs(current_rho - FINAL_DENSITY) > 0.00001);
   reset_values();
 }
 
@@ -726,25 +714,32 @@ void MD::reset_values() {
    * MD object.
    */
 
-  // Close streams
   /*
     todo: add try-except block for stream closing,
-    todo bc the stream might be closed and the user might then call reset_values
-    todo: which will throw an exception
+    bc the stream might be closed and the user might then call reset_values
+    which will throw an exception
   */
-  RDF.close();
-  DATA.close();
-  POS.close();
-  // Clear values, size, but reserve capacity
-  rx.clear();
-  ry.clear();
-  rz.clear();
+
+  // Do not close streams and do not clear position and velocity vectors
+  // in the case where the fluid is being compressed
+  if (!compress) {
+    // Close streams
+    RDF.close();
+    DATA.close();
+    POS.close();
+    // Clear values, size, but reserve capacity
+    rx.clear();
+    ry.clear();
+    rz.clear();
+    vx.clear();
+    vy.clear();
+    vz.clear();
+  }
+  // Reset the MSD initial vectors
   rrx.clear();
   rry.clear();
   rrz.clear();
-  vx.clear();
-  vy.clear();
-  vz.clear();
+  // Clear monitored quantities
   density.clear();
   temperature.clear();
   u_en.clear();
@@ -754,9 +749,9 @@ void MD::reset_values() {
   msd.clear();
   Cr.clear();
   gr.resize(nhist + 1, 0);  // gr with Index igr
-  fx.resize(N, 0);
-  fy.resize(N, 0);
-  fz.resize(N, 0);
+  // fx.resize(N, 0);
+  // fy.resize(N, 0);
+  // fz.resize(N, 0);
 }
 
 void MD::time_stamp(std::ofstream &stream, std::string variables) {

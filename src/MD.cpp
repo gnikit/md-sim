@@ -411,7 +411,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
 
   // cut_off redefinition
   // * Large cut offs increase the runtime exponentially
-  cut_off = 2.0;
+  cut_off = 3.0;
   rg = cut_off;
   dr = rg / nhist;
   MD_tools potential;  // Pair potential object
@@ -464,9 +464,9 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
         if (r < cut_off) {
           // BIP potential of the form: phi = 1/[(r**2 + a**2)**(n/2)]
           // Allows the user to choose different pair potentials
-          // auto [ff, temp_u] = potential.BIP_force(r, POWER, A_CST);
+          auto [ff, temp_u] = potential.BIP_force(r, POWER, A_CST);
           // auto [ff, temp_u] = potential.GCM_force(r);
-          auto [ff, temp_u] = potential.Exp_force(r, POWER, A_CST);
+          // auto [ff, temp_u] = potential.Exp_force(r, POWER, A_CST);
 
           // Average potential energy
           U += temp_u;

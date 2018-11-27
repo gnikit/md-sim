@@ -378,7 +378,7 @@ void MD::mean_square_displacement(std::vector<double> &MSDx,
 }
 
 // MD Simulation
-void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
+void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
                     double A_CST) {
   /*
    *  Executes the fluid simulation. It includes all statistical methods
@@ -585,7 +585,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
 }
 
 void MD::get_phases(double DENSITY, double FINAL_DENSITY, double DENSITY_INC,
-                    double TEMPERATURE, int POWER, double A_CST) {
+                    double TEMPERATURE, double POWER, double A_CST) {
   /*
    * Compress the fluid to get the phase boundary for a specific temperature.
    *
@@ -627,7 +627,7 @@ void MD::get_phases(double DENSITY, double FINAL_DENSITY, double DENSITY_INC,
 
 // File Handling
 std::string MD::file_naming(std::string prefix, double DENSITY,
-                            double TEMPERATURE, int POWER, double A_cst) {
+                            double TEMPERATURE, double POWER, double A_cst) {
   /*
    * Generates a unique filename for the simulation results to be stored.
    * The method infers from the constructor the number of particles used
@@ -654,7 +654,7 @@ std::string MD::file_naming(std::string prefix, double DENSITY,
   _particles_to_str = "_particles_" + std::to_string(N);
   _rho_to_str = "_rho_" + rho_stream.str();
   _T_to_str = "_T_" + T_stream.str();
-  _n_to_str = "_n_" + std::to_string(POWER);
+  _n_to_str = "_n_" + convert_to_string(POWER, 2);
   _A_to_str = "_A_" + A_stream.str();
 
   _FILE_ID = _step_to_str + _particles_to_str + _rho_to_str + _T_to_str +

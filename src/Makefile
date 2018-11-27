@@ -11,6 +11,10 @@ OBJS = MD.o isomorph.o md_algorithms.o
 
 all: md libmd.a
 
+debug: CXXFLAGS = $(DCXXFLAGS)
+debug: FLAGS = $(DFLAGS)
+debug: md libmd.a
+
 md: Source.o libmd.a
 		$(CXX) $(FLAGS) Source.o $(LINKER) -o $(BIN)/md
 

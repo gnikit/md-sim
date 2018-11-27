@@ -1,16 +1,16 @@
-/* 
- * Ioannis Nikiteas 13/7/2017                                      
- *                                                                 
- * BSc Dissertation:                                               
- * Investigating the transition from Molecular Dynamics to        
- * Smoothed Particle Hydrodynamics                              
- *                                                                 
- * University: Royal Holloway University of London              
- *                                                                 
- * A program meant to simulate a MD fluid with an only        
- * repulsive BIP pair-potential. Increasing the parameter A       
+/*
+ * Ioannis Nikiteas 13/7/2017
+ *
+ * BSc Dissertation:
+ * Investigating the transition from Molecular Dynamics to
+ * Smoothed Particle Hydrodynamics
+ *
+ * University: Royal Holloway University of London
+ *
+ * A program meant to simulate a MD fluid with an only
+ * repulsive BIP pair-potential. Increasing the parameter A
  * creates a coarse-graining effect for the system allowing it
- * to transition to SPH                                       
+ * to transition to SPH
  */
 #pragma once
 #include <fstream>
@@ -30,7 +30,7 @@ class MD {
   size_t Nx, Ny, Nz, nhist, rdf_wait;  // Particles in x, y, z
   size_t N, _STEP_INDEX, STEPS;  // Total particles, step index, maximum steps
   double _T0;                    // Target/ Thermostat temperature
-  double dt = 0.005;             // time step
+  double dt;                     // time step
   double x, y, z;                // distance between particle i and j
   double r;                      // distance in polar
   double _rho;                   // density
@@ -44,7 +44,6 @@ class MD {
   double PC = 0;                 // Configurational Pressure
   double PK;                     // Kinetic Pressure
   double scale_v;                // velocity scaling
-  double _density_increment;     // Amount by which density is altered
 
   // Visualisation vectors initialised in constructor
   std::vector<std::vector<double>> *pos_x;
@@ -52,8 +51,8 @@ class MD {
   std::vector<std::vector<double>> *pos_z;
 
   // Compression variables
-  bool compression_flag = false;
-  size_t Q_counter = 0;  // counts the number compression that have occurred
+  bool compress = false;
+  size_t c_counter = 0;  // counts the number compression that have occurred
 
   // HISTOGRAM VARIABLES
   int igr;                 // Index of Hist
@@ -68,9 +67,9 @@ class MD {
   std::string full_exe_dir, top_exe_dir;
   std::string _step_to_str, _particles_to_str, _rho_to_str, _T_to_str,
       _n_to_str, _A_to_str;
-  std::string HIST, data, pos;
+  std::string rdf, data, pos;
   std::string _dir, _FILE_ID;
-  std::ofstream Hist, DATA, POS;
+  std::ofstream RDF, DATA, POS;
 
  public:
   bool VISUALISE;
@@ -83,6 +82,8 @@ class MD {
   ~MD();
 
   void Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST);
+  void get_phases(double DENSITY, double FINAL_DENSITY, double DENSITY_INC,
+                  double TEMPERATURE, int POWER, double A_CST);
   void reset_values();
 
  protected:
@@ -103,8 +104,6 @@ class MD {
   void mean_square_displacement(std::vector<double> &MSDx,
                                 std::vector<double> &MSDy,
                                 std::vector<double> &MSDz);
-  void density_compression(int steps_quench, double TEMPERATURE,
-                           double density_increment);
 
   void open_files();
   std::string file_naming(std::string prefix, double DENSITY,

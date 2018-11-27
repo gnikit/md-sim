@@ -466,6 +466,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
           // Allows the user to choose different pair potentials
           auto [ff, temp_u] = potential.BIP_force(r, POWER, A_CST);
           // auto [ff, temp_u] = potential.GCM_force(r);
+          // auto [ff, temp_u] = potential.Exp_force(r, POWER, A_CST);
 
           // Average potential energy
           U += temp_u;

@@ -4,7 +4,7 @@ MD_tools::MD_tools() {}
 
 MD_tools::~MD_tools() {}
 
-std::tuple<double, double> MD_tools::BIP_force(double &r, int n, double a) {
+std::tuple<double, double> MD_tools::BIP_force(double &r, double n, double a) {
   /*
    * Generates the force of a Bounded Inverse Power potential
    * and its potential energy.

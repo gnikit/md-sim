@@ -2,6 +2,7 @@
 #include <chrono>   // CPU run-time
 #include <ctime>    // std::chrono
 #include <iomanip>  // setprecision
+#include <numeric>  // accumulate
 #include <random>   // normal_dist
 #include <sstream>  // stringstream
 #include "md_algorithms.h"
@@ -42,6 +43,11 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
   /*
    * This constructor allows for increased control over the internal
    * parameters of the fluid.
+   *
+   * If the compress parameter is true, then the number of steps per simulation
+   * automatically becomes the number of steps per compression.
+   * The true duration of the simulation is the controlled by the initial and
+   * final DENISITIES passed on the get_phases method and with their increment.
    */
 
   try {
@@ -62,7 +68,8 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
   // Total number of particles N
   Nx = Ny = Nz = particles_per_axis;
   N = Nx * Ny * Nz;
-  compression_flag = COMPRESS_FLAG;
+  // If compress is true, then STEPS = steps_per_compression
+  compress = COMPRESS_FLAG;
 
   // Save all the positions for the fluid
   VISUALISE = track_particles;
@@ -114,12 +121,11 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
   pos_z = new std::vector<std::vector<double>>(STEPS);
 
   PI = acos(-1.0);
-  _density_increment = 0.01;
 }
 
 // Delegating constructors with reduced number of arguments
 // https://en.wikipedia.org/wiki/C++11#Object_construction_improvement
-// Constructor to use for density compression
+// Constructor to use for density compress
 MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG)
     : MD(DIRECTORY, run_number, COMPRESS_FLAG, NHIST, PARTICLES_PER_AXIS, false,
          RDF_WAIT) {}
@@ -155,8 +161,7 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
    */
 
   // Initialise position matrix and velocity matrix from Cubic Centred Lattice
-  if (compression_flag == false ||
-      (compression_flag == true && Q_counter == 0)) {
+  if (compress == false || (compress == true && c_counter == 0)) {
     size_t n = 0;
     size_t i, j, k;
     for (i = 0; i < Nx; ++i) {
@@ -166,11 +171,6 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
           y.push_back((j + 0.5) * scale);
           z.push_back((k + 0.5) * scale);
 
-          // Position vectors used for MSD
-          rrx.push_back((i + 0.5) * scale);
-          rry.push_back((j + 0.5) * scale);
-          rrz.push_back((k + 0.5) * scale);
-
           ++n;
         }
       }
@@ -179,20 +179,19 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
     mb_distribution(TEMPERATURE);
   }
 
-  // scale of x, y, z
-  double mean_vx = 0;
-  double mean_vy = 0;
-  double mean_vz = 0;
+  // Calculate the average velocities
+  double mean_vx = std::accumulate(vx.begin(), vx.end(), 0.0) / N;
+  double mean_vy = std::accumulate(vy.begin(), vy.end(), 0.0) / N;
+  double mean_vz = std::accumulate(vz.begin(), vz.end(), 0.0) / N;
+  // Conserve the momentum of the fluid by subsracting the average velocities
+  // using a lambda expression
+  std::for_each(vx.begin(), vx.end(), [mean_vx](double &d) { d -= mean_vx; });
+  std::for_each(vy.begin(), vy.end(), [mean_vy](double &d) { d -= mean_vy; });
+  std::for_each(vz.begin(), vz.end(), [mean_vz](double &d) { d -= mean_vz; });
 
-  size_t i;
-  // Momentum conservation
-  for (i = 0; i < N; ++i) {
-    mean_vx += vx[i] / N;
-    mean_vy += vy[i] / N;
-    mean_vz += vz[i] / N;
-  }
-
+  // ! Check the values of mean_vx, mean_vy, mean_vz after a compression
   size_t tempN = N;
+  size_t i;
   // Subtracting Av. velocities from each particle
   for (i = 0; i < tempN; ++i) {
     vx[i] = vx[i] - mean_vx;
@@ -204,6 +203,7 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
   for (i = 0; i < N; ++i) {
     KE += 0.5 * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]);
   }
+  // ! Check the value of KE after a compression
   T = KE / (1.5 * N);
   scale_v = sqrt(TEMPERATURE / T);  // scaling factor
 
@@ -213,6 +213,10 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
     vy[i] *= scale_v;
     vz[i] *= scale_v;
   }
+  // A copy of the r vectors where the BC will not be applied
+  rrx = x;
+  rry = y;
+  rrz = z;
   // MSD initialisation, storing first positions of particles
   MSDx = x;
   MSDy = y;
@@ -307,7 +311,6 @@ void MD::velocity_autocorrelation_function(std::vector<double> &Cvx,
    */
 
   double cr_temp = 0;  // resets the sum every time step
-  double kb = 1.0;     // Boltzmann constant
   double m = 1.0;      // particle mass
   size_t i;
   /* The peak of the VAF is located at 3kb*T/m */
@@ -333,10 +336,10 @@ void MD::radial_distribution_function() {
   double cor_rho = _rho * (N - 1) / N;
   double dr = rg / nhist;
   size_t i;
-  Hist << "# particles (N): " << N << " steps: " << STEPS << " rho: " << _rho
-       << " bin (NHIST): " << nhist << " cut_off (rg): " << rg << " dr: " << dr
-       << std::endl;
-  Hist << "# Unormalised" << '\t' << "Normalised" << std::endl;
+  RDF << "# particles (N): " << N << " steps: " << STEPS << " rho: " << _rho
+      << " bin (NHIST): " << nhist << " cut_off (rg): " << rg << " dr: " << dr
+      << std::endl;
+  RDF << "# Unormalised" << '\t' << "Normalised" << std::endl;
   for (i = 1; i < nhist; ++i) {  // Changed initial loop value from 0 -> 1
     R = rg * i / nhist;
     // Volume between 2 spheres, accounting for double counting
@@ -345,7 +348,7 @@ void MD::radial_distribution_function() {
     norm = cor_rho * (2.0 / 3.0 * PI * N * (STEPS - rdf_wait) *
                       (pow((R + (dr / 2.0)), 3) - pow((R - (dr / 2.0)), 3)));
 
-    Hist << gr[i] << '\t' << gr[i] / norm << std::endl;
+    RDF << gr[i] << '\t' << gr[i] / norm << std::endl;
   }
 }
 
@@ -374,41 +377,6 @@ void MD::mean_square_displacement(std::vector<double> &MSDx,
   msd.push_back(msd_temp / N);
 }
 
-void MD::density_compression(int steps_quench, double TEMPERATURE,
-                             double density_increment) {
-  /*
-   * Performs repeated compressions of the fluid by periodically
-   * incrementing the density of the fluid.
-   * As a consequence the box length, the scaling factor and the
-   * position vectors are also scaled in order to conserve the number
-   * of particles in the box.
-   *
-   * @param steps_quench: Number of steps over which a compression occurs
-   * @param TEMPERATURE: Temperature of the fluid
-   * @param density_increment: Amount with which the density is increased (or
-   * decreased)
-   */
-  double old_box_length = L;
-
-  // Density incrementation
-  _rho += density_increment;
-
-  // Re-using this piece of code from MD::Simulation
-  scale = pow((N / _rho), (1.0 / 3.0)) / Nx;
-  L = pow((N / _rho), 1.0 / 3.0);
-  double box_length_ratio = L / old_box_length;
-
-  // Rescalling the positional vectors
-  for (size_t i = 0; i < N; ++i) {
-    rx[i] *= box_length_ratio;
-    ry[i] *= box_length_ratio;
-    rz[i] *= box_length_ratio;
-  }
-  Vol = N / _rho;
-
-  initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
-}
-
 // MD Simulation
 void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
                     double A_CST) {
@@ -432,33 +400,36 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
             << std::endl;
   std::cout << "Fluid parameters: rho: " << DENSITY << " T: " << TEMPERATURE
             << " n: " << POWER << " a: " << A_CST << std::endl;
-  _T0 = TEMPERATURE;
+
   _rho = DENSITY;
-  dt /= sqrt(_T0);
+  _T0 = TEMPERATURE;
+  dt = 0.005 / sqrt(_T0);  // Time-step, defined here and reused in the Verlet
   // Box length scaling
   scale = pow((N / _rho), (1.0 / 3.0)) / Nx;
   L = pow((N / _rho), 1.0 / 3.0);
   Vol = N / _rho;
 
   // cut_off redefinition
-  // Large cut offs increase the runtime exponentially
+  // * Large cut offs increase the runtime exponentially
   cut_off = 3.0;
   rg = cut_off;
   dr = rg / nhist;
   MD_tools potential;  // Pair potential object
 
   // Generating the filenames for the output
-  data = file_naming("/Data", DENSITY, TEMPERATURE, POWER, A_CST);
-  pos =
-      file_naming("/Positions_Velocities", DENSITY, TEMPERATURE, POWER, A_CST);
-  HIST = file_naming("/RDF", DENSITY, TEMPERATURE, POWER, A_CST);
+  // Start a new stream only if the fluid is not being compressed
+  if (c_counter == 0) {
+    data = file_naming("/Data", DENSITY, TEMPERATURE, POWER, A_CST);
+    pos = file_naming("/Positions_Velocities", DENSITY, TEMPERATURE, POWER,
+                      A_CST);
+    rdf = file_naming("/RDF", DENSITY, TEMPERATURE, POWER, A_CST);
 
-  open_files();
-  time_stamp(DATA, "# step \t rho \t U \t K \t Pc \t Pk \t MSD \t VAF");
+    open_files();
+    time_stamp(DATA, "# step \t rho \t T \t U \t K \t Pc \t Pk \t MSD \t VAF");
+  }
 
   std::chrono::steady_clock::time_point begin =
       std::chrono::steady_clock::now();
-
   initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
 
   for (_STEP_INDEX = 0; _STEP_INDEX < STEPS; ++_STEP_INDEX) {
@@ -468,18 +439,8 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
     std::fill(fy.begin(), fy.end(), 0);
     std::fill(fz.begin(), fz.end(), 0);
 
-    U = 0;  // seting Potential U to 0
+    U = 0;  // reseting <Potential> U to 0
     PC = 0;
-
-    // TODO: pass as argument steps_quench
-    size_t steps_quench = 10;  // steps between each quenching
-    if (compression_flag == true && _STEP_INDEX != 0 &&
-        _STEP_INDEX % steps_quench == 0) {
-      ++Q_counter;
-      density_compression(steps_quench, TEMPERATURE, _density_increment);
-      std::cout << "Compressing fluid, run: " << Q_counter << " rho: " << _rho
-                << std::endl;
-    }
 
     size_t i, j;
     for (i = 0; i < N - 1; ++i) {
@@ -504,6 +465,8 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
           // BIP potential of the form: phi = 1/[(r**2 + a**2)**(n/2)]
           // Allows the user to choose different pair potentials
           auto [ff, temp_u] = potential.BIP_force(r, POWER, A_CST);
+          // auto [ff, temp_u] = potential.GCM_force(r);
+          // auto [ff, temp_u] = potential.Exp_force(r, POWER, A_CST);
 
           // Average potential energy
           U += temp_u;
@@ -532,10 +495,12 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
     }
 
     // Average Potential Energy per particle
-    u_en.push_back(U / N);
+    U /= N;  // Ensuring that variables are not optimised away
+    u_en.push_back(U);
 
     // Average Configurational Pressure Pc
-    pc.push_back(PC / (3 * Vol));
+    PC /= (3 * Vol);  // Ensuring that variables are not optimised away
+    pc.push_back(PC);
 
     // Isothermal Calibration
     scale_v = sqrt(_T0 / T);  // using T & KE from prev timestep
@@ -592,6 +557,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
 
   write_to_files();
   // Saving Last Position
+  // todo: saves the same shit
   time_stamp(POS, "# X\tY\tZ\tVx\tVy\tVz\tFx\tFy\tFz");
   for (size_t el = 0; el < rx.size(); ++el) {
     POS << rx[el] << '\t' << ry[el] << '\t' << rz[el] << '\t' << vx[el] << '\t'
@@ -613,7 +579,49 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, int POWER,
                "** MD Simulation terminated **\n"
                "******************************\n"
             << std::endl;
-  // Close file streams and reset vectors
+
+  // Close file streams, makes Simulation reusable in loops
+  reset_values();
+}
+
+void MD::get_phases(double DENSITY, double FINAL_DENSITY, double DENSITY_INC,
+                    double TEMPERATURE, int POWER, double A_CST) {
+  /*
+   * Compress the fluid to get the phase boundary for a specific temperature.
+   *
+   * Performs repeated compresss of the fluid by periodically
+   * incrementing the density of the fluid.
+   * As a consequence the box length, the scaling factor and the
+   * position vectors are also scaled in order to conserve the number
+   * of particles in the box.
+   *
+   */
+  // todo: many features do not work at this moment like particle tracking
+  // todo: the POS << time_stamp stream will be a mess, same with RDF
+  double current_rho = DENSITY;
+  double old_box_length = 0;
+  // size_t compression_num = ceil((FINAL_DENSITY - DENSITY) / DENSITY_INC);
+
+  do {
+    Simulation(current_rho, TEMPERATURE, POWER, A_CST);
+    // Holds the box length of the previous simulation just run
+    old_box_length = L;
+    // Density incrementation
+    current_rho += DENSITY_INC;
+    // Simulation updates old_box_length
+    // the updated current_rho can generate the new box length
+    // This value gets recalculated in the next Simulation
+    L = pow((N / current_rho), 1.0 / 3.0);
+    double box_length_ratio = L / old_box_length;
+
+    // Rescalling the positional vectors
+    for (size_t i = 0; i < N; ++i) {
+      rx[i] *= box_length_ratio;
+      ry[i] *= box_length_ratio;
+      rz[i] *= box_length_ratio;
+    }
+    ++c_counter;
+  } while (abs(current_rho - FINAL_DENSITY) > 0.00001);
   reset_values();
 }
 
@@ -664,7 +672,7 @@ void MD::open_files() {
    * Open/Create if file does not exist.
    * Overwrites existing data.
    */
-  Hist.open(HIST, std::ios::out | std::ios::trunc);
+  RDF.open(rdf, std::ios::out | std::ios::trunc);
   DATA.open(data, std::ios::out | std::ios::trunc);
   POS.open(pos, std::ios::out | std::ios::trunc);
 }
@@ -707,20 +715,32 @@ void MD::reset_values() {
    * MD object.
    */
 
-  // Close streams
-  Hist.close();
-  DATA.close();
-  POS.close();
-  // Clear values, size, but reserve capacity
-  rx.clear();
-  ry.clear();
-  rz.clear();
+  /*
+    todo: add try-except block for stream closing,
+    bc the stream might be closed and the user might then call reset_values
+    which will throw an exception
+  */
+
+  // Do not close streams and do not clear position and velocity vectors
+  // in the case where the fluid is being compressed
+  if (!compress) {
+    // Close streams
+    RDF.close();
+    DATA.close();
+    POS.close();
+    // Clear values, size, but reserve capacity
+    rx.clear();
+    ry.clear();
+    rz.clear();
+    vx.clear();
+    vy.clear();
+    vz.clear();
+  }
+  // Reset the MSD initial vectors
   rrx.clear();
   rry.clear();
   rrz.clear();
-  vx.clear();
-  vy.clear();
-  vz.clear();
+  // Clear monitored quantities
   density.clear();
   temperature.clear();
   u_en.clear();
@@ -730,9 +750,9 @@ void MD::reset_values() {
   msd.clear();
   Cr.clear();
   gr.resize(nhist + 1, 0);  // gr with Index igr
-  fx.resize(N, 0);
-  fy.resize(N, 0);
-  fz.resize(N, 0);
+  // fx.resize(N, 0);
+  // fy.resize(N, 0);
+  // fz.resize(N, 0);
 }
 
 void MD::time_stamp(std::ofstream &stream, std::string variables) {

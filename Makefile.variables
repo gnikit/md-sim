@@ -1,11 +1,19 @@
 CC  = icc
 CXX = icpc
 STD = -std=c++17
+
 # INTEL compiler flags
-FLAGS = $(STD) -g3 -pthread -Ofast -xHOST -Wall -m64 -use-intel-optimized-headers
-# FLAGS = $(STD) -pthread -g -O3 -Wall 
-CXXFLAGS = -c $(FLAGS)
+# * Aggressive optimisations hurt the accuracy of the RDF
+FLAGS  = $(STD) -pthread -O2 -xHOST -Wall
+DFLAGS = $(STD) -g3 -pthread -xHOST -Wall -m64 -use-intel-optimized-headers
+# GNU C
+# FLAGS  = $(STD) -pthread -O3 -Wall 
+# DFLAGS = $(STD) -pthread -g3 -Wall 
+
+CXXFLAGS  = -c $(FLAGS)
+DCXXFLAGS = -c $(DFLAGS)
+
 INC = -I ../lib -I ../src -I ../tools/FileIO -I ../tools/tinyxml2
-LN = -L ../lib -L ../src -L ../tools/FileIO -L ../tools/tinyxml2
+LN  = -L ../lib -L ../src -L ../tools/FileIO -L ../tools/tinyxml2
 
 LINKER = $(INC) $(LN) -lmd -ltinyxml2 -lstdc++fs

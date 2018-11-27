@@ -35,3 +35,15 @@ std::tuple<double, double> MD_tools::GCM_force(double &r) {
   double u = exp(-r * r);
   return std::make_tuple(ff, u);
 }
+
+std::tuple<double, double> MD_tools::Exp_force(double &r, double m, double C) {
+  /* 
+   * Exponential pair potential, similar to the GCM.
+   * If used use a smaller cut-off 1.5 ~ 2.0.
+   * Also it is more convinient to use multipliers of e as the C cst
+   */
+
+  double ff = C * m * pow(r, (m-1)) * exp(-(pow(r, m)));
+  double u = C * exp(-(pow(r, m)));
+  return std::make_tuple(ff, u);
+}

@@ -81,9 +81,10 @@ class MD {
 
   ~MD();
 
-  void Simulation(double DENSITY, double TEMPERATURE, int POWER, double A_CST);
+  void Simulation(double DENSITY, double TEMPERATURE, double POWER,
+                  double A_CST);
   void get_phases(double DENSITY, double FINAL_DENSITY, double DENSITY_INC,
-                  double TEMPERATURE, int POWER, double A_CST);
+                  double TEMPERATURE, double POWER, double A_CST);
   void reset_values();
 
  protected:
@@ -107,7 +108,7 @@ class MD {
 
   void open_files();
   std::string file_naming(std::string prefix, double DENSITY,
-                          double TEMPERATURE, int POWER, double A_cst);
+                          double TEMPERATURE, double POWER, double A_cst);
   void write_to_files();
   void show_run(size_t step_size_show);
   void time_stamp(std::ofstream &, std::string variables);

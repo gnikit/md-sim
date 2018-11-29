@@ -245,8 +245,13 @@ void MD::mb_distribution(double TEMPERATURE) {
   double var = sqrt(TEMPERATURE * kb / m);
   double mean = 0;
 
-  // TODO: this needs a seed to randomise every time, FIX
+  // Use current time as seed for random generator
+  std::srand(std::time(nullptr)); 
+  int random_variable = std::rand();
+
   std::default_random_engine generator;
+  generator.seed(random_variable);
+
   std::normal_distribution<double> g_x(mean, var);
   std::normal_distribution<double> g_y(mean, var);
   std::normal_distribution<double> g_z(mean, var);

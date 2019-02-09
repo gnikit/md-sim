@@ -1,5 +1,6 @@
 
 #pragma once
+#include <iostream>
 #include <tuple>
 
 // Load Intel math lib if available
@@ -24,8 +25,12 @@ class MD_tools {
   MD_tools();
   ~MD_tools();
 
-  void get_force(std::string &pp_name);
-  std::tuple<double, double> BIP_force(double &r, double n, double a);
-  std::tuple<double, double> GCM_force(double &r);
-  std::tuple<double, double> Exp_force(double &r, double m, double C);
+  std::tuple<double, double> get_force(double &r);
+  std::tuple<double, double> get_force(double &r, double &power, double &a_cst);
+  std::tuple<double, double> get_force(double &r, double &power, double &a_cst,
+                                       std::string &pp_name);
+
+  static std::tuple<double, double> BIP_force(double &r, double n, double a);
+  static std::tuple<double, double> GCM_force(double &r);
+  static std::tuple<double, double> Exp_force(double &r, double m, double C);
 };

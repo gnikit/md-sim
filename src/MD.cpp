@@ -5,7 +5,7 @@
 #include <numeric>  // accumulate
 #include <random>   // normal_dist
 #include <sstream>  // stringstream
-#include "md_algorithms.h"
+#include "md_pair_potentials.h"
 
 // Check for Compiler support
 // TODO: in future C++ versions, rm fs:: from global scope and mv in constructor

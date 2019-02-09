@@ -24,6 +24,7 @@ class MD_tools {
   MD_tools();
   ~MD_tools();
 
+  void get_force(std::string &pp_name);
   std::tuple<double, double> BIP_force(double &r, double n, double a);
   std::tuple<double, double> GCM_force(double &r);
   std::tuple<double, double> Exp_force(double &r, double m, double C);

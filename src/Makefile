@@ -2,7 +2,7 @@ SHELL = /bin/bash
 include ../Makefile.variables
 LIB = ../lib
 BIN = ../bin
-OBJS = MD.o isomorph.o md_algorithms.o
+OBJS = MD.o isomorph.o md_pair_potentials.o
 
 # The LINKER and the INC variables contain invalid, or unnecassary paths
 # like ../src or ../tools/FileIO for the case of Source.o 
@@ -24,8 +24,8 @@ libmd.a: $(OBJS)
 MD.o: MD.cpp
 	$(CXX) $(CXXFLAGS) $(LINKER) MD.cpp
 
-md_algorithms.o: md_algorithms.cpp
-	$(CXX) $(CXXFLAGS) $(LINKER) md_algorithms.cpp
+md_pair_potentials.o: md_pair_potentials.cpp
+	$(CXX) $(CXXFLAGS) $(LINKER) md_pair_potentials.cpp
 
 isomorph.o: isomorph.cpp
 	$(CXX) $(CXXFLAGS) isomorph.cpp

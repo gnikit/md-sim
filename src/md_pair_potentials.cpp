@@ -1,4 +1,4 @@
-#include "md_algorithms.h"
+#include "md_pair_potentials.h"
 
 MD_tools::MD_tools() {}
 

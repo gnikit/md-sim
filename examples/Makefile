@@ -9,6 +9,7 @@ LN = -L ../lib -L ../src -L ../tools/FileIO
 LINKER = $(INC) $(LN) -lmd
 
 all: database \
+			database_epx_pp \
 			isomorph_line \
 			fluid_compression \
 			simple_run \
@@ -19,6 +20,7 @@ all: database \
 debug: CXXFLAGS = $(DCXXFLAGS)
 debug: FLAGS = $(DFLAGS)
 debug: database \
+				database_epx_pp \
 				isomorph_line \
 				fluid_compression \
 				simple_run \
@@ -27,8 +29,12 @@ debug: database \
 
 # TODO: -lstdc++fs has to be added at the end
 # TODO: https://stackoverflow.com/questions/33149878/experimentalfilesystem-linker-error
-database: database.o $(LIB)/libmd.a
-	$(CXX) $(FLAGS) database.o $(LINKER) -o database -lstdc++fs
+database: make_database.o $(LIB)/libmd.a
+	$(CXX) $(FLAGS) make_database.o $(LINKER) -o database -lstdc++fs
+
+
+database_epx_pp: make_database_exp_pp.o $(LIB)/libmd.a
+	$(CXX) $(FLAGS) make_database_exp_pp.o $(LINKER) -o make_database_exp_pp -lstdc++fs
 	
 isomorph_line: isomorph_line.o $(LIB)/libmd.a
 	$(CXX) $(FLAGS) isomorph_line.o $(LINKER) -o isomorph_line -lstdc++fs
@@ -43,20 +49,8 @@ visualise_fluid: visualise_fluid.o $(LIB)/libmd.a
 	$(CXX) $(FLAGS) visualise_fluid.o $(LINKER) -o visualise_fluid -lstdc++fs
 
 
-database.o:
-	$(CXX) $(CXXFLAGS) -I$(SRC) make_database.cpp -o database.o
-
-isomorph_line.o:
-	$(CXX) $(CXXFLAGS) -I$(SRC) isomorph_line.cpp -o isomorph_line.o
-
-fluid_compression.o:
-	$(CXX) $(CXXFLAGS) -I$(SRC) fluid_compression.cpp -o fluid_compression.o
-
-simple_run.o:
-	$(CXX) $(CXXFLAGS) -I$(SRC) simple_run.cpp -o simple_run.o
-
-visualise_fluid.o:
-	$(CXX) $(CXXFLAGS) -I$(SRC) visualise_fluid.cpp -o visualise_fluid.o
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -I$(SRC) -o $@ $<
 
 
 clean:
@@ -68,5 +62,5 @@ clean:
 
 
 clean_keep_data:
-	$(RM) isomorph_line database fluid_compression 
+	$(RM) isomorph_line database fluid_compression database_exp_pp
 	$(RM) simple_run visualise_fluid *.o

@@ -52,6 +52,8 @@ int main(int argc, char const* argv[]) {
       root->FirstChildElement("simulation_input")->FirstChildElement("n");
   XMLElement* xml_A =
       root->FirstChildElement("simulation_input")->FirstChildElement("A");
+  XMLElement* xml_pp =
+      root->FirstChildElement("simulation_input")->FirstChildElement("pp");
 
   /* Check if results exist and are readbale */
   if (xml_dir == nullptr) return XML_ERROR_PARSING_ELEMENT;
@@ -66,9 +68,10 @@ int main(int argc, char const* argv[]) {
   if (xml_T == nullptr) return XML_ERROR_PARSING_ELEMENT;
   if (xml_n == nullptr) return XML_ERROR_PARSING_ELEMENT;
   if (xml_A == nullptr) return XML_ERROR_PARSING_ELEMENT;
+  if (xml_pp == nullptr) return XML_ERROR_PARSING_ELEMENT;
 
   /* Convert xml input to usable variables */
-  std::string dir;
+  std::string dir, pair_potential;
   bool comp, track_particles;
   unsigned int steps, n, rdf_bins, particles_per_axis, rdf_wait;
   double rho, T, A;
@@ -96,9 +99,10 @@ int main(int argc, char const* argv[]) {
   eReuslt = xml_n->QueryUnsignedText(&n);  // Parse potential power
   XMLCheckResult(eReuslt);
   eReuslt = xml_A->QueryDoubleText(&A);  // Parse softening parameter
+  pair_potential = xml_pp->GetText();   // Parse type of pair potential
 
   /* Run MD simulation */
   MD run(dir, steps, comp, rdf_bins, particles_per_axis, track_particles,
          rdf_wait);
-  run.Simulation(rho, T, n, A);
+  run.Simulation(rho, T, n, A, pair_potential);
 }

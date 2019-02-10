@@ -19,7 +19,7 @@ int main() {
    */
   for (const auto& i : temperature_array) {
     MD* run1 = new MD(dir_linux, STEPS_PER_COMPRESSION, true);
-    run1->get_phases(0.05, 0.2, 0.001, i, 12, 0);
+    run1->get_phases(0.05, 0.2, 0.001, i, 12, 0, "BIP");
   }
 }
 

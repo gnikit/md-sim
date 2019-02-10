@@ -23,6 +23,7 @@ RHO = 0.5
 TEMPERATURE = 0.5
 POWER = 8
 A = 0.5
+PAIR_POTENTIAL = "BIP"
 
 root = ET.Element("input_variables")
 
@@ -44,6 +45,7 @@ ET.SubElement(sim, "rho").text = str(RHO)
 ET.SubElement(sim, "T").text = str(TEMPERATURE)
 ET.SubElement(sim, "n").text = str(POWER)
 ET.SubElement(sim, "A").text = str(A)
+ET.SubElement(sim, "PP").text = str(PAIR_POTENTIAL)
 
 # Build tree in xml file
 tree = ET.ElementTree(root)

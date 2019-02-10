@@ -52,8 +52,10 @@ void MakeDataBase() {
         // MD* run4 = new MD(dir_linux, STEPS, false, 500, 10, false, RDF_EQ);
 
         // ? set temperature manually in default machine
-        std::thread th1(&MD::Simulation, run1, rho[d], T[t], n[i], exp(0.25));
-        std::thread th2(&MD::Simulation, run2, rho[d], T[t], n[i], exp(0.75));
+        std::thread th1(&MD::Simulation, run1, rho[d], T[t], n[i], exp(0.25),
+                        "EXP");
+        std::thread th2(&MD::Simulation, run2, rho[d], T[t], n[i], exp(0.75),
+                        "EXP");
         // std::thread th3(&MD::Simulation, run3, rho[d], T[t], n[i], A3[j]);
         // std::thread th4(&MD::Simulation, run4, rho[d], T[t], n[i], A4[j]);
 

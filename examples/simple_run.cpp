@@ -16,5 +16,5 @@ int main() {
   std::string dir = "./examples/example_data";
   size_t steps = 20000;
   MD run(dir, steps, false, 500, 10, false, 2000);
-  run.Simulation(0.5, 0.5, 8, 0.5);
+  run.Simulation(0.5, 0.5, 8, 0.5, "BIP");
 }

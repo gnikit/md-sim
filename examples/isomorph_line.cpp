@@ -8,7 +8,7 @@
 #define PARTICLES 1000
 typedef std::vector<double> vec1d;
 
-std::string dir_linux = "/home/gn/Desktop/test_data/isomorph";
+std::string dir_linux = "./examples/example_data";
 
 std::vector<double> LinearSpacedArray(double a, double b, std::size_t N);
 
@@ -37,7 +37,7 @@ int main() {
    */
   for (size_t i = 0; i < T_iso.size(); ++i) {
     MD run(dir_linux, STEPS, false, 500, 10, false, 2000);
-    run.Simulation(rho_iso[i], T_iso[i], n, A_iso[i]);
+    run.Simulation(rho_iso[i], T_iso[i], n, A_iso[i], "BIP");
   }
 }
 

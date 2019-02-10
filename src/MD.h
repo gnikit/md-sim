@@ -82,9 +82,10 @@ class MD {
   ~MD();
 
   void Simulation(double DENSITY, double TEMPERATURE, double POWER,
-                  double A_CST);
+                  double A_CST, std::string pp_type);
   void get_phases(double DENSITY, double FINAL_DENSITY, double DENSITY_INC,
-                  double TEMPERATURE, double POWER, double A_CST);
+                  double TEMPERATURE, double POWER, double A_CST,
+                  std::string pp_type);
   void reset_values();
 
  protected:

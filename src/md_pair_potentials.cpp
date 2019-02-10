@@ -1,35 +1,5 @@
 #include "md_pair_potentials.h"
 
-MD_tools::MD_tools() {}
-
-MD_tools::~MD_tools() {}
-
-std::tuple<double, double> MD_tools::get_force(double &r, double &power,
-                                               double &a_cst,
-                                               std::string &pp_name) {
-  if (pp_name == "GCM") {
-    auto [ff, u] = GCM_force(r);
-    return std::make_tuple(ff, u);
-  } else if (pp_name == "EXP") {
-    auto [ff, u] = Exp_force(r, power, a_cst);
-    return std::make_tuple(ff, u);
-  } else {
-    auto [ff, u] = BIP_force(r, power, a_cst);
-    return std::make_tuple(ff, u);
-  }
-}
-
-std::tuple<double, double> MD_tools::get_force(double &r) {
-  auto [ff, u] = GCM_force(r);
-  return std::make_tuple(ff, u);
-}
-
-std::tuple<double, double> MD_tools::get_force(double &r, double &power,
-                                               double &a_cst) {
-  auto [ff, u] = BIP_force(r, power, a_cst);
-  return std::make_tuple(ff, u);
-}
-
 std::tuple<double, double> MD_tools::BIP_force(double &r, double n, double a) {
   /*
    * Generates the force of a Bounded Inverse Power potential
@@ -72,4 +42,43 @@ std::tuple<double, double> MD_tools::Exp_force(double &r, double m, double C) {
   double ff = C * m * pow(r, (m - 1)) * exp(-(pow(r, m)));
   double u = C * exp(-(pow(r, m)));
   return std::make_tuple(ff, u);
+}
+
+/* **********************  Pair potential classes  ************************ */
+
+std::tuple<double, double> BIP_pp::get_force(double &r, double power,
+                                             double a_cst) {
+  auto [ff, u] = MD_tools::BIP_force(r, power, a_cst);
+  return std::make_tuple(ff, u);
+}
+
+std::tuple<double, double> GCM_pp::get_force(double &r, double m = 0,
+                                             double C = 0) {
+  auto [ff, u] = MD_tools::GCM_force(r);
+  return std::make_tuple(ff, u);
+}
+
+std::tuple<double, double> Exp_pp::get_force(double &r, double m,
+                                             double C){
+  auto [ff, u] = MD_tools::Exp_force(r, m, C);
+  return std::make_tuple(ff, u);
+}
+
+/*
+ * NOTE: this map needs to be updated with every new pair potential
+ * that is added in the system.
+ * In addition to the updating the map, a method has to be added in the MD_tools
+ * and a wrapper class has to be created.
+ */
+
+std::map<std::string, pair_potential_type> get_force_funcs = {
+    {"GCM", &GCM_pp::get_force},
+    {"EXP", &Exp_pp::get_force},
+    {"BIP", &BIP_pp::get_force}};
+
+/* Global hash table function, returning a different type of object per key */
+pair_potential_type get_force_func(std::string pp_type) {
+  pair_potential_type pp = get_force_funcs[pp_type];
+  if (!pp) pp = get_force_funcs["BIP"]; // Default case
+  return pp;
 }

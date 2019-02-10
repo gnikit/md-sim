@@ -1,10 +1,11 @@
 #include "MD.h"
-#include <chrono>   // CPU run-time
-#include <ctime>    // std::chrono
-#include <iomanip>  // setprecision
-#include <numeric>  // accumulate
-#include <random>   // normal_dist
-#include <sstream>  // stringstream
+#include <chrono>      // CPU run-time
+#include <ctime>       // std::chrono
+#include <functional>  // funciton pointers
+#include <iomanip>     // setprecision
+#include <numeric>     // accumulate
+#include <random>      // normal_dist
+#include <sstream>     // stringstream
 #include "md_pair_potentials.h"
 
 // Check for Compiler support
@@ -246,7 +247,7 @@ void MD::mb_distribution(double TEMPERATURE) {
   double mean = 0;
 
   // Use current time as seed for random generator
-  std::srand(std::time(nullptr)); 
+  std::srand(std::time(nullptr));
   int random_variable = std::rand();
 
   std::default_random_engine generator;
@@ -384,7 +385,7 @@ void MD::mean_square_displacement(std::vector<double> &MSDx,
 
 // MD Simulation
 void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
-                    double A_CST) {
+                    double A_CST, std::string pp_type) {
   /*
    *  Executes the fluid simulation. It includes all statistical methods
    *  defined in this class. It monitors the following quantities
@@ -397,6 +398,8 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
    *  @param A_CST: softening constant 'a' of the pair potential.
    *                When 'a' = 0, then fluid is pure MD, increasing
    *                'a' results into softening of the pair potential.
+   * @param pp_type: The type of the pair potential the simulation is 
+   *                 modelling. Options are "BIP", "GCM", "EXP"
    */
   // Initialise scaling variables
   std::cout << "***************************\n"
@@ -415,12 +418,14 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
   Vol = N / _rho;
 
   // cut_off redefinition
-  // * Large cut offs increase the runtime exponentially
-  cut_off = 3.0;
+  // NOTE: Large cut offs increase the runtime exponentially
+  cut_off = 3.0;  // TODO: return as argument from BIP or add calibration method
   rg = cut_off;
   dr = rg / nhist;
-  // TODO: make all member functions static
-  MD_tools potential;  // Pair potential object 
+
+  // Gets the pair potential for the simulation based on a map of the
+  // initials of the pair potential and the pair potential itself.
+  pair_potential_type pair_potential_force = get_force_func(pp_type);
 
   // Generating the filenames for the output
   // Start a new stream only if the fluid is not being compressed
@@ -470,9 +475,10 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
         if (r < cut_off) {
           // BIP potential of the form: phi = 1/[(r**2 + a**2)**(n/2)]
           // Allows the user to choose different pair potentials
-          auto [ff, temp_u] = potential.BIP_force(r, POWER, A_CST);
+          // auto [ff, temp_u] = potential.BIP_force(r, POWER, A_CST);
           // auto [ff, temp_u] = potential.GCM_force(r);
           // auto [ff, temp_u] = potential.Exp_force(r, POWER, A_CST);
+          auto [ff, temp_u] = pair_potential_force(r, POWER, A_CST);
 
           // Average potential energy
           U += temp_u;
@@ -590,8 +596,10 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
   reset_values();
 }
 
+// todo: move to other class devoted to phase transitions and multiphase
 void MD::get_phases(double DENSITY, double FINAL_DENSITY, double DENSITY_INC,
-                    double TEMPERATURE, double POWER, double A_CST) {
+                    double TEMPERATURE, double POWER, double A_CST,
+                    std::string pp_type) {
   /*
    * Compress the fluid to get the phase boundary for a specific temperature.
    *
@@ -609,7 +617,7 @@ void MD::get_phases(double DENSITY, double FINAL_DENSITY, double DENSITY_INC,
   // size_t compression_num = ceil((FINAL_DENSITY - DENSITY) / DENSITY_INC);
 
   do {
-    Simulation(current_rho, TEMPERATURE, POWER, A_CST);
+    Simulation(current_rho, TEMPERATURE, POWER, A_CST, pp_type);
     // Holds the box length of the previous simulation just run
     old_box_length = L;
     // Density incrementation

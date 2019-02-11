@@ -4,7 +4,7 @@ STD = -std=c++17
 
 # INTEL compiler flags
 # * Aggressive optimisations hurt the accuracy of the RDF
-FLAGS  = $(STD) -pthread -O2 -xHOST -Wall
+FLAGS  = $(STD) -pthread -Ofast -xHOST -Wall
 DFLAGS = $(STD) -g3 -pthread -xHOST -Wall -m64 -use-intel-optimized-headers
 # GNU C
 # FLAGS  = $(STD) -pthread -O3 -Wall 

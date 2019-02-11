@@ -10,6 +10,8 @@ all:
 	@cd src && $(MAKE)
 	@echo "MAKE MD examples"
 	@cd examples && $(MAKE)
+	@echo "MAKE tools"
+	@cd tools && $(MAKE)
 
 clean:
 	@echo "Cleaning lib"
@@ -20,6 +22,8 @@ clean:
 	@cd  src && $(MAKE) clean
 	@echo "Cleaning MD Examples src/examples"
 	@cd examples && $(MAKE) clean
+	@echo "MAKE tools"
+	@cd tools && $(MAKE) clean
 
 debug:
 	@echo "DEBUG BUILD"
@@ -31,6 +35,8 @@ debug:
 	@cd src && $(MAKE) debug
 	@echo "MAKE MD examples"
 	@cd examples && $(MAKE) debug
+	@echo "MAKE tools"
+	@cd tools && $(MAKE)
 
 clean_keep_data:
 	@echo "Cleaning lib"
@@ -41,3 +47,5 @@ clean_keep_data:
 	@cd  src && $(MAKE) clean
 	@echo "Cleaning MD Examples src/examples"
 	@cd examples && $(MAKE) clean_keep_data
+	@echo "MAKE tools"
+	@cd tools && $(MAKE) clean

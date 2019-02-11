@@ -5,6 +5,7 @@
 *.out
 *.a
 *.so
+*.py
 
 # Intel Optimisation reports
 *.optrpt

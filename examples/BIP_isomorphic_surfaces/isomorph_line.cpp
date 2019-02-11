@@ -8,7 +8,7 @@
 #define PARTICLES 1000
 typedef std::vector<double> vec1d;
 
-std::string dir_linux = "./examples/example_data";
+std::string dir_linux = ".";
 
 std::vector<double> LinearSpacedArray(double a, double b, std::size_t N);
 

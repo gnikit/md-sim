@@ -6,13 +6,13 @@ import lxml.etree as ET
 
 USAGE = "usage: generate_xml_file.py " \
         "[-d dir] [-s steps] [-c compress] [-r rdf_bins]" \
-        "[-p particles] [-t tracking] [-w rdf_wait]\n" \
+        "[-p particles] [-l lattice] [-t tracking] [-w rdf_wait]\n" \
         "                            [-R rho] [-T temperature] [-n=strength]" \
         "[-A softening_param] [-P pair_potential]\n" \
         "                            [-o output_file]\n\n"
 
 EXAMPLE = "generate_xml_file.py -d ./examples/example_data -s 10000 -c false"\
-          " -r 500 -p 10 -t false -w 2000 --rho 0.5 -T 0.5 -n 8 -A 0.5"\
+          " -r 500 -p 10 -l SC -t false -w 2000 --rho 0.5 -T 0.5 -n 8 -A 0.5"\
           " --pp BIP -o ./MD-simulation/examples/example\n\n"
 
 
@@ -27,6 +27,11 @@ HELP = "Options:\n" \
        "                     default is 500.\n" \
        "  -p, --particles:   Particles per axis of the cubic box.\n" \
        "                     default is 10 per axis.\n" \
+       "  -l, --lattice:     Lattice selection for the simulation.\n" \
+       "                     Initial lattice selection:\n" \
+       "                         \"FCC\": Face Centred Cubic\n" \
+       "                         \"BCC\": Body Centred Cubic\n" \
+       "                          \"SC\": Simple Cubic\n" \
        "  -t, --track:       true/false Enables/disables particle tracking.\n" \
        "                     set to true and use visualise.py. \n" \
        "                     Default is false.\n" \
@@ -52,6 +57,7 @@ STEPS = 15000
 COMPRESSION = "false"
 RDF_BINS = 500
 PARTICLES_PER_AXIS = 10
+LATTICE = "SC"
 TRACK_PARTICLES = "false"
 RDF_EQUILIBRATE = 2000
 
@@ -62,7 +68,7 @@ A = 0.5
 PAIR_POTENTIAL = "BIP"
 
 
-def create_xml(dir, steps, compression, rdf_bins, particles, tracking,
+def create_xml(dir, steps, compression, rdf_bins, particles, lattice, tracking,
                rdf_wait, rho, t, n, a, pp, file_out):
 
     root = ET.Element("input_variables")
@@ -73,6 +79,7 @@ def create_xml(dir, steps, compression, rdf_bins, particles, tracking,
     ET.SubElement(input, "compression").text = compression
     ET.SubElement(input, "rdf_bins").text = str(rdf_bins)
     ET.SubElement(input, "particles_per_axis").text = str(particles)
+    ET.SubElement(input, "lattice").text = str(lattice)
     ET.SubElement(input, "track_particles").text = tracking
     ET.SubElement(input, "rdf_equilibrate").text = str(rdf_wait)
 
@@ -93,10 +100,10 @@ def create_xml(dir, steps, compression, rdf_bins, particles, tracking,
 
 def command_line_input(argv):
     try:
-        opts, args = getopt.getopt(argv, "hd:s:c:r:p:t:w:R:T:n:A:P:o:", [
+        opts, args = getopt.getopt(argv, "hd:s:c:r:p:l:t:w:R:T:n:A:P:o:", [
                                    "dir=", "steps=", "compress=",
                                    "rdf_bins=", "particles_per_axis=",
-                                   "track_particles=", "rdf_wait=",
+                                   "lattice=", "track_particles=", "rdf_wait=",
                                    "rho=", "temp=", "n=", "A=", "pp=",
                                    "out="])
     except getopt.GetoptError:
@@ -109,6 +116,7 @@ def command_line_input(argv):
     compress = None
     rdf_bins = None
     particles = None
+    lattice = None
     track_particles = None
     rdf_wait = None
     rho = None
@@ -134,6 +142,8 @@ def command_line_input(argv):
             rdf_bins = arg
         elif opt in ("-p", "--particles"):
             particles = arg
+        elif opt in ("-l", "--lattice"):
+            lattice = arg
         elif opt in ("-t", "--track"):
             track_particles = arg
         elif opt in ("-w", "--rdf_wait"):
@@ -159,6 +169,7 @@ def command_line_input(argv):
            f" Compression: {compress}\n" \
            f" RDF_bins: {rdf_bins}\n" \
            f" Particles per axis: {particles}\n" \
+           f" Lattice selection: {lattice}\n" \
            f" Tracking particles: {track_particles}\n" \
            f" RDF_wait: {rdf_wait}\n" \
            f" -------------------------------------\n" \
@@ -171,15 +182,16 @@ def command_line_input(argv):
            f" Output file: {output_file}\n\n"
 
     print(vars)
-    return (out_dir, steps, compress, rdf_bins, particles, track_particles, \
-            rdf_wait, rho, temperature, n, par_a, pair_potential, output_file)
+    return (out_dir, steps, compress, rdf_bins, particles, lattice, \
+            track_particles, rdf_wait, \
+            rho, temperature, n, par_a, pair_potential, output_file)
 
 
 if __name__ == "__main__":
     l = command_line_input(sys.argv[1:])
     print(l)
     if (not all(i is None for i in l)):
-        create_xml(l[0], l[1], l[2], l[3], l[4], l[5], l[6], \
-                   l[7], l[8], l[9], l[10], l[11], l[12])
+        create_xml(l[0], l[1], l[2], l[3], l[4], l[5], l[6], l[7], \
+                   l[8], l[9], l[10], l[11], l[12], l[13])
     else:
         print("Error: Uninitialised variables in the arguments list.")

@@ -39,8 +39,8 @@ namespace fs = std::experimental::filesystem;
 #pragma warning(disable : 4996)  //_CRT_SECURE_NO_WARNINGS
 
 MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
-       size_t rdf_bins, size_t particles_per_axis, bool track_particles,
-       size_t collect_rdf_after) {
+       size_t rdf_bins, size_t particles_per_axis, std::string LATTICE,
+       bool track_particles, size_t collect_rdf_after) {
   /*
    * This constructor allows for increased control over the internal
    * parameters of the fluid.
@@ -67,8 +67,18 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
 
   STEPS = run_number;
   // Total number of particles N
-  Nx = Ny = Nz = particles_per_axis;
-  N = Nx * Ny * Nz;
+  if (LATTICE == "FCC") {
+    lattice = 1;
+    Nx = Ny = Nz = particles_per_axis;
+    N = Nx * Ny * Nz * 4;
+  } else if (LATTICE == "BCC")
+    lattice = 2;
+  else {
+    lattice = 0;
+    Nx = Ny = Nz = particles_per_axis;
+    N = Nx * Ny * Nz;
+  }
+
   // If compress is true, then STEPS = steps_per_compression
   compress = COMPRESS_FLAG;
 
@@ -128,12 +138,12 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
 // https://en.wikipedia.org/wiki/C++11#Object_construction_improvement
 // Constructor to use for density compress
 MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG)
-    : MD(DIRECTORY, run_number, COMPRESS_FLAG, NHIST, PARTICLES_PER_AXIS, false,
-         RDF_WAIT) {}
+    : MD(DIRECTORY, run_number, COMPRESS_FLAG, NHIST, PARTICLES_PER_AXIS, "SC",
+         false, RDF_WAIT) {}
 
 // Constructor to use for the simplest cases
 MD::MD(std::string DIRECTORY, size_t run_number)
-    : MD(DIRECTORY, run_number, false, NHIST, PARTICLES_PER_AXIS, false,
+    : MD(DIRECTORY, run_number, false, NHIST, PARTICLES_PER_AXIS, "SC", false,
          RDF_WAIT) {}
 
 MD::~MD() {
@@ -163,18 +173,41 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
 
   // Initialise position matrix and velocity matrix from Cubic Centred Lattice
   if (compress == false || (compress == true && c_counter == 0)) {
-    size_t n = 0;
-    size_t i, j, k;
-    for (i = 0; i < Nx; ++i) {
-      for (j = 0; j < Ny; ++j) {
-        for (k = 0; k < Nz; ++k) {
-          x.push_back((i + 0.5) * scale);
-          y.push_back((j + 0.5) * scale);
-          z.push_back((k + 0.5) * scale);
+    switch (lattice) {
+      // FCC lattice
+      case 1:
 
-          ++n;
+        // Coordinates for the FCC lattice
+        double x_c[4] = {0.25, 0.75, 0.75, 0.25};
+        double y_c[4] = {0.25, 0.75, 0.25, 0.75};
+        double z_c[4] = {0.25, 0.25, 0.75, 0.75};
+
+        // Loop over the the corner coordinates of the FCC and then x, y, z
+        for (size_t c = 0; c < 4; ++c) {
+          for (size_t i = 0; i < Nx; ++i) {
+            for (size_t j = 0; j < Ny; ++j) {
+              for (size_t k = 0; k < Nz; ++k) {
+                x.push_back((i + x_c[c]) / double(Nx) * scale);
+                y.push_back((j + y_c[c]) / double(Ny) * scale);
+                z.push_back((k + z_c[c]) / double(Nz) * scale);
+              }
+            }
+          }
         }
-      }
+        break;
+
+      // Simple Cubic lattice
+      default:
+        for (size_t i = 0; i < Nx; ++i) {
+          for (size_t j = 0; j < Ny; ++j) {
+            for (size_t k = 0; k < Nz; ++k) {
+              x.push_back((i + 0.5) * scale);
+              y.push_back((j + 0.5) * scale);
+              z.push_back((k + 0.5) * scale);
+            }
+          }
+        }
+        break;
     }
     // Generates Maxwell-Boltzmann distribution
     mb_distribution(TEMPERATURE);
@@ -398,7 +431,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
    *  @param A_CST: softening constant 'a' of the pair potential.
    *                When 'a' = 0, then fluid is pure MD, increasing
    *                'a' results into softening of the pair potential.
-   * @param pp_type: The type of the pair potential the simulation is 
+   * @param pp_type: The type of the pair potential the simulation is
    *                 modelling. Options are "BIP", "GCM", "EXP"
    */
   // Initialise scaling variables
@@ -413,7 +446,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
   _T0 = TEMPERATURE;
   dt = 0.005 / sqrt(_T0);  // Time-step, defined here and reused in the Verlet
   // Box length scaling
-  scale = pow((N / _rho), (1.0 / 3.0)) / Nx;
+  scale = pow((N / _rho), (1.0 / 3.0)) / pow(N, (1.0 / 3.0));
   L = pow((N / _rho), 1.0 / 3.0);
   Vol = N / _rho;
 

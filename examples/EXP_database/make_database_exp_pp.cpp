@@ -46,8 +46,8 @@ void MakeDataBase() {
         // for (size_t j = 0; j < A1.size(); ++j) {
         std::cout << " run num: " << num << std::endl;
 
-        MD* run1 = new MD(dir_linux, STEPS, false, 250, 8, false, RDF_EQ);
-        MD* run2 = new MD(dir_linux, STEPS, false, 250, 8, false, RDF_EQ);
+        MD* run1 = new MD(dir_linux, STEPS, false, 250, 8, "SC", false, RDF_EQ);
+        MD* run2 = new MD(dir_linux, STEPS, false, 250, 8, "SC", false, RDF_EQ);
         // MD* run3 = new MD(dir_linux, STEPS, false, 500, 10, false, RDF_EQ);
         // MD* run4 = new MD(dir_linux, STEPS, false, 500, 10, false, RDF_EQ);
 

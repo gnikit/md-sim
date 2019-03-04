@@ -27,23 +27,25 @@ class MD {
   // Statistical quantity vectors, VAF, MSD, Energies and pressures
   std::vector<double> Cr, msd, u_en, k_en, pc, pk, temperature, density;
 
-  size_t Nx, Ny, Nz, nhist, rdf_wait;  // Particles in x, y, z
-  size_t N, _STEP_INDEX, STEPS;  // Total particles, step index, maximum steps
-  double _T0;                    // Target/ Thermostat temperature
-  double dt;                     // time step
-  double x, y, z;                // distance between particle i and j
-  double r;                      // distance in polar
-  double _rho;                   // density
-  double scale;                  // box scaling parameter
-  double KE = 0.0;               // Kinetic Energy
-  double T;                      // Temperature
-  double L;                      // Length of the box after scaling
-  double Vol;                    // Volume
-  double cut_off = 3.0;          // simulation runs only within cutoff
-  double U = 0;                  // Potential Energy
-  double PC = 0;                 // Configurational Pressure
-  double PK;                     // Kinetic Pressure
-  double scale_v;                // velocity scaling
+  size_t Nx, Ny, Nz, N;       // Particles in x, y, z and total
+  size_t _STEP_INDEX, STEPS;  // Total particles, step index, maximum steps
+  size_t nhist, rdf_wait;     // histogram bin number, equilibrium period
+  size_t lattice;             // Parameter defining the initial lattice
+  double _T0;                 // Target/ Thermostat temperature
+  double dt;                  // time step
+  double x, y, z;             // distance between particle i and j
+  double r;                   // distance in polar
+  double _rho;                // density
+  double scale;               // box scaling parameter
+  double KE = 0.0;            // Kinetic Energy
+  double T;                   // Temperature
+  double L;                   // Length of the box after scaling
+  double Vol;                 // Volume
+  double cut_off = 3.0;       // simulation runs only within cutoff
+  double U = 0;               // Potential Energy
+  double PC = 0;              // Configurational Pressure
+  double PK;                  // Kinetic Pressure
+  double scale_v;             // velocity scaling
 
   // Visualisation vectors initialised in constructor
   std::vector<std::vector<double>> *pos_x;
@@ -76,8 +78,8 @@ class MD {
   MD(std::string DIRECTORY, size_t run_number);
   MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG);
   MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
-     size_t rdf_bins, size_t particles_per_axis, bool track_particles,
-     size_t collect_rdf_after);
+     size_t rdf_bins, size_t particles_per_axis, std::string LATTICE,
+     bool track_particles, size_t collect_rdf_after);
 
   ~MD();
 

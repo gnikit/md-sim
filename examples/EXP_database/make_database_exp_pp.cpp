@@ -14,7 +14,7 @@
 #define STEPS 65000  // 10000
 #define RDF_EQ 15000
 
-std::string dir_linux = "/home/gn/Desktop/md_data/exp";
+std::string dir_linux = "";
 
 void MakeDataBase();
 

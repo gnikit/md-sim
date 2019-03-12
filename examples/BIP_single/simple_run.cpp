@@ -13,8 +13,8 @@
  */
 
 int main() {
-  std::string dir = ".";
-  size_t steps = 20000;
+  std::string dir = "";
+  size_t steps = 5000;
   MD run(dir, steps, false, 500, 10, "SC", false, 2000);
   run.Simulation(0.5, 0.5, 8, 0.5, "BIP");
 }

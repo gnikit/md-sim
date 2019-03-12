@@ -16,6 +16,8 @@ all:
 	@cd BIP_single && $(MAKE)
 	@echo "EXP_database"
 	@cd EXP_database && $(MAKE)
+	@echo "GCM_phase_diagram"
+	@cd GCM_phase_diagram && $(MAKE)
 
 
 clean:
@@ -31,6 +33,9 @@ clean:
 	@cd BIP_single && $(MAKE) clean
 	@echo "EXP_database"
 	@cd EXP_database && $(MAKE) clean
+	@echo "GCM_phase_diagram"
+	@cd GCM_phase_diagram && $(MAKE) clean
+
 
 clean_keep_data:
 	@echo "3D_visualisation"
@@ -45,3 +50,5 @@ clean_keep_data:
 	@cd BIP_single && $(MAKE) clean_keep_data
 	@echo "EXP_database"
 	@cd EXP_database && $(MAKE) clean_keep_data
+	@echo "GCM_phase_diagram"
+	@cd GCM_phase_diagram && $(MAKE) clean_keep_data

@@ -24,6 +24,8 @@ class MD {
   std::vector<double> Cvx, Cvy, Cvz;     // VAF arrays
   std::vector<double> rrx, rry, rrz;     // used in MSD calculation
   std::vector<double> MSDx, MSDy, MSDz;  // MSD arrays
+  std::vector<double> sfx, sfy, sfz;     // Structure factor k-arrays
+
   // Statistical quantity vectors, VAF, MSD, Energies and pressures
   std::vector<double> Cr, msd, u_en, k_en, pc, pk, temperature, density;
 
@@ -69,9 +71,9 @@ class MD {
   std::string full_exe_dir, top_exe_dir;
   std::string _step_to_str, _particles_to_str, _rho_to_str, _T_to_str,
       _n_to_str, _A_to_str;
-  std::string rdf, data, pos;
+  std::string rdf, data, pos, sf;
   std::string _dir, _FILE_ID;
-  std::ofstream RDF, DATA, POS;
+  std::ofstream RDF, DATA, POS, SF;
 
  public:
   bool VISUALISE;
@@ -108,6 +110,8 @@ class MD {
   void mean_square_displacement(std::vector<double> &MSDx,
                                 std::vector<double> &MSDy,
                                 std::vector<double> &MSDz);
+  void structure_factor(std::vector<double> &rx, std::vector<double> &ry,
+                        std::vector<double> &rz);
 
   void open_files();
   std::string file_naming(std::string prefix, double DENSITY,

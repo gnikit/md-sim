@@ -118,6 +118,10 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
   fx.resize(N, 0);
   fy.resize(N, 0);
   fz.resize(N, 0);
+  /* Structure factor k-arrays */
+  sfx.reserve(N);
+  sfy.reserve(N);
+  sfz.reserve(N);
   /* Observed Quantities */
   Cr.reserve(STEPS);    // Velocity Autocorrelation Function
   msd.reserve(STEPS);   // Mean Square Displacement
@@ -415,6 +419,55 @@ void MD::mean_square_displacement(std::vector<double> &MSDx,
   }
   msd.push_back(msd_temp / N);
 }
+void MD::structure_factor(std::vector<double> &rx, std::vector<double> &ry,
+                          std::vector<double> &rz) {
+  /*
+   * Calculates the structure factor, which is computed as a Fourier Transform.
+   * The structure factor is more useful in FCC and BCC lattices
+   */
+
+  double s = pow((N / _rho), (1.0 / 3.0));
+  double fkx1 = 2.0 * PI / (s / 2.0 * Nx);
+  double fky1 = 2.0 * PI / (s / 2.0 * Ny);
+  double fkz1 = 2.0 * PI / (s / 2.0 * Nz);
+  double sfcosx, sfcosy, sfcosz = 0;
+  double sfsinx, sfsiny, sfsinz = 0;
+
+  /* Try to calculate the structure factor at once for all axis
+     if the particles per axis are equal. Else simply do them individually */
+
+  if (Nx == Ny && Nx == Nz) {
+    for (size_t i = 0; i < rx.size(); ++i) {
+      sfcosx += cos(fkx1 * rx[i]);
+      sfsinx += sin(fkx1 * rx[i]);
+      sfcosy += cos(fky1 * ry[i]);
+      sfsiny += sin(fky1 * ry[i]);
+      sfcosz += cos(fkz1 * rz[i]);
+      sfsinz += sin(fkz1 * rz[i]);
+    }
+  } else {
+    for (const auto &i : rx) {
+      sfcosx += cos(fkx1 * i);
+      sfsinx += sin(fkx1 * i);
+    }
+    for (const auto &i : ry) {
+      sfcosy += cos(fky1 * i);
+      sfsiny += sin(fky1 * i);
+    }
+    for (const auto &i : ry) {
+      sfcosz += cos(fkz1 * i);
+      sfsinz += sin(fkz1 * i);
+    }
+  }
+
+  double kx = (pow(sfcosx, 2) + pow(sfsinx, 2)) / N;
+  double ky = (pow(sfcosy, 2) + pow(sfsiny, 2)) / N;
+  double kz = (pow(sfcosz, 2) + pow(sfsinz, 2)) / N;
+
+  sfx.push_back(kx);
+  sfy.push_back(ky);
+  sfz.push_back(kz);
+}
 
 // MD Simulation
 void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
@@ -467,7 +520,8 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
     pos = file_naming("/Positions_Velocities", DENSITY, TEMPERATURE, POWER,
                       A_CST);
     rdf = file_naming("/RDF", DENSITY, TEMPERATURE, POWER, A_CST);
-
+    sf = file_naming("/SF", DENSITY, TEMPERATURE, POWER, A_CST);
+    
     open_files();
     time_stamp(DATA, "# step \t rho \t T \t U \t K \t Pc \t Pk \t MSD \t VAF");
   }
@@ -722,6 +776,7 @@ void MD::open_files() {
   RDF.open(rdf, std::ios::out | std::ios::trunc);
   DATA.open(data, std::ios::out | std::ios::trunc);
   POS.open(pos, std::ios::out | std::ios::trunc);
+  SF.open(sf, std::ios::out | std::ios::trunc);
 }
 
 void MD::write_to_files() {

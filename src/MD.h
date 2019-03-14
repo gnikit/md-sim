@@ -65,7 +65,7 @@ class MD {
   std::vector<double> gr;  // RDF vector container
 
  private:
-  long double PI;
+  double PI;
   std::string _FILE_EXT;  // output file extension
   /* Variables for storing inside the object the file ID */
   std::string full_exe_dir, top_exe_dir;
@@ -77,9 +77,9 @@ class MD {
 
  public:
   bool VISUALISE;
-  MD(std::string DIRECTORY, size_t run_number);
-  MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG);
-  MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
+  MD(std::string &DIRECTORY, size_t run_number);
+  MD(std::string &DIRECTORY, size_t run_number, bool COMPRESS_FLAG);
+  MD(std::string &DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
      size_t rdf_bins, size_t particles_per_axis, std::string LATTICE,
      bool track_particles, size_t collect_rdf_after);
 

@@ -38,7 +38,7 @@ namespace fs = std::experimental::filesystem;
 #define RDF_WAIT 0               // Iterations after which RDF will be collected
 #pragma warning(disable : 4996)  //_CRT_SECURE_NO_WARNINGS
 
-MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
+MD::MD(std::string &DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
        size_t rdf_bins, size_t particles_per_axis, std::string LATTICE,
        bool track_particles, size_t collect_rdf_after) {
   /*
@@ -141,12 +141,12 @@ MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
 // Delegating constructors with reduced number of arguments
 // https://en.wikipedia.org/wiki/C++11#Object_construction_improvement
 // Constructor to use for density compress
-MD::MD(std::string DIRECTORY, size_t run_number, bool COMPRESS_FLAG)
+MD::MD(std::string &DIRECTORY, size_t run_number, bool COMPRESS_FLAG)
     : MD(DIRECTORY, run_number, COMPRESS_FLAG, NHIST, PARTICLES_PER_AXIS, "SC",
          false, RDF_WAIT) {}
 
 // Constructor to use for the simplest cases
-MD::MD(std::string DIRECTORY, size_t run_number)
+MD::MD(std::string &DIRECTORY, size_t run_number)
     : MD(DIRECTORY, run_number, false, NHIST, PARTICLES_PER_AXIS, "SC", false,
          RDF_WAIT) {}
 
@@ -176,11 +176,10 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
    */
 
   // Initialise position matrix and velocity matrix from Cubic Centred Lattice
-  if (compress == false || (compress == true && c_counter == 0)) {
+  if (!compress || (compress && c_counter == 0)) {
     switch (lattice) {
       // FCC lattice
-      case 1:
-
+      case 1: {
         // Coordinates for the FCC lattice
         double x_c[4] = {0.25, 0.75, 0.75, 0.25};
         double y_c[4] = {0.25, 0.75, 0.25, 0.75};
@@ -199,9 +198,10 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
           }
         }
         break;
+      }
 
       // Simple Cubic lattice
-      default:
+      default: {
         for (size_t i = 0; i < Nx; ++i) {
           for (size_t j = 0; j < Ny; ++j) {
             for (size_t k = 0; k < Nz; ++k) {
@@ -212,6 +212,7 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
           }
         }
         break;
+      }
     }
     // Generates Maxwell-Boltzmann distribution
     mb_distribution(TEMPERATURE);
@@ -430,8 +431,8 @@ void MD::structure_factor(std::vector<double> &rx, std::vector<double> &ry,
   double fkx1 = 2.0 * PI / (s / 2.0 * Nx);
   double fky1 = 2.0 * PI / (s / 2.0 * Ny);
   double fkz1 = 2.0 * PI / (s / 2.0 * Nz);
-  double sfcosx, sfcosy, sfcosz = 0;
-  double sfsinx, sfsiny, sfsinz = 0;
+  double sfcosx = 0, sfcosy = 0, sfcosz = 0;
+  double sfsinx = 0, sfsiny = 0, sfsinz = 0;
 
   /* Try to calculate the structure factor at once for all axis
      if the particles per axis are equal. Else simply do them individually */
@@ -521,7 +522,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
                       A_CST);
     rdf = file_naming("/RDF", DENSITY, TEMPERATURE, POWER, A_CST);
     sf = file_naming("/SF", DENSITY, TEMPERATURE, POWER, A_CST);
-    
+
     open_files();
     time_stamp(DATA, "# step \t rho \t T \t U \t K \t Pc \t Pk \t MSD \t VAF");
   }

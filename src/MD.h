@@ -73,7 +73,7 @@ class MD {
       _n_to_str, _A_to_str;
   std::string rdf, data, pos, sf;
   std::string _dir, _FILE_ID;
-  std::ofstream RDF, DATA, POS, SF;
+  std::ofstream RDF, DATA, POS;
 
  public:
   bool VISUALISE;

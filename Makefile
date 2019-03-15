@@ -34,7 +34,7 @@ debug:
 	@echo "MAKE MD src"
 	@cd src && $(MAKE) debug
 	@echo "MAKE MD examples"
-	@cd examples && $(MAKE) debug
+	@cd examples && $(MAKE)
 	@echo "MAKE tools"
 	@cd tools && $(MAKE)
 

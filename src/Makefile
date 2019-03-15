@@ -2,7 +2,7 @@ SHELL = /bin/bash
 include ../Makefile.variables
 LIB = ../lib
 BIN = ../bin
-OBJS = MD.o isomorph.o md_pair_potentials.o
+OBJS = MD.o isomorph.o md_pair_potentials.o stat_file_logger.o
 
 # The LINKER and the INC variables contain invalid, or unnecassary paths
 # like ../src or ../tools/FileIO for the case of Source.o 
@@ -26,6 +26,9 @@ MD.o: MD.cpp
 
 md_pair_potentials.o: md_pair_potentials.cpp
 	$(CXX) $(CXXFLAGS) $(LINKER) md_pair_potentials.cpp
+
+stat_file_logger.o: stat_file_logger.cpp
+	$(CXX) $(CXXFLAGS) $(LINKER) stat_file_logger.cpp
 
 isomorph.o: isomorph.cpp
 	$(CXX) $(CXXFLAGS) isomorph.cpp

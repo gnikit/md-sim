@@ -521,10 +521,11 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
     pos = file_naming("/Positions_Velocities", DENSITY, TEMPERATURE, POWER,
                       A_CST);
     rdf = file_naming("/RDF", DENSITY, TEMPERATURE, POWER, A_CST);
-    sf = file_naming("/SF", DENSITY, TEMPERATURE, POWER, A_CST);
 
     open_files();
-    time_stamp(DATA, "# step \t rho \t T \t U \t K \t Pc \t Pk \t MSD \t VAF");
+    time_stamp(DATA,
+               "# step \t rho \t T \t U \t K \t Pc \t Pk \t MSD \t VAF \t SFx "
+               "\t SFy \t SFz");
   }
 
   std::chrono::steady_clock::time_point begin =
@@ -548,7 +549,9 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
         y = ry[i] - ry[j];  // between particles i and j
         z = rz[i] - rz[j];  // in Cartesian
 
-        // Ensure the particles' separation distance is within the box
+        // Get the shortest image of the two particles
+        // if the particles are near the periodic boundary,
+        // this ismage is their reflection.
         if (x > (0.5 * L)) x = x - L;
         if (x < (-0.5 * L)) x = x + L;
         if (y > (0.5 * L)) y = y - L;
@@ -561,11 +564,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
 
         // Force loop
         if (r < cut_off) {
-          // BIP potential of the form: phi = 1/[(r**2 + a**2)**(n/2)]
           // Allows the user to choose different pair potentials
-          // auto [ff, temp_u] = potential.BIP_force(r, POWER, A_CST);
-          // auto [ff, temp_u] = potential.GCM_force(r);
-          // auto [ff, temp_u] = potential.Exp_force(r, POWER, A_CST);
           auto [ff, temp_u] = pair_potential_force(r, POWER, A_CST);
 
           // Average potential energy
@@ -623,6 +622,9 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
 
     // Density
     density.push_back(_rho);
+
+    // Calculate the structure factor k-vectors
+    structure_factor(rx, ry, rz);
 
     // Save positions for visualisation with Python
     if (VISUALISE) {
@@ -777,7 +779,6 @@ void MD::open_files() {
   RDF.open(rdf, std::ios::out | std::ios::trunc);
   DATA.open(data, std::ios::out | std::ios::trunc);
   POS.open(pos, std::ios::out | std::ios::trunc);
-  SF.open(sf, std::ios::out | std::ios::trunc);
 }
 
 void MD::write_to_files() {
@@ -787,7 +788,8 @@ void MD::write_to_files() {
   for (size_t i = 0; i < STEPS; ++i) {
     DATA << (i + 1) << '\t' << density[i] << '\t' << temperature[i] << '\t'
          << u_en[i] << '\t' << k_en[i] << '\t' << pc[i] << '\t' << pk[i] << '\t'
-         << msd[i] << '\t' << Cr[i] << std::endl;
+         << msd[i] << '\t' << Cr[i] << sfx[i] << '\t' << sfy[i] << '\t'
+         << sfz[i] << std::endl;
   }
 }
 

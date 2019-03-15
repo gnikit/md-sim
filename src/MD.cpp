@@ -79,6 +79,11 @@ MD::MD(std::string &DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
     N = Nx * Ny * Nz;
   }
 
+  // Initialise the log output variable
+  logger.N = N;
+  logger.STEPS = STEPS;
+  logger._dir = _dir;
+
   // If compress is true, then STEPS = steps_per_compression
   compress = COMPRESS_FLAG;
 
@@ -380,10 +385,10 @@ void MD::radial_distribution_function() {
   double cor_rho = _rho * (N - 1) / N;
   double dr = rg / nhist;
   size_t i;
-  RDF << "# particles (N): " << N << " steps: " << STEPS << " rho: " << _rho
-      << " bin (NHIST): " << nhist << " cut_off (rg): " << rg << " dr: " << dr
-      << std::endl;
-  RDF << "# Unormalised" << '\t' << "Normalised" << std::endl;
+  logger.RDF << "# particles (N): " << N << " steps: " << STEPS
+             << " rho: " << _rho << " bin (NHIST): " << nhist
+             << " cut_off (rg): " << rg << " dr: " << dr << std::endl;
+  logger.RDF << "# Unormalised" << '\t' << "Normalised" << std::endl;
   for (i = 1; i < nhist; ++i) {  // Changed initial loop value from 0 -> 1
     R = rg * i / nhist;
     // Volume between 2 spheres, accounting for double counting
@@ -392,7 +397,7 @@ void MD::radial_distribution_function() {
     norm = cor_rho * (2.0 / 3.0 * PI * N * (STEPS - rdf_wait) *
                       (pow((R + (dr / 2.0)), 3) - pow((R - (dr / 2.0)), 3)));
 
-    RDF << gr[i] << '\t' << gr[i] / norm << std::endl;
+    logger.RDF << gr[i] << '\t' << gr[i] / norm << std::endl;
   }
 }
 
@@ -517,15 +522,18 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
   // Generating the filenames for the output
   // Start a new stream only if the fluid is not being compressed
   if (c_counter == 0) {
-    data = file_naming("/Data", DENSITY, TEMPERATURE, POWER, A_CST);
-    pos = file_naming("/Positions_Velocities", DENSITY, TEMPERATURE, POWER,
-                      A_CST);
-    rdf = file_naming("/RDF", DENSITY, TEMPERATURE, POWER, A_CST);
+    std::string data =
+        logger.file_naming("/Data", DENSITY, TEMPERATURE, POWER, A_CST);
+    std::string pos = logger.file_naming("/Positions_Velocities", DENSITY,
+                                         TEMPERATURE, POWER, A_CST);
+    std::string rdf =
+        logger.file_naming("/RDF", DENSITY, TEMPERATURE, POWER, A_CST);
 
-    open_files();
-    time_stamp(DATA,
-               "# step \t rho \t T \t U \t K \t Pc \t Pk \t MSD \t VAF \t SFx "
-               "\t SFy \t SFz");
+    logger.open_files(data, rdf, pos);
+    logger.time_stamp(
+        logger.DATA,
+        "# step \t rho \t T \t U \t K \t Pc \t Pk \t MSD \t VAF \t SFx "
+        "\t SFy \t SFz");
   }
 
   std::chrono::steady_clock::time_point begin =
@@ -647,24 +655,29 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
     // Write the arrays as jagged,(hence transposed), this creates rows=STEPS
     // and columns=PARTICLES
     f.Write2File<double>(
-        *pos_x, file_naming("/x_data", DENSITY, TEMPERATURE, POWER, A_CST),
-        "\t", true);
+        *pos_x,
+        logger.file_naming("/x_data", DENSITY, TEMPERATURE, POWER, A_CST), "\t",
+        true);
     f.Write2File<double>(
-        *pos_y, file_naming("/y_data", DENSITY, TEMPERATURE, POWER, A_CST),
-        "\t", true);
+        *pos_y,
+        logger.file_naming("/y_data", DENSITY, TEMPERATURE, POWER, A_CST), "\t",
+        true);
     f.Write2File<double>(
-        *pos_z, file_naming("/z_data", DENSITY, TEMPERATURE, POWER, A_CST),
-        "\t", true);
+        *pos_z,
+        logger.file_naming("/z_data", DENSITY, TEMPERATURE, POWER, A_CST), "\t",
+        true);
   }
 
-  write_to_files();
+  logger.write_data_file(density, temperature, u_en, k_en, pc, pk, msd, Cr, sfx,
+                         sfy, sfz);
   // Saving Last Position
   // todo: saves the same shit
-  time_stamp(POS, "# X\tY\tZ\tVx\tVy\tVz\tFx\tFy\tFz");
+  logger.time_stamp(logger.POS,
+                    "# X\tY\tZ\tVx\tVy\tVz\tFx\tFy\tFz");  // fstream
   for (size_t el = 0; el < rx.size(); ++el) {
-    POS << rx[el] << '\t' << ry[el] << '\t' << rz[el] << '\t' << vx[el] << '\t'
-        << vy[el] << '\t' << vz[el] << '\t' << fx[el] << '\t' << fy[el] << '\t'
-        << fz[el] << std::endl;
+    logger.POS << rx[el] << '\t' << ry[el] << '\t' << rz[el] << '\t' << vx[el]
+               << '\t' << vy[el] << '\t' << vz[el] << '\t' << fx[el] << '\t'
+               << fy[el] << '\t' << fz[el] << std::endl;
   }
 
   radial_distribution_function();
@@ -729,70 +742,6 @@ void MD::get_phases(double DENSITY, double FINAL_DENSITY, double DENSITY_INC,
   reset_values();
 }
 
-// File Handling
-std::string MD::file_naming(std::string prefix, double DENSITY,
-                            double TEMPERATURE, double POWER, double A_cst) {
-  /*
-   * Generates a unique filename for the simulation results to be stored.
-   * The method infers from the constructor the number of particles used
-   * and the duration of the simulation (steps).
-   *
-   * @param prefix: File name preceeding the file id
-   * @param DENSITY: Fluid density
-   * @param TEMPERATURE: Fluid temperature
-   * @param POWER: Pair potential power
-   * @param A_cst: Softening parameter constant
-   *
-   * @return: string structured as follows
-   *          INPUT_DIR/prefix_step_#_particles_#_rho_#_T_#_n_#_A_#.txt
-   */
-
-  // Individual streams handling double to string conversions
-  std::stringstream A_stream, rho_stream, T_stream;
-
-  rho_stream << std::fixed << std::setprecision(4) << DENSITY;    // 4 decimals
-  T_stream << std::fixed << std::setprecision(4) << TEMPERATURE;  // 4 decimals
-  A_stream << std::fixed << std::setprecision(5) << A_cst;        // 5 decimals
-
-  _step_to_str = "_step_" + std::to_string(STEPS);
-  _particles_to_str = "_particles_" + std::to_string(N);
-  _rho_to_str = "_rho_" + rho_stream.str();
-  _T_to_str = "_T_" + T_stream.str();
-  _n_to_str = "_n_" + convert_to_string(POWER, 2);
-  _A_to_str = "_A_" + A_stream.str();
-
-  _FILE_ID = _step_to_str + _particles_to_str + _rho_to_str + _T_to_str +
-             _n_to_str + _A_to_str;
-
-  // Explicit defitions
-  _FILE_EXT = ".txt";
-
-  // Path addition
-  return _dir + prefix + _FILE_ID + _FILE_EXT;
-}
-
-void MD::open_files() {
-  /*
-   * Open/Create if file does not exist.
-   * Overwrites existing data.
-   */
-  RDF.open(rdf, std::ios::out | std::ios::trunc);
-  DATA.open(data, std::ios::out | std::ios::trunc);
-  POS.open(pos, std::ios::out | std::ios::trunc);
-}
-
-void MD::write_to_files() {
-  /*
-   * Writes values of parameters to Data file.
-   */
-  for (size_t i = 0; i < STEPS; ++i) {
-    DATA << (i + 1) << '\t' << density[i] << '\t' << temperature[i] << '\t'
-         << u_en[i] << '\t' << k_en[i] << '\t' << pc[i] << '\t' << pk[i] << '\t'
-         << msd[i] << '\t' << Cr[i] << sfx[i] << '\t' << sfy[i] << '\t'
-         << sfz[i] << std::endl;
-  }
-}
-
 void MD::show_run(size_t step_size_show) {
   /*
    * Displays the system parameters every step_size_show of steps
@@ -830,9 +779,9 @@ void MD::reset_values() {
   // in the case where the fluid is being compressed
   if (!compress) {
     // Close streams
-    RDF.close();
-    DATA.close();
-    POS.close();
+    logger.RDF.close();
+    logger.DATA.close();
+    logger.POS.close();
     // Clear values, size, but reserve capacity
     rx.clear();
     ry.clear();
@@ -855,39 +804,4 @@ void MD::reset_values() {
   msd.clear();
   Cr.clear();
   gr.resize(nhist + 1, 0);  // gr with Index igr
-  // fx.resize(N, 0);
-  // fy.resize(N, 0);
-  // fz.resize(N, 0);
-}
-
-void MD::time_stamp(std::ofstream &stream, std::string variables) {
-  /*
-   * Dates the file and allows the input of a header
-   * Input a file stream to write and string of characters to display as
-   * headers.
-   *
-   * @param &stream: Stream that should be timestaped
-   * @param variables: A header that can be included underneath the timestamp
-   */
-  std::chrono::time_point<std::chrono::system_clock> instance;
-  instance = std::chrono::system_clock::now();
-  std::time_t date_time = std::chrono::system_clock::to_time_t(instance);
-  stream << "# Created on: " << std::ctime(&date_time);
-  stream << variables << std::endl;
-}
-
-std::string MD::convert_to_string(const double &x, const int &precision) {
-  /*
-   * Convert doubles to a string with a variable degree of precision.
-   *
-   * @param &x: Double number to be converted
-   * @param &precision: Precision of the double when converted to string
-   *
-   * @return: string
-   */
-  std::ostringstream ss;
-  ss.str(std::string());  // don't forget to empty the stream
-  ss << std::fixed << std::setprecision(precision) << x;
-
-  return ss.str();
 }

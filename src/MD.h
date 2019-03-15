@@ -13,8 +13,8 @@
  * to transition to SPH
  */
 #pragma once
-#include <fstream>
 #include <vector>
+#include "stat_file_logger.h"
 
 class MD {
  protected:
@@ -66,14 +66,9 @@ class MD {
 
  private:
   double PI;
-  std::string _FILE_EXT;  // output file extension
   /* Variables for storing inside the object the file ID */
-  std::string full_exe_dir, top_exe_dir;
-  std::string _step_to_str, _particles_to_str, _rho_to_str, _T_to_str,
-      _n_to_str, _A_to_str;
-  std::string rdf, data, pos, sf;
-  std::string _dir, _FILE_ID;
-  std::ofstream RDF, DATA, POS;
+  Stat_File logger;
+  std::string _dir;
 
  public:
   bool VISUALISE;
@@ -112,12 +107,5 @@ class MD {
                                 std::vector<double> &MSDz);
   void structure_factor(std::vector<double> &rx, std::vector<double> &ry,
                         std::vector<double> &rz);
-
-  void open_files();
-  std::string file_naming(std::string prefix, double DENSITY,
-                          double TEMPERATURE, double POWER, double A_cst);
-  void write_to_files();
   void show_run(size_t step_size_show);
-  void time_stamp(std::ofstream &, std::string variables);
-  std::string convert_to_string(const double &x, const int &precision);
 };

@@ -3,11 +3,9 @@
 // Passes the name of the variable to a stream
 #define GET_VAR_NAME(stream, variable) (stream) << #variable
 
-Stat_File::Stat_File() {}
+stat_file::stat_file() {}
 
-Stat_File::Stat_File(size_t &STEPS, size_t &N, std::string DIR) : STEPS(STEPS), N(N) , _dir(DIR){}
-
-void Stat_File::open_files(std::string &data, std::string &rdf,
+void stat_file::open_files(std::string &data, std::string &rdf,
                            std::string &pos) {
   /*
    * Open/Create if file does not exist.
@@ -19,12 +17,12 @@ void Stat_File::open_files(std::string &data, std::string &rdf,
   POS.open(pos, std::ios::out | std::ios::trunc);
 }
 
-void Stat_File::write_data_file(
-    std::vector<double> &density, std::vector<double> &temperature,
-    std::vector<double> &u_en, std::vector<double> &k_en,
-    std::vector<double> &pc, std::vector<double> &pk, std::vector<double> &msd,
-    std::vector<double> &Cr, std::vector<double> &sfx, std::vector<double> &sfy,
-    std::vector<double> &sfz) {
+void stat_file::write_data_file(
+    size_t STEPS, std::vector<double> &density,
+    std::vector<double> &temperature, std::vector<double> &u_en,
+    std::vector<double> &k_en, std::vector<double> &pc, std::vector<double> &pk,
+    std::vector<double> &msd, std::vector<double> &Cr, std::vector<double> &sfx,
+    std::vector<double> &sfy, std::vector<double> &sfz) {
   /*
    * Writes values of parameters to Data file.
    */
@@ -36,7 +34,7 @@ void Stat_File::write_data_file(
   }
 }
 
-void Stat_File::time_stamp(std::ofstream &stream, std::string variables) {
+void stat_file::time_stamp(std::ofstream &stream, std::string variables) {
   /*
    * Dates the file and allows the input of a header
    * Input a file stream to write and string of characters to display as
@@ -51,9 +49,10 @@ void Stat_File::time_stamp(std::ofstream &stream, std::string variables) {
   stream << "# Created on: " << std::ctime(&date_time);
   stream << variables << std::endl;
 }
-std::string Stat_File::file_naming(std::string prefix, double &DENSITY,
-                                   double &TEMPERATURE, double &POWER,
-                                   double &A_cst) {
+
+std::string stat_file::file_naming(std::string prefix, size_t &STEPS, size_t &N,
+                                   double &DENSITY, double &TEMPERATURE,
+                                   double &POWER, double &A_cst) {
   /*
    * Generates a unique filename for the simulation results to be stored.
    * The method infers from the constructor the number of particles used
@@ -90,9 +89,9 @@ std::string Stat_File::file_naming(std::string prefix, double &DENSITY,
   std::string _FILE_EXT = ".txt";
 
   // Path addition
-  return _dir + prefix + _FILE_ID + _FILE_EXT;
+  return prefix + _FILE_ID + _FILE_EXT;
 }
-std::string Stat_File::convert_to_string(const double &x,
+std::string stat_file::convert_to_string(const double &x,
                                          const int &precision) {
   /*
    * Convert doubles to a string with a variable degree of precision.
@@ -108,4 +107,3 @@ std::string Stat_File::convert_to_string(const double &x,
 
   return ss.str();
 }
-

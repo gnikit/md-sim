@@ -1,8 +1,12 @@
 # Molecular Dynamics Simulation
 
-A program simulating a Molecular Dynamics (MD) fluid under the influence of an only repulsive, modified Lennard-Jones potential
+A program simulating Molecular Dynamics (MD) fluids, with the option to use
+custom pair potentials. The potentials currently in the project include:
 
-![first eq](http://latex.codecogs.com/gif.latex?%5Cphi_%7Bij%7D%20%28r%29%20%3D%20%5Cvarepsilon%5Cbigg%28%5Cdfrac%7B%5Csigma%7D%7B%28r%5E%7B2%7D%20&plus;%20A%29%7D%5Cbigg%29%5E%5Cfrac%7Bn%7D%7B2%7D)
+* Bounded Inverse Power (BIP)
+* Gaussian Core Model (GCM)
+* Exponential Pair Potential (EXP)
+* Lennard-Jones Potential (LJ)
 
 ## Description
 
@@ -21,6 +25,7 @@ git clone --recurse-submodules -j4 https://github.com/GiannisNikiteas/MD-simulat
 ```
 
 ### Build
+
 Build the library, the executables and the test cases with:
 
 ```bash
@@ -56,7 +61,7 @@ int main() {
   // Files will be saved to
   std::string dir = "/Desired/Path/"; // The directory has to exist
   
-  MD run(dir, steps);
-  run.Simulation(rho, t, n, a);
+  MD run(dir, steps); // More elaborate constructors also exist
+  run.Simulation(rho, t, n, a, "LJ"); // LJ: Lennard-Jones pair potential
 }
 ```

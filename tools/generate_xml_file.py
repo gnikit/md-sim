@@ -102,8 +102,8 @@ def command_line_input(argv):
     try:
         opts, args = getopt.getopt(argv, "hd:s:c:r:p:l:t:w:R:T:n:A:P:o:", [
                                    "dir=", "steps=", "compress=",
-                                   "rdf_bins=", "particles_per_axis=",
-                                   "lattice=", "track_particles=", "rdf_wait=",
+                                   "rdf_bins=", "particles=",
+                                   "lattice=", "track=", "rdf_wait=",
                                    "rho=", "temp=", "n=", "A=", "pp=",
                                    "out="])
     except getopt.GetoptError:

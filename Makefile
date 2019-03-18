@@ -13,7 +13,13 @@ all:
 	@echo "MAKE tools"
 	@cd tools && $(MAKE)
 
+test: all
+	# Do not run the database files
+	$(RM) examples/examplebin/*database*
+	@cd examples/examplebin; for i in ./*; do ./$$i >> $$i.log; done
+
 clean:
+	$(RM) *.log *.txt		# TODO: this will cause an issue if/when we change to cmake
 	@echo "Cleaning lib"
 	@cd lib && $(MAKE) clean
 	@echo "Cleaning MD src and bin"

@@ -1,5 +1,7 @@
 # Molecular Dynamics Simulation
 
+[![Build Status](https://travis-ci.com/GNikit/MD-simulation.svg?branch=master)](https://travis-ci.com/GNikit/MD-simulation)
+
 A program simulating Molecular Dynamics (MD) fluids, with the option to use
 custom pair potentials. The potentials currently in the project include:
 

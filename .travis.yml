@@ -14,4 +14,5 @@ addons:
 script:
   - export CC=gcc-7
   - export CXX=g++-7
+  - export STD=c++17
   - make -j 3 test

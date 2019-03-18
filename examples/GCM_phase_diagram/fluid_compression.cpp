@@ -19,7 +19,7 @@ int main() {
    */
   for (const auto& i : temperature_array) {
     phase_transition* run1 = new phase_transition(dir_linux, STEPS_PER_COMPRESSION, true, 500, 4, "FCC", false, 1000);
-    run1->crystallisation(0.1, 0.2, 0.001, 0.005, 12, 0, "GCM");
+    run1->crystallisation(0.1, 0.2, 0.01, 0.005, 0, 0, "GCM");
   }
 }
 

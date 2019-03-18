@@ -44,6 +44,16 @@ std::tuple<double, double> MD_tools::Exp_force(double &r, double m, double C) {
   return std::make_tuple(ff, u);
 }
 
+std::tuple<double, double> MD_tools::LJ_force(double &r) {
+  /*
+   * Lennard-Jones pair potential.
+   */
+
+  double ff = 4 * (12 * pow(r, -13) + 6 * pow(r, -7));
+  double u = 4 * (pow(r, -12) - pow(r, -6));
+  return std::make_tuple(ff, u);
+}
+
 /* **********************  Pair potential classes  ************************ */
 
 std::tuple<double, double> BIP_pp::get_force(double &r, double power,
@@ -58,9 +68,14 @@ std::tuple<double, double> GCM_pp::get_force(double &r, double m = 0,
   return std::make_tuple(ff, u);
 }
 
-std::tuple<double, double> Exp_pp::get_force(double &r, double m,
-                                             double C){
+std::tuple<double, double> Exp_pp::get_force(double &r, double m, double C) {
   auto [ff, u] = MD_tools::Exp_force(r, m, C);
+  return std::make_tuple(ff, u);
+}
+
+std::tuple<double, double> LJ_pp::get_force(double &r, double m = 0,
+                                            double C = 0) {
+  auto [ff, u] = MD_tools::LJ_force(r);
   return std::make_tuple(ff, u);
 }
 
@@ -74,11 +89,12 @@ std::tuple<double, double> Exp_pp::get_force(double &r, double m,
 std::map<std::string, pair_potential_type> get_force_funcs = {
     {"GCM", &GCM_pp::get_force},
     {"EXP", &Exp_pp::get_force},
-    {"BIP", &BIP_pp::get_force}};
+    {"BIP", &BIP_pp::get_force},
+    {"LJ", &LJ_pp::get_force}};
 
 /* Global hash table function, returning a different type of object per key */
 pair_potential_type get_force_func(std::string pp_type) {
   pair_potential_type pp = get_force_funcs[pp_type];
-  if (!pp) pp = get_force_funcs["BIP"]; // Default case
+  if (!pp) pp = get_force_funcs["BIP"];  // Default case
   return pp;
 }

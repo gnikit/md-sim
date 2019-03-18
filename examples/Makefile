@@ -4,6 +4,7 @@ SHELL = /bin/bash
 # TODO: https://stackoverflow.com/questions/33149878/experimentalfilesystem-linker-error
 
 all:
+	@mkdir examplebin example_data
 	@echo "3D_visualisation"
 	@cd 3D_visualisation && $(MAKE)
 	@echo "BIP_database"
@@ -35,6 +36,7 @@ clean:
 	@cd EXP_database && $(MAKE) clean
 	@echo "GCM_phase_diagram"
 	@cd GCM_phase_diagram && $(MAKE) clean
+	@rm -rf examplebin example_data
 
 
 clean_keep_data:

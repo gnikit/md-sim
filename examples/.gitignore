@@ -6,3 +6,14 @@
 
 # Intel Optimisation reports
 *.optrpt
+
+# Ignore the hard-coded example binaries
+fluid_compression_bip
+fluid_compression_gcm
+database_epx_pp
+simple_run
+isomorph_line
+database
+visualise_fluid
+# Ignore examplebin
+examplebin

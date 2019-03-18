@@ -1,19 +1,23 @@
-CC  = icc
-CXX = icpc
-STD = -std=c++17
+SHELL = /bin/bash
 
-# INTEL compiler flags
-# * Aggressive optimisations hurt the accuracy of the RDF
-FLAGS  = $(STD) -pthread -Ofast -xHOST -Wall
-DFLAGS = $(STD) -g3 -pthread -xHOST -Wall -m64 -use-intel-optimized-headers
-# GNU C
-# FLAGS  = $(STD) -pthread -O3 -Wall 
-# DFLAGS = $(STD) -pthread -g3 -Wall 
+STD       := -std=c++1z
+CXXFLAGS  := $(STD) -pthread -Wall
+DCXXFLAGS := $(STD) -pthread -g -Wall
 
-CXXFLAGS  = -c $(FLAGS)
-DCXXFLAGS = -c $(DFLAGS)
 
-INC = -I ../lib -I ../src -I ../tools/FileIO -I ../tools/tinyxml2
-LN  = -L ../lib -L ../src -L ../tools/FileIO -L ../tools/tinyxml2
+INC = -I ../include -I ../tools/FileIO -I ../tools/tinyxml2
+LN  = -L ../lib
 
 LINKER = $(INC) $(LN) -lmd -ltinyxml2 -lstdc++fs
+
+# Test if we have intel compilers in our PATH
+ifeq (, $(shell which icpc))
+	# GNU compiler configuration
+	CXX = g++
+	CXXFLAGS += -O3 -Wall
+else
+	# INTEL compiler flags
+	# * Aggressive optimisations hurt the accuracy of the RDF
+	CXX = icpc
+	CXXFLAGS  += -Ofast -xHOST -m64 -use-intel-optimized-headers
+endif

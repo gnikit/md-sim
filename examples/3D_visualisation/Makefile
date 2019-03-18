@@ -11,14 +11,14 @@ LINKER = $(INC) $(LN) -lmd
 all: visualise_fluid
 			
 debug: CXXFLAGS = $(DCXXFLAGS)
-debug: FLAGS = $(DFLAGS)
 debug: visualise_fluid
 
 visualise_fluid: *.o $(LIB)/libmd.a
-	$(CXX) $(FLAGS) *.o $(LINKER) -o visualise_fluid -lstdc++fs
+	$(CXX) $(CXXFLAGS) *.o $(LINKER) -o visualise_fluid -lstdc++fs
+	mv visualise_fluid ../examplebin/
 
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -I$(SRC) -o $@ $<
+	$(CXX) -c $(CXXFLAGS) -I$(SRC) $<
 
 clean:
 	$(RM) visualise_fluid *.o *.dat *.txt

@@ -79,11 +79,6 @@ MD::MD(std::string &DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
     N = Nx * Ny * Nz;
   }
 
-  // Initialise the log output variable
-  logger.N = N;
-  logger.STEPS = STEPS;
-  logger._dir = _dir;
-
   // If compress is true, then STEPS = steps_per_compression
   compress = COMPRESS_FLAG;
 
@@ -522,12 +517,13 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
   // Generating the filenames for the output
   // Start a new stream only if the fluid is not being compressed
   if (c_counter == 0) {
-    std::string data =
-        logger.file_naming("/Data", DENSITY, TEMPERATURE, POWER, A_CST);
-    std::string pos = logger.file_naming("/Positions_Velocities", DENSITY,
-                                         TEMPERATURE, POWER, A_CST);
-    std::string rdf =
-        logger.file_naming("/RDF", DENSITY, TEMPERATURE, POWER, A_CST);
+    std::string data = _dir + logger.file_naming("/Data", STEPS, N, DENSITY,
+                                                 TEMPERATURE, POWER, A_CST);
+    std::string pos =
+        _dir + logger.file_naming("/Positions_Velocities", STEPS, N, DENSITY,
+                                  TEMPERATURE, POWER, A_CST);
+    std::string rdf = _dir + logger.file_naming("/RDF", STEPS, N, DENSITY,
+                                                TEMPERATURE, POWER, A_CST);
 
     logger.open_files(data, rdf, pos);
     logger.time_stamp(
@@ -654,21 +650,21 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
     FileIO f;
     // Write the arrays as jagged,(hence transposed), this creates rows=STEPS
     // and columns=PARTICLES
-    f.Write2File<double>(
-        *pos_x,
-        logger.file_naming("/x_data", DENSITY, TEMPERATURE, POWER, A_CST), "\t",
-        true);
-    f.Write2File<double>(
-        *pos_y,
-        logger.file_naming("/y_data", DENSITY, TEMPERATURE, POWER, A_CST), "\t",
-        true);
-    f.Write2File<double>(
-        *pos_z,
-        logger.file_naming("/z_data", DENSITY, TEMPERATURE, POWER, A_CST), "\t",
-        true);
+    f.Write2File<double>(*pos_x,
+                         logger.file_naming("/x_data", STEPS, N, DENSITY,
+                                            TEMPERATURE, POWER, A_CST),
+                         "\t", true);
+    f.Write2File<double>(*pos_y,
+                         logger.file_naming("/y_data", STEPS, N, DENSITY,
+                                            TEMPERATURE, POWER, A_CST),
+                         "\t", true);
+    f.Write2File<double>(*pos_z,
+                         logger.file_naming("/z_data", STEPS, N, DENSITY,
+                                            TEMPERATURE, POWER, A_CST),
+                         "\t", true);
   }
 
-  logger.write_data_file(density, temperature, u_en, k_en, pc, pk, msd, Cr, sfx,
+  logger.write_data_file(STEPS, density, temperature, u_en, k_en, pc, pk, msd, Cr, sfx,
                          sfy, sfz);
   // Saving Last Position
   // todo: saves the same shit
@@ -696,49 +692,6 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
             << std::endl;
 
   // Close file streams, makes Simulation reusable in loops
-  reset_values();
-}
-
-// todo: move to other class devoted to phase transitions and multiphase
-void MD::get_phases(double DENSITY, double FINAL_DENSITY, double DENSITY_INC,
-                    double TEMPERATURE, double POWER, double A_CST,
-                    std::string pp_type) {
-  /*
-   * Compress the fluid to get the phase boundary for a specific temperature.
-   *
-   * Performs repeated compresss of the fluid by periodically
-   * incrementing the density of the fluid.
-   * As a consequence the box length, the scaling factor and the
-   * position vectors are also scaled in order to conserve the number
-   * of particles in the box.
-   *
-   */
-  // todo: many features do not work at this moment like particle tracking
-  // todo: the POS << time_stamp stream will be a mess, same with RDF
-  double current_rho = DENSITY;
-  double old_box_length = 0;
-  // size_t compression_num = ceil((FINAL_DENSITY - DENSITY) / DENSITY_INC);
-
-  do {
-    Simulation(current_rho, TEMPERATURE, POWER, A_CST, pp_type);
-    // Holds the box length of the previous simulation just run
-    old_box_length = L;
-    // Density incrementation
-    current_rho += DENSITY_INC;
-    // Simulation updates old_box_length
-    // the updated current_rho can generate the new box length
-    // This value gets recalculated in the next Simulation
-    L = pow((N / current_rho), 1.0 / 3.0);
-    double box_length_ratio = L / old_box_length;
-
-    // Rescalling the positional vectors
-    for (size_t i = 0; i < N; ++i) {
-      rx[i] *= box_length_ratio;
-      ry[i] *= box_length_ratio;
-      rz[i] *= box_length_ratio;
-    }
-    ++c_counter;
-  } while (abs(current_rho - FINAL_DENSITY) > 0.00001);
   reset_values();
 }
 

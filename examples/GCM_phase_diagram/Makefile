@@ -1,27 +1,27 @@
 SHELL = /bin/bash
 include ../../Makefile.variables
-LIB = ../../lib
-BIN = ../../bin
-SRC = ../../src
-INC = -I ../../lib -I ../../src -I ../../tools/FileIO
-LN  = -L ../../lib -L ../../src -L ../../tools/FileIO
+LIB := ../../lib
+BIN := ../../bin
+SRC := ../../src
+INC := -I ../../include
+LN  := -L ../../lib
 
 LINKER = $(INC) $(LN) -lmd
 
-all: fluid_compression
+all: fluid_compression_gcm
 			
 debug: CXXFLAGS = $(DCXXFLAGS)
-debug: FLAGS = $(DFLAGS)
-debug: fluid_compression
+debug: fluid_compression_gcm
 
-fluid_compression: *.o $(LIB)/libmd.a
-	$(CXX) $(FLAGS) *.o $(LINKER) -o fluid_compression -lstdc++fs
+fluid_compression_gcm: *.o $(LIB)/libmd.a
+	$(CXX) $(CXXFLAGS) *.o $(LINKER) -o fluid_compression_gcm -lstdc++fs
+	mv fluid_compression_gcm ../examplebin/
 
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -I$(SRC) -o $@ $<
+	$(CXX) -c $(CXXFLAGS) -I$(SRC) $<
 
 clean:
-	$(RM) fluid_compression *.o *.dat *.txt
+	$(RM) fluid_compression_gcm *.o *.dat *.txt
 
 clean_keep_data:
-	$(RM) fluid_compression *.o
+	$(RM) fluid_compression_gcm *.o

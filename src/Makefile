@@ -1,40 +1,27 @@
 SHELL = /bin/bash
 include ../Makefile.variables
-LIB = ../lib
-BIN = ../bin
-OBJS = MD.o isomorph.o md_pair_potentials.o stat_file_logger.o
+LIB := ../lib
+BIN := ../bin
+INCLUDE := ../include
 
-# The LINKER and the INC variables contain invalid, or unnecassary paths
-# like ../src or ../tools/FileIO for the case of Source.o 
-#which cause the compilation to be slightly slower. 
-# The trade off is global-management of the linker from Makefile.variables
+# FILES := $(filter-out Source.cpp , $(basename $(wildcard *.cpp)))
+FILES := $(basename $(wildcard *.cpp))
+OBJS = MD.o isomorph.o md_pair_potentials.o stat_file_logger.o phase_transition.o
 
 all: md libmd.a
 
 debug: CXXFLAGS = $(DCXXFLAGS)
-debug: FLAGS = $(DFLAGS)
 debug: md libmd.a
 
-md: Source.o libmd.a
-		$(CXX) $(FLAGS) Source.o $(LINKER) -o $(BIN)/md
+md: libmd.a Source.o 
+	$(CXX) $(CXXFLAGS) Source.o $(LINKER) -o $(BIN)/md
 
 libmd.a: $(OBJS)
 	ar rcvs $(LIB)/libmd.a $(OBJS)
 
-MD.o: MD.cpp
-	$(CXX) $(CXXFLAGS) $(LINKER) MD.cpp
-
-md_pair_potentials.o: md_pair_potentials.cpp
-	$(CXX) $(CXXFLAGS) $(LINKER) md_pair_potentials.cpp
-
-stat_file_logger.o: stat_file_logger.cpp
-	$(CXX) $(CXXFLAGS) $(LINKER) stat_file_logger.cpp
-
-isomorph.o: isomorph.cpp
-	$(CXX) $(CXXFLAGS) isomorph.cpp
-
-Source.o: Source.cpp 
-	$(CXX) $(CXXFLAGS) $(INC) Source.cpp
+%.o: %.cpp
+	$(CXX) -c $(CXXFLAGS) $(LINKER) $<
+	cp $@ $(INCLUDE)/$@
 
 
 clean:

@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-class Stat_File {
+class stat_file {
  public:
   std::string _step_to_str, _particles_to_str, _rho_to_str, _T_to_str;
   std::string _n_to_str, _A_to_str;
@@ -15,13 +15,10 @@ class Stat_File {
   std::ofstream RDF, DATA, POS;
 
   // Initialise them before doing any IO operations
-  size_t STEPS, N;
-
-  Stat_File();
-  Stat_File(size_t &STEPS, size_t &N, std::string DIR);
+  stat_file();
   void open_files(std::string &data, std::string &rdf, std::string &pos);
 
-  void write_data_file(std::vector<double> &density,
+  void write_data_file(size_t STEPS, std::vector<double> &density,
                        std::vector<double> &temperature,
                        std::vector<double> &u_en, std::vector<double> &k_en,
                        std::vector<double> &pc, std::vector<double> &pk,
@@ -29,7 +26,8 @@ class Stat_File {
                        std::vector<double> &sfx, std::vector<double> &sfy,
                        std::vector<double> &sfz);
   void time_stamp(std::ofstream &, std::string variables);
-  std::string file_naming(std::string prefix, double &DENSITY,
-                          double &TEMPERATURE, double &POWER, double &A_cst);
+  std::string file_naming(std::string prefix, size_t &STEPS, size_t &N,
+                          double &DENSITY, double &TEMPERATURE, double &POWER,
+                          double &A_cst);
   std::string convert_to_string(const double &x, const int &precision);
 };

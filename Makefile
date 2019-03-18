@@ -1,9 +1,9 @@
 SHELL = /bin/bash
+include Makefile.variables
 
+RM := rm -rf
 
 all:
-	@echo "MAKE tools/TinyXML2"
-	@cd tools/tinyxml2 && $(MAKE) staticlib
 	@echo "MAKE lib"
 	@cd lib && $(MAKE)
 	@echo "MAKE MD src"
@@ -16,19 +16,17 @@ all:
 clean:
 	@echo "Cleaning lib"
 	@cd lib && $(MAKE) clean
-	@echo "Cleaning TinyXML2"
-	@cd tools/tinyxml2 && $(MAKE) clean
 	@echo "Cleaning MD src and bin"
 	@cd  src && $(MAKE) clean
 	@echo "Cleaning MD Examples src/examples"
 	@cd examples && $(MAKE) clean
-	@echo "MAKE tools"
-	@cd tools && $(MAKE) clean
+	@echo "Cleaning bin"
+	@cd bin && $(RM) *
+	@echo "Cleaning include"
+	@cd include && $(RM) *.o
 
 debug:
 	@echo "DEBUG BUILD"
-	@echo "MAKE tools/TinyXML2"
-	@cd tools/tinyxml2 && $(MAKE) staticlib
 	@echo "MAKE lib"
 	@cd lib && $(MAKE)
 	@echo "MAKE MD src"
@@ -41,11 +39,7 @@ debug:
 clean_keep_data:
 	@echo "Cleaning lib"
 	@cd lib && $(MAKE) clean
-	@echo "Cleaning TinyXML2"
-	@cd tools/tinyxml2 && $(MAKE) clean
 	@echo "Cleaning MD src and bin"
 	@cd  src && $(MAKE) clean
 	@echo "Cleaning MD Examples src/examples"
 	@cd examples && $(MAKE) clean_keep_data
-	@echo "MAKE tools"
-	@cd tools && $(MAKE) clean

@@ -67,7 +67,7 @@ class MD {
  private:
   double PI;
   /* Variables for storing inside the object the file ID */
-  Stat_File logger;
+  stat_file logger;
   std::string _dir;
 
  public:
@@ -82,9 +82,6 @@ class MD {
 
   void Simulation(double DENSITY, double TEMPERATURE, double POWER,
                   double A_CST, std::string pp_type);
-  void get_phases(double DENSITY, double FINAL_DENSITY, double DENSITY_INC,
-                  double TEMPERATURE, double POWER, double A_CST,
-                  std::string pp_type);
   void reset_values();
 
  protected:

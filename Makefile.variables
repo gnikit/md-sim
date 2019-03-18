@@ -1,8 +1,8 @@
 SHELL = /bin/bash
 
 STD       := -std=c++1z
-CXXFLAGS  := $(STD) -pthread -Wall
-DCXXFLAGS := $(STD) -pthread -g -Wall
+CXXFLAGS  += $(STD) -pthread -Wall
+DCXXFLAGS += $(STD) -pthread -g -Wall
 
 
 INC = -I ../include -I ../tools/FileIO -I ../tools/tinyxml2

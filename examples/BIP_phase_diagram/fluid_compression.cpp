@@ -1,5 +1,5 @@
 #include <iostream>
-#include "MD.h"
+#include "phase_transition.h"
 
 #define STEPS_PER_COMPRESSION 5000
 #define PARTICLES 1000
@@ -18,8 +18,8 @@ int main() {
    * a lot of unneeded densities.
    */
   for (const auto& i : temperature_array) {
-    MD* run1 = new MD(dir_linux, STEPS_PER_COMPRESSION, true);
-    run1->get_phases(0.05, 0.2, 0.001, i, 12, 0, "BIP");
+    phase_transition* run1 = new phase_transition(dir_linux, STEPS_PER_COMPRESSION, true);
+    run1->crystallisation(0.05, 0.2, 0.001, i, 12, 0, "BIP");
   }
 }
 

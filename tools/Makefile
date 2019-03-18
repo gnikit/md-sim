@@ -9,6 +9,4 @@ python_tools:
 	@chmod +x generate_xml_file.py
 	@cp generate_xml_file.py $(BIN)/generate_xml_file.py
 
-clean:
-	$(RM) $(BIN)/generate_xml_file.py
 

@@ -1,11 +1,12 @@
 language: cpp
+sudo: required
 dist: trusty
 
 os: linux
 
 compiler: 
   - gcc
-  
+
 addons:
   apt:
     sources:

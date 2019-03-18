@@ -31,6 +31,7 @@ class MD_tools {
   static std::tuple<double, double> BIP_force(double &r, double n, double a);
   static std::tuple<double, double> GCM_force(double &r);
   static std::tuple<double, double> Exp_force(double &r, double m, double C);
+  static std::tuple<double, double> LJ_force(double &r);
 };
 
 /* **********************  Pair potential wrappers  ************************ */
@@ -46,6 +47,11 @@ class GCM_pp {
 };
 
 class Exp_pp {
+ public:
+  static std::tuple<double, double> get_force(double &r, double m, double C);
+};
+
+class LJ_pp {
  public:
   static std::tuple<double, double> get_force(double &r, double m, double C);
 };

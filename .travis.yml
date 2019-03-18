@@ -1,0 +1,12 @@
+language: cpp
+
+os:
+  - linux
+  - osx
+
+compiler:
+  - gcc
+
+script:
+  - make -j3
+  - make test

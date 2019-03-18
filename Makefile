@@ -4,6 +4,7 @@ include Makefile.variables
 RM := rm -rf
 
 all:
+	@mkdir -p include
 	@echo "MAKE lib"
 	@cd lib && $(MAKE)
 	@echo "MAKE MD src"

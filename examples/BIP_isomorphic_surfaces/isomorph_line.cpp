@@ -4,7 +4,7 @@
 #include "MD.h"
 #include "isomorph.h"
 
-#define STEPS 15000
+#define STEPS 5000
 #define PARTICLES 1000
 typedef std::vector<double> vec1d;
 
@@ -36,7 +36,7 @@ int main() {
    * Simulates the fluid along the line
    */
   for (size_t i = 0; i < T_iso.size(); ++i) {
-    MD run(dir_linux, STEPS, false, 500, 10, "SC", false, 2000);
+    MD run(dir_linux, STEPS, false, 500, 8, "SC", false, 2000);
     run.Simulation(rho_iso[i], T_iso[i], n, A_iso[i], "BIP");
   }
 }

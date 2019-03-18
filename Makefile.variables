@@ -1,6 +1,6 @@
 SHELL = /bin/bash
 
-STD       := -std=c++1z
+STD       := -std=c++17
 CXXFLAGS  += $(STD) -pthread -Wall
 DCXXFLAGS += $(STD) -pthread -g -Wall
 

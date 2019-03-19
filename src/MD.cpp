@@ -651,21 +651,21 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
     // Write the arrays as jagged,(hence transposed), this creates rows=STEPS
     // and columns=PARTICLES
     f.Write2File<double>(*pos_x,
-                         logger.file_naming("/x_data", STEPS, N, DENSITY,
+                         logger.file_naming(_dir + "/x_data", STEPS, N, DENSITY,
                                             TEMPERATURE, POWER, A_CST),
                          "\t", true);
     f.Write2File<double>(*pos_y,
-                         logger.file_naming("/y_data", STEPS, N, DENSITY,
+                         logger.file_naming(_dir + "/y_data", STEPS, N, DENSITY,
                                             TEMPERATURE, POWER, A_CST),
                          "\t", true);
     f.Write2File<double>(*pos_z,
-                         logger.file_naming("/z_data", STEPS, N, DENSITY,
+                         logger.file_naming(_dir + "/z_data", STEPS, N, DENSITY,
                                             TEMPERATURE, POWER, A_CST),
                          "\t", true);
   }
 
-  logger.write_data_file(STEPS, density, temperature, u_en, k_en, pc, pk, msd, Cr, sfx,
-                         sfy, sfz);
+  logger.write_data_file(STEPS, density, temperature, u_en, k_en, pc, pk, msd,
+                         Cr, sfx, sfy, sfz);
   // Saving Last Position
   // todo: saves the same shit
   logger.time_stamp(logger.POS,

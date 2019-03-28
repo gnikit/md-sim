@@ -29,7 +29,7 @@ void stat_file::write_data_file(
   for (size_t i = 0; i < STEPS; ++i) {
     DATA << (i + 1) << '\t' << density[i] << '\t' << temperature[i] << '\t'
          << u_en[i] << '\t' << k_en[i] << '\t' << pc[i] << '\t' << pk[i] << '\t'
-         << msd[i] << '\t' << Cr[i] << sfx[i] << '\t' << sfy[i] << '\t'
+         << msd[i] << '\t' << Cr[i] << '\t' << sfx[i] << '\t' << sfy[i] << '\t'
          << sfz[i] << std::endl;
   }
 }

@@ -461,9 +461,9 @@ void MD::structure_factor(std::vector<double> &rx, std::vector<double> &ry,
     }
   }
 
-  double kx = (pow(sfcosx, 2) + pow(sfsinx, 2)) / N;
-  double ky = (pow(sfcosy, 2) + pow(sfsiny, 2)) / N;
-  double kz = (pow(sfcosz, 2) + pow(sfsinz, 2)) / N;
+  double kx = (pow(sfcosx / N, 2) + pow(sfsinx / N, 2));
+  double ky = (pow(sfcosy / N, 2) + pow(sfsiny / N, 2));
+  double kz = (pow(sfcosz / N, 2) + pow(sfsinz / N, 2));
 
   sfx.push_back(kx);
   sfy.push_back(ky);

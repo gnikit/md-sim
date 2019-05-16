@@ -23,7 +23,7 @@ Examples are listed under the **examples** directory
 You can clone the project with all its submodules with:
 
 ```bash
-git clone --recurse-submodules -j4 https://github.com/GiannisNikiteas/MD-simulation.git
+git clone --recurse-submodules https://github.com/GNikit/MD-simulation.git
 ```
 
 ### Build

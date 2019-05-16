@@ -2,6 +2,7 @@
 #include <string>
 #include <thread>
 #include "MD.h"
+#include "helper_functions.h"
 
 #define STEPS 35000  // 10000
 #define RDF_EQ 5000
@@ -9,8 +10,6 @@
 std::string dir_linux = ".";
 
 void MakeDataBase();
-
-std::vector<double> LinearSpacedArray(double a, double b, std::size_t N);
 
 int main() { MakeDataBase(); }
 
@@ -27,9 +26,9 @@ void MakeDataBase() {
   std::vector<double> rho = {0.20, 0.3, 0.5, 1.0};
   /* Test temperature smaller than 1 line 0.75 */
   std::vector<double> T = {0.5, 1.0, 1.5, 2.0};
-  std::vector<double> A1 = LinearSpacedArray(0, 1, 5);
-  std::vector<double> A2 = LinearSpacedArray(1.25, 2.25, 5);
-  std::vector<double> A3 = LinearSpacedArray(2.50, 4.50, 5);
+  std::vector<double> A1 = helper_functions::linspace(0.0, 1.0, 5);
+  std::vector<double> A2 = helper_functions::linspace(1.25, 2.25, 5);
+  std::vector<double> A3 = helper_functions::linspace(2.50, 4.50, 5);
   std::vector<double> A4 = {0.20, 0.40, 0.60, 0.80, 0.90};
 
   for (size_t d = 0; d < rho.size(); ++d) {
@@ -72,19 +71,4 @@ void MakeDataBase() {
       }
     }
   }
-}
-
-std::vector<double> LinearSpacedArray(double a, double b, std::size_t N) {
-  /*
-   * Produces an equally spaced vector of N increments
-   * in the inclusive range of [a, b]
-   */
-  double h = (b - a) / static_cast<double>(N - 1);
-  std::vector<double> xs(N);
-  std::vector<double>::iterator x;
-  double val;
-  for (x = xs.begin(), val = a; x != xs.end(); ++x, val += h) {
-    *x = val;
-  }
-  return xs;
 }

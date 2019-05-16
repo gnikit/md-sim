@@ -3,6 +3,7 @@
 #include <thread>
 #include "MD.h"
 #include "isomorph.h"
+#include "helper_functions.h"
 
 #define STEPS 5000
 #define PARTICLES 1000
@@ -10,13 +11,12 @@ typedef std::vector<double> vec1d;
 
 std::string dir_linux = ".";
 
-std::vector<double> LinearSpacedArray(double a, double b, std::size_t N);
 
 int main() {
   /* Potential power strength */
   size_t n = 8;
   /* Generate Temperature vector for isomorph */
-  vec1d T_iso = LinearSpacedArray(0.5, 2, 5);
+  vec1d T_iso = helper_functions::linspace(0.5, 2.0, 5);
   /* Empty containers for density and a_par */
   vec1d rho_iso, A_iso;
   vec1d rho_iso_h, A_iso_h;
@@ -39,19 +39,4 @@ int main() {
     MD run(dir_linux, STEPS, false, 500, 8, "SC", false, 2000);
     run.Simulation(rho_iso[i], T_iso[i], n, A_iso[i], "BIP");
   }
-}
-
-std::vector<double> LinearSpacedArray(double a, double b, std::size_t N) {
-  /*
-   * Produces an equally spaced vector of N increments
-   * in the inclusive range of [a, b]
-   */
-  double h = (b - a) / static_cast<double>(N - 1);
-  std::vector<double> xs(N);
-  std::vector<double>::iterator x;
-  double val;
-  for (x = xs.begin(), val = a; x != xs.end(); ++x, val += h) {
-    *x = val;
-  }
-  return xs;
 }

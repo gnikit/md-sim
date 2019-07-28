@@ -667,7 +667,7 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
   logger.write_data_file(STEPS, density, temperature, u_en, k_en, pc, pk, msd,
                          Cr, sfx, sfy, sfz);
   // Saving Last Position
-  // todo: saves the same shit
+  // todo: if we are compressing, save the last position of the compression step
   logger.time_stamp(logger.POS,
                     "# X\tY\tZ\tVx\tVy\tVz\tFx\tFy\tFz");  // fstream
   for (size_t el = 0; el < rx.size(); ++el) {
@@ -715,11 +715,13 @@ void MD::show_run(size_t step_size_show) {
   }
 }
 
-void MD::reset_values() {
+void MD::reset_values(bool force_reset) {
   /*
    * Closes open file streams and resets sizes and values to 0
    * Use it when running multiple simulations and recycling the same
    * MD object.
+   * 
+   * @force_reset: Will close file streams even when compression is turned on
    */
 
   /*
@@ -730,7 +732,7 @@ void MD::reset_values() {
 
   // Do not close streams and do not clear position and velocity vectors
   // in the case where the fluid is being compressed
-  if (!compress) {
+  if (!compress || force_reset) {
     // Close streams
     logger.RDF.close();
     logger.DATA.close();
@@ -742,6 +744,7 @@ void MD::reset_values() {
     vx.clear();
     vy.clear();
     vz.clear();
+    c_counter = 0;
   }
   // Reset the MSD initial vectors
   rrx.clear();

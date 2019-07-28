@@ -82,7 +82,7 @@ class MD {
 
   void Simulation(double DENSITY, double TEMPERATURE, double POWER,
                   double A_CST, std::string pp_type);
-  void reset_values();
+  void reset_values(bool force_reset=false);
 
  protected:
   void initialise(std::vector<double> &x, std::vector<double> &y,

@@ -48,5 +48,7 @@ void phase_transition::crystallisation(double DENSITY, double FINAL_DENSITY,
     }
     ++c_counter;
   } while (abs(current_rho - FINAL_DENSITY) > 0.00001);
-  reset_values();
+  //! BUG: will break if huge increment is provided that will offset current
+  //! rho, add checks about values being greater
+  reset_values(true);
 }

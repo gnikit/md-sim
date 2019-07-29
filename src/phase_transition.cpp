@@ -1,4 +1,5 @@
 #include "phase_transition.h"
+#include <iostream>
 
 // Load Intel math lib if available
 #if defined(__INTEL_COMPILER)
@@ -27,13 +28,33 @@ void phase_transition::crystallisation(double DENSITY, double FINAL_DENSITY,
   double current_rho = DENSITY;
   double old_box_length = 0;
   // size_t compression_num = ceil((FINAL_DENSITY - DENSITY) / DENSITY_INC);
+  try {
+    if (FINAL_DENSITY > DENSITY) {
+      std::runtime_error(
+          "Final density has to be smaller than initial density");
+    }
+    if (FINAL_DENSITY) {
+      std::runtime_error(
+          "Density increment has to be smaller than final density");
+    }
+  } catch (const std::exception &msg) {
+    std::cerr << "Error: " << msg.what() << std::endl;
+    exit(1);
+  }
+  
+  // Number of compressions to occur
+  size_t total_comp_steps = ceil((FINAL_DENSITY - DENSITY) / DENSITY_INC);
 
-  do {
+  for (size_t comp_step = 1; comp_step < total_comp_steps; comp_step++){
+
     Simulation(current_rho, TEMPERATURE, POWER, A_CST, pp_type);
+
     // Holds the box length of the previous simulation just run
     old_box_length = L;
+
     // Density incrementation
     current_rho += DENSITY_INC;
+
     // Simulation updates old_box_length
     // the updated current_rho can generate the new box length
     // This value gets recalculated in the next Simulation
@@ -47,8 +68,7 @@ void phase_transition::crystallisation(double DENSITY, double FINAL_DENSITY,
       rz[i] *= box_length_ratio;
     }
     ++c_counter;
-  } while (abs(current_rho - FINAL_DENSITY) > 0.00001);
-  //! BUG: will break if huge increment is provided that will offset current
-  //! rho, add checks about values being greater
+  }
+
   reset_values(true);
 }

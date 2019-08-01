@@ -428,9 +428,9 @@ void MD::structure_factor(std::vector<double> &rx, std::vector<double> &ry,
    */
 
   double s = pow((N / _rho), (1.0 / 3.0));
-  double fkx1 = 2.0 * PI / (s / 2.0 * Nx);
-  double fky1 = 2.0 * PI / (s / 2.0 * Ny);
-  double fkz1 = 2.0 * PI / (s / 2.0 * Nz);
+  double fkx1 = 2.0 * PI / (s / (2.0 * Nx));
+  double fky1 = 2.0 * PI / (s / (2.0 * Ny));
+  double fkz1 = 2.0 * PI / (s / (2.0 * Nz));
   double sfcosx = 0, sfcosy = 0, sfcosz = 0;
   double sfsinx = 0, sfsiny = 0, sfsinz = 0;
 

@@ -498,8 +498,8 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
   _T0 = TEMPERATURE;
   dt = 0.005 / sqrt(_T0);  // Time-step, defined here and reused in the Verlet
   // Box length scaling
-  scale = pow((N / _rho), (1.0 / 3.0)) / pow(N, (1.0 / 3.0));
   L = pow((N / _rho), 1.0 / 3.0);
+  scale = L;
   Vol = N / _rho;
 
   // cut_off redefinition

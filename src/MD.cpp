@@ -228,26 +228,17 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
   std::for_each(vy.begin(), vy.end(), [mean_vy](double &d) { d -= mean_vy; });
   std::for_each(vz.begin(), vz.end(), [mean_vz](double &d) { d -= mean_vz; });
 
-  // ! Check the values of mean_vx, mean_vy, mean_vz after a compression
-  size_t tempN = N;
   size_t i;
-  // Subtracting Av. velocities from each particle
-  for (i = 0; i < tempN; ++i) {
-    vx[i] = vx[i] - mean_vx;
-    vy[i] = vy[i] - mean_vy;
-    vz[i] = vz[i] - mean_vz;
-  }
   // Temperature calculation, statistically
   KE = 0;
   for (i = 0; i < N; ++i) {
     KE += 0.5 * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]);
   }
-  // ! Check the value of KE after a compression
   T = KE / (1.5 * N);
   scale_v = sqrt(TEMPERATURE / T);  // scaling factor
 
   // Velocity scaling
-  for (i = 0; i < tempN; ++i) {
+  for (i = 0; i < N; ++i) {
     vx[i] *= scale_v;
     vy[i] *= scale_v;
     vz[i] *= scale_v;
@@ -318,13 +309,18 @@ void MD::verlet_algorithm(std::vector<double> &rx, std::vector<double> &ry,
 
   size_t i;
   for (i = 0; i < N; ++i) {
+
+    // Step velocities forward in time
     vx[i] = vx[i] * scale_v + fx[i] * dt;
     vy[i] = vy[i] * scale_v + fy[i] * dt;
     vz[i] = vz[i] * scale_v + fz[i] * dt;
+
+    // Step positions forward in time
     rx[i] = rx[i] + vx[i] * dt;
     ry[i] = ry[i] + vy[i] * dt;
     rz[i] = rz[i] + vz[i] * dt;
 
+    // MSD stepping
     rrx[i] = rrx[i] + vx[i] * dt;
     rry[i] = rry[i] + vy[i] * dt;
     rrz[i] = rrz[i] + vz[i] * dt;
@@ -500,8 +496,8 @@ void MD::Simulation(double DENSITY, double TEMPERATURE, double POWER,
   _T0 = TEMPERATURE;
   dt = 0.005 / sqrt(_T0);  // Time-step, defined here and reused in the Verlet
   // Box length scaling
-  scale = pow((N / _rho), (1.0 / 3.0)) / pow(N, (1.0 / 3.0));
   L = pow((N / _rho), 1.0 / 3.0);
+  scale = L;
   Vol = N / _rho;
 
   // cut_off redefinition

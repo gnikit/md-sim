@@ -15,7 +15,8 @@ void phase_transition::crystallisation(double DENSITY, double FINAL_DENSITY,
                                        std::string pp_type) {
   /*
    * Compress the fluid to get the phase boundary for a specific temperature.
-   *
+   * 
+   * ceil((FINAL_DENSITY - DENSITY) / DENSITY_INC) compressions of STEPS length
    * Performs repeated compresss of the fluid by periodically
    * incrementing the density of the fluid.
    * As a consequence the box length, the scaling factor and the
@@ -27,9 +28,9 @@ void phase_transition::crystallisation(double DENSITY, double FINAL_DENSITY,
   // todo: the POS << time_stamp stream will be a mess, same with RDF
   double current_rho = DENSITY;
   double old_box_length = 0;
-  // size_t compression_num = ceil((FINAL_DENSITY - DENSITY) / DENSITY_INC);
+
   try {
-    if (FINAL_DENSITY > DENSITY) {
+    if (FINAL_DENSITY > DENSITY) {  //todo: add compression rate sensitive case +/- sign
       std::runtime_error(
           "Final density has to be smaller than initial density");
     }

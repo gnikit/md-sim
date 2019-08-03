@@ -228,14 +228,12 @@ void MD::initialise(std::vector<double> &x, std::vector<double> &y,
   std::for_each(vy.begin(), vy.end(), [mean_vy](double &d) { d -= mean_vy; });
   std::for_each(vz.begin(), vz.end(), [mean_vz](double &d) { d -= mean_vz; });
 
-  // ! Check the values of mean_vx, mean_vy, mean_vz after a compression
   size_t i;
   // Temperature calculation, statistically
   KE = 0;
   for (i = 0; i < N; ++i) {
     KE += 0.5 * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]);
   }
-  // ! Check the value of KE after a compression
   T = KE / (1.5 * N);
   scale_v = sqrt(TEMPERATURE / T);  // scaling factor
 

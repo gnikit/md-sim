@@ -15,7 +15,7 @@ debug: gcm_compression_density_increment
 
 gcm_compression_density_increment: gcm_compression_density_increment.o $(LIB)/libmd.a
 	$(CXX) $(CXXFLAGS) gcm_compression_density_increment.o $(LINKER) -o gcm_compression_density_increment -lstdc++fs
-	mv gcm_compression_density_increment ../examplebin/
+	cp gcm_compression_density_increment ../examplebin/
 
 %.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) -I$(SRC) $<

@@ -5,18 +5,18 @@
 #include "phase_transition.h"
 
 int main() {
-  std::string dir = "/home/gn/Desktop/md_data/compress_gcm";
-  size_t compress_steps = 100;
-  //todo: create a range density vector
-  //todo: loop through it one timestep at a time
+  std::string dir = "./";  // Places files in the execution dir
+  size_t compress_steps = 5000;
+
   /*
-    * This method effectively replaces timestep iterations with 
-    * density iterations by equating the compression timestep to 1
-    * 
+   * This method effectively replaces timestep iterations with
+   * density iterations by equating the compression timestep to 1
+   *
    */
-  phase_transition run(dir, compress_steps, true, 10, 6, "FCC", false, 0);
-  std::vector<double> temperatures = {0.001, 0.002, 0.003, 0.004, 0.005, 0.006};
-  for (int t = 0; t < temperatures.size(); ++t) {
-    run.crystallisation(0.05, 0.8, 0.001, temperatures[t], 0, 0, "GCM");
+  phase_transition run(dir, compress_steps, true, 500, 7, "FCC", false, 500);
+
+  std::vector<double> temperatures = {0.001, 0.003, 0.0033, 0.0035, 0.0038};
+  for (size_t t = 0; t < temperatures.size(); ++t) {
+    run.crystallisation(0.05, 0.30, 0.025, temperatures[t], 0, 0, "GCM");
   }
 }

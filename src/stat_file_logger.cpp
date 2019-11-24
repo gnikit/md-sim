@@ -91,6 +91,7 @@ std::string stat_file::file_naming(std::string prefix, size_t &STEPS, size_t &N,
   // Path addition
   return prefix + _FILE_ID + _FILE_EXT;
 }
+
 std::string stat_file::convert_to_string(const double &x,
                                          const int &precision) {
   /*
@@ -101,6 +102,7 @@ std::string stat_file::convert_to_string(const double &x,
    *
    * @return: string
    */
+
   std::ostringstream ss;
   ss.str(std::string());  // don't forget to empty the stream
   ss << std::fixed << std::setprecision(precision) << x;

@@ -24,6 +24,7 @@ using pair_potential_type = std::tuple<double, double> (*)(double &, double,
  * BIP: Bounded Inverse Power
  * GCM: Gaussian Core Model
  * Exp: Exponential potential
+ * LJ:  Lennard-Jones potential
  */
 
 class MD_tools {

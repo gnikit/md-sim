@@ -26,8 +26,10 @@ class stat_file {
                        std::vector<double> &sfx, std::vector<double> &sfy,
                        std::vector<double> &sfz);
   void time_stamp(std::ofstream &, std::string variables);
+
   std::string file_naming(std::string prefix, size_t &STEPS, size_t &N,
                           double &DENSITY, double &TEMPERATURE, double &POWER,
                           double &A_cst);
-  std::string convert_to_string(const double &x, const int &precision);
+
+  static std::string convert_to_string(const double &x, const int &precision);
 };

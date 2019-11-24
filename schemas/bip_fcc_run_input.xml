@@ -1,0 +1,20 @@
+<input_variables>
+  <constructor>
+    <output_dir>.</output_dir>
+    <steps>5000</steps>
+    <compression>false</compression>
+    <rdf_bins>500</rdf_bins>
+    <particles_per_axis>10</particles_per_axis>
+    <lattice>FCC</lattice>
+    <track_particles>false</track_particles>
+    <rdf_equilibrate>2000</rdf_equilibrate>
+  </constructor>
+  <simulation_input>
+    <simulation_name>simple_fcc_run_</simulation_name>
+    <rho>0.5</rho>
+    <T>0.5</T>
+    <n>8</n>
+    <A>0.5</A>
+    <pp>BIP</pp>
+  </simulation_input>
+</input_variables>

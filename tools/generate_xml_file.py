@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import os
 import sys
 import getopt
@@ -39,6 +41,8 @@ HELP = "Options:\n" \
        "                     starts collecting data. The steps input in\n" \
        "                     the `rdf_wait` should be greater than the \n" \
        "                     total number of steps used in the simulation.\n" \
+       "  -N, --sim_name:    The simulation name to be used as a prefix in\n" \
+       "                     all the output files to be generated.        \n" \
        "  -R, --rho:         The number density of the fluid.\n" \
        "  -T, --temp:        The temperature of the fluid.\n" \
        "  -n, --n:           The pair potential strength of the fluid.\n" \
@@ -52,8 +56,8 @@ HELP = "Options:\n" \
        "  -o, --out:         Output directory for the generated XML file.\n\n"
 
 
-DIR = "/home/gn/Code/MD-simulation/examples/example_data"
-STEPS = 15000
+DIR = ""
+STEPS = 5000
 COMPRESSION = "false"
 RDF_BINS = 500
 PARTICLES_PER_AXIS = 10
@@ -61,6 +65,7 @@ LATTICE = "SC"
 TRACK_PARTICLES = "false"
 RDF_EQUILIBRATE = 2000
 
+SIM_NAME = "simple_run_"
 RHO = 0.5
 TEMPERATURE = 0.5
 POWER = 8
@@ -69,7 +74,7 @@ PAIR_POTENTIAL = "BIP"
 
 
 def create_xml(dir, steps, compression, rdf_bins, particles, lattice, tracking,
-               rdf_wait, rho, t, n, a, pp, file_out):
+               rdf_wait, sim_name, rho, t, n, a, pp, file_out):
 
     root = ET.Element("input_variables")
     # Input parameters for the constructor of MD
@@ -83,9 +88,10 @@ def create_xml(dir, steps, compression, rdf_bins, particles, lattice, tracking,
     ET.SubElement(input, "track_particles").text = tracking
     ET.SubElement(input, "rdf_equilibrate").text = str(rdf_wait)
 
-    # Input parameters for MD::Simulation
+    # Input parameters for MD::simulation
     sim = ET.SubElement(root, "simulation_input")
 
+    ET.SubElement(sim, "simulation_name").text = str(sim_name)
     ET.SubElement(sim, "rho").text = str(rho)
     ET.SubElement(sim, "T").text = str(t)
     ET.SubElement(sim, "n").text = str(n)
@@ -97,15 +103,14 @@ def create_xml(dir, steps, compression, rdf_bins, particles, lattice, tracking,
     tree.write(f"{file_out}.xml", pretty_print=True)
 
 
-
 def command_line_input(argv):
     try:
-        opts, args = getopt.getopt(argv, "hd:s:c:r:p:l:t:w:R:T:n:A:P:o:", [
+        opts, args = getopt.getopt(argv, "hd:s:c:r:p:l:t:w:N:R:T:n:A:P:o:", [
                                    "dir=", "steps=", "compress=",
                                    "rdf_bins=", "particles=",
                                    "lattice=", "track=", "rdf_wait=",
-                                   "rho=", "temp=", "n=", "A=", "pp=",
-                                   "out="])
+                                   "sim_name=", "rho=", "temp=", "n=", "A=",
+                                   "pp=", "out="])
     except getopt.GetoptError:
         print(USAGE)
         print(EXAMPLE)
@@ -119,6 +124,8 @@ def command_line_input(argv):
     lattice = None
     track_particles = None
     rdf_wait = None
+
+    sim_name = None
     rho = None
     temperature = None
     n = None
@@ -148,6 +155,8 @@ def command_line_input(argv):
             track_particles = arg
         elif opt in ("-w", "--rdf_wait"):
             rdf_wait = arg
+        elif opt in ("-N", "--sim_name"):
+            sim_name = arg
         elif opt in ("-R", "--rho"):
             rho = arg
         elif opt in ("-T", "--temp"):
@@ -173,6 +182,7 @@ def command_line_input(argv):
            f" Tracking particles: {track_particles}\n" \
            f" RDF_wait: {rdf_wait}\n" \
            f" -------------------------------------\n" \
+           f" simulation name: {sim_name}\n" \
            f" RHO: {rho}\n" \
            f" T: {temperature}\n" \
            f" n: {n}\n" \
@@ -182,16 +192,16 @@ def command_line_input(argv):
            f" Output file: {output_file}\n\n"
 
     print(vars)
-    return (out_dir, steps, compress, rdf_bins, particles, lattice, \
-            track_particles, rdf_wait, \
-            rho, temperature, n, par_a, pair_potential, output_file)
+    return (out_dir, steps, compress, rdf_bins, particles, lattice,
+            track_particles, rdf_wait,
+            sim_name, rho, temperature, n, par_a, pair_potential, output_file)
 
 
 if __name__ == "__main__":
     l = command_line_input(sys.argv[1:])
     print(l)
     if (not all(i is None for i in l)):
-        create_xml(l[0], l[1], l[2], l[3], l[4], l[5], l[6], l[7], \
-                   l[8], l[9], l[10], l[11], l[12], l[13])
+        create_xml(l[0], l[1], l[2], l[3], l[4], l[5], l[6], l[7],
+                   l[8], l[9], l[10], l[11], l[12], l[13], l[14])
     else:
         print("Error: Uninitialised variables in the arguments list.")

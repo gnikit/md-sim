@@ -1,13 +1,4 @@
 #include "phase_transition.h"
-#include <iostream>
-
-// Load Intel math lib if available
-#if defined(__INTEL_COMPILER)
-#include <mathimf.h>  // Intel Math library
-#define COMPILER "INTEL"
-#else
-#include <math.h>
-#endif
 
 void phase_transition::crystallisation(double DENSITY, double FINAL_DENSITY,
                                        double DENSITY_INC, double TEMPERATURE,
@@ -15,7 +6,7 @@ void phase_transition::crystallisation(double DENSITY, double FINAL_DENSITY,
                                        std::string pp_type) {
   /*
    * Compress the fluid to get the phase boundary for a specific temperature.
-   * 
+   *
    * ceil((FINAL_DENSITY - DENSITY) / DENSITY_INC) compressions of STEPS length
    * Performs repeated compresss of the fluid by periodically
    * incrementing the density of the fluid.
@@ -30,7 +21,8 @@ void phase_transition::crystallisation(double DENSITY, double FINAL_DENSITY,
   double old_box_length = 0;
 
   try {
-    if (FINAL_DENSITY > DENSITY) {  //todo: add compression rate sensitive case +/- sign
+    if (FINAL_DENSITY >
+        DENSITY) {  // todo: add compression rate sensitive case +/- sign
       std::runtime_error(
           "Final density has to be smaller than initial density");
     }
@@ -42,12 +34,11 @@ void phase_transition::crystallisation(double DENSITY, double FINAL_DENSITY,
     std::cerr << "Error: " << msg.what() << std::endl;
     exit(1);
   }
-  
+
   // Number of compressions to occur
   size_t total_comp_steps = ceil((FINAL_DENSITY - DENSITY) / DENSITY_INC);
 
-  for (size_t comp_step = 1; comp_step < total_comp_steps; comp_step++){
-
+  for (size_t comp_step = 1; comp_step < total_comp_steps; comp_step++) {
     Simulation(current_rho, TEMPERATURE, POWER, A_CST, pp_type);
 
     // Holds the box length of the previous simulation just run

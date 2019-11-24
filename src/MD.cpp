@@ -1,33 +1,4 @@
 #include "MD.h"
-#include <chrono>      // CPU run-time
-#include <ctime>       // std::chrono
-#include <functional>  // funciton pointers
-#include <iomanip>     // setprecision
-#include <numeric>     // accumulate
-#include <random>      // normal_dist
-#include <sstream>     // stringstream
-#include "md_pair_potentials.h"
-
-// Check for Compiler support
-// TODO: in future C++ versions, rm fs:: from global scope and mv in constructor
-#if __cplusplus <= 201103L
-#error This library requires at least C++17 compiler support
-// If C++ version C++2a or above use
-#elif __cplusplus >= 201709
-#include <filesystem>
-namespace fs = std::filesystem;
-#else
-#include <experimental/filesystem>
-namespace fs = std::experimental::filesystem;
-#endif
-
-// Load Intel math lib if available
-#if defined(__INTEL_COMPILER)
-#include <mathimf.h>  // Intel Math library
-#define COMPILER "INTEL"
-#else
-#include <math.h>
-#endif
 
 // FileIO has to be loaded after the math libraries
 #include "FileIO.h"  // FileIO class
@@ -309,7 +280,6 @@ void MD::verlet_algorithm(std::vector<double> &rx, std::vector<double> &ry,
 
   size_t i;
   for (i = 0; i < N; ++i) {
-
     // Step velocities forward in time
     vx[i] = vx[i] * scale_v + fx[i] * dt;
     vy[i] = vy[i] * scale_v + fy[i] * dt;
@@ -716,7 +686,7 @@ void MD::reset_values(bool force_reset) {
    * Closes open file streams and resets sizes and values to 0
    * Use it when running multiple simulations and recycling the same
    * MD object.
-   * 
+   *
    * @force_reset: Will close file streams even when compression is turned on
    */
 

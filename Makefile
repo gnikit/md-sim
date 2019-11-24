@@ -3,14 +3,18 @@ include Makefile.variables
 
 RM := rm -rf
 
-all:
+all: libmd examples
+
+examples: libmd
+	@echo "MAKE MD examples"
+	@cd examples && $(MAKE)
+
+libmd:
 	@mkdir -p include
 	@echo "MAKE lib"
 	@cd lib && $(MAKE)
 	@echo "MAKE MD src"
 	@cd src && $(MAKE)
-	@echo "MAKE MD examples"
-	@cd examples && $(MAKE)
 	@echo "MAKE tools"
 	@cd tools && $(MAKE)
 

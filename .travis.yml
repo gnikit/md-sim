@@ -4,6 +4,9 @@ dist: xenial
 
 os: linux
 
+python:
+  - "3.7"
+
 compiler: 
   - gcc
 
@@ -22,4 +25,5 @@ script:
   - export CC=/usr/bin/gcc-7
   - export CXX=/usr/bin/g++-7
   - g++ -v
+  - make
   - make test

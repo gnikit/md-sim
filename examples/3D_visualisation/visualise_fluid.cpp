@@ -13,5 +13,5 @@ int main() {
   std::string dir = ".";
   size_t steps = 5000;
   MD run(dir, steps, false, 100, 10, "SC", true, 0);
-  run.Simulation(0.5, 0.5, 8, 0.5, "BIP");
+  run.simulation("3D_view_", 0.5, 0.5, 8, 0.5, "BIP");
 }

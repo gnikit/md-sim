@@ -8,20 +8,19 @@ LN  := -L ../../lib
 
 LINKER = $(INC) $(LN) -lmd
 
-all: database_epx_pp
+all: exp_database
 			
 debug: CXXFLAGS = $(DCXXFLAGS)
-debug: database_epx_pp
+debug: exp_database
 
-database_epx_pp: *.o $(LIB)/libmd.a
-	$(CXX) $(CXXFLAGS) *.o $(LINKER) -o database_epx_pp -lstdc++fs
-	mv database_epx_pp ../examplebin/
+exp_database: *.o $(LIB)/libmd.a
+	$(CXX) $(CXXFLAGS) *.o $(LINKER) -o exp_database -lstdc++fs
 
 %.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) -I$(SRC) $<
 
-clean:
-	$(RM) database_epx_pp *.o *.dat *.txt
+clean: clean_keep_data
+	$(RM) *.dat *.txt
 
 clean_keep_data:
-	$(RM) database_epx_pp *.o
+	$(RM) exp_database *.o

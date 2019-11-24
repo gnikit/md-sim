@@ -8,13 +8,14 @@ LN  := -L ../../lib
 
 LINKER = $(INC) $(LN) -lmd
 
-all: bip_database
+all: simple_run
 			
 debug: CXXFLAGS = $(DCXXFLAGS)
-debug: bip_database
+debug: simple_run
 
-bip_database: *.o $(LIB)/libmd.a
-	$(CXX) $(CXXFLAGS) *.o $(LINKER) -o bip_database -lstdc++fs
+simple_run: *.o $(LIB)/libmd.a
+	$(CXX) $(CXXFLAGS) *.o $(LINKER) -o simple_run -lstdc++fs
+	cp simple_run ../examplebin/
 
 %.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) -I$(SRC) $<
@@ -23,4 +24,4 @@ clean: clean_keep_data
 	$(RM) *.dat *.txt
 
 clean_keep_data:
-	$(RM) bip_database *.o
+	$(RM) simple_run *.o

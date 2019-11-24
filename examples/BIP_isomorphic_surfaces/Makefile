@@ -15,13 +15,13 @@ debug: isomorph_line
 
 isomorph_line: *.o $(LIB)/libmd.a
 	$(CXX) $(CXXFLAGS) *.o $(LINKER) -o isomorph_line -lstdc++fs
-	mv isomorph_line ../examplebin/
+	cp isomorph_line ../examplebin/
 
 %.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) -I$(SRC) $<
 
-clean:
-	$(RM) isomorph_line *.o *.dat *.txt
+clean: clean_keep_data
+	$(RM) *.dat *.txt
 
 clean_keep_data:
 	$(RM) isomorph_line *.o

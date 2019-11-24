@@ -15,8 +15,5 @@ int main() {
    */
   phase_transition run(dir, compress_steps, true, 500, 7, "FCC", false, 500);
 
-  std::vector<double> temperatures = {0.001, 0.003, 0.0033, 0.0035, 0.0038};
-  for (size_t t = 0; t < temperatures.size(); ++t) {
-    run.crystallisation(0.05, 0.30, 0.025, temperatures[t], 0, 0, "GCM");
-  }
+  run.run_backwards("compress_", 0.05, 0.15, 0.05, 0.003, 0, 0, "GCM");
 }

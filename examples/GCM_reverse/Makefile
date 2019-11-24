@@ -8,19 +8,20 @@ LN  := -L ../../lib
 
 LINKER = $(INC) $(LN) -lmd
 
-all: bip_database
+all: gcm_reverse
 			
 debug: CXXFLAGS = $(DCXXFLAGS)
-debug: bip_database
+debug: gcm_reverse
 
-bip_database: *.o $(LIB)/libmd.a
-	$(CXX) $(CXXFLAGS) *.o $(LINKER) -o bip_database -lstdc++fs
+gcm_reverse: gcm_reverse.o $(LIB)/libmd.a
+	$(CXX) $(CXXFLAGS) gcm_reverse.o $(LINKER) -o gcm_reverse -lstdc++fs
+	cp gcm_reverse ../examplebin/
 
 %.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) -I$(SRC) $<
 
 clean: clean_keep_data
-	$(RM) *.dat *.txt
+	$(RM) *.dat *.txt 
 
 clean_keep_data:
-	$(RM) bip_database *.o
+	$(RM) *.o gcm_reverse

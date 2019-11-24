@@ -15,13 +15,13 @@ debug: visualise_fluid
 
 visualise_fluid: *.o $(LIB)/libmd.a
 	$(CXX) $(CXXFLAGS) *.o $(LINKER) -o visualise_fluid -lstdc++fs
-	mv visualise_fluid ../examplebin/
+	cp visualise_fluid ../examplebin/
 
 %.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) -I$(SRC) $<
 
-clean:
-	$(RM) visualise_fluid *.o *.dat *.txt
+clean: clean_keep_data
+	$(RM) *.dat *.txt
 
 clean_keep_data:
 	$(RM) visualise_fluid *.o

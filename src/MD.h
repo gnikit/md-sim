@@ -13,8 +13,38 @@
  * to transition to SPH
  */
 #pragma once
+#include <chrono>      // CPU run-time
+#include <ctime>       // std::chrono
+#include <functional>  // funciton pointers
+#include <iomanip>     // setprecision
+#include <numeric>     // accumulate
+#include <random>      // normal_dist
+#include <sstream>     // stringstream
 #include <vector>
+
+#include "md_pair_potentials.h"
 #include "stat_file_logger.h"
+
+// Check for Compiler support
+// TODO: in future C++ versions, rm fs:: from global scope and mv in constructor
+#if __cplusplus <= 201103L
+#error This library requires at least C++17 compiler support
+// If C++ version C++2a or above use
+#elif __cplusplus >= 201709
+#include <filesystem>
+namespace fs = std::filesystem;
+#else
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#endif
+
+// Load Intel math lib if available
+#if defined(__INTEL_COMPILER)
+#include <mathimf.h>  // Intel Math library
+#define COMPILER "INTEL"
+#else
+#include <math.h>
+#endif
 
 class MD {
  protected:
@@ -82,7 +112,7 @@ class MD {
 
   void Simulation(double DENSITY, double TEMPERATURE, double POWER,
                   double A_CST, std::string pp_type);
-  void reset_values(bool force_reset=false);
+  void reset_values(bool force_reset = false);
 
  protected:
   void initialise(std::vector<double> &x, std::vector<double> &y,

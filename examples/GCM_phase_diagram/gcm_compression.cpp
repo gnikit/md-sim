@@ -17,7 +17,7 @@ int main() {
 
   std::vector<double> temperatures = {0.0033, 0.0035};
   for (size_t t = 0; t < temperatures.size(); ++t) {
-    run.crystallisation("compress_fwd_", 0.05, 0.20, 0.025, temperatures[t], 0,
-                        0, "GCM");
+    run.crystallisation("compress_fwd_", 0.05, 0.20, 0.025, temperatures[t],
+                        NAN, NAN, "GCM");
   }
 }

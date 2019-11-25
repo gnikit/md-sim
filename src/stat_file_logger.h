@@ -1,4 +1,5 @@
 #pragma once
+#include <math.h>  // isnan
 #include <chrono>
 #include <fstream>
 #include <iomanip>  // setprecision

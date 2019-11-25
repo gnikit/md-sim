@@ -13,11 +13,11 @@ int main() {
    * density iterations by equating the compression timestep to 1
    *
    */
-  phase_transition run(dir, compress_steps, true, 500, 7, "FCC", false, 500);
+  phase_transition run(dir, compress_steps, true, 500, 5, "FCC", false, 500);
 
-  std::vector<double> temperatures = {0.001, 0.003, 0.0033, 0.0035};
+  std::vector<double> temperatures = {0.0033, 0.0035};
   for (size_t t = 0; t < temperatures.size(); ++t) {
-    run.crystallisation("compress_fwd_", 0.05, 0.30, 0.025, temperatures[t], 0,
+    run.crystallisation("compress_fwd_", 0.05, 0.20, 0.025, temperatures[t], 0,
                         0, "GCM");
   }
 }

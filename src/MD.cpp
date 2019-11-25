@@ -116,6 +116,7 @@ MD::MD(std::string &DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
   pos_z = new std::vector<std::vector<double>>(__steps);
 
   PI = acos(-1.0);
+  fixed_seed = false;
 }
 
 // Delegating constructors with reduced number of arguments
@@ -170,9 +171,9 @@ double MD::initialise(std::vector<double> &x, std::vector<double> &y,
           for (size_t i = 0; i < __Nx; ++i) {
             for (size_t j = 0; j < __Ny; ++j) {
               for (size_t k = 0; k < __Nz; ++k) {
-                x.push_back((i + x_c[c]) / double(__Nx) * __L);
-                y.push_back((j + y_c[c]) / double(__Ny) * __L);
-                z.push_back((k + z_c[c]) / double(__Nz) * __L);
+                x.push_back((i + x_c[c]) * (__L / __Nx));
+                y.push_back((j + y_c[c]) * (__L / __Ny));
+                z.push_back((k + z_c[c]) * (__L / __Nz));
               }
             }
           }
@@ -190,9 +191,9 @@ double MD::initialise(std::vector<double> &x, std::vector<double> &y,
           for (size_t i = 0; i < __Nx; i++) {
             for (size_t j = 0; j < __Ny; j++) {
               for (size_t k = 0; k < __Nz; k++) {
-                x.push_back((i + x_c[c]) / double(__Nx) * __L);
-                y.push_back((j + y_c[c]) / double(__Ny) * __L);
-                z.push_back((k + z_c[c]) / double(__Nz) * __L);
+                x.push_back((i + x_c[c]) * (__L / __Nx));
+                y.push_back((j + y_c[c]) * (__L / __Ny));
+                z.push_back((k + z_c[c]) * (__L / __Nz));
               }
             }
           }
@@ -205,9 +206,9 @@ double MD::initialise(std::vector<double> &x, std::vector<double> &y,
         for (size_t i = 0; i < __Nx; ++i) {
           for (size_t j = 0; j < __Ny; ++j) {
             for (size_t k = 0; k < __Nz; ++k) {
-              x.push_back((i + 0.5) * __L);
-              y.push_back((j + 0.5) * __L);
-              z.push_back((k + 0.5) * __L);
+              x.push_back((i + 0.5) * (__L / __Nx));
+              y.push_back((j + 0.5) * (__L / __Ny));
+              z.push_back((k + 0.5) * (__L / __Nz));
             }
           }
         }
@@ -529,9 +530,17 @@ void MD::simulation(std::string simulation_name, double DENSITY,
   // cut_off redefinition
   // NOTE: Large cut offs increase the runtime exponentially
   __cut_off = 3.0;  // TODO: return as argument from BIP or add calibration func
+  // if cut-off is too large rescale it
+  if (__cut_off > __L / 2.0) {
+    std::cerr << "Warning: cutoff was too large!\n"
+                 "Setting cut-off to half the length box\n"
+                 "cut-off: "
+              << __L / 2.0 << std::endl;
+    __cut_off = __L / 2.0;
+  }
 
-  // Gets the pair potential for the simulation based on a map of the
-  // initials of the pair potential and the pair potential itself.
+  /* Gets the pair potential for the simulation based on a map of the
+     initials of the pair potential and the pair potential itself. */
   pair_potential_type pair_potential_force = get_force_func(pp_type);
 
   // Generating the filenames for the output
@@ -581,7 +590,7 @@ void MD::simulation(std::string simulation_name, double DENSITY,
 
         // Get the shortest image of the two particles
         // if the particles are near the periodic boundary,
-        // this ismage is their reflection.
+        // this image is their reflection.
         if (x > (0.5 * __L)) x = x - __L;
         if (x < (-0.5 * __L)) x = x + __L;
         if (y > (0.5 * __L)) y = y - __L;

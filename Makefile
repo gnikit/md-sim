@@ -22,6 +22,8 @@ debug: toolkit
 	@cd lib && $(MAKE)
 	@echo "MAKE MD src"
 	@cd src && $(MAKE) debug
+	@echo "MAKE examples"
+	@cd examples && $(MAKE) debug
 
 schemas: toolkit
 	@bin/generate_xml_file -d . -s 5000 -c false -r 500 -p 10 -l SC -t false -w 2000 -N simple_sc_run_ -R 0.5 -T 0.5 -n 8 -A 0.5 -P BIP -o schemas/bip_sc_run_input >/dev/null

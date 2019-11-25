@@ -1,8 +1,6 @@
 #include "MD.h"
 // TODO: create internal structures for quantities such as velocities, rs, fs,
 // TODO: make docstrings consistent
-// TODO: add wrapper around simulation for arguments of different potentials
-// TODO: make simulation return arguments to recursively call it for compression
 
 // FileIO has to be loaded after the math libraries
 #include "FileIO.h"  // FileIO class
@@ -118,6 +116,7 @@ MD::MD(std::string &DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
   pos_z = new std::vector<std::vector<double>>(__steps);
 
   PI = acos(-1.0);
+  fixed_seed = false;
 }
 
 // Delegating constructors with reduced number of arguments
@@ -172,9 +171,9 @@ double MD::initialise(std::vector<double> &x, std::vector<double> &y,
           for (size_t i = 0; i < __Nx; ++i) {
             for (size_t j = 0; j < __Ny; ++j) {
               for (size_t k = 0; k < __Nz; ++k) {
-                x.push_back((i + x_c[c]) / double(__Nx) * __L);
-                y.push_back((j + y_c[c]) / double(__Ny) * __L);
-                z.push_back((k + z_c[c]) / double(__Nz) * __L);
+                x.push_back((i + x_c[c]) * (__L / __Nx));
+                y.push_back((j + y_c[c]) * (__L / __Ny));
+                z.push_back((k + z_c[c]) * (__L / __Nz));
               }
             }
           }
@@ -192,9 +191,9 @@ double MD::initialise(std::vector<double> &x, std::vector<double> &y,
           for (size_t i = 0; i < __Nx; i++) {
             for (size_t j = 0; j < __Ny; j++) {
               for (size_t k = 0; k < __Nz; k++) {
-                x.push_back((i + x_c[c]) / double(__Nx) * __L);
-                y.push_back((j + y_c[c]) / double(__Ny) * __L);
-                z.push_back((k + z_c[c]) / double(__Nz) * __L);
+                x.push_back((i + x_c[c]) * (__L / __Nx));
+                y.push_back((j + y_c[c]) * (__L / __Ny));
+                z.push_back((k + z_c[c]) * (__L / __Nz));
               }
             }
           }
@@ -207,9 +206,9 @@ double MD::initialise(std::vector<double> &x, std::vector<double> &y,
         for (size_t i = 0; i < __Nx; ++i) {
           for (size_t j = 0; j < __Ny; ++j) {
             for (size_t k = 0; k < __Nz; ++k) {
-              x.push_back((i + 0.5) * __L);
-              y.push_back((j + 0.5) * __L);
-              z.push_back((k + 0.5) * __L);
+              x.push_back((i + 0.5) * (__L / __Nx));
+              y.push_back((j + 0.5) * (__L / __Ny));
+              z.push_back((k + 0.5) * (__L / __Nz));
             }
           }
         }
@@ -282,9 +281,9 @@ void MD::mb_distribution(double TEMPERATURE) {
   double mean = 0;
 
   // Use current time as seed for random generator
-  // TODO: pass arg to fix seed for reproduceble results
   std::srand(std::time(nullptr));
   int random_variable = std::rand();
+  if (fixed_seed) random_variable = 666;  // Fixing it for testing
 
   std::default_random_engine generator;
   generator.seed(random_variable);
@@ -483,12 +482,14 @@ void MD::structure_factor(std::vector<double> &rx, std::vector<double> &ry,
 
 // MD simulation
 void MD::simulation(std::string simulation_name, double DENSITY,
-                    double TEMPERATURE, double POWER = 8, double A_CST = 0,
-                    std::string pp_type = "BIP") {
+                    double TEMPERATURE, double POWER = NAN, double A_CST = NAN,
+                    std::string pp_type = "GCM") {
   /*
    *  Executes the fluid simulation. It includes all statistical methods
    *  defined in this class. It monitors the following quantities
    *  RDF, MSD, VAF, average particle energies & pressures.
+   *  The produced files are named after the input parameters of the run.
+   *  The restart parameters of the run are also returned.
    *
    *  @param DENSITY: Density rho of fluid.
    *  @param TEMPERATURE: Temperature of the thermostat.
@@ -501,16 +502,7 @@ void MD::simulation(std::string simulation_name, double DENSITY,
    *                 modelling. Options are "BIP", "GCM", "EXP", "LJ"
    */
 
-  // Initialise scaling variables
-  std::cout << "***************************\n"
-               "** MD simulation started **\n"
-               "***************************\n"
-            << std::endl;
-
-  std::cout << get_simulation_params(DENSITY, TEMPERATURE, POWER, A_CST,
-                                     pp_type)
-            << std::endl;
-
+  // Initialise the variables with the input parameters
   // Name the simulation. This will be used as a prefix in the files
   __simulation_name = simulation_name;
   __rho = DENSITY;
@@ -519,6 +511,17 @@ void MD::simulation(std::string simulation_name, double DENSITY,
   __a_cst = A_CST;
   __pp_type = pp_type;
 
+  std::cout << "***************************\n"
+               "** MD simulation started **\n"
+               "***************************\n"
+            << std::endl;
+
+  // Sets the unneeded variables (A and/or n) to NAN depending on the pp-type
+  std::cout << set_simulation_params(DENSITY, TEMPERATURE, POWER, A_CST,
+                                     pp_type)
+            << std::endl;
+
+  // Initialise scaling variables
   __dt = 0.005 / sqrt(__T0);  // dt defined here and reused in the Verlet
   // Box length scaling
   __L = pow((__N / __rho), 1.0 / 3.0);
@@ -527,9 +530,17 @@ void MD::simulation(std::string simulation_name, double DENSITY,
   // cut_off redefinition
   // NOTE: Large cut offs increase the runtime exponentially
   __cut_off = 3.0;  // TODO: return as argument from BIP or add calibration func
+  // if cut-off is too large rescale it
+  if (__cut_off > __L / 2.0) {
+    std::cerr << "Warning: cutoff was too large!\n"
+                 "Setting cut-off to half the length box\n"
+                 "cut-off: "
+              << __L / 2.0 << std::endl;
+    __cut_off = __L / 2.0;
+  }
 
-  // Gets the pair potential for the simulation based on a map of the
-  // initials of the pair potential and the pair potential itself.
+  /* Gets the pair potential for the simulation based on a map of the
+     initials of the pair potential and the pair potential itself. */
   pair_potential_type pair_potential_force = get_force_func(pp_type);
 
   // Generating the filenames for the output
@@ -537,14 +548,14 @@ void MD::simulation(std::string simulation_name, double DENSITY,
   if (c_counter == 0) {
     std::string data =
         __dir + logger.file_naming("/" + __simulation_name + "Data", __steps,
-                                   __N, DENSITY, TEMPERATURE, POWER, A_CST);
+                                   __N, __rho, __T0, __power, __a_cst);
     std::string pos =
         __dir +
         logger.file_naming("/" + __simulation_name + "Positions_Velocities",
-                           __steps, __N, DENSITY, TEMPERATURE, POWER, A_CST);
+                           __steps, __N, __rho, __T0, __power, __a_cst);
     std::string rdf =
         __dir + logger.file_naming("/" + __simulation_name + "RDF", __steps,
-                                   __N, DENSITY, TEMPERATURE, POWER, A_CST);
+                                   __N, __rho, __T0, __power, __a_cst);
 
     logger.open_files(data, rdf, pos);
     logger.time_stamp(logger.DATA,
@@ -556,7 +567,7 @@ void MD::simulation(std::string simulation_name, double DENSITY,
       std::chrono::steady_clock::now();
 
   // Initialise the simulation, lattice params and much more
-  __KE = initialise(rx, ry, rz, vx, vy, vz, TEMPERATURE);
+  __KE = initialise(rx, ry, rz, vx, vy, vz, __T0);
 
   for (__step_idx = 0; __step_idx < __steps; ++__step_idx) {
     // Forces loop
@@ -579,7 +590,7 @@ void MD::simulation(std::string simulation_name, double DENSITY,
 
         // Get the shortest image of the two particles
         // if the particles are near the periodic boundary,
-        // this ismage is their reflection.
+        // this image is their reflection.
         if (x > (0.5 * __L)) x = x - __L;
         if (x < (-0.5 * __L)) x = x + __L;
         if (y > (0.5 * __L)) y = y - __L;
@@ -593,7 +604,7 @@ void MD::simulation(std::string simulation_name, double DENSITY,
         // Force loop
         if (r < __cut_off) {
           // Allows the user to choose different pair potentials
-          auto [ff, temp_u] = pair_potential_force(r, POWER, A_CST);
+          auto [ff, temp_u] = pair_potential_force(r, __power, __a_cst);
 
           // Average potential energy
           U += temp_u;
@@ -673,17 +684,17 @@ void MD::simulation(std::string simulation_name, double DENSITY,
     f.Write2File<double>(
         *pos_x,
         logger.file_naming(__dir + "/" + __simulation_name + "x_data", __steps,
-                           __N, DENSITY, TEMPERATURE, POWER, A_CST),
+                           __N, __rho, __T0, __power, __a_cst),
         "\t", true);
     f.Write2File<double>(
         *pos_y,
         logger.file_naming(__dir + "/" + __simulation_name + "y_data", __steps,
-                           __N, DENSITY, TEMPERATURE, POWER, A_CST),
+                           __N, __rho, __T0, __power, __a_cst),
         "\t", true);
     f.Write2File<double>(
         *pos_z,
         logger.file_naming(__dir + "/" + __simulation_name + "z_data", __steps,
-                           __N, DENSITY, TEMPERATURE, POWER, A_CST),
+                           __N, __rho, __T0, __power, __a_cst),
         "\t", true);
   }
 
@@ -729,7 +740,6 @@ void MD::reset_values(bool force_reset) {
    */
 
   /*
-    todo: add try-except block for stream closing,
     bc the stream might be closed and the user might then call reset_values
     which will throw an exception
   */
@@ -770,9 +780,11 @@ std::string MD::get_dir() { return __dir; }
 
 std::string MD::get_simulation_name() { return __simulation_name; }
 
-std::string MD::get_simulation_params(double &rho, double &T, double &power,
+std::string MD::set_simulation_params(double &rho, double &T, double &power,
                                       double &a, std::string &pp_type) {
   /*
+   * Sets the internal class variables for the fluid according to
+   * the pair-potential selected.
    * Returns a string with all the simulation setup parameters
    */
 
@@ -794,11 +806,17 @@ std::string MD::get_simulation_params(double &rho, double &T, double &power,
       break;
   }
 
-  if (pp_type == "GCM")
+  if (pp_type == "GCM") {
     params = "Potential: GCM, " + params;
+    __power = NAN;  // Set the variable to NAN to be ignore by the logger
+    __a_cst = NAN;  // Set the variable to NAN to be ignore by the logger
+  }
 
-  else if (pp_type == "LJ")
+  else if (pp_type == "LJ") {
     params = "Potential: LJ, " + params;
+    __power = NAN;  // Set the variable to NAN to be ignore by the logger
+    __a_cst = NAN;  // Set the variable to NAN to be ignore by the logger
+  }
 
   else if (pp_type == "EXP") {
     params = "Potential: EXP, " + params;

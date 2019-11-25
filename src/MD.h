@@ -103,6 +103,8 @@ class MD {
 
  public:
   bool visualise;
+  bool fixed_seed;
+  
   MD(std::string &DIRECTORY, size_t run_number);
   MD(std::string &DIRECTORY, size_t run_number, bool COMPRESS_FLAG);
   MD(std::string &DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
@@ -147,6 +149,6 @@ class MD {
   /* Helper Functions */
   std::string get_dir();
   std::string get_simulation_name();
-  std::string get_simulation_params(double &rho, double &T, double &power,
+  std::string set_simulation_params(double &rho, double &T, double &power,
                                     double &a, std::string &pp_type);
 };

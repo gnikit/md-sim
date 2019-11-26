@@ -46,7 +46,7 @@ void phase_transition::crystallisation(std::string SIMULATION_NAME,
 
   for (size_t comp_step = 1; comp_step < total_comp_steps; comp_step++) {
     std::cout << "Runing MD::simulation " << comp_step << "/"
-              << total_comp_steps << std::endl;
+              << total_comp_steps -1 << std::endl;
 
     simulation(SIMULATION_NAME, current_rho, TEMPERATURE, POWER, A_CST,
                pp_type);

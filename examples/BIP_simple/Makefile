@@ -8,20 +8,20 @@ LN  := -L ../../lib
 
 LINKER = $(INC) $(LN) -lmd
 
-all: simple_run
+all: bip_simple_run
 			
 debug: CXXFLAGS = $(DCXXFLAGS)
-debug: simple_run
+debug: bip_simple_run
 
-simple_run: *.o $(LIB)/libmd.a
-	$(CXX) $(CXXFLAGS) *.o $(LINKER) -o simple_run -lstdc++fs
-	mv simple_run ../examplebin/
+bip_simple_run: *.o $(LIB)/libmd.a
+	$(CXX) $(CXXFLAGS) *.o $(LINKER) -o bip_simple_run -lstdc++fs
+	cp bip_simple_run ../examplebin/
 
 %.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) -I$(SRC) $<
 
-clean:
-	$(RM) simple_run *.o *.dat *.txt
+clean: clean_keep_data
+	$(RM) *.dat *.txt
 
 clean_keep_data:
-	$(RM) simple_run *.o
+	$(RM) bip_simple_run *.o

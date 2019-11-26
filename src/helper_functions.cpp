@@ -53,4 +53,6 @@ std::tuple<double, double> helper_functions::linfit(
   const auto a = (n * s_xy - s_x * s_y) / denominator;
   // Y-intercept of the linear fit
   const auto b = (s_y * s_xx - s_x * s_xy) / denominator;
+
+  return std::make_tuple(a, b);
 }

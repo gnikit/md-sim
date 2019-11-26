@@ -1,12 +1,12 @@
 language: cpp
-sudo: required
-dist: xenial
 
 os: linux
-
-compiler: 
-  - gcc
-
+dist: bionic
+sudo: required
+name: Python 3.8, c++17 gcc 7
+python: "3.8"
+compiler: gcc
+env: PYTHON=3.8
 addons:
   apt:
     sources:
@@ -14,7 +14,16 @@ addons:
     packages:
       - gcc-7
       - g++-7
+      - python3.8-dev
+      - python3.8-venv
 
+before_install:
+  - pyenv global $(pyenv whence 2to3)  # activate all python versions
+  - PY_CMD=python3
+  - $PY_CMD -m pip install --user --upgrade pip wheel setuptools
+install:
+  - $PY_CMD -m pip install --user --upgrade pytest
+  - $PY_CMD -m pip install --user --upgrade lxml
 script:
   - sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc
   - sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++
@@ -22,4 +31,6 @@ script:
   - export CC=/usr/bin/gcc-7
   - export CXX=/usr/bin/g++-7
   - g++ -v
+  - make toolkit
+  - make
   - make test

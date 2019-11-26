@@ -20,7 +20,7 @@
 #include <numeric>     // accumulate
 #include <random>      // normal_dist
 #include <sstream>     // stringstream
-#include <vector>
+#include <vector>      // vectors
 
 #include "md_pair_potentials.h"
 #include "stat_file_logger.h"
@@ -59,49 +59,52 @@ class MD {
   // Statistical quantity vectors, VAF, MSD, Energies and pressures
   std::vector<double> Cr, msd, u_en, k_en, pc, pk, temperature, density;
 
-  size_t Nx, Ny, Nz, N;       // Particles in x, y, z and total
-  size_t _STEP_INDEX, STEPS;  // Total particles, step index, maximum steps
-  size_t nhist, rdf_wait;     // histogram bin number, equilibrium period
-  size_t lattice;             // Parameter defining the initial lattice
-  double _T0;                 // Target/ Thermostat temperature
-  double dt;                  // time step
-  double x, y, z;             // distance between particle i and j
-  double r;                   // distance in polar
-  double _rho;                // density
-  double scale;               // box scaling parameter
-  double KE = 0.0;            // Kinetic Energy
-  double T;                   // Temperature
-  double L;                   // Length of the box after scaling
-  double Vol;                 // Volume
-  double cut_off = 3.0;       // simulation runs only within cutoff
-  double U = 0;               // Potential Energy
-  double PC = 0;              // Configurational Pressure
-  double PK;                  // Kinetic Pressure
-  double scale_v;             // velocity scaling
+  /* Constructor variables */
+  size_t __Nx, __Ny, __Nz, __N;  // Particles in x, y, z and total
+  size_t __step_idx, __steps;    // step index, maximum steps
+  size_t __nhist, __rdf_wait;    // histogram bin number, equilibrium period
+  size_t __lattice;              // Parameter defining the initial lattice
 
-  // Visualisation vectors initialised in constructor
+  double __dt;             // time step
+  double __KE = 0.0;       // Kinetic Energy
+  double __T;              // Temperature
+  double __L;              // Length of the box after scaling
+  double __cut_off = 3.0;  // simulation runs only within cutoff
+  double scale_v;          // velocity scaling
+
+  /* Visualisation vectors, initialised in constructor */
   std::vector<std::vector<double>> *pos_x;
   std::vector<std::vector<double>> *pos_y;
   std::vector<std::vector<double>> *pos_z;
 
-  // Compression variables
-  bool compress = false;
+  /* Compression variables */
+  bool __compress = false;
   size_t c_counter = 0;  // counts the number compression that have occurred
 
-  // HISTOGRAM VARIABLES
+  /* Radial Distribution variables */
   int igr;                 // Index of Hist
-  double rg;               // cut off radius
-  double dr;               // bin increment in terms of radius units
+  double __rg;             // cut off radius
+  double __dr;             // bin increment in terms of radius units
   std::vector<double> gr;  // RDF vector container
 
  private:
   double PI;
   /* Variables for storing inside the object the file ID */
   stat_file logger;
-  std::string _dir;
+  std::string __dir;
+  std::string __simulation_name;
+
+  /* Variables storing the simulation setup variables */
+  double __rho;           // density
+  double __T0;            // target/ Thermostat temperature
+  double __power;         // pair potential intensity
+  double __a_cst;         // generic softening parameter
+  std::string __pp_type;  // pair potential type
 
  public:
-  bool VISUALISE;
+  bool visualise;
+  bool fixed_seed;
+  
   MD(std::string &DIRECTORY, size_t run_number);
   MD(std::string &DIRECTORY, size_t run_number, bool COMPRESS_FLAG);
   MD(std::string &DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
@@ -110,29 +113,42 @@ class MD {
 
   ~MD();
 
-  void Simulation(double DENSITY, double TEMPERATURE, double POWER,
-                  double A_CST, std::string pp_type);
+  void simulation(std::string simulation_name, double DENSITY,
+                  double TEMPERATURE, double POWER, double A_CST,
+                  std::string pp_type);
+
   void reset_values(bool force_reset = false);
 
  protected:
-  void initialise(std::vector<double> &x, std::vector<double> &y,
-                  std::vector<double> &z, std::vector<double> &vx,
-                  std::vector<double> &vy, std::vector<double> &vz,
-                  double TEMPERATURE);
+  double initialise(std::vector<double> &x, std::vector<double> &y,
+                    std::vector<double> &z, std::vector<double> &vx,
+                    std::vector<double> &vy, std::vector<double> &vz,
+                    double TEMPERATURE);
+
   void mb_distribution(double TEMPERATURE);
-  void verlet_algorithm(std::vector<double> &rx, std::vector<double> &ry,
-                        std::vector<double> &rz, std::vector<double> &vx,
-                        std::vector<double> &vy, std::vector<double> &vz,
-                        std::vector<double> &rrx, std::vector<double> &rry,
-                        std::vector<double> &rrz);
+
+  double verlet_algorithm(std::vector<double> &rx, std::vector<double> &ry,
+                          std::vector<double> &rz, std::vector<double> &vx,
+                          std::vector<double> &vy, std::vector<double> &vz,
+                          bool sample_msd);
+
   void velocity_autocorrelation_function(std::vector<double> &Cvx,
                                          std::vector<double> &Cvy,
                                          std::vector<double> &Cvz);
-  void radial_distribution_function();
+
+  void radial_distribution_function(double &rho, double &cut_off, size_t &bins,
+                                    size_t &particles);
+
   void mean_square_displacement(std::vector<double> &MSDx,
                                 std::vector<double> &MSDy,
                                 std::vector<double> &MSDz);
+
   void structure_factor(std::vector<double> &rx, std::vector<double> &ry,
                         std::vector<double> &rz);
-  void show_run(size_t step_size_show);
+
+  /* Helper Functions */
+  std::string get_dir();
+  std::string get_simulation_name();
+  std::string set_simulation_params(double &rho, double &T, double &power,
+                                    double &a, std::string &pp_type);
 };

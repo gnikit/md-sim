@@ -15,7 +15,16 @@ class phase_transition : public MD {
  public:
   using MD::MD;
 
-  void crystallisation(double DENSITY, double FINAL_DENSITY, double DENSITY_INC,
+  void crystallisation(std::string SIMULATION_NAME, double DENSITY,
+                       double FINAL_DENSITY, double DENSITY_INC,
                        double TEMPERATURE, double POWER, double A_CST,
                        std::string pp_type);
+
+  void run_backwards(std::string SIMULATION_NAME, double DENSITY,
+                     double FINAL_DENSITY, double DENSITY_INC,
+                     double TEMPERATURE, double POWER, double A_CST,
+                     std::string pp_type);
+  // TODO:run a forward crystallisation and go back a
+
+  void detect_transition();
 };

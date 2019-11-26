@@ -74,7 +74,7 @@ int main(int argc, char const* argv[]) {
   if (xml_pp == nullptr) return XML_ERROR_PARSING_ELEMENT;
 
   /* Convert xml input to usable variables */
-  std::string dir, lattice, pair_potential;
+  std::string dir, simulation_name, lattice, pair_potential;
   bool comp, track_particles;
   unsigned int steps, n, rdf_bins, particles_per_axis, rdf_wait;
   double rho, T, A;
@@ -96,6 +96,8 @@ int main(int argc, char const* argv[]) {
       &rdf_wait);  // Parse RDF equilibration steps
   XMLCheckResult(eReuslt);
 
+  /* Simulation input */
+  simulation_name = xml_dir->GetText();      // Parse output directory
   eReuslt = xml_rho->QueryDoubleText(&rho);  // Parse density
   XMLCheckResult(eReuslt);
   eReuslt = xml_T->QueryDoubleText(&T);  // Parse temperature
@@ -108,5 +110,5 @@ int main(int argc, char const* argv[]) {
   /* Run MD simulation */
   MD run(dir, steps, comp, rdf_bins, particles_per_axis, lattice,
          track_particles, rdf_wait);
-  run.Simulation(rho, T, n, A, pair_potential);
+  run.simulation(simulation_name, rho, T, n, A, pair_potential);
 }

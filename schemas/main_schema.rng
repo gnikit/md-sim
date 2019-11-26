@@ -3,6 +3,7 @@
   <!--
     The SPUD base schema
     include "spud_base.rnc"
+    TODO: force constructor compression to false when enabling and vice versa
   -->
   <define name="constructor_types">
     <!--
@@ -52,6 +53,7 @@ results will be dominated by statistical noise.</a:documentation>
         <a:documentation>Number of particles per axis (x, y, z).
 This in combination with the lattice formation will yield
 a total number of particles equal to:
+
 SC: particles_per_axis **3
 
 FCC: particles_per_axis **3 *4
@@ -91,12 +93,13 @@ from the start of the simulation.</a:documentation>
       </element>
     </element>
   </define>
-  <!-- TODO: force constructor compression to false -->
-  <define name="simulation_single">
+  <define name="simulation_name">
     <element name="simulation_name">
       <a:documentation>Name of the simulation, to be used as prefix to all output files.</a:documentation>
       <data type="string"/>
     </element>
+  </define>
+  <define name="simulation_potentials">
     <element name="pp">
       <a:documentation>Available pair potentials:
 
@@ -115,6 +118,8 @@ LJ: Lennard-Jones Potential, 1/r**12 - 1/r**6
         <value>LJ</value>
       </choice>
     </element>
+  </define>
+  <define name="simulation_parameters">
     <element name="rho">
       <a:documentation>Fluid denisty (unitless).</a:documentation>
       <data type="double"/>
@@ -135,7 +140,14 @@ no-smoothening and 2.0 to a very smoothened fluid.</a:documentation>
       <data type="double"/>
     </element>
   </define>
+  <define name="simulation_single">
+    <ref name="simulation_name"/>
+    <ref name="simulation_potentials"/>
+    <ref name="simulation_parameters"/>
+  </define>
   <define name="simulation_compress">
+    <ref name="simulation_name"/>
+    <ref name="simulation_potentials"/>
     <element name="final_density">
       <a:documentation>The density that the compression aims to reach.</a:documentation>
       <data type="double"/>
@@ -145,16 +157,22 @@ no-smoothening and 2.0 to a very smoothened fluid.</a:documentation>
 in order to meed the final density.</a:documentation>
       <data type="double"/>
     </element>
-    <ref name="simulation_single"/>
+    <ref name="simulation_parameters"/>
   </define>
   <define name="simulation">
     <choice>
-      <element name="input_variables">
+      <element name="simulation_input">
         <a:documentation>Input variables for a single MD::simulation.</a:documentation>
+        <attribute name="name">
+          <value>NormalRun</value>
+        </attribute>
         <ref name="simulation_single"/>
       </element>
-      <element name="input_variables">
+      <element name="simulation_input">
         <a:documentation>Input variables for a compression/phase transisiton run.</a:documentation>
+        <attribute name="name">
+          <value>CompressionRun</value>
+        </attribute>
         <ref name="simulation_compress"/>
       </element>
     </choice>

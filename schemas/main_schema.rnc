@@ -1,5 +1,6 @@
 # The SPUD base schema
 # include "spud_base.rnc"
+# TODO: force constructor compression to false when enabling and vice versa
 
 constructor_types =
 (
@@ -39,6 +40,7 @@ constructor_types =
         ## Number of particles per axis (x, y, z).
         ## This in combination with the lattice formation will yield
         ## a total number of particles equal to:
+        ##
         ## SC: particles_per_axis **3
         ##
         ## FCC: particles_per_axis **3 *4
@@ -68,13 +70,14 @@ constructor_types =
     }
 )
 
-# TODO: force constructor compression to false
-
-simulation_single =
+simulation_name = 
 (
     ## Name of the simulation, to be used as prefix to all output files.
-    element simulation_name { xsd:string },
+    element simulation_name { xsd:string }
+)
 
+simulation_potentials = 
+(
     ## Available pair potentials:
     ##
     ## BIP: Bounded Inverse Power, 1/(r**2 + a**2)**n
@@ -87,8 +90,11 @@ simulation_single =
     ##
     element pp {
         "BIP" | "EXP" | "GCM" | "LJ"
-    },
+    }
+)
 
+simulation_parameters =
+(
     ## Fluid denisty (unitless).
     element rho { xsd:double },
 
@@ -106,8 +112,21 @@ simulation_single =
 
 )
 
+simulation_single = 
+(
+    simulation_name,
+
+    simulation_potentials,
+
+    simulation_parameters
+)
+
 simulation_compress =
 (
+    simulation_name,
+
+    simulation_potentials,
+
     ## The density that the compression aims to reach.
     element final_density { xsd:double },
 
@@ -115,15 +134,25 @@ simulation_compress =
     ## in order to meed the final density.
     element density_increment { xsd:double },
 
-    simulation_single
+    simulation_parameters
 )
 
 simulation =
 (
     ## Input variables for a single MD::simulation.
-    element input_variables { simulation_single }|
+    element simulation_input {
+
+        attribute name { "NormalRun" },
+
+        simulation_single 
+    }|
     ## Input variables for a compression/phase transisiton run.
-    element input_variables { simulation_compress }
+    element simulation_input { 
+        
+        attribute name { "CompressionRun" },
+
+        simulation_compress
+    }
 )
 
 start =

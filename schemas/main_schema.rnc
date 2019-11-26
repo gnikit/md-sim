@@ -4,20 +4,20 @@
 
 constructor_types =
 (
-    # # Construtor 1
+    # # Constructor 1
     # element constructor {
 
     #     element output_dir { xsd:string },
     #     element steps { xsd:integer }
     # }|
-    # # Construtor 2
+    # # Constructor 2
     # element constructor {
 
     #     element output_dir { xsd:string },
     #     element steps { xsd:integer },
     #     element compression { "true" | "false" }
     # }|
-    # Construtor 3
+    # Constructor 3
     ## Constructor initialisation for MD or phase_transition objects.
     element constructor {
 
@@ -59,11 +59,11 @@ constructor_types =
 
         ## If enabled will save in ASCII format the positions of all the
         ## particles for the entire simulation.
-        ## The datafiles can then be viewd with the python tools.
+        ## The datafiles can then be viewed with the python tools.
         ## NOTE: For large simulations this will be slow.
         element track_particles { "true" | "false" },
 
-        ## An equilibriation period for the RDF in time step units.
+        ## An equilibration period for the RDF in time step units.
         ## The RDF will begin to be collected rdf_equilibrate steps
         ## from the start of the simulation.
         element rdf_equilibrate { xsd:integer }
@@ -84,7 +84,7 @@ simulation_potentials =
     ##
     ## GCM: Gaussian Core Model, exp(-r**2)
     ##
-    ## EXP: Exponetial Potential, A * exp(-r**n)
+    ## EXP: Exponential Potential, A * exp(-r**n)
     ##
     ## LJ: Lennard-Jones Potential, 1/r**12 - 1/r**6
     ##
@@ -95,10 +95,10 @@ simulation_potentials =
 
 simulation_parameters =
 (
-    ## Fluid denisty (unitless).
+    ## Fluid density (unitless).
     element rho { xsd:double },
 
-    ## Fluid temerature (unitless).
+    ## Fluid temperature (unitless).
     element T { xsd:double },
 
     ## Pair potential strength.
@@ -107,7 +107,7 @@ simulation_parameters =
 
     ## Softening parameter. Only applicable for BIP and EXP pair potentials.
     ## Normal values usually range between 0 - 2.0. With 0 corresponding to
-    ## no-smoothening and 2.0 to a very smoothened fluid.
+    ## no-smoothening and 2.0 to a very smoothed fluid.
     element A { xsd:double }
 
 )
@@ -146,10 +146,18 @@ simulation =
 
         simulation_single 
     }|
-    ## Input variables for a compression/phase transisiton run.
+    ## Input variables for a compression/phase transition run.
     element simulation_input { 
         
         attribute name { "CompressionRun" },
+
+        simulation_compress
+    }|
+    ## Run a forward series of compressions/expansions followed by 
+    ## expansions/compressions in the opposite direction of the phase diagram.
+    element simulation_input {
+
+        attribute name { "ReverseCompressionRun" },
 
         simulation_compress
     }

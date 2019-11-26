@@ -28,6 +28,7 @@ struct constructor_type {
 
 struct simulation_type {
   std::string simulation_name = "";
+  std::string simulation_type = "";
   double density = 0.5;
   double density_final = 2.0;
   double density_inc = 0.5;
@@ -35,6 +36,8 @@ struct simulation_type {
   double power = 8;
   double a_cst = 0.5;
   std::string pp_type = "BIP";
+  /* Whether or not to perform a reverse compression run */
+  bool reverse_comp = false;
 };
 
 using namespace tinyxml2;
@@ -45,6 +48,16 @@ using namespace tinyxml2;
  * look at answer:
  * https://stackoverflow.com/questions/54768440/reading-in-all-siblings-elements-with-tinyxml
  */
+
+int get_switch(constructor_type& constructor, simulation_type& sim) {
+  /*
+   * Returns:
+   * 0: NormalRun
+   * 1: CompressionRun
+   * 2: ReverseCompressionRun
+   */
+  return constructor.comp + sim.reverse_comp;
+}
 
 int load_constructor_options(XMLNode* root, constructor_type& constructor);
 
@@ -68,23 +81,44 @@ int main(int argc, char const* argv[]) {
   simulation_type sim;
   XMLCheckResult(load_simulation_options(root, sim, constructor.comp));
 
-  /* Check if the compression flag has been enabled */
-  if (constructor.comp) {
-    phase_transition run(constructor.dir, constructor.steps, constructor.comp,
-                         constructor.rdf_bins, constructor.ppa,
-                         constructor.lattice, constructor.track_particles,
-                         constructor.rdf_wait);
+  /* Run a version of the simulation */
+  switch (get_switch(constructor, sim)) {
+    case 0: {
+      MD run(constructor.dir, constructor.steps, constructor.comp,
+             constructor.rdf_bins, constructor.ppa, constructor.lattice,
+             constructor.track_particles, constructor.rdf_wait);
 
-    run.crystallisation(sim.simulation_name, sim.density, sim.density_final,
+      run.simulation(sim.simulation_name, sim.density, sim.temperature,
+                     sim.power, sim.a_cst, sim.pp_type);
+      break;
+    }
+
+    case 1: {
+      phase_transition run(constructor.dir, constructor.steps, constructor.comp,
+                           constructor.rdf_bins, constructor.ppa,
+                           constructor.lattice, constructor.track_particles,
+                           constructor.rdf_wait);
+
+      run.crystallisation(sim.simulation_name, sim.density, sim.density_final,
+                          sim.density_inc, sim.temperature, sim.power,
+                          sim.a_cst, sim.pp_type);
+      break;
+    }
+
+    case 2: {
+      phase_transition run(constructor.dir, constructor.steps, constructor.comp,
+                           constructor.rdf_bins, constructor.ppa,
+                           constructor.lattice, constructor.track_particles,
+                           constructor.rdf_wait);
+
+      run.run_backwards(sim.simulation_name, sim.density, sim.density_final,
                         sim.density_inc, sim.temperature, sim.power, sim.a_cst,
                         sim.pp_type);
-  } else {
-    MD run(constructor.dir, constructor.steps, constructor.comp,
-           constructor.rdf_bins, constructor.ppa, constructor.lattice,
-           constructor.track_particles, constructor.rdf_wait);
+      break;
+    }
 
-    run.simulation(sim.simulation_name, sim.density, sim.temperature, sim.power,
-                   sim.a_cst, sim.pp_type);
+    default:
+      break;
   }
 }
 
@@ -157,20 +191,31 @@ int load_simulation_options(XMLNode* root, simulation_type& sim,
 
   /* Get the type of simulation */
   XMLElement* name = input->ToElement();
-  std::string sim_type = name->Attribute("name");
+  sim.simulation_type = name->Attribute("name");
 
   /* See if a compressions have been enabled in the schema */
-  if (sim_type == "CompressionRun" && compress == true) {
+  if (sim.simulation_type == "CompressionRun" && compress == true) {
     vars["xml_rho_final"] = input->FirstChildElement("final_density");
     vars["xml_rho_inc"] = input->FirstChildElement("density_increment");
   }
 
-  else if (sim_type == "CompressionRun" && compress == false) {
-    std::cerr << "Error: Set compression to true in the schema." << std::endl;
+  else if (sim.simulation_type == "ReverseCompressionRun" && compress == true) {
+    vars["xml_rho_final"] = input->FirstChildElement("final_density");
+    vars["xml_rho_inc"] = input->FirstChildElement("density_increment");
+    sim.reverse_comp = true;
+  }
+
+  else if ((sim.simulation_type == "CompressionRun" ||
+            sim.simulation_type == "ReverseCompressionRun") &&
+           compress == false) {
+    std::cerr << "Error: Set constructor/compression to true in the schema."
+              << std::endl;
     return -1;
   }
 
-  else if (sim_type != "CompressionRun" && compress == false) {
+  else if ((sim.simulation_type != "CompressionRun" ||
+            sim.simulation_type != "ReverseCompressionRun") &&
+           compress == false) {
     std::cerr << "Error: Set simulation type to CompressionRun in the schema."
               << std::endl;
     return -1;
@@ -216,7 +261,9 @@ int load_simulation_options(XMLNode* root, simulation_type& sim,
   /* Parse type of pair potential */
   sim.pp_type = vars["xml_pp"]->GetText();
 
-  if (sim_type == "CompressionRun" && compress == true) {
+  if ((sim.simulation_type == "CompressionRun" ||
+       sim.simulation_type == "ReverseCompressionRun") &&
+      compress == true) {
     /* Parse final density for compression */
     error = vars["xml_rho_final"]->QueryDoubleText(&sim.density_final);
     XMLCheckResult(error);

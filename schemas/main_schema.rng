@@ -7,14 +7,14 @@
   -->
   <define name="constructor_types">
     <!--
-      # Construtor 1
+      # Constructor 1
       element constructor {
     -->
     <!--
           element output_dir { xsd:string },
           element steps { xsd:integer }
       }|
-      # Construtor 2
+      # Constructor 2
       element constructor {
     -->
     <!--
@@ -22,7 +22,7 @@
           element steps { xsd:integer },
           element compression { "true" | "false" }
       }|
-      Construtor 3
+      Constructor 3
     -->
     <element name="constructor">
       <a:documentation>Constructor initialisation for MD or phase_transition objects.</a:documentation>
@@ -78,7 +78,7 @@ BCC: Body Centred Cubic</a:documentation>
       <element name="track_particles">
         <a:documentation>If enabled will save in ASCII format the positions of all the
 particles for the entire simulation.
-The datafiles can then be viewd with the python tools.
+The datafiles can then be viewed with the python tools.
 NOTE: For large simulations this will be slow.</a:documentation>
         <choice>
           <value>true</value>
@@ -86,7 +86,7 @@ NOTE: For large simulations this will be slow.</a:documentation>
         </choice>
       </element>
       <element name="rdf_equilibrate">
-        <a:documentation>An equilibriation period for the RDF in time step units.
+        <a:documentation>An equilibration period for the RDF in time step units.
 The RDF will begin to be collected rdf_equilibrate steps
 from the start of the simulation.</a:documentation>
         <data type="integer"/>
@@ -107,7 +107,7 @@ BIP: Bounded Inverse Power, 1/(r**2 + a**2)**n
 
 GCM: Gaussian Core Model, exp(-r**2)
 
-EXP: Exponetial Potential, A * exp(-r**n)
+EXP: Exponential Potential, A * exp(-r**n)
 
 LJ: Lennard-Jones Potential, 1/r**12 - 1/r**6
 </a:documentation>
@@ -121,11 +121,11 @@ LJ: Lennard-Jones Potential, 1/r**12 - 1/r**6
   </define>
   <define name="simulation_parameters">
     <element name="rho">
-      <a:documentation>Fluid denisty (unitless).</a:documentation>
+      <a:documentation>Fluid density (unitless).</a:documentation>
       <data type="double"/>
     </element>
     <element name="T">
-      <a:documentation>Fluid temerature (unitless).</a:documentation>
+      <a:documentation>Fluid temperature (unitless).</a:documentation>
       <data type="double"/>
     </element>
     <element name="n">
@@ -136,7 +136,7 @@ Normal values are between 6 - 12.</a:documentation>
     <element name="A">
       <a:documentation>Softening parameter. Only applicable for BIP and EXP pair potentials.
 Normal values usually range between 0 - 2.0. With 0 corresponding to
-no-smoothening and 2.0 to a very smoothened fluid.</a:documentation>
+no-smoothening and 2.0 to a very smoothed fluid.</a:documentation>
       <data type="double"/>
     </element>
   </define>
@@ -169,9 +169,17 @@ in order to meed the final density.</a:documentation>
         <ref name="simulation_single"/>
       </element>
       <element name="simulation_input">
-        <a:documentation>Input variables for a compression/phase transisiton run.</a:documentation>
+        <a:documentation>Input variables for a compression/phase transition run.</a:documentation>
         <attribute name="name">
           <value>CompressionRun</value>
+        </attribute>
+        <ref name="simulation_compress"/>
+      </element>
+      <element name="simulation_input">
+        <a:documentation>Run a forward series of compressions/expansions followed by 
+expansions/compressions in the opposite direction of the phase diagram.</a:documentation>
+        <attribute name="name">
+          <value>ReverseCompressionRun</value>
         </attribute>
         <ref name="simulation_compress"/>
       </element>

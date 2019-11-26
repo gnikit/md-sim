@@ -42,11 +42,12 @@ void phase_transition::crystallisation(std::string SIMULATION_NAME,
   }
 
   // Number of compressions to occur
-  size_t total_comp_steps = ceil((FINAL_DENSITY - DENSITY) / DENSITY_INC);
+  size_t total_comp_steps =
+      abs(ceil((FINAL_DENSITY - DENSITY) / DENSITY_INC)) + 1;
 
-  for (size_t comp_step = 1; comp_step < total_comp_steps; comp_step++) {
-    std::cout << "Runing MD::simulation " << comp_step << "/"
-              << total_comp_steps -1 << std::endl;
+  for (size_t comp_step = 0; comp_step < total_comp_steps; comp_step++) {
+    std::cout << "Runing MD::simulation " << comp_step + 1 << "/"
+              << total_comp_steps << std::endl;
 
     simulation(SIMULATION_NAME, current_rho, TEMPERATURE, POWER, A_CST,
                pp_type);
@@ -81,7 +82,7 @@ void phase_transition::run_backwards(std::string SIMULATION_NAME,
                                      double POWER, double A_CST,
                                      std::string pp_type) {
   /*
-   *
+   * //todo: implement in schema
    *
    */
 

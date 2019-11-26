@@ -4,6 +4,6 @@
 [submodule "tools/tinyxml2"]
 	path = tools/tinyxml2
 	url = https://github.com/leethomason/tinyxml2.git
-[submodule "tools/MD-Simulation-Data-Analysis"]
-	path = tools/MD-Simulation-Data-Analysis
-	url = https://github.com/gnikit/MD-Simulation-Data-Analysis.git
+[submodule "tools/md-tools"]
+	path = tools/md-tools
+	url = https://github.com/gnikit/md-tools.git

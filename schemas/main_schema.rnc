@@ -17,6 +17,7 @@ constructor_types =
     #     element compression { "true" | "false" }
     # }|
     # Construtor 3
+    ## Constructor initialisation for MD or phase_transition objects.
     element constructor {
 
         ## Output directory for the files to be produced during a simulation.
@@ -67,49 +68,74 @@ constructor_types =
     }
 )
 
+# TODO: force constructor compression to false
+
+simulation_single =
+(
+    ## Name of the simulation, to be used as prefix to all output files.
+    element simulation_name { xsd:string },
+
+    ## Available pair potentials:
+    ##
+    ## BIP: Bounded Inverse Power, 1/(r**2 + a**2)**n
+    ##
+    ## GCM: Gaussian Core Model, exp(-r**2)
+    ##
+    ## EXP: Exponetial Potential, A * exp(-r**n)
+    ##
+    ## LJ: Lennard-Jones Potential, 1/r**12 - 1/r**6
+    ##
+    element pp {
+        "BIP" | "EXP" | "GCM" | "LJ"
+    },
+
+    ## Fluid denisty (unitless).
+    element rho { xsd:double },
+
+    ## Fluid temerature (unitless).
+    element T { xsd:double },
+
+    ## Pair potential strength.
+    ## Normal values are between 6 - 12.
+    element n { xsd:double },
+
+    ## Softening parameter. Only applicable for BIP and EXP pair potentials.
+    ## Normal values usually range between 0 - 2.0. With 0 corresponding to
+    ## no-smoothening and 2.0 to a very smoothened fluid.
+    element A { xsd:double }
+
+)
+
+simulation_compress =
+(
+    ## The density that the compression aims to reach.
+    element final_density { xsd:double },
+
+    ## The density increment used to increase/decrease the current density
+    ## in order to meed the final density.
+    element density_increment { xsd:double },
+
+    simulation_single
+)
+
 simulation =
 (
-    # core of simulation
-    element simulation_input {
-
-        ## Fluid denisty (unitless).
-        element rho { xsd:double },
-
-        ## Fluid temerature (unitless).
-        element T { xsd:double },
-
-        ## Pair potential strength.
-        ## Normal values are between 6 - 12.
-        element n { xsd:double },
-
-        ## Softening parameter. Only applicable for some pair potentials.
-        element A { xsd:double },
-
-        ## Available pair potentials:
-        ##
-        ## BIP: Bounded Inverse Power, 1/(r**2 + a**2)**n
-        ##
-        ## GCM: Gaussian Core Model, exp(-r**2)
-        ##
-        ## EXP: Exponetial Potential, A * exp(-r**n)
-        ##
-        ## LJ: Lennard-Jones Potential, 1/r**12 - 1/r**6
-        ##
-        element pp {
-            "BIP" | "GCM" | "EXP" | "LJ"
-        }
-    }
+    ## Input variables for a single MD::simulation.
+    element input_variables { simulation_single }|
+    ## Input variables for a compression/phase transisiton run.
+    element input_variables { simulation_compress }
 )
 
 start =
 (
+    ## Input variables for a molecular dynamics simulation
     element input_variables {
 
         constructor_types,
 
         simulation,
 
-        ## Enable to for unit testing.
+        ## Enable for unit testing.
         element enable_testing { "true" | "false" }
     }
 )

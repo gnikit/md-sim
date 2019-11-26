@@ -24,6 +24,7 @@
       Construtor 3
     -->
     <element name="constructor">
+      <a:documentation>Constructor initialisation for MD or phase_transition objects.</a:documentation>
       <element name="output_dir">
         <a:documentation>Output directory for the files to be produced during a simulation.</a:documentation>
         <data type="string"/>
@@ -90,28 +91,14 @@ from the start of the simulation.</a:documentation>
       </element>
     </element>
   </define>
-  <define name="simulation">
-    <!-- core of simulation -->
-    <element name="simulation_input">
-      <element name="rho">
-        <a:documentation>Fluid denisty (unitless).</a:documentation>
-        <data type="double"/>
-      </element>
-      <element name="T">
-        <a:documentation>Fluid temerature (unitless).</a:documentation>
-        <data type="double"/>
-      </element>
-      <element name="n">
-        <a:documentation>Pair potential strength.
-Normal values are between 6 - 12.</a:documentation>
-        <data type="double"/>
-      </element>
-      <element name="A">
-        <a:documentation>Softening parameter. Only applicable for some pair potentials.</a:documentation>
-        <data type="double"/>
-      </element>
-      <element name="pp">
-        <a:documentation>Available pair potentials:
+  <!-- TODO: force constructor compression to false -->
+  <define name="simulation_single">
+    <element name="simulation_name">
+      <a:documentation>Name of the simulation, to be used as prefix to all output files.</a:documentation>
+      <data type="string"/>
+    </element>
+    <element name="pp">
+      <a:documentation>Available pair potentials:
 
 BIP: Bounded Inverse Power, 1/(r**2 + a**2)**n
 
@@ -121,21 +108,64 @@ EXP: Exponetial Potential, A * exp(-r**n)
 
 LJ: Lennard-Jones Potential, 1/r**12 - 1/r**6
 </a:documentation>
-        <choice>
-          <value>BIP</value>
-          <value>GCM</value>
-          <value>EXP</value>
-          <value>LJ</value>
-        </choice>
-      </element>
+      <choice>
+        <value>BIP</value>
+        <value>EXP</value>
+        <value>GCM</value>
+        <value>LJ</value>
+      </choice>
     </element>
+    <element name="rho">
+      <a:documentation>Fluid denisty (unitless).</a:documentation>
+      <data type="double"/>
+    </element>
+    <element name="T">
+      <a:documentation>Fluid temerature (unitless).</a:documentation>
+      <data type="double"/>
+    </element>
+    <element name="n">
+      <a:documentation>Pair potential strength.
+Normal values are between 6 - 12.</a:documentation>
+      <data type="double"/>
+    </element>
+    <element name="A">
+      <a:documentation>Softening parameter. Only applicable for BIP and EXP pair potentials.
+Normal values usually range between 0 - 2.0. With 0 corresponding to
+no-smoothening and 2.0 to a very smoothened fluid.</a:documentation>
+      <data type="double"/>
+    </element>
+  </define>
+  <define name="simulation_compress">
+    <element name="final_density">
+      <a:documentation>The density that the compression aims to reach.</a:documentation>
+      <data type="double"/>
+    </element>
+    <element name="density_increment">
+      <a:documentation>The density increment used to increase/decrease the current density
+in order to meed the final density.</a:documentation>
+      <data type="double"/>
+    </element>
+    <ref name="simulation_single"/>
+  </define>
+  <define name="simulation">
+    <choice>
+      <element name="input_variables">
+        <a:documentation>Input variables for a single MD::simulation.</a:documentation>
+        <ref name="simulation_single"/>
+      </element>
+      <element name="input_variables">
+        <a:documentation>Input variables for a compression/phase transisiton run.</a:documentation>
+        <ref name="simulation_compress"/>
+      </element>
+    </choice>
   </define>
   <start>
     <element name="input_variables">
+      <a:documentation>Input variables for a molecular dynamics simulation</a:documentation>
       <ref name="constructor_types"/>
       <ref name="simulation"/>
       <element name="enable_testing">
-        <a:documentation>Enable to for unit testing.</a:documentation>
+        <a:documentation>Enable for unit testing.</a:documentation>
         <choice>
           <value>true</value>
           <value>false</value>

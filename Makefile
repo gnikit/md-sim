@@ -36,6 +36,10 @@ toolkit:
 	@echo "MAKE tools"
 	@cd tools && $(MAKE) scripts
 
+python:
+	@echo "MAKE python modules"
+	@cd tools/md-tools && pip3 install --user --upgrade -e .
+
 test: all
 	# Do not run the database files
 	$(RM) examples/examplebin/*database*

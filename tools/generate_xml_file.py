@@ -15,7 +15,7 @@ USAGE = "usage: generate_xml_file.py " \
 
 EXAMPLE = "generate_xml_file.py -d ./examples/example_data -s 10000 -c false"\
           " -r 500 -p 10 -l SC -t false -w 2000 --rho 0.5 -T 0.5 -n 8 -A 0.5"\
-          " --pp BIP -o ./MD-simulation/examples/example\n\n"
+          " --pp BIP -o ./md-sim/examples/example\n\n"
 
 
 HELP = "Options:\n" \

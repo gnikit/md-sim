@@ -1,6 +1,6 @@
 # Molecular Dynamics Simulation
 
-[![Build Status](https://travis-ci.com/GNikit/MD-simulation.svg?branch=master)](https://travis-ci.com/GNikit/MD-simulation)
+[![Build Status](https://travis-ci.com/GNikit/md-sim.svg?branch=master)](https://travis-ci.com/GNikit/md-sim)
 
 A program simulating Molecular Dynamics (MD) fluids, with the option to use
 custom pair potentials. The potentials currently in the project include:
@@ -12,7 +12,7 @@ custom pair potentials. The potentials currently in the project include:
 
 ## Description
 
-A program written to investigate the transition of a fluid from MD to SPH. The C++ files **MD.cpp** and **MD.h** contain the core of the fluid simulation while **tools/MD-Simulation-Data-Analysis** contains the analysis methods written in Python. The files **bin/md** executable in combination with the script under **tools/generate_xml_file.py** can be used to simulate a fluid with any initial parameters, by simply changing the xml file passed to **md**.
+A program written to investigate the transition of a fluid from MD to SPH. The C++ files **MD.cpp** and **MD.h** contain the core of the fluid simulation while **tools/md-tools** contains the analysis methods written in Python. The files **bin/md** executable in combination with the script under **tools/generate_xml_file.py** can be used to simulate a fluid with any initial parameters, by simply changing the xml file passed to **md**.
 
 Examples are listed under the **examples** directory
 
@@ -23,7 +23,7 @@ Examples are listed under the **examples** directory
 You can clone the project with all its submodules with:
 
 ```bash
-git clone --recurse-submodules https://github.com/GNikit/MD-simulation.git
+git clone --recurse-submodules https://github.com/GNikit/md-sim.git
 ```
 
 ### Build

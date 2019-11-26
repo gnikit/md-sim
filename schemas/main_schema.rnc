@@ -1,0 +1,115 @@
+# The SPUD base schema
+# include "spud_base.rnc"
+
+constructor_types =
+(
+    # # Construtor 1
+    # element constructor {
+
+    #     element output_dir { xsd:string },
+    #     element steps { xsd:integer }
+    # }|
+    # # Construtor 2
+    # element constructor {
+
+    #     element output_dir { xsd:string },
+    #     element steps { xsd:integer },
+    #     element compression { "true" | "false" }
+    # }|
+    # Construtor 3
+    element constructor {
+
+        ## Output directory for the files to be produced during a simulation.
+        element output_dir { xsd:string },
+
+        ## Number of iteration steps the MD algorithm should run for.
+        element steps { xsd:integer },
+
+        ## Set the flag for incremental resizing of the simulation box.
+        ## Set to true for phase transition studies else set to false.
+        element compression { "true" | "false" },
+
+        ## Accuracy of the Radial Distribution Function (RDF).
+        ## A large number of bins will result into a very accurate RDF,
+        ## however if the simulation is short (small number of steps) the
+        ## results will be dominated by statistical noise.
+        element rdf_bins { xsd:integer },
+
+        ## Number of particles per axis (x, y, z).
+        ## This in combination with the lattice formation will yield
+        ## a total number of particles equal to:
+        ## SC: particles_per_axis **3
+        ##
+        ## FCC: particles_per_axis **3 *4
+        ##
+        ## BCC: particles_per_axis **3 *2
+        element particles_per_axis { xsd:integer },
+
+        ## Available initial lattice formations:
+        ##
+        ## SC: Simple Cubic
+        ##
+        ## FCC: Face Centred Cubic
+        ##
+        ## BCC: Body Centred Cubic
+        element lattice { "SC" | "FCC" | "BCC" },
+
+        ## If enabled will save in ASCII format the positions of all the
+        ## particles for the entire simulation.
+        ## The datafiles can then be viewd with the python tools.
+        ## NOTE: For large simulations this will be slow.
+        element track_particles { "true" | "false" },
+
+        ## An equilibriation period for the RDF in time step units.
+        ## The RDF will begin to be collected rdf_equilibrate steps
+        ## from the start of the simulation.
+        element rdf_equilibrate { xsd:integer }
+    }
+)
+
+simulation =
+(
+    # core of simulation
+    element simulation_input {
+
+        ## Fluid denisty (unitless).
+        element rho { xsd:double },
+
+        ## Fluid temerature (unitless).
+        element T { xsd:double },
+
+        ## Pair potential strength.
+        ## Normal values are between 6 - 12.
+        element n { xsd:double },
+
+        ## Softening parameter. Only applicable for some pair potentials.
+        element A { xsd:double },
+
+        ## Available pair potentials:
+        ##
+        ## BIP: Bounded Inverse Power, 1/(r**2 + a**2)**n
+        ##
+        ## GCM: Gaussian Core Model, exp(-r**2)
+        ##
+        ## EXP: Exponetial Potential, A * exp(-r**n)
+        ##
+        ## LJ: Lennard-Jones Potential, 1/r**12 - 1/r**6
+        ##
+        element pp {
+            "BIP" | "GCM" | "EXP" | "LJ"
+        }
+    }
+)
+
+start =
+(
+    element input_variables {
+
+        constructor_types,
+
+        simulation,
+
+        ## Enable to for unit testing.
+        element enable_testing { "true" | "false" }
+    }
+)

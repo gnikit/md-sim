@@ -46,6 +46,8 @@ int main(int argc, char const* argv[]) {
                                  ->FirstChildElement("rdf_equilibrate");
 
   /* Pointer to the 2nd child of root, simulation_input */
+  XMLElement* xml_simulation_name = root->FirstChildElement("simulation_input")
+                                        ->FirstChildElement("simulation_name");
   XMLElement* xml_rho =
       root->FirstChildElement("simulation_input")->FirstChildElement("rho");
   XMLElement* xml_T =
@@ -97,8 +99,8 @@ int main(int argc, char const* argv[]) {
   XMLCheckResult(eReuslt);
 
   /* Simulation input */
-  simulation_name = xml_dir->GetText();      // Parse output directory
-  eReuslt = xml_rho->QueryDoubleText(&rho);  // Parse density
+  simulation_name = xml_simulation_name->GetText();  // Parse output directory
+  eReuslt = xml_rho->QueryDoubleText(&rho);          // Parse density
   XMLCheckResult(eReuslt);
   eReuslt = xml_T->QueryDoubleText(&T);  // Parse temperature
   XMLCheckResult(eReuslt);

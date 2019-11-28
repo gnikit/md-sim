@@ -40,6 +40,10 @@ struct simulation_type {
   bool reverse_comp = false;
 };
 
+struct test_type {
+  bool is_testing = false;
+};
+
 using namespace tinyxml2;
 
 /*
@@ -49,19 +53,13 @@ using namespace tinyxml2;
  * https://stackoverflow.com/questions/54768440/reading-in-all-siblings-elements-with-tinyxml
  */
 
-int get_switch(constructor_type& constructor, simulation_type& sim) {
-  /*
-   * Returns:
-   * 0: NormalRun
-   * 1: CompressionRun
-   * 2: ReverseCompressionRun
-   */
-  return constructor.comp + sim.reverse_comp;
-}
+int get_switch(constructor_type& constructor, simulation_type& sim);
 
 int load_constructor_options(XMLNode* root, constructor_type& constructor);
 
 int load_simulation_options(XMLNode* root, simulation_type& sim, bool compress);
+
+int load_test_options(XMLNode* root, test_type& test_options);
 
 int main(int argc, char const* argv[]) {
   /* Path and name of the XML schema file */
@@ -81,12 +79,18 @@ int main(int argc, char const* argv[]) {
   simulation_type sim;
   XMLCheckResult(load_simulation_options(root, sim, constructor.comp));
 
+  test_type test;
+  XMLCheckResult(load_test_options(root, test));
+
   /* Run a version of the simulation */
   switch (get_switch(constructor, sim)) {
     case 0: {
       MD run(constructor.dir, constructor.steps, constructor.comp,
              constructor.rdf_bins, constructor.ppa, constructor.lattice,
              constructor.track_particles, constructor.rdf_wait);
+
+      /* If we are testing this changes to true and fixes the random seed */
+      run.fixed_seed = test.is_testing;
 
       run.simulation(sim.simulation_name, sim.density, sim.temperature,
                      sim.power, sim.a_cst, sim.pp_type);
@@ -98,6 +102,9 @@ int main(int argc, char const* argv[]) {
                            constructor.rdf_bins, constructor.ppa,
                            constructor.lattice, constructor.track_particles,
                            constructor.rdf_wait);
+
+      /* If we are testing this changes to true and fixes the random seed */
+      run.fixed_seed = test.is_testing;
 
       run.crystallisation(sim.simulation_name, sim.density, sim.density_final,
                           sim.density_inc, sim.temperature, sim.power,
@@ -111,6 +118,9 @@ int main(int argc, char const* argv[]) {
                            constructor.lattice, constructor.track_particles,
                            constructor.rdf_wait);
 
+      /* If we are testing this changes to true and fixes the random seed */
+      run.fixed_seed = test.is_testing;
+
       run.run_backwards(sim.simulation_name, sim.density, sim.density_final,
                         sim.density_inc, sim.temperature, sim.power, sim.a_cst,
                         sim.pp_type);
@@ -120,6 +130,16 @@ int main(int argc, char const* argv[]) {
     default:
       break;
   }
+}
+
+int get_switch(constructor_type& constructor, simulation_type& sim) {
+  /*
+   * Returns:
+   * 0: NormalRun
+   * 1: CompressionRun
+   * 2: ReverseCompressionRun
+   */
+  return constructor.comp + sim.reverse_comp;
 }
 
 int load_constructor_options(XMLNode* root, constructor_type& constructor) {
@@ -271,6 +291,17 @@ int load_simulation_options(XMLNode* root, simulation_type& sim,
     error = vars["xml_rho_inc"]->QueryDoubleText(&sim.density_inc);
     XMLCheckResult(error);
   }
+
+  return 0;
+}
+
+int load_test_options(XMLNode* root, test_type& test_options) {
+  XMLElement* xml_is_testing = root->FirstChildElement("enable_testing");
+
+  XMLError error;
+  /* Parse the testing flag from the schema */
+  error = xml_is_testing->QueryBoolText(&test_options.is_testing);
+  XMLCheckResult(error);
 
   return 0;
 }

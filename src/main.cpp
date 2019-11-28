@@ -215,7 +215,7 @@ int load_simulation_options(XMLNode* root, simulation_type& sim,
 
   else if ((sim.simulation_type != "CompressionRun" ||
             sim.simulation_type != "ReverseCompressionRun") &&
-           compress == false) {
+           compress == true) {
     std::cerr << "Error: Set simulation type to CompressionRun in the schema."
               << std::endl;
     return -1;

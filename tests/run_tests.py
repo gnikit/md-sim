@@ -77,7 +77,7 @@ class TestPotentials(unittest.TestCase):
         test_results = []
 
         test_string = '_step_2000_particles_512_rho_0.5000_T_1.0000' \
-            + '_n_8.00_A_0.50000.txt'
+            + '_n_8.00_A_0.50000.log'
         sim_name = 'bip_potential_test_'
 
         # Test variables
@@ -120,7 +120,7 @@ class TestPotentials(unittest.TestCase):
         os.chdir(f_dir)
         test_results = []
 
-        test_string = '_step_2000_particles_512_rho_0.5000_T_1.0000.txt'
+        test_string = '_step_2000_particles_512_rho_0.5000_T_1.0000.log'
         sim_name = 'lj_potential_test_'
 
         # Test variables
@@ -165,7 +165,7 @@ class TestPotentials(unittest.TestCase):
         test_results = []
 
         test_string = '_step_2000_particles_512_rho_0.5000_T_1.0000' \
-            + '_n_8.00_A_0.50000.txt'
+            + '_n_8.00_A_0.50000.log'
         sim_name = 'exp_potential_test_'
 
         # Test variables
@@ -209,7 +209,7 @@ class TestPotentials(unittest.TestCase):
         os.chdir(f_dir)
         test_results = []
 
-        test_string = '_step_2000_particles_512_rho_0.5000_T_1.0000.txt'
+        test_string = '_step_2000_particles_512_rho_0.5000_T_1.0000.log'
         sim_name = 'gcm_potential_test_'
 
         # Test variables
@@ -264,7 +264,7 @@ class TestLatticeStructures(unittest.TestCase):
         test_results = []
 
         test_string = '_step_1_particles_512_rho_0.5000_T_1.0000' \
-            + '_n_8.00_A_0.50000.txt'
+            + '_n_8.00_A_0.50000.log'
         sim_name = 'sc_test_'
 
         # Test variables
@@ -297,7 +297,7 @@ class TestLatticeStructures(unittest.TestCase):
         test_results = []
 
         test_string = '_step_1_particles_2048_rho_0.5000_T_1.0000' \
-            + '_n_8.00_A_0.50000.txt'
+            + '_n_8.00_A_0.50000.log'
         sim_name = 'fcc_test_'
 
         # Test variables
@@ -330,7 +330,7 @@ class TestLatticeStructures(unittest.TestCase):
         test_results = []
 
         test_string = '_step_1_particles_1024_rho_0.5000_T_1.0000' \
-            + '_n_8.00_A_0.50000.txt'
+            + '_n_8.00_A_0.50000.log'
         sim_name = 'bcc_test_'
 
         # Test variables
@@ -373,7 +373,7 @@ class Test3DVisualisation(unittest.TestCase):
         os.chdir(f_dir)
         test_results = []
 
-        test_string = '_step_10_particles_512_rho_0.5000_T_1.0000.txt'
+        test_string = '_step_10_particles_512_rho_0.5000_T_1.0000.log'
         sim_name = 'visual_'
 
         # Test variables
@@ -400,6 +400,43 @@ class Test3DVisualisation(unittest.TestCase):
         test_results.append(result)
 
         self.assertTrue(get_test_result(test_results))
+
+        print(f'Exiting: {f_dir}')
+
+
+class TestConstructors(unittest.TestCase):
+
+    def setUp(self):
+        print('-'*80)
+
+    def tearDown(self):
+        call(['make', 'clean'])
+        os.chdir('..')
+        print('-'*80)
+
+    def test_schema_missing_options(self):
+        f_dir = 'schema_missing_options'
+        print(f'Entering: {f_dir}')
+
+        setup_ok = run_file(f_dir, 'missing_options.xml')
+        self.assertTrue(setup_ok)
+
+        os.chdir(f_dir)
+        test_results = []
+
+        test_string = 'Data_step_100_particles_512_rho_0.5000_T_0.5000.log'
+        sim_name = 'missing_options_'
+
+        # Test variables
+        data = np.loadtxt(f'{sim_name}{test_string}')
+
+        # Reference variables
+        data_ref = np.loadtxt('test_data.log')
+
+        # Test for consistency
+        result = np.allclose(data, data_ref)
+        print(f'Testing Data file consistency with reference: {result}')
+        test_results.append(result)
 
         print(f'Exiting: {f_dir}')
 

@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8'?>
+<input_variables>
+  <constructor>
+    <output_dir>.</output_dir>
+    <steps>1</steps>
+    <compression>false</compression>
+    <rdf_bins>200</rdf_bins>
+    <particles_per_axis>8</particles_per_axis>
+    <lattice>SC</lattice>
+    <track_particles>false</track_particles>
+    <rdf_equilibrate>0</rdf_equilibrate>
+  </constructor>
+  <simulation_input name="NormalRun">
+    <simulation_name>sc_test_</simulation_name>
+    <pp>BIP</pp>
+    <rho>0.5</rho>
+    <T>1.0</T>
+    <n>8</n>
+    <A>0.5</A>
+  </simulation_input>
+  <enable_testing>true</enable_testing>
+</input_variables>

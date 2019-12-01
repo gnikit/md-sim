@@ -1,7 +1,0 @@
-1. In the currect Makefile setup the example binaries cannot be created 
-   unless 'make all' is called, which is slightly counter intuitive.
-   Examples should be compiled in a seperate make option on the top makefile.
-   (On a side note, the current makefile structure is terrible.)
-
-
-

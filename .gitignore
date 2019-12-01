@@ -9,3 +9,6 @@
 
 # Intel Optimisation reports
 *.optrpt
+
+# Python ignore
+__pycache__*

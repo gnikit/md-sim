@@ -24,6 +24,8 @@ before_install:
 install:
   - $PY_CMD -m pip install --user --upgrade pytest
   - $PY_CMD -m pip install --user --upgrade lxml
+  - $PY_CMD -m pip install --user --upgrade numpy
+  - $PY_CMD -m pip install --user --upgrade matplotlib
 script:
   - sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc
   - sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++
@@ -33,4 +35,5 @@ script:
   - g++ -v
   - make toolkit
   - make
+  - make examples
   - make test

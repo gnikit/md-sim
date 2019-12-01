@@ -1,19 +1,16 @@
 #include "MD.h"
 // TODO: create internal structures for quantities such as velocities, rs, fs,
 // TODO: make docstrings consistent
+// TODO: remove all constructor-defaulted options to another method
 
 // FileIO has to be loaded after the math libraries
 #include "FileIO.h"  // FileIO class
 
-#define PARTICLES_PER_AXIS 10
-// Increase the number of bins for a more accurate RDF
-#define NHIST 500                // Number of histogram bins
-#define RDF_WAIT 0               // Iterations after which RDF will be collected
 #pragma warning(disable : 4996)  //_CRT_SECURE_NO_WARNINGS
 
-MD::MD(std::string &DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
-       size_t rdf_bins, size_t particles_per_axis, std::string LATTICE,
-       bool track_particles, size_t collect_rdf_after) {
+MD::MD(size_t step_number, size_t particles_per_axis, std::string lattice,
+       std::string out_directory, bool is_compressing, bool track_particles,
+       size_t rdf_bins, size_t collect_rdf_after) {
   /*
    * This constructor allows for increased control over the internal
    * parameters of the fluid.
@@ -24,11 +21,29 @@ MD::MD(std::string &DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
    * final DENISITIES passed on the get_phases method and with their increment.
    */
 
+  // Assign number of iterations of the MD algorithm
+  __steps = step_number;
+
+  // Assign the type of lattice
+  __lattice = lattice;
+
+  // Calculate the total number of particles N based on the lattice
+  if (lattice == "FCC") {
+    __Nx = __Ny = __Nz = particles_per_axis;
+    __N = __Nx * __Ny * __Nz * 4;
+  } else if (lattice == "BCC") {
+    __Nx = __Ny = __Nz = particles_per_axis;
+    __N = __Nx * __Ny * __Nz * 2;
+  } else {
+    __Nx = __Ny = __Nz = particles_per_axis;
+    __N = __Nx * __Ny * __Nz;
+  }
+
   try {
-    __dir = DIRECTORY;
+    __dir = out_directory;
     if (!fs::exists(__dir)) {
       throw
-          "input DIRECTORY in MD constructor does not exist. "
+          "input out_directory in MD constructor does not exist.\n"
           "Use a valid directory for output files to be saved";
     }
 
@@ -37,29 +52,11 @@ MD::MD(std::string &DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
     exit(1);
   }
 
-  // Assign number of iterations of the MD algorithm
-  __steps = run_number;
-
-  // Total number of particles N
-  if (LATTICE == "FCC") {
-    __lattice = 1;
-    __Nx = __Ny = __Nz = particles_per_axis;
-    __N = __Nx * __Ny * __Nz * 4;
-  } else if (LATTICE == "BCC") {
-    __lattice = 2;
-    __Nx = __Ny = __Nz = particles_per_axis;
-    __N = __Nx * __Ny * __Nz * 2;
-  } else {
-    __lattice = 0;
-    __Nx = __Ny = __Nz = particles_per_axis;
-    __N = __Nx * __Ny * __Nz;
-  }
-
   // If compress is true, then STEPS = steps_per_compression
-  __compress = COMPRESS_FLAG;
+  __compress = is_compressing;
 
   // Save all the positions for the fluid
-  visualise = track_particles;
+  __visualise = track_particles;
 
   // Accuracy of RDF
   __nhist = rdf_bins;
@@ -72,9 +69,9 @@ MD::MD(std::string &DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
 
     /* Substraction of size_ts if negative results into logic errors
        hence the use of an int temp; */
-    int temp = run_number - collect_rdf_after;
+    int temp = step_number - collect_rdf_after;
     if (temp < 0) {
-      throw "collect_rdf_after is greater than the run_number";
+      throw "collect_rdf_after is greater than the step_number";
     }
   } catch (const char *msg) {
     std::cerr << "Warning: " << msg << std::endl;
@@ -121,15 +118,9 @@ MD::MD(std::string &DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
 
 // Delegating constructors with reduced number of arguments
 // https://en.wikipedia.org/wiki/C++11#Object_construction_improvement
-// Constructor to use for density compress
-MD::MD(std::string &DIRECTORY, size_t run_number, bool COMPRESS_FLAG)
-    : MD(DIRECTORY, run_number, COMPRESS_FLAG, NHIST, PARTICLES_PER_AXIS, "SC",
-         false, RDF_WAIT) {}
-
-// Constructor to use for the simplest cases
-MD::MD(std::string &DIRECTORY, size_t run_number)
-    : MD(DIRECTORY, run_number, false, NHIST, PARTICLES_PER_AXIS, "SC", false,
-         RDF_WAIT) {}
+// Convinient constructor to use for simple cases
+MD::MD(size_t step_number, size_t particles_per_axis, std::string lattice)
+    : MD(step_number, particles_per_axis, lattice, ".", false, false, 500, 0) {}
 
 MD::~MD() {
   // Destroy the vectors allocated on the heap
@@ -158,63 +149,58 @@ double MD::initialise(std::vector<double> &x, std::vector<double> &y,
 
   // Initialise position matrix and velocity matrix from Cubic Centred Lattice
   if (!__compress || (__compress && c_counter == 0)) {
-    switch (__lattice) {
-      // FCC lattice
-      case 1: {
-        // Coordinates for the FCC lattice
-        double x_c[4] = {0.25, 0.75, 0.75, 0.25};
-        double y_c[4] = {0.25, 0.75, 0.25, 0.75};
-        double z_c[4] = {0.25, 0.25, 0.75, 0.75};
+    if (__lattice == "FCC") {
+      // Coordinates for the FCC lattice
+      double x_c[4] = {0.25, 0.75, 0.75, 0.25};
+      double y_c[4] = {0.25, 0.75, 0.25, 0.75};
+      double z_c[4] = {0.25, 0.25, 0.75, 0.75};
 
-        // Loop over the the corner coordinates of the FCC and then x, y, z
-        for (size_t c = 0; c < 4; ++c) {
-          for (size_t i = 0; i < __Nx; ++i) {
-            for (size_t j = 0; j < __Ny; ++j) {
-              for (size_t k = 0; k < __Nz; ++k) {
-                x.push_back((i + x_c[c]) * (__L / __Nx));
-                y.push_back((j + y_c[c]) * (__L / __Ny));
-                z.push_back((k + z_c[c]) * (__L / __Nz));
-              }
-            }
-          }
-        }
-        break;
-      }
-
-      // BCC lattice
-      case 2: {
-        double x_c[2] = {0.25, 0.75};
-        double y_c[2] = {0.25, 0.75};
-        double z_c[2] = {0.25, 0.75};
-
-        for (size_t c = 0; c < 2; ++c) {
-          for (size_t i = 0; i < __Nx; i++) {
-            for (size_t j = 0; j < __Ny; j++) {
-              for (size_t k = 0; k < __Nz; k++) {
-                x.push_back((i + x_c[c]) * (__L / __Nx));
-                y.push_back((j + y_c[c]) * (__L / __Ny));
-                z.push_back((k + z_c[c]) * (__L / __Nz));
-              }
-            }
-          }
-        }
-        break;
-      }
-
-      // Simple Cubic lattice
-      default: {
+      // Loop over the the corner coordinates of the FCC and then x, y, z
+      for (size_t c = 0; c < 4; ++c) {
         for (size_t i = 0; i < __Nx; ++i) {
           for (size_t j = 0; j < __Ny; ++j) {
             for (size_t k = 0; k < __Nz; ++k) {
-              x.push_back((i + 0.5) * (__L / __Nx));
-              y.push_back((j + 0.5) * (__L / __Ny));
-              z.push_back((k + 0.5) * (__L / __Nz));
+              x.push_back((i + x_c[c]) * (__L / __Nx));
+              y.push_back((j + y_c[c]) * (__L / __Ny));
+              z.push_back((k + z_c[c]) * (__L / __Nz));
             }
           }
         }
-        break;
       }
     }
+
+    // BCC lattice
+    else if (__lattice == "BCC") {
+      double x_c[2] = {0.25, 0.75};
+      double y_c[2] = {0.25, 0.75};
+      double z_c[2] = {0.25, 0.75};
+
+      for (size_t c = 0; c < 2; ++c) {
+        for (size_t i = 0; i < __Nx; i++) {
+          for (size_t j = 0; j < __Ny; j++) {
+            for (size_t k = 0; k < __Nz; k++) {
+              x.push_back((i + x_c[c]) * (__L / __Nx));
+              y.push_back((j + y_c[c]) * (__L / __Ny));
+              z.push_back((k + z_c[c]) * (__L / __Nz));
+            }
+          }
+        }
+      }
+    }
+
+    // Simple Cubic lattice
+    else {
+      for (size_t i = 0; i < __Nx; ++i) {
+        for (size_t j = 0; j < __Ny; ++j) {
+          for (size_t k = 0; k < __Nz; ++k) {
+            x.push_back((i + 0.5) * (__L / __Nx));
+            y.push_back((j + 0.5) * (__L / __Ny));
+            z.push_back((k + 0.5) * (__L / __Nz));
+          }
+        }
+      }
+    }
+
     // Generates Maxwell-Boltzmann distribution
     mb_distribution(TEMPERATURE);
   }
@@ -388,7 +374,7 @@ void MD::radial_distribution_function(double &rho, double &cut_off,
   double dr = cut_off / bins;
 
   logger.RDF << "# particles (N): " << particles << " steps: " << __steps
-             << " rho: " << rho << " bin (NHIST): " << bins
+             << " rho: " << rho << " bins: " << bins
              << " cut_off (rg): " << cut_off << " dr: " << dr << std::endl;
   logger.RDF << "# Unormalised" << '\t' << "Normalised" << std::endl;
 
@@ -662,7 +648,7 @@ void MD::simulation(std::string simulation_name, double DENSITY,
     structure_factor(rx, ry, rz);
 
     // Save positions for visualisation with Python
-    if (visualise) {
+    if (__visualise) {
       // Reserve memory for the position vectors
       (*pos_x)[__step_idx].reserve(__N);
       (*pos_y)[__step_idx].reserve(__N);
@@ -676,7 +662,7 @@ void MD::simulation(std::string simulation_name, double DENSITY,
   }
   // simulation Ends HERE
 
-  if (visualise) {
+  if (__visualise) {
     // Save particle positions to files
     FileIO f;
     // Write the arrays as jagged,(hence transposed), this creates rows=STEPS
@@ -792,19 +778,7 @@ std::string MD::set_simulation_params(double &rho, double &T, double &power,
       "Fluid parameters: rho: " + stat_file::convert_to_string(rho, 4) +
       " T: " + stat_file::convert_to_string(T, 4);
 
-  switch (__lattice) {
-    case 1:
-      params = "Lattice: FCC\n" + params;
-      break;
-
-    case 2:
-      params = "Lattice: BCC\n" + params;
-      break;
-
-    default:
-      params = "Lattice: SC\n" + params;
-      break;
-  }
+  params = "Lattice: " + get_lattice_structure() + "\n";
 
   if (pp_type == "GCM") {
     params = "Potential: GCM, " + params;
@@ -839,4 +813,30 @@ std::string MD::set_simulation_params(double &rho, double &T, double &power,
   }
 
   return params;
+}
+
+std::string MD::get_lattice_structure() { return __lattice; }
+
+bool MD::get_compression_flag() { return __compress; }
+
+void MD::set_compression_flag(bool is_compressing) {
+  __compress = is_compressing;
+}
+
+bool MD::get_visualisation_flag() { return __visualise; }
+
+void MD::set_visualisation_flag(bool is_visualising) {
+  __visualise = is_visualising;
+}
+
+size_t MD::get_particle_number() { return __N; }
+
+size_t MD::get_rdf_accuracy() { return __nhist; }
+
+void MD::enable_testing(bool is_testing) { fixed_seed = is_testing; }
+
+size_t MD::get_rdf_collect_after() { return __rdf_wait; }
+
+void MD::set_rdf_collect_after(size_t rdf_collect_after) {
+  __rdf_wait = rdf_collect_after;
 }

@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <!--
+    The SPUD base schema
+    include "spud_base.rnc"
+    TODO: force constructor compression to false when enabling and vice versa
+  -->
+  <define name="constructor_types">
+    <!--
+      # Constructor 1
+      element constructor {
+    -->
+    <!--
+          element output_dir { xsd:string },
+          element steps { xsd:integer }
+      }|
+      # Constructor 2
+      element constructor {
+    -->
+    <!--
+          element output_dir { xsd:string },
+          element steps { xsd:integer },
+          element compression { "true" | "false" }
+      }|
+      Constructor 3
+    -->
+    <element name="constructor">
+      <a:documentation>Constructor initialisation for MD or phase_transition objects.</a:documentation>
+      <element name="steps">
+        <a:documentation>Number of iteration steps the MD algorithm should run for.</a:documentation>
+        <data type="integer"/>
+      </element>
+      <element name="particles_per_axis">
+        <a:documentation>Number of particles per axis (x, y, z).
+This in combination with the lattice formation will yield
+a total number of particles equal to:
+
+SC: particles_per_axis **3
+
+FCC: particles_per_axis **3 *4
+
+BCC: particles_per_axis **3 *2</a:documentation>
+        <data type="integer"/>
+      </element>
+      <element name="lattice">
+        <a:documentation>Available initial lattice formations:
+
+SC: Simple Cubic
+
+FCC: Face Centred Cubic
+
+BCC: Body Centred Cubic</a:documentation>
+        <choice>
+          <value>SC</value>
+          <value>FCC</value>
+          <value>BCC</value>
+        </choice>
+      </element>
+      <optional>
+        <element name="output_dir">
+          <a:documentation>Output directory for the files to be produced during a simulation.</a:documentation>
+          <data type="string"/>
+        </element>
+      </optional>
+      <optional>
+        <element name="compression">
+          <a:documentation>Set the flag for incremental resizing of the simulation box.
+Set to true for phase transition studies else set to false.</a:documentation>
+          <choice>
+            <value>true</value>
+            <value>false</value>
+          </choice>
+        </element>
+      </optional>
+      <optional>
+        <element name="rdf_bins">
+          <a:documentation>Accuracy of the Radial Distribution Function (RDF).
+A large number of bins will result into a very accurate RDF,
+however if the simulation is short (small number of steps) the
+results will be dominated by statistical noise.</a:documentation>
+          <data type="integer"/>
+        </element>
+      </optional>
+      <optional>
+        <element name="track_particles">
+          <a:documentation>If enabled will save in ASCII format the positions of all the
+particles for the entire simulation.
+The datafiles can then be viewed with the python tools.
+NOTE: For large simulations this will be slow.</a:documentation>
+          <choice>
+            <value>true</value>
+            <value>false</value>
+          </choice>
+        </element>
+      </optional>
+      <optional>
+        <element name="rdf_equilibrate">
+          <a:documentation>An equilibration period for the RDF in time step units.
+The RDF will begin to be collected rdf_equilibrate steps
+from the start of the simulation.</a:documentation>
+          <data type="integer"/>
+        </element>
+      </optional>
+    </element>
+  </define>
+  <define name="simulation_name">
+    <element name="simulation_name">
+      <a:documentation>Name of the simulation, to be used as prefix to all output files.</a:documentation>
+      <data type="string"/>
+    </element>
+  </define>
+  <define name="simulation_potentials">
+    <element name="pp">
+      <a:documentation>Available pair potentials:
+
+BIP: Bounded Inverse Power, 1/(r**2 + a**2)**n
+
+GCM: Gaussian Core Model, exp(-r**2)
+
+EXP: Exponential Potential, A * exp(-r**n)
+
+LJ: Lennard-Jones Potential, 1/r**12 - 1/r**6
+</a:documentation>
+      <choice>
+        <value>BIP</value>
+        <value>EXP</value>
+        <value>GCM</value>
+        <value>LJ</value>
+      </choice>
+    </element>
+  </define>
+  <define name="simulation_parameters">
+    <element name="rho">
+      <a:documentation>Fluid density (unitless).</a:documentation>
+      <data type="double"/>
+    </element>
+    <element name="T">
+      <a:documentation>Fluid temperature (unitless).</a:documentation>
+      <data type="double"/>
+    </element>
+    <element name="n">
+      <a:documentation>Pair potential strength.
+Normal values are between 6 - 12.</a:documentation>
+      <data type="double"/>
+    </element>
+    <element name="A">
+      <a:documentation>Softening parameter. Only applicable for BIP and EXP pair potentials.
+Normal values usually range between 0 - 2.0. With 0 corresponding to
+no-smoothening and 2.0 to a very smoothed fluid.</a:documentation>
+      <data type="double"/>
+    </element>
+  </define>
+  <define name="simulation_single">
+    <ref name="simulation_name"/>
+    <ref name="simulation_potentials"/>
+    <ref name="simulation_parameters"/>
+  </define>
+  <define name="simulation_compress">
+    <ref name="simulation_name"/>
+    <ref name="simulation_potentials"/>
+    <element name="final_density">
+      <a:documentation>The density that the compression aims to reach.</a:documentation>
+      <data type="double"/>
+    </element>
+    <element name="density_increment">
+      <a:documentation>The density increment used to increase/decrease the current density
+in order to meed the final density.</a:documentation>
+      <data type="double"/>
+    </element>
+    <ref name="simulation_parameters"/>
+  </define>
+  <define name="simulation">
+    <choice>
+      <element name="simulation_input">
+        <a:documentation>Input variables for a single MD::simulation.</a:documentation>
+        <attribute name="name">
+          <value>NormalRun</value>
+        </attribute>
+        <ref name="simulation_single"/>
+      </element>
+      <element name="simulation_input">
+        <a:documentation>Input variables for a compression/phase transition run.</a:documentation>
+        <attribute name="name">
+          <value>CompressionRun</value>
+        </attribute>
+        <ref name="simulation_compress"/>
+      </element>
+      <element name="simulation_input">
+        <a:documentation>Run a forward series of compressions/expansions followed by 
+expansions/compressions in the opposite direction of the phase diagram.</a:documentation>
+        <attribute name="name">
+          <value>ReverseCompressionRun</value>
+        </attribute>
+        <ref name="simulation_compress"/>
+      </element>
+    </choice>
+  </define>
+  <start>
+    <element name="input_variables">
+      <a:documentation>Input variables for a molecular dynamics simulation</a:documentation>
+      <ref name="constructor_types"/>
+      <ref name="simulation"/>
+      <element name="enable_testing">
+        <a:documentation>Enable for unit testing.</a:documentation>
+        <choice>
+          <value>true</value>
+          <value>false</value>
+        </choice>
+      </element>
+    </element>
+  </start>
+</grammar>

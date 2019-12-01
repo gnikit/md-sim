@@ -1,6 +1,7 @@
 #include "MD.h"
 // TODO: create internal structures for quantities such as velocities, rs, fs,
 // TODO: make docstrings consistent
+// TODO: remove all constructor-defaulted options to another method
 
 // FileIO has to be loaded after the math libraries
 #include "FileIO.h"  // FileIO class
@@ -8,9 +9,8 @@
 #pragma warning(disable : 4996)  //_CRT_SECURE_NO_WARNINGS
 
 MD::MD(size_t step_number, size_t particles_per_axis, std::string lattice,
-       std::string out_directory = ".", bool is_compressing = false,
-       bool track_particles = false, size_t rdf_bins = 500,
-       size_t collect_rdf_after = 0) {
+       std::string out_directory, bool is_compressing, bool track_particles,
+       size_t rdf_bins, size_t collect_rdf_after) {
   /*
    * This constructor allows for increased control over the internal
    * parameters of the fluid.
@@ -118,9 +118,9 @@ MD::MD(size_t step_number, size_t particles_per_axis, std::string lattice,
 
 // Delegating constructors with reduced number of arguments
 // https://en.wikipedia.org/wiki/C++11#Object_construction_improvement
-// Old constructor format
-MD::MD(std::string out_directory, size_t step_number)
-    : MD(step_number, 10, "SC", out_directory, false, false, 500, 0) {}
+// Convinient constructor to use for simple cases
+MD::MD(size_t step_number, size_t particles_per_axis, std::string lattice)
+    : MD(step_number, particles_per_axis, lattice, ".", false, false, 500, 0) {}
 
 MD::~MD() {
   // Destroy the vectors allocated on the heap
@@ -834,3 +834,9 @@ size_t MD::get_particle_number() { return __N; }
 size_t MD::get_rdf_accuracy() { return __nhist; }
 
 void MD::enable_testing(bool is_testing) { fixed_seed = is_testing; }
+
+size_t MD::get_rdf_collect_after() { return __rdf_wait; }
+
+void MD::set_rdf_collect_after(size_t rdf_collect_after) {
+  __rdf_wait = rdf_collect_after;
+}

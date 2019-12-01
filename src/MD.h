@@ -107,7 +107,7 @@ class MD {
  public:
   bool fixed_seed;
 
-  MD(std::string out_directory, size_t step_number);
+  MD(size_t step_number, size_t particles_per_axis, std::string lattice);
   MD(size_t step_number, size_t particles_per_axis, std::string lattice,
      std::string out_directory, bool is_compressing, bool track_particles,
      size_t rdf_bins, size_t collect_rdf_after);
@@ -170,4 +170,8 @@ class MD {
   size_t get_rdf_accuracy();
 
   void enable_testing(bool is_testing);
+
+  size_t get_rdf_collect_after();
+
+  void set_rdf_collect_after(size_t rdf_collect_after);
 };

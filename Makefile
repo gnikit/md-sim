@@ -49,7 +49,7 @@ python:
 
 test: libmd
 	@echo "Running regression test"
-	@cd tests; python run_tests.py
+	@cd tests; python3 run_tests.py
 
 examples: all
 	# Do not run the database files

@@ -18,7 +18,15 @@ libmd:
 	@echo "MAKE MD src"
 	@cd src && $(MAKE)
 
-debug: toolkit
+debug_libmd:
+	@echo "DEBUG BUILD"
+	@mkdir -p include
+	@echo "MAKE lib"
+	@cd lib && $(MAKE)
+	@echo "MAKE MD src"
+	@cd src && $(MAKE) debug
+
+debug:
 	@echo "DEBUG BUILD"
 	@echo "MAKE lib"
 	@cd lib && $(MAKE)
@@ -39,7 +47,7 @@ python:
 	@echo "MAKE python modules"
 	@cd tools/md-tools && pip3 install --user --upgrade -e .
 
-test:
+test: libmd
 	@echo "Running regression test"
 	@cd tests; python run_tests.py
 

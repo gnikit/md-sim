@@ -35,4 +35,5 @@ script:
   - g++ -v
   - make toolkit
   - make
+  - make examples
   - make test

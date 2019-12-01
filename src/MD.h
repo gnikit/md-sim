@@ -63,7 +63,7 @@ class MD {
   size_t __Nx, __Ny, __Nz, __N;  // Particles in x, y, z and total
   size_t __step_idx, __steps;    // step index, maximum steps
   size_t __nhist, __rdf_wait;    // histogram bin number, equilibrium period
-  size_t __lattice;              // Parameter defining the initial lattice
+  std::string __lattice;         // Parameter defining the initial lattice
 
   double __dt;             // time step
   double __KE = 0.0;       // Kinetic Energy
@@ -101,15 +101,16 @@ class MD {
   double __a_cst;         // generic softening parameter
   std::string __pp_type;  // pair potential type
 
+  /* Visualisation flag */
+  bool __visualise;
+
  public:
-  bool visualise;
   bool fixed_seed;
-  
-  MD(std::string &DIRECTORY, size_t run_number);
-  MD(std::string &DIRECTORY, size_t run_number, bool COMPRESS_FLAG);
-  MD(std::string &DIRECTORY, size_t run_number, bool COMPRESS_FLAG,
-     size_t rdf_bins, size_t particles_per_axis, std::string LATTICE,
-     bool track_particles, size_t collect_rdf_after);
+
+  MD(size_t step_number, size_t particles_per_axis, std::string lattice);
+  MD(size_t step_number, size_t particles_per_axis, std::string lattice,
+     std::string out_directory, bool is_compressing, bool track_particles,
+     size_t rdf_bins, size_t collect_rdf_after);
 
   ~MD();
 
@@ -146,9 +147,31 @@ class MD {
   void structure_factor(std::vector<double> &rx, std::vector<double> &ry,
                         std::vector<double> &rz);
 
-  /* Helper Functions */
-  std::string get_dir();
-  std::string get_simulation_name();
   std::string set_simulation_params(double &rho, double &T, double &power,
                                     double &a, std::string &pp_type);
+  /* Helper Functions */
+ public:
+  std::string get_dir();
+
+  std::string get_simulation_name();
+
+  std::string get_lattice_structure();
+
+  bool get_compression_flag();
+
+  void set_compression_flag(bool is_compressing);
+
+  bool get_visualisation_flag();
+
+  void set_visualisation_flag(bool is_visualising);
+
+  size_t get_particle_number();
+
+  size_t get_rdf_accuracy();
+
+  void enable_testing(bool is_testing);
+
+  size_t get_rdf_collect_after();
+
+  void set_rdf_collect_after(size_t rdf_collect_after);
 };

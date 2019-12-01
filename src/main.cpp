@@ -15,15 +15,15 @@
 #endif
 
 struct constructor_type {
-  std::string dir = "";
   unsigned int steps = 5000;
-  bool comp = false;
-  unsigned int rdf_bins = 500;
   /* particles per axis */
   unsigned int ppa = 10;
   std::string lattice = "SC";
+  std::string dir = ".";
+  bool comp = false;
   bool track_particles = false;
-  unsigned int rdf_wait = 2000;
+  unsigned int rdf_bins = 500;
+  unsigned int rdf_wait = 0;
 };
 
 struct simulation_type {
@@ -85,12 +85,12 @@ int main(int argc, char const* argv[]) {
   /* Run a version of the simulation */
   switch (get_switch(constructor, sim)) {
     case 0: {
-      MD run(constructor.dir, constructor.steps, constructor.comp,
-             constructor.rdf_bins, constructor.ppa, constructor.lattice,
-             constructor.track_particles, constructor.rdf_wait);
+      MD run(constructor.steps, constructor.ppa, constructor.lattice,
+             constructor.dir, constructor.comp, constructor.track_particles,
+             constructor.rdf_bins, constructor.rdf_wait);
 
       /* If we are testing this changes to true and fixes the random seed */
-      run.fixed_seed = test.is_testing;
+      run.enable_testing(test.is_testing);
 
       run.simulation(sim.simulation_name, sim.density, sim.temperature,
                      sim.power, sim.a_cst, sim.pp_type);
@@ -98,13 +98,13 @@ int main(int argc, char const* argv[]) {
     }
 
     case 1: {
-      phase_transition run(constructor.dir, constructor.steps, constructor.comp,
-                           constructor.rdf_bins, constructor.ppa,
-                           constructor.lattice, constructor.track_particles,
-                           constructor.rdf_wait);
+      phase_transition run(constructor.steps, constructor.ppa,
+                           constructor.lattice, constructor.dir,
+                           constructor.comp, constructor.track_particles,
+                           constructor.rdf_bins, constructor.rdf_wait);
 
       /* If we are testing this changes to true and fixes the random seed */
-      run.fixed_seed = test.is_testing;
+      run.enable_testing(test.is_testing);
 
       run.crystallisation(sim.simulation_name, sim.density, sim.density_final,
                           sim.density_inc, sim.temperature, sim.power,
@@ -113,13 +113,13 @@ int main(int argc, char const* argv[]) {
     }
 
     case 2: {
-      phase_transition run(constructor.dir, constructor.steps, constructor.comp,
-                           constructor.rdf_bins, constructor.ppa,
-                           constructor.lattice, constructor.track_particles,
-                           constructor.rdf_wait);
+      phase_transition run(constructor.steps, constructor.ppa,
+                           constructor.lattice, constructor.dir,
+                           constructor.comp, constructor.track_particles,
+                           constructor.rdf_bins, constructor.rdf_wait);
 
       /* If we are testing this changes to true and fixes the random seed */
-      run.fixed_seed = test.is_testing;
+      run.enable_testing(test.is_testing);
 
       run.run_backwards(sim.simulation_name, sim.density, sim.density_final,
                         sim.density_inc, sim.temperature, sim.power, sim.a_cst,
@@ -149,20 +149,21 @@ int load_constructor_options(XMLNode* root, constructor_type& constructor) {
   /* Create a map to store the data from the XML file */
   std::map<std::string, XMLElement*> vars;
 
-  vars["xml_dir"] = input->FirstChildElement("output_dir");
   vars["xml_steps"] = input->FirstChildElement("steps");
-  vars["xml_comp"] = input->FirstChildElement("compression");
-  vars["xml_rdf_bins"] = input->FirstChildElement("rdf_bins");
   vars["xml_particles_per_axis"] =
       input->FirstChildElement("particles_per_axis");
   vars["xml_lattice"] = input->FirstChildElement("lattice");
-  vars["xml_track_particles"] = input->FirstChildElement("track_particles");
-  vars["xml_rdf_wait"] = input->FirstChildElement("rdf_equilibrate");
+  /* Optional parameters start with xml_opt_ when parsed */
+  vars["xml_opt_dir"] = input->FirstChildElement("output_dir");
+  vars["xml_opt_comp"] = input->FirstChildElement("compression");
+  vars["xml_opt_track_particles"] = input->FirstChildElement("track_particles");
+  vars["xml_opt_rdf_bins"] = input->FirstChildElement("rdf_bins");
+  vars["xml_opt_rdf_wait"] = input->FirstChildElement("rdf_equilibrate");
 
-  /* Check if all results exist and are readbale */
+  /* Check if all the mandatory results exist and are readbale */
   for (auto const& i : vars) {
     try {
-      if (i.second == nullptr)
+      if (i.second == nullptr && i.first.find("xml_opt_") == std::string::npos)
         throw "XML node " + i.first + " missing from the input file.";
 
     } catch (const char* msg) {
@@ -174,29 +175,41 @@ int load_constructor_options(XMLNode* root, constructor_type& constructor) {
   /* Cast XML input to data types with error checking */
   /* The error variable will return an integer with the XML node erroring */
   XMLError error;
-  /* Parse output directory */
-  constructor.dir = vars["xml_dir"]->GetText();
   /* Parse number of steps */
   error = vars["xml_steps"]->QueryUnsignedText(&constructor.steps);
-  XMLCheckResult(error);
-  /* Parse compression flag */
-  error = vars["xml_comp"]->QueryBoolText(&constructor.comp);
-  XMLCheckResult(error);
-  /* Parse RDF accuracy */
-  error = vars["xml_rdf_bins"]->QueryUnsignedText(&constructor.rdf_bins);
   XMLCheckResult(error);
   /* Parse particles per axis */
   error = vars["xml_particles_per_axis"]->QueryUnsignedText(&constructor.ppa);
   XMLCheckResult(error);
   /* Parse form of lattice */
   constructor.lattice = vars["xml_lattice"]->GetText();
+
+  /* Do not parse the empty optional arguments */
+  /* Parse output directory */
+  if (vars["xml_opt_dir"] != nullptr) {
+    constructor.dir = vars["xml_opt_dir"]->GetText();
+  }
+  /* Parse compression flag */
+  if (vars["xml_opt_comp"] != nullptr) {
+    error = vars["xml_opt_comp"]->QueryBoolText(&constructor.comp);
+    XMLCheckResult(error);
+  }
   /* Parse particle tracking flag */
-  error =
-      vars["xml_track_particles"]->QueryBoolText(&constructor.track_particles);
-  XMLCheckResult(error);
+  if (vars["xml_opt_track_particles"] != nullptr) {
+    error = vars["xml_opt_track_particles"]->QueryBoolText(
+        &constructor.track_particles);
+    XMLCheckResult(error);
+  }
+  /* Parse RDF accuracy */
+  if (vars["xml_opt_rdf_bins"] != nullptr) {
+    error = vars["xml_opt_rdf_bins"]->QueryUnsignedText(&constructor.rdf_bins);
+    XMLCheckResult(error);
+  }
   /* Parse RDF equilibration steps */
-  error = vars["xml_rdf_wait"]->QueryUnsignedText(&constructor.rdf_wait);
-  XMLCheckResult(error);
+  if (vars["xml_opt_rdf_wait"] != nullptr) {
+    error = vars["xml_opt_rdf_wait"]->QueryUnsignedText(&constructor.rdf_wait);
+    XMLCheckResult(error);
+  }
 
   return 0;
 }

@@ -18,7 +18,15 @@ libmd:
 	@echo "MAKE MD src"
 	@cd src && $(MAKE)
 
-debug: toolkit
+debug_libmd:
+	@echo "DEBUG BUILD"
+	@mkdir -p include
+	@echo "MAKE lib"
+	@cd lib && $(MAKE)
+	@echo "MAKE MD src"
+	@cd src && $(MAKE) debug
+
+debug:
 	@echo "DEBUG BUILD"
 	@echo "MAKE lib"
 	@cd lib && $(MAKE)
@@ -39,11 +47,11 @@ python:
 	@echo "MAKE python modules"
 	@cd tools/md-tools && pip3 install --user --upgrade -e .
 
-test:
+test: libmd
 	@echo "Running regression test"
-	@cd tests; python run_tests.py
+	@cd tests; python3 run_tests.py
 
-examples: all
+test_examples: libmd
 	# Do not run the database files
 	$(RM) examples/examplebin/*database*
 	@cd examples/examplebin; for i in ./*; do echo $$i && ./$$i >> $$i.log; done

@@ -4,8 +4,7 @@
 #include "MD.h"
 #include "helper_functions.h"
 
-#define STEPS 35000  // 10000
-#define RDF_EQ 5000
+#define STEPS 10000
 
 std::string dir_linux = ".";
 
@@ -24,8 +23,8 @@ void MakeDataBase() {
   size_t num = 1;
   std::vector<size_t> n = {8, 10, 12};
   std::vector<double> rho = {0.20, 0.3, 0.5, 1.0};
-  /* Test temperature smaller than 1 line 0.75 */
   std::vector<double> T = {0.5, 1.0, 1.5, 2.0};
+
   std::vector<double> A1 = helper_functions::linspace(0.0, 1.0, 5);
   std::vector<double> A2 = helper_functions::linspace(1.25, 2.25, 5);
   std::vector<double> A3 = helper_functions::linspace(2.50, 4.50, 5);
@@ -37,14 +36,10 @@ void MakeDataBase() {
         for (size_t j = 0; j < A1.size(); ++j) {
           std::cout << " run num: " << num << std::endl;
 
-          MD* run1 =
-              new MD(dir_linux, STEPS, false, 500, 10, "SC", false, RDF_EQ);
-          MD* run2 =
-              new MD(dir_linux, STEPS, false, 500, 10, "SC", false, RDF_EQ);
-          MD* run3 =
-              new MD(dir_linux, STEPS, false, 500, 10, "SC", false, RDF_EQ);
-          MD* run4 =
-              new MD(dir_linux, STEPS, false, 500, 10, "SC", false, RDF_EQ);
+          MD* run1 = new MD(STEPS, 10, "SC");
+          MD* run2 = new MD(STEPS, 10, "SC");
+          MD* run3 = new MD(STEPS, 10, "SC");
+          MD* run4 = new MD(STEPS, 10, "SC");
 
           // ? set temperature manually in default machine
           std::thread th1(&MD::simulation, run1, "", rho[d], T[t], n[i], A1[j],

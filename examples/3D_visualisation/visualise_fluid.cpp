@@ -10,8 +10,8 @@
  */
 
 int main() {
-  std::string dir = ".";
   size_t steps = 1000;
-  MD run(dir, steps, false, 100, 5, "SC", true, 0);
+  MD run(steps, 5, "SC");
+  run.set_visualisation_flag(true);
   run.simulation("3D_view_", 0.5, 0.5, 8, 0.5, "BIP");
 }

@@ -2,15 +2,12 @@
 #include <string>
 #include <thread>
 #include "MD.h"
-#include "isomorph.h"
 #include "helper_functions.h"
+#include "isomorph.h"
 
 #define STEPS 5000
 #define PARTICLES 1000
 typedef std::vector<double> vec1d;
-
-std::string dir_linux = ".";
-
 
 int main() {
   /* Potential power strength */
@@ -36,7 +33,7 @@ int main() {
    * Simulates the fluid along the line
    */
   for (size_t i = 0; i < T_iso.size(); ++i) {
-    MD run(dir_linux, STEPS, false, 500, 8, "SC", false, 2000);
+    MD run(STEPS, 8, "SC");
     run.simulation("isomorph_", rho_iso[i], T_iso[i], n, A_iso[i], "BIP");
   }
 }

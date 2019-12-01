@@ -5,7 +5,6 @@
 #include "phase_transition.h"
 
 int main() {
-  std::string dir = "./";  // Places files in the execution dir
   size_t compress_steps = 5000;
 
   /*
@@ -13,7 +12,9 @@ int main() {
    * density iterations by equating the compression timestep to 1
    *
    */
-  phase_transition run(dir, compress_steps, true, 500, 7, "FCC", false, 500);
+  phase_transition run(compress_steps, 7, "FCC");
+  run.set_compression_flag(true);
+  run.set_rdf_collect_after(500);
 
   run.run_backwards("compress_", 0.05, 0.15, 0.05, 0.003, 0, 0, "GCM");
 }

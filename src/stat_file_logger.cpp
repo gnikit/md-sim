@@ -65,7 +65,7 @@ std::string stat_file::file_naming(std::string prefix, size_t &STEPS, size_t &N,
    * @param A_cst: Softening parameter constant
    *
    * @return: string structured as follows
-   *          INPUT_DIR/prefix_step_#_particles_#_rho_#_T_#_n_#_A_#.txt
+   *          INPUT_DIR/prefix_step_#_particles_#_rho_#_T_#_n_#_A_#.log
    */
 
   // Individual streams handling double to string conversions
@@ -96,7 +96,7 @@ std::string stat_file::file_naming(std::string prefix, size_t &STEPS, size_t &N,
              _n_to_str + _A_to_str;
 
   // Explicit defitions
-  std::string _FILE_EXT = ".txt";
+  std::string _FILE_EXT = ".log";
 
   // Path addition
   return prefix + _FILE_ID + _FILE_EXT;

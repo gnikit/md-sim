@@ -21,21 +21,8 @@ constructor_types =
     ## Constructor initialisation for MD or phase_transition objects.
     element constructor {
 
-        ## Output directory for the files to be produced during a simulation.
-        element output_dir { xsd:string },
-
         ## Number of iteration steps the MD algorithm should run for.
         element steps { xsd:integer },
-
-        ## Set the flag for incremental resizing of the simulation box.
-        ## Set to true for phase transition studies else set to false.
-        element compression { "true" | "false" },
-
-        ## Accuracy of the Radial Distribution Function (RDF).
-        ## A large number of bins will result into a very accurate RDF,
-        ## however if the simulation is short (small number of steps) the
-        ## results will be dominated by statistical noise.
-        element rdf_bins { xsd:integer },
 
         ## Number of particles per axis (x, y, z).
         ## This in combination with the lattice formation will yield
@@ -57,16 +44,29 @@ constructor_types =
         ## BCC: Body Centred Cubic
         element lattice { "SC" | "FCC" | "BCC" },
 
+        ## Output directory for the files to be produced during a simulation.
+        element output_dir { xsd:string }?,
+
+        ## Set the flag for incremental resizing of the simulation box.
+        ## Set to true for phase transition studies else set to false.
+        element compression { "true" | "false" }?,
+
+        ## Accuracy of the Radial Distribution Function (RDF).
+        ## A large number of bins will result into a very accurate RDF,
+        ## however if the simulation is short (small number of steps) the
+        ## results will be dominated by statistical noise.
+        element rdf_bins { xsd:integer }?,
+
         ## If enabled will save in ASCII format the positions of all the
         ## particles for the entire simulation.
         ## The datafiles can then be viewed with the python tools.
         ## NOTE: For large simulations this will be slow.
-        element track_particles { "true" | "false" },
+        element track_particles { "true" | "false" }?,
 
         ## An equilibration period for the RDF in time step units.
         ## The RDF will begin to be collected rdf_equilibrate steps
         ## from the start of the simulation.
-        element rdf_equilibrate { xsd:integer }
+        element rdf_equilibrate { xsd:integer }?
     }
 )
 

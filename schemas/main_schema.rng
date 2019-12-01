@@ -26,27 +26,8 @@
     -->
     <element name="constructor">
       <a:documentation>Constructor initialisation for MD or phase_transition objects.</a:documentation>
-      <element name="output_dir">
-        <a:documentation>Output directory for the files to be produced during a simulation.</a:documentation>
-        <data type="string"/>
-      </element>
       <element name="steps">
         <a:documentation>Number of iteration steps the MD algorithm should run for.</a:documentation>
-        <data type="integer"/>
-      </element>
-      <element name="compression">
-        <a:documentation>Set the flag for incremental resizing of the simulation box.
-Set to true for phase transition studies else set to false.</a:documentation>
-        <choice>
-          <value>true</value>
-          <value>false</value>
-        </choice>
-      </element>
-      <element name="rdf_bins">
-        <a:documentation>Accuracy of the Radial Distribution Function (RDF).
-A large number of bins will result into a very accurate RDF,
-however if the simulation is short (small number of steps) the
-results will be dominated by statistical noise.</a:documentation>
         <data type="integer"/>
       </element>
       <element name="particles_per_axis">
@@ -75,22 +56,51 @@ BCC: Body Centred Cubic</a:documentation>
           <value>BCC</value>
         </choice>
       </element>
-      <element name="track_particles">
-        <a:documentation>If enabled will save in ASCII format the positions of all the
+      <optional>
+        <element name="output_dir">
+          <a:documentation>Output directory for the files to be produced during a simulation.</a:documentation>
+          <data type="string"/>
+        </element>
+      </optional>
+      <optional>
+        <element name="compression">
+          <a:documentation>Set the flag for incremental resizing of the simulation box.
+Set to true for phase transition studies else set to false.</a:documentation>
+          <choice>
+            <value>true</value>
+            <value>false</value>
+          </choice>
+        </element>
+      </optional>
+      <optional>
+        <element name="rdf_bins">
+          <a:documentation>Accuracy of the Radial Distribution Function (RDF).
+A large number of bins will result into a very accurate RDF,
+however if the simulation is short (small number of steps) the
+results will be dominated by statistical noise.</a:documentation>
+          <data type="integer"/>
+        </element>
+      </optional>
+      <optional>
+        <element name="track_particles">
+          <a:documentation>If enabled will save in ASCII format the positions of all the
 particles for the entire simulation.
 The datafiles can then be viewed with the python tools.
 NOTE: For large simulations this will be slow.</a:documentation>
-        <choice>
-          <value>true</value>
-          <value>false</value>
-        </choice>
-      </element>
-      <element name="rdf_equilibrate">
-        <a:documentation>An equilibration period for the RDF in time step units.
+          <choice>
+            <value>true</value>
+            <value>false</value>
+          </choice>
+        </element>
+      </optional>
+      <optional>
+        <element name="rdf_equilibrate">
+          <a:documentation>An equilibration period for the RDF in time step units.
 The RDF will begin to be collected rdf_equilibrate steps
 from the start of the simulation.</a:documentation>
-        <data type="integer"/>
-      </element>
+          <data type="integer"/>
+        </element>
+      </optional>
     </element>
   </define>
   <define name="simulation_name">

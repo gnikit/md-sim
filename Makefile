@@ -51,7 +51,7 @@ test: libmd
 	@echo "Running regression test"
 	@cd tests; python3 run_tests.py
 
-examples: all
+test_examples: libmd
 	# Do not run the database files
 	$(RM) examples/examplebin/*database*
 	@cd examples/examplebin; for i in ./*; do echo $$i && ./$$i >> $$i.log; done

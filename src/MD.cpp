@@ -370,13 +370,15 @@ void MD::radial_distribution_function(double &rho, double &cut_off,
 
   double R = 0;
   double norm = 1;
+  // Exclude the self particle interaction from the density
   double cor_rho = rho * (particles - 1) / particles;
   double dr = cut_off / bins;
 
   logger.RDF << "# particles (N): " << particles << " steps: " << __steps
              << " rho: " << rho << " bins: " << bins
              << " cut_off (rg): " << cut_off << " dr: " << dr << std::endl;
-  logger.RDF << "# Unormalised" << '\t' << "Normalised" << std::endl;
+  logger.RDF << "# Radius (r)" << '\t' << "Normalised" << '\t' << "Unormalised"
+             << std::endl;
 
   for (size_t i = 1; i < bins; ++i) {
     R = cut_off * i / bins;
@@ -386,7 +388,7 @@ void MD::radial_distribution_function(double &rho, double &cut_off,
     norm = cor_rho * (2.0 / 3.0 * PI * particles * (__steps - __rdf_wait) *
                       (pow((R + (dr / 2.0)), 3) - pow((R - (dr / 2.0)), 3)));
 
-    logger.RDF << gr[i] << '\t' << gr[i] / norm << std::endl;
+    logger.RDF << R << '\t' << gr[i] / norm << '\t' << gr[i] << std::endl;
   }
 }
 
@@ -513,9 +515,9 @@ void MD::simulation(std::string simulation_name, double DENSITY,
   __L = pow((__N / __rho), 1.0 / 3.0);
   double Vol = __N / __rho;
 
-  // cut_off redefinition
+  // cut_off definition
   // NOTE: Large cut offs increase the runtime exponentially
-  __cut_off = 3.0;  // TODO: return as argument from BIP or add calibration func
+  __cut_off = __L / 3.0;  // TODO: return as arg from pp or add calibration func
   // if cut-off is too large rescale it
   if (__cut_off > __L / 2.0) {
     std::cerr << "Warning: cutoff was too large!\n"

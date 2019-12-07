@@ -20,7 +20,7 @@ bip_database: *.o $(LIB)/libmd.a
 	$(CXX) -c $(CXXFLAGS) -I$(SRC) $<
 
 clean: clean_keep_data
-	$(RM) *.dat *.txt
+	$(RM) *.dat *.txt *.log
 
 clean_keep_data:
 	$(RM) bip_database *.o

@@ -21,7 +21,7 @@ gcm_compression: gcm_compression.o $(LIB)/libmd.a
 	$(CXX) -c $(CXXFLAGS) -I$(SRC) $<
 
 clean: clean_keep_data
-	$(RM) *.o *.dat *.txt 
+	$(RM) *.o *.dat *.txt *.log
 
 clean_keep_data:
 	$(RM) *.o gcm_compression

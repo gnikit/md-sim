@@ -515,9 +515,9 @@ void MD::simulation(std::string simulation_name, double DENSITY,
   __L = pow((__N / __rho), 1.0 / 3.0);
   double Vol = __N / __rho;
 
-  // cut_off redefinition
+  // cut_off definition
   // NOTE: Large cut offs increase the runtime exponentially
-  __cut_off = 3.0;  // TODO: return as argument from BIP or add calibration func
+  __cut_off = __L / 3.0;  // TODO: return as arg from pp or add calibration func
   // if cut-off is too large rescale it
   if (__cut_off > __L / 2.0) {
     std::cerr << "Warning: cutoff was too large!\n"

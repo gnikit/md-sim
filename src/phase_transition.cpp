@@ -16,6 +16,9 @@ void phase_transition::crystallisation(std::string SIMULATION_NAME,
    * of particles in the box.
    *
    */
+
+  set_compression_flag(true);
+
   // todo: many features do not work at this moment like particle tracking
   // todo: the POS << time_stamp stream will be a mess, same with RDF
   double current_rho = DENSITY;

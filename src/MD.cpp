@@ -8,9 +8,7 @@
 
 #pragma warning(disable : 4996)  //_CRT_SECURE_NO_WARNINGS
 
-MD::MD(size_t step_number, size_t particles_per_axis, std::string lattice,
-       std::string out_directory, bool is_compressing, bool track_particles,
-       size_t rdf_bins, size_t collect_rdf_after) {
+MD::MD(size_t step_number, size_t particles_per_axis, std::string lattice) {
   /*
    * This constructor allows for increased control over the internal
    * parameters of the fluid.
@@ -39,45 +37,18 @@ MD::MD(size_t step_number, size_t particles_per_axis, std::string lattice,
     __N = __Nx * __Ny * __Nz;
   }
 
-  try {
-    __dir = out_directory;
-    if (!fs::exists(__dir)) {
-      throw
-          "input out_directory in MD constructor does not exist.\n"
-          "Use a valid directory for output files to be saved";
-    }
-
-  } catch (const char *msg) {
-    std::cerr << "Error: " << msg << std::endl;
-    exit(1);
-  }
+  __dir = ".";
 
   // If compress is true, then STEPS = steps_per_compression
-  __compress = is_compressing;
+  __compress = false;
 
   // Save all the positions for the fluid
-  __visualise = track_particles;
+  __visualise = false;
 
   // Accuracy of RDF
-  __nhist = rdf_bins;
+  __nhist = 500;
 
-  // Ensuring the number of steps is greater than the rdf equilibration period
-  try {
-    /* The number of iterations the data collection of RDF is postponed
-       in order to allow the fluid to lose its internal cubic lattice */
-    __rdf_wait = collect_rdf_after;
-
-    /* Substraction of size_ts if negative results into logic errors
-       hence the use of an int temp; */
-    int temp = step_number - collect_rdf_after;
-    if (temp < 0) {
-      throw "collect_rdf_after is greater than the step_number";
-    }
-  } catch (const char *msg) {
-    std::cerr << "Warning: " << msg << std::endl;
-    std::cerr << "rdf_wait is set to 0" << std::endl;
-    __rdf_wait = 0;
-  }
+  __rdf_wait = 0;
 
   // For efficiency, memory in the containers is reserved before use
   /* Positions */
@@ -119,14 +90,72 @@ MD::MD(size_t step_number, size_t particles_per_axis, std::string lattice,
 // Delegating constructors with reduced number of arguments
 // https://en.wikipedia.org/wiki/C++11#Object_construction_improvement
 // Convinient constructor to use for simple cases
-MD::MD(size_t step_number, size_t particles_per_axis, std::string lattice)
-    : MD(step_number, particles_per_axis, lattice, ".", false, false, 500, 0) {}
 
 MD::~MD() {
   // Destroy the vectors allocated on the heap
   delete pos_x;
   delete pos_y;
   delete pos_z;
+}
+
+void MD::load_options(std::string out_directory = ".",
+                      bool is_compressing = false, bool track_particles = false,
+                      size_t rdf_bins = 500, size_t collect_rdf_after = 500) {
+  /*
+   * Load secondary options for a simulation run that allow for
+   * better fine tuning of the model.
+   *
+   * @param out_directory: output directory of log files.
+   * @param is_compressing: sets the commpression flag.
+   * @param track_particles: saves the x, y, z positions of particles to
+   *                         visualise them with python.
+   * @param rdf_bins: the accuracy of the RDF.
+   * @param collect_rdf_after: delay the collection of the RDF data to ensure
+   *                           melting of the fluid.
+   */
+
+  // Test whether the input directory exists
+  if (!out_directory.empty()) {
+    try {
+      __dir = out_directory;
+      if (!fs::exists(__dir)) {
+        throw
+          "input out_directory in MD constructor does not exist.\n"
+          "Use a valid directory for output files to be saved";
+      }
+
+    } catch (const char *msg) {
+      std::cerr << "Error: " << msg << std::endl;
+      exit(1);
+    }
+  }
+
+  // If compress is true, then STEPS = steps_per_compression
+  __compress = is_compressing;
+
+  // Save all the positions for the fluid
+  __visualise = track_particles;
+
+  // Accuracy of RDF
+  __nhist = rdf_bins;
+
+  // Ensuring the number of steps is greater than the rdf equilibration period
+  try {
+    /* The number of iterations the data collection of RDF is postponed
+       in order to allow the fluid to lose its internal cubic lattice */
+    __rdf_wait = collect_rdf_after;
+
+    /* Substraction of size_ts if negative results into logic errors
+       hence the use of an int temp; */
+    int temp = __steps - collect_rdf_after;
+    if (temp < 0) {
+      throw "collect_rdf_after is greater than the step_number";
+    }
+  } catch (const char *msg) {
+    std::cerr << "Warning: " << msg << std::endl;
+    std::cerr << "rdf_wait is set to 0" << std::endl;
+    __rdf_wait = 0;
+  }
 }
 
 // Methods for MD Analysis
@@ -188,6 +217,14 @@ double MD::initialise(std::vector<double> &x, std::vector<double> &y,
       }
     }
 
+    else if (__lattice == "RANDOM") {
+      x.resize(__N);
+      y.resize(__N);
+      z.resize(__N);
+      // todo: add schema option to set variance
+      mb_distribution(x, y, z, TEMPERATURE);
+    }
+
     // Simple Cubic lattice
     else {
       for (size_t i = 0; i < __Nx; ++i) {
@@ -202,7 +239,7 @@ double MD::initialise(std::vector<double> &x, std::vector<double> &y,
     }
 
     // Generates Maxwell-Boltzmann distribution
-    mb_distribution(TEMPERATURE);
+    mb_distribution(vx, vy, vz, TEMPERATURE);
   }
 
   // Calculate the average velocities
@@ -249,7 +286,8 @@ double MD::initialise(std::vector<double> &x, std::vector<double> &y,
   return KE;
 }
 
-void MD::mb_distribution(double TEMPERATURE) {
+void MD::mb_distribution(std::vector<double> &vx, std::vector<double> &vy,
+                         std::vector<double> &vz, double TEMPERATURE) {
   /*
    * Generates velocities for based on the Maxwell Boltzmann distribution.
    * The MB dist in 3D is effectively the triple product of 3 Normal dist.
@@ -283,6 +321,19 @@ void MD::mb_distribution(double TEMPERATURE) {
     vy.push_back(g_y(generator));
     vz.push_back(g_z(generator));
   }
+}
+
+void MD::set_random_position_variance(double var) {
+  /*
+   * Sets the variance for 3 normal distributions that will in turn
+   * generate random particle positions in space.
+   * To be called before the md_distribution function.
+   * The md_distribution takes the square root of the Temperature hence the
+   * square of the variance is being stored interlay.
+   *
+   * @param var: variance of normal distributions
+   */
+  __var = var * var;
 }
 
 double MD::verlet_algorithm(std::vector<double> &rx, std::vector<double> &ry,
@@ -516,6 +567,7 @@ void MD::simulation(std::string simulation_name, double DENSITY,
   double Vol = __N / __rho;
 
   // cut_off definition
+  // Hard coded into 1/3 of the box length
   // NOTE: Large cut offs increase the runtime exponentially
   __cut_off = __L / 3.0;  // TODO: return as arg from pp or add calibration func
   // if cut-off is too large rescale it

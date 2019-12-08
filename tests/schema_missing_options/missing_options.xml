@@ -5,6 +5,7 @@
     <particles_per_axis>8</particles_per_axis>
     <lattice>SC</lattice>
   </constructor>
+  <options/>
   <simulation_input name="NormalRun">
     <simulation_name>missing_options_</simulation_name>
     <pp>LJ</pp>

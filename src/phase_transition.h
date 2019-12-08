@@ -10,8 +10,6 @@
 #endif
 
 class phase_transition : public MD {
- private:
-  /* data */
  public:
   using MD::MD;
 

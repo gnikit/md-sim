@@ -2,22 +2,26 @@
 # include "spud_base.rnc"
 # TODO: force constructor compression to false when enabling and vice versa
 
+lattice_type =
+(
+    ## Available initial lattice formations:
+    ##
+    ## SC: Simple Cubic
+    ##
+    ## FCC: Face Centred Cubic
+    ##
+    ## BCC: Body Centred Cubic
+    element lattice { ("SC" | "FCC" | "BCC"| "RANDOM")
+        # ## Randomise the positions of the particles in the lattice
+        # ## using a normal distribution.
+        # element random {"true",
+        #     ## The variance of the normal distribution
+        #     element variance {xsd:double} }?
+    }
+)
+
 constructor_types =
 (
-    # # Constructor 1
-    # element constructor {
-
-    #     element output_dir { xsd:string },
-    #     element steps { xsd:integer }
-    # }|
-    # # Constructor 2
-    # element constructor {
-
-    #     element output_dir { xsd:string },
-    #     element steps { xsd:integer },
-    #     element compression { "true" | "false" }
-    # }|
-    # Constructor 3
     ## Constructor initialisation for MD or phase_transition objects.
     element constructor {
 
@@ -35,15 +39,14 @@ constructor_types =
         ## BCC: particles_per_axis **3 *2
         element particles_per_axis { xsd:integer },
 
-        ## Available initial lattice formations:
-        ##
-        ## SC: Simple Cubic
-        ##
-        ## FCC: Face Centred Cubic
-        ##
-        ## BCC: Body Centred Cubic
-        element lattice { "SC" | "FCC" | "BCC" },
+        lattice_type
+    }
+)
 
+options =
+(
+    ## Set a series of options for fine-tunning an MD run
+    element options {
         ## Output directory for the files to be produced during a simulation.
         element output_dir { xsd:string }?,
 
@@ -70,13 +73,13 @@ constructor_types =
     }
 )
 
-simulation_name = 
+simulation_name =
 (
     ## Name of the simulation, to be used as prefix to all output files.
     element simulation_name { xsd:string }
 )
 
-simulation_potentials = 
+simulation_potentials =
 (
     ## Available pair potentials:
     ##
@@ -112,7 +115,7 @@ simulation_parameters =
 
 )
 
-simulation_single = 
+simulation_single =
 (
     simulation_name,
 
@@ -144,16 +147,16 @@ simulation =
 
         attribute name { "NormalRun" },
 
-        simulation_single 
+        simulation_single
     }|
     ## Input variables for a compression/phase transition run.
-    element simulation_input { 
-        
+    element simulation_input {
+
         attribute name { "CompressionRun" },
 
         simulation_compress
     }|
-    ## Run a forward series of compressions/expansions followed by 
+    ## Run a forward series of compressions/expansions followed by
     ## expansions/compressions in the opposite direction of the phase diagram.
     element simulation_input {
 
@@ -169,6 +172,8 @@ start =
     element input_variables {
 
         constructor_types,
+
+        options?,
 
         simulation,
 

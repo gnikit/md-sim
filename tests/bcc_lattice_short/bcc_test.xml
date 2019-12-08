@@ -1,15 +1,17 @@
 <?xml version='1.0' encoding='utf-8'?>
 <input_variables>
   <constructor>
-    <output_dir>.</output_dir>
     <steps>1</steps>
-    <compression>false</compression>
-    <rdf_bins>200</rdf_bins>
     <particles_per_axis>8</particles_per_axis>
     <lattice>BCC</lattice>
+  </constructor>
+  <options>
+    <output_dir>.</output_dir>
+    <compression>false</compression>
+    <rdf_bins>200</rdf_bins>
     <track_particles>false</track_particles>
     <rdf_equilibrate>0</rdf_equilibrate>
-  </constructor>
+  </options>
   <simulation_input name="NormalRun">
     <simulation_name>bcc_test_</simulation_name>
     <pp>BIP</pp>

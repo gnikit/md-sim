@@ -5,25 +5,31 @@
     include "spud_base.rnc"
     TODO: force constructor compression to false when enabling and vice versa
   -->
+  <define name="lattice_type">
+    <element name="lattice">
+      <a:documentation>Available initial lattice formations:
+
+SC: Simple Cubic
+
+FCC: Face Centred Cubic
+
+BCC: Body Centred Cubic</a:documentation>
+      <choice>
+        <value>SC</value>
+        <value>FCC</value>
+        <value>BCC</value>
+        <value>RANDOM</value>
+      </choice>
+      <!--
+        ## Randomise the positions of the particles in the lattice
+        ## using a normal distribution.
+        element random {"true",
+            ## The variance of the normal distribution
+            element variance {xsd:double} }?
+      -->
+    </element>
+  </define>
   <define name="constructor_types">
-    <!--
-      # Constructor 1
-      element constructor {
-    -->
-    <!--
-          element output_dir { xsd:string },
-          element steps { xsd:integer }
-      }|
-      # Constructor 2
-      element constructor {
-    -->
-    <!--
-          element output_dir { xsd:string },
-          element steps { xsd:integer },
-          element compression { "true" | "false" }
-      }|
-      Constructor 3
-    -->
     <element name="constructor">
       <a:documentation>Constructor initialisation for MD or phase_transition objects.</a:documentation>
       <element name="steps">
@@ -42,20 +48,12 @@ FCC: particles_per_axis **3 *4
 BCC: particles_per_axis **3 *2</a:documentation>
         <data type="integer"/>
       </element>
-      <element name="lattice">
-        <a:documentation>Available initial lattice formations:
-
-SC: Simple Cubic
-
-FCC: Face Centred Cubic
-
-BCC: Body Centred Cubic</a:documentation>
-        <choice>
-          <value>SC</value>
-          <value>FCC</value>
-          <value>BCC</value>
-        </choice>
-      </element>
+      <ref name="lattice_type"/>
+    </element>
+  </define>
+  <define name="options">
+    <element name="options">
+      <a:documentation>Set a series of options for fine-tunning an MD run</a:documentation>
       <optional>
         <element name="output_dir">
           <a:documentation>Output directory for the files to be produced during a simulation.</a:documentation>
@@ -186,7 +184,7 @@ in order to meed the final density.</a:documentation>
         <ref name="simulation_compress"/>
       </element>
       <element name="simulation_input">
-        <a:documentation>Run a forward series of compressions/expansions followed by 
+        <a:documentation>Run a forward series of compressions/expansions followed by
 expansions/compressions in the opposite direction of the phase diagram.</a:documentation>
         <attribute name="name">
           <value>ReverseCompressionRun</value>
@@ -199,6 +197,9 @@ expansions/compressions in the opposite direction of the phase diagram.</a:docum
     <element name="input_variables">
       <a:documentation>Input variables for a molecular dynamics simulation</a:documentation>
       <ref name="constructor_types"/>
+      <optional>
+        <ref name="options"/>
+      </optional>
       <ref name="simulation"/>
       <element name="enable_testing">
         <a:documentation>Enable for unit testing.</a:documentation>

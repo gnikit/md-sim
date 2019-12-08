@@ -65,12 +65,13 @@ class MD {
   size_t __nhist, __rdf_wait;    // histogram bin number, equilibrium period
   std::string __lattice;         // Parameter defining the initial lattice
 
-  double __dt;             // time step
-  double __KE = 0.0;       // Kinetic Energy
-  double __T;              // Temperature
-  double __L;              // Length of the box after scaling
-  double __cut_off = 3.0;  // simulation runs only within cutoff
-  double scale_v;          // velocity scaling
+  double __dt;       // time step
+  double __KE;       // Kinetic Energy
+  double __T;        // Temperature
+  double __L;        // Length of the box after scaling
+  double __cut_off;  // simulation runs only within cutoff
+  double __var;      // variance random positions generator
+  double scale_v;    // velocity scaling
 
   /* Visualisation vectors, initialised in constructor */
   std::vector<std::vector<double>> *pos_x;
@@ -78,7 +79,7 @@ class MD {
   std::vector<std::vector<double>> *pos_z;
 
   /* Compression variables */
-  bool __compress = false;
+  bool __compress;
   size_t c_counter = 0;  // counts the number compression that have occurred
 
   /* Radial Distribution variables */
@@ -108,11 +109,12 @@ class MD {
   bool fixed_seed;
 
   MD(size_t step_number, size_t particles_per_axis, std::string lattice);
-  MD(size_t step_number, size_t particles_per_axis, std::string lattice,
-     std::string out_directory, bool is_compressing, bool track_particles,
-     size_t rdf_bins, size_t collect_rdf_after);
 
   ~MD();
+
+  void load_options(std::string out_directory, bool is_compressing,
+                    bool track_particles, size_t rdf_bins,
+                    size_t collect_rdf_after);
 
   void simulation(std::string simulation_name, double DENSITY,
                   double TEMPERATURE, double POWER, double A_CST,
@@ -126,7 +128,8 @@ class MD {
                     std::vector<double> &vy, std::vector<double> &vz,
                     double TEMPERATURE);
 
-  void mb_distribution(double TEMPERATURE);
+  void mb_distribution(std::vector<double> &vx, std::vector<double> &vy,
+                       std::vector<double> &vz, double TEMPERATURE);
 
   double verlet_algorithm(std::vector<double> &rx, std::vector<double> &ry,
                           std::vector<double> &rz, std::vector<double> &vx,
@@ -174,4 +177,6 @@ class MD {
   size_t get_rdf_collect_after();
 
   void set_rdf_collect_after(size_t rdf_collect_after);
+
+  void set_random_position_variance(double var);
 };

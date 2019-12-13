@@ -9,16 +9,6 @@
 #pragma warning(disable : 4996)  //_CRT_SECURE_NO_WARNINGS
 
 MD::MD(size_t step_number, size_t particles_per_axis, std::string lattice) {
-  /*
-   * This constructor allows for increased control over the internal
-   * parameters of the fluid.
-   *
-   * If the compress parameter is true, then the number of steps per simulation
-   * automatically becomes the number of steps per compression.
-   * The true duration of the simulation is the controlled by the initial and
-   * final DENISITIES passed on the get_phases method and with their increment.
-   */
-
   // Assign number of iterations of the MD algorithm
   __steps = step_number;
 
@@ -101,19 +91,6 @@ MD::~MD() {
 void MD::load_options(std::string out_directory = ".",
                       bool is_compressing = false, bool track_particles = false,
                       size_t rdf_bins = 500, size_t collect_rdf_after = 500) {
-  /*
-   * Load secondary options for a simulation run that allow for
-   * better fine tuning of the model.
-   *
-   * @param out_directory: output directory of log files.
-   * @param is_compressing: sets the commpression flag.
-   * @param track_particles: saves the x, y, z positions of particles to
-   *                         visualise them with python.
-   * @param rdf_bins: the accuracy of the RDF.
-   * @param collect_rdf_after: delay the collection of the RDF data to ensure
-   *                           melting of the fluid.
-   */
-
   // Test whether the input directory exists
   if (!out_directory.empty()) {
     try {
@@ -163,19 +140,6 @@ double MD::initialise(std::vector<double> &x, std::vector<double> &y,
                       std::vector<double> &z, std::vector<double> &vx,
                       std::vector<double> &vy, std::vector<double> &vz,
                       double TEMPERATURE) {
-  /*
-   *  Initialises the:
-   *  + Position Arrays
-   *  + Velocity Arrays
-   *  + Conserves/ Scales momentum == 0
-   *  + Temperature
-   *  + Velocity Autocorrelation Function
-   *
-   *  @param &x, &y, &z: X, Y, Z vector points
-   *  @param &vx, &vy, &vz: Vx, Vy, Vz vector points
-   *  @param TEMPERATURE: Thermostat target temperature
-   */
-
   // Initialise position matrix and velocity matrix from Cubic Centred Lattice
   if (!__compress || (__compress && c_counter == 0)) {
     if (__lattice == "FCC") {
@@ -288,16 +252,6 @@ double MD::initialise(std::vector<double> &x, std::vector<double> &y,
 
 void MD::mb_distribution(std::vector<double> &vx, std::vector<double> &vy,
                          std::vector<double> &vz, double TEMPERATURE) {
-  /*
-   * Generates velocities for based on the Maxwell Boltzmann distribution.
-   * The MB dist in 3D is effectively the triple product of 3 Normal dist.
-   *
-   * The method populates the velocity vectors vx, vy, vz.
-   * All the constants are assumed to be 1.
-   *
-   * @ param TEMPERATURE: Temperature of the MB distribution
-   */
-
   double kb = 1.0;
   double m = 1.0;
 
@@ -323,32 +277,12 @@ void MD::mb_distribution(std::vector<double> &vx, std::vector<double> &vy,
   }
 }
 
-void MD::set_random_position_variance(double var) {
-  /*
-   * Sets the variance for 3 normal distributions that will in turn
-   * generate random particle positions in space.
-   * To be called before the md_distribution function.
-   * The md_distribution takes the square root of the Temperature hence the
-   * square of the variance is being stored interlay.
-   *
-   * @param var: variance of normal distributions
-   */
-  __var = var * var;
-}
+void MD::set_random_position_variance(double var) { __var = var * var; }
 
 double MD::verlet_algorithm(std::vector<double> &rx, std::vector<double> &ry,
                             std::vector<double> &rz, std::vector<double> &vx,
                             std::vector<double> &vy, std::vector<double> &vz,
                             bool sample_msd = true) {
-  /*
-   *  An iterative leap-frog Verlet Algorithm.
-   *
-   *  @params <r> (x,y,z): position vector of particles
-   *  @params <v> (vx,vy,vz): velocity vector of particles
-   *  @params <rr> (xx,yy,zz): position vectors for the fluid in the
-   *                           square displacement arrays
-   */
-
   size_t i;
   double KE = 0;
 
@@ -388,15 +322,10 @@ double MD::verlet_algorithm(std::vector<double> &rx, std::vector<double> &ry,
 
 void MD::velocity_autocorrelation_function(std::vector<double> &Cvx,
                                            std::vector<double> &Cvy,
-                                           std::vector<double> &Cvz) {
-  /*
-   * Calculates the Velocity Autocorrelation Function for the fluid.
-   * The method stores the values into the Cr vector and uses internally
-   * the velocities of the particles.
-   *
-   * @param &Cvx, &Cvy, &Cvz: Reference to the initial velocity vectors.
-   */
-
+                                           std::vector<double> &Cvz,
+                                           std::vector<double> &vx,
+                                           std::vector<double> &vy,
+                                           std::vector<double> &vz) {
   double cr_temp = 0;  // resets the sum every time step
   double m = 1.0;      // particle mass
   size_t i;
@@ -410,15 +339,6 @@ void MD::velocity_autocorrelation_function(std::vector<double> &Cvx,
 
 void MD::radial_distribution_function(double &rho, double &cut_off,
                                       size_t &bins, size_t &particles) {
-  /*
-   * Calculates the Radial Distribution Function for the fluid
-   * based on the values that are stored in the gr vector
-   * throughout the simulation.
-   * The accuracy of the RDF is defined by the nhist variable.
-   * Saves the unormalised and normalised values of the RDF in
-   * the corresponding filestream.
-   */
-
   double R = 0;
   double norm = 1;
   // Exclude the self particle interaction from the density
@@ -445,21 +365,10 @@ void MD::radial_distribution_function(double &rho, double &cut_off,
 
 void MD::mean_square_displacement(std::vector<double> &MSDx,
                                   std::vector<double> &MSDy,
-                                  std::vector<double> &MSDz) {
-  /*
-   * Performs the Mean Square Displacement calculation for the fluid.
-   * The method stores the MSD of the step in the msd vector.
-   *
-   * The method uses the explicitly created position vectors
-   * rrx, rry and rrz that are instantiated in the initialise method
-   * and are a copy of the rx, ry, rz vectors without the application
-   * of the periodic boundary conditions in the Verlet algorithm.
-   *
-   *
-   * @param &MSDx, &MSDy, &MSDz: Reference to vectors containing the
-   *                             initial positions of the particles
-   */
-
+                                  std::vector<double> &MSDz,
+                                  std::vector<double> &rrx,
+                                  std::vector<double> &rry,
+                                  std::vector<double> &rrz) {
   double msd_temp = 0;
 
   for (size_t i = 0; i < __N; ++i) {
@@ -471,11 +380,6 @@ void MD::mean_square_displacement(std::vector<double> &MSDx,
 
 void MD::structure_factor(std::vector<double> &rx, std::vector<double> &ry,
                           std::vector<double> &rz) {
-  /*
-   * Calculates the structure factor, which is computed as a Fourier Transform.
-   * The structure factor is more useful in FCC and BCC lattices
-   */
-
   double s = pow((__N / __rho), (1.0 / 3.0));
   double fkx1 = 2.0 * PI / (s / (2.0 * __Nx));
   double fky1 = 2.0 * PI / (s / (2.0 * __Ny));
@@ -519,28 +423,9 @@ void MD::structure_factor(std::vector<double> &rx, std::vector<double> &ry,
   sfz.push_back(kz);
 }
 
-// MD simulation
 void MD::simulation(std::string simulation_name, double DENSITY,
                     double TEMPERATURE, double POWER = NAN, double A_CST = NAN,
                     std::string pp_type = "GCM") {
-  /*
-   *  Executes the fluid simulation. It includes all statistical methods
-   *  defined in this class. It monitors the following quantities
-   *  RDF, MSD, VAF, average particle energies & pressures.
-   *  The produced files are named after the input parameters of the run.
-   *  The restart parameters of the run are also returned.
-   *
-   *  @param DENSITY: Density rho of fluid.
-   *  @param TEMPERATURE: Temperature of the thermostat.
-   *  @param POWER: the power n that the pair potential will be using
-   *                typical values are in the range of 6-18.
-   *  @param A_CST: softening constant 'a' of the pair potential.
-   *                When 'a' = 0, then fluid is pure MD, increasing
-   *                'a' results into softening of the pair potential.
-   * @param pp_type: The type of the pair potential the simulation is
-   *                 modelling. Options are "BIP", "GCM", "EXP", "LJ"
-   */
-
   // Initialise the variables with the input parameters
   // Name the simulation. This will be used as a prefix in the files
   __simulation_name = simulation_name;
@@ -682,8 +567,8 @@ void MD::simulation(std::string simulation_name, double DENSITY,
     scale_v = sqrt(__T0 / __T);  // using T & KE from prev timestep
 
     __KE = verlet_algorithm(rx, ry, rz, vx, vy, vz, true);
-    mean_square_displacement(MSDx, MSDy, MSDz);
-    velocity_autocorrelation_function(Cvx, Cvy, Cvz);
+    mean_square_displacement(MSDx, MSDy, MSDz, rrx, rry, rrz);
+    velocity_autocorrelation_function(Cvx, Cvy, Cvz, vx, vy, vz);
 
     // Average Temperature
     __T = __KE / (1.5 * __N);
@@ -772,14 +657,6 @@ void MD::simulation(std::string simulation_name, double DENSITY,
 
 void MD::reset_values(bool force_reset) {
   /*
-   * Closes open file streams and resets sizes and values to 0
-   * Use it when running multiple simulations and recycling the same
-   * MD object.
-   *
-   * @force_reset: Will close file streams even when compression is turned on
-   */
-
-  /*
     bc the stream might be closed and the user might then call reset_values
     which will throw an exception
   */
@@ -822,12 +699,6 @@ std::string MD::get_simulation_name() { return __simulation_name; }
 
 std::string MD::set_simulation_params(double &rho, double &T, double &power,
                                       double &a, std::string &pp_type) {
-  /*
-   * Sets the internal class variables for the fluid according to
-   * the pair-potential selected.
-   * Returns a string with all the simulation setup parameters
-   */
-
   std::string params =
       "Fluid parameters: rho: " + stat_file::convert_to_string(rho, 4) +
       " T: " + stat_file::convert_to_string(T, 4);

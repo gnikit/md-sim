@@ -1,9 +1,9 @@
 [submodule "tools/FileIO"]
 	path = tools/FileIO
 	url = https://github.com/gnikit/FileIO.git
-[submodule "tools/tinyxml2"]
-	path = tools/tinyxml2
-	url = https://github.com/leethomason/tinyxml2.git
 [submodule "tools/md-tools"]
 	path = tools/md-tools
 	url = https://github.com/gnikit/md-tools.git
+[submodule "spud"]
+	path = spud
+	url = https://github.com/fluidityProject/spud

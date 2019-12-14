@@ -33,7 +33,7 @@ int main() {
    * Simulates the fluid along the line
    */
   for (size_t i = 0; i < T_iso.size(); ++i) {
-    MD run(STEPS, 8, "SC");
+    MD run(STEPS, {8, 8, 8}, "SC");
     run.simulation("isomorph_", rho_iso[i], T_iso[i], n, A_iso[i], "BIP");
   }
 }

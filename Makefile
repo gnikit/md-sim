@@ -37,7 +37,7 @@ debug:
 
 schemas: toolkit
 	# If the user has installed libspud see fluidity project on github
-	@spud-preprocess schemas/main_schema.rnc
+	@$(bash ./spud/bin/spud-preprocess schemas/main_schema.rnc)
 
 toolkit:
 	@echo "MAKE tools"

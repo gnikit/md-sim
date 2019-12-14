@@ -1,22 +1,31 @@
 # The SPUD base schema
-# include "spud_base.rnc"
+include "spud_base.rnc"
 # TODO: force constructor compression to false when enabling and vice versa
-
+# TODO: remove compression parameter fom options, is set by phase_transition
 lattice_type =
 (
-    ## Available initial lattice formations:
-    ##
     ## SC: Simple Cubic
-    ##
+    element lattice {
+        attribute name {"SC"},
+        comment
+        }|
     ## FCC: Face Centred Cubic
-    ##
+    element lattice {
+        attribute name {"FCC"},
+        comment
+    }|
     ## BCC: Body Centred Cubic
-    element lattice { ("SC" | "FCC" | "BCC"| "RANDOM")
-        # ## Randomise the positions of the particles in the lattice
-        # ## using a normal distribution.
-        # element random {"true",
-        #     ## The variance of the normal distribution
-        #     element variance {xsd:double} }?
+    element lattice {
+        attribute name {"BCC"},
+        comment
+    }|
+    ## RANDOM: Randomise the positions of the particles in the lattice
+    element lattice {
+        attribute name {"RANDOM"},
+        ## Variance of the normal istributions
+        element variance {real},
+        ## Fix the seed of the normal distribution
+        element fixed_seed {"true" | "false"}
     }
 )
 
@@ -26,18 +35,33 @@ constructor_types =
     element constructor {
 
         ## Number of iteration steps the MD algorithm should run for.
-        element steps { xsd:integer },
+        element steps {
 
-        ## Number of particles per axis (x, y, z).
+            integer,
+
+            comment
+        },
+
+        ## Number of particles per axis (x y z).
         ## This in combination with the lattice formation will yield
         ## a total number of particles equal to:
         ##
-        ## SC: particles_per_axis **3
+        ## SC: particles **3
         ##
-        ## FCC: particles_per_axis **3 *4
+        ## FCC: particles **3 *4
         ##
-        ## BCC: particles_per_axis **3 *2
-        element particles_per_axis { xsd:integer },
+        ## BCC: particles **3 *2
+        # element particles {
+        #     attribute x { xsd:integer },
+        #     attribute y { xsd:integer },
+        #     attribute z { xsd:integer }
+        # },
+        element particles {
+
+            integer_vector,
+
+            comment
+        },
 
         lattice_type
     }
@@ -47,110 +71,142 @@ options =
 (
     ## Set a series of options for fine-tunning an MD run
     element options {
-        ## Output directory for the files to be produced during a simulation.
-        element output_dir { xsd:string }?,
 
-        ## Set the flag for incremental resizing of the simulation box.
-        ## Set to true for phase transition studies else set to false.
-        element compression { "true" | "false" }?,
+        ## Output directory for the files to be produced during a simulation.
+        element output_dir { string }?,
+
+        # ## Set the flag for incremental resizing of the simulation box.
+        # ## Set to true for phase transition studies else set to false.
+        # element compression { empty }?,
 
         ## Accuracy of the Radial Distribution Function (RDF).
         ## A large number of bins will result into a very accurate RDF,
         ## however if the simulation is short (small number of steps) the
         ## results will be dominated by statistical noise.
-        element rdf_bins { xsd:integer }?,
+        element rdf_bins { integer }?,
 
         ## If enabled will save in ASCII format the positions of all the
         ## particles for the entire simulation.
         ## The datafiles can then be viewed with the python tools.
         ## NOTE: For large simulations this will be slow.
-        element track_particles { "true" | "false" }?,
+        element track_particles { empty }?,
 
         ## An equilibration period for the RDF in time step units.
         ## The RDF will begin to be collected rdf_equilibrate steps
         ## from the start of the simulation.
-        element rdf_equilibrate { xsd:integer }?
+        element rdf_equilibrate { integer }?
     }
 )
 
 simulation_name =
 (
     ## Name of the simulation, to be used as prefix to all output files.
-    element simulation_name { xsd:string }
+    element simulation_name { string }
 )
 
-simulation_potentials =
+potentials =
 (
-    ## Available pair potentials:
-    ##
-    ## BIP: Bounded Inverse Power, 1/(r**2 + a**2)**n
-    ##
-    ## GCM: Gaussian Core Model, exp(-r**2)
-    ##
-    ## EXP: Exponential Potential, A * exp(-r**n)
-    ##
     ## LJ: Lennard-Jones Potential, 1/r**12 - 1/r**6
-    ##
-    element pp {
-        "BIP" | "EXP" | "GCM" | "LJ"
+    element pair_potential {
+
+        attribute name { "LennardJones" },
+
+        simulation_parameters,
+
+        comment
+
+    }|
+    ## GCM: Gaussian Core Model, exp(-r**2)
+    element pair_potential {
+
+        attribute name { "GaussianCoreModel" },
+
+        simulation_parameters,
+
+        comment
+
+    }|
+    ## EXP: Exponential Potential, A * exp(-r**n)
+    element pair_potential {
+
+        attribute name { "Exponential" },
+
+        simulation_parameters,
+
+        pair_potential_parameters,
+
+        comment
+
+    }|
+    ## BIP: Bounded Inverse Power, 1/(r**2 + a**2)**n
+    element pair_potential {
+
+        attribute name { "BoundedInversePower" },
+
+        simulation_parameters,
+
+        pair_potential_parameters,
+
+        comment
+
     }
 )
 
 simulation_parameters =
 (
     ## Fluid density (unitless).
-    element rho { xsd:double },
+    element density { real },
 
     ## Fluid temperature (unitless).
-    element T { xsd:double },
+    element temperature { real }
+)
 
+pair_potential_parameters =
+(
     ## Pair potential strength.
     ## Normal values are between 6 - 12.
-    element n { xsd:double },
+    element potential_strength { real },
 
     ## Softening parameter. Only applicable for BIP and EXP pair potentials.
     ## Normal values usually range between 0 - 2.0. With 0 corresponding to
     ## no-smoothening and 2.0 to a very smoothed fluid.
-    element A { xsd:double }
-
+    element softening_parameter { real }
 )
 
 simulation_single =
 (
     simulation_name,
 
-    simulation_potentials,
+    potentials
 
-    simulation_parameters
 )
 
 simulation_compress =
 (
     simulation_name,
 
-    simulation_potentials,
+    potentials,
 
     ## The density that the compression aims to reach.
-    element final_density { xsd:double },
+    element final_density { real },
 
     ## The density increment used to increase/decrease the current density
     ## in order to meed the final density.
-    element density_increment { xsd:double },
+    element density_increment { real }
 
-    simulation_parameters
 )
 
 simulation =
 (
     ## Input variables for a single MD::simulation.
-    element simulation_input {
+    element simulation_type {
 
         attribute name { "NormalRun" },
 
         simulation_single
     }|
     ## Input variables for a compression/phase transition run.
-    element simulation_input {
+    element simulation_type {
 
         attribute name { "CompressionRun" },
 
@@ -158,7 +214,7 @@ simulation =
     }|
     ## Run a forward series of compressions/expansions followed by
     ## expansions/compressions in the opposite direction of the phase diagram.
-    element simulation_input {
+    element simulation_type {
 
         attribute name { "ReverseCompressionRun" },
 
@@ -178,6 +234,6 @@ start =
         simulation,
 
         ## Enable for unit testing.
-        element enable_testing { "true" | "false" }
+        element enable_testing { empty } ?
     }
 )

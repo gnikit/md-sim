@@ -22,7 +22,10 @@ class phase_transition : public MD {
                      double FINAL_DENSITY, double DENSITY_INC,
                      double TEMPERATURE, double POWER, double A_CST,
                      std::string pp_type);
-  // TODO:run a forward crystallisation and go back a
 
   void detect_transition();
+
+  bool get_compression_flag();
+
+  void set_compression_flag(bool is_compressing);
 };

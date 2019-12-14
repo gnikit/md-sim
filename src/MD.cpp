@@ -1,29 +1,44 @@
 #include "MD.h"
 // TODO: create internal structures for quantities such as velocities, rs, fs,
-// TODO: make docstrings consistent
-// TODO: remove all constructor-defaulted options to another method
 
 // FileIO has to be loaded after the math libraries
 #include "FileIO.h"  // FileIO class
 
 #pragma warning(disable : 4996)  //_CRT_SECURE_NO_WARNINGS
 
-MD::MD(size_t step_number, size_t particles_per_axis, std::string lattice) {
+MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
   // Assign number of iterations of the MD algorithm
   __steps = step_number;
 
   // Assign the type of lattice
   __lattice = lattice;
 
+  try {
+    if (particles.empty()) {
+      throw "The supplied particles vector is empty";
+    } else if (particles.size() < 3) {
+      throw "The supplied particles vector is of incorrect size";
+    } else if (std::find(particles.begin(), particles.end(), 0) !=
+               particles.end()) {
+      throw
+                  "The supplied particles vector contains a 0\n"
+                  "particles cannot be 0 in x, y or z";
+    }
+
+  } catch (const char *msg) {
+    std::cerr << "Error: " << msg << std::endl;
+    exit(1);
+  }
+
   // Calculate the total number of particles N based on the lattice
+  __Nx = particles[0];
+  __Ny = particles[1];
+  __Nz = particles[2];
   if (lattice == "FCC") {
-    __Nx = __Ny = __Nz = particles_per_axis;
     __N = __Nx * __Ny * __Nz * 4;
   } else if (lattice == "BCC") {
-    __Nx = __Ny = __Nz = particles_per_axis;
     __N = __Nx * __Ny * __Nz * 2;
   } else {
-    __Nx = __Ny = __Nz = particles_per_axis;
     __N = __Nx * __Ny * __Nz;
   }
 
@@ -89,8 +104,8 @@ MD::~MD() {
 }
 
 void MD::load_options(std::string out_directory = ".",
-                      bool is_compressing = false, bool track_particles = false,
-                      size_t rdf_bins = 500, size_t collect_rdf_after = 500) {
+                      bool track_particles = false, size_t rdf_bins = 500,
+                      size_t collect_rdf_after = 500) {
   // Test whether the input directory exists
   if (!out_directory.empty()) {
     try {
@@ -106,9 +121,6 @@ void MD::load_options(std::string out_directory = ".",
       exit(1);
     }
   }
-
-  // If compress is true, then STEPS = steps_per_compression
-  __compress = is_compressing;
 
   // Save all the positions for the fluid
   __visualise = track_particles;
@@ -130,7 +142,7 @@ void MD::load_options(std::string out_directory = ".",
     }
   } catch (const char *msg) {
     std::cerr << "Warning: " << msg << std::endl;
-    std::cerr << "rdf_wait is set to 0" << std::endl;
+    std::cerr << "         rdf_wait is set to 0" << std::endl;
     __rdf_wait = 0;
   }
 }
@@ -705,25 +717,25 @@ std::string MD::set_simulation_params(double &rho, double &T, double &power,
 
   params = "Lattice: " + get_lattice_structure() + "\n";
 
-  if (pp_type == "GCM") {
+  if (pp_type == "GCM" || pp_type == "GaussianCoreModel") {
     params = "Potential: GCM, " + params;
     __power = NAN;  // Set the variable to NAN to be ignore by the logger
     __a_cst = NAN;  // Set the variable to NAN to be ignore by the logger
   }
 
-  else if (pp_type == "LJ") {
+  else if (pp_type == "LJ" || pp_type == "LennardJones") {
     params = "Potential: LJ, " + params;
     __power = NAN;  // Set the variable to NAN to be ignore by the logger
     __a_cst = NAN;  // Set the variable to NAN to be ignore by the logger
   }
 
-  else if (pp_type == "EXP") {
+  else if (pp_type == "EXP" || pp_type == "Exponential") {
     params = "Potential: EXP, " + params;
     params += " m: " + stat_file::convert_to_string(power, 4);
     params += " C: " + stat_file::convert_to_string(a, 4);
   }
 
-  else if (pp_type == "BIP") {
+  else if (pp_type == "BIP" || pp_type == "BoundedInversePower") {
     params = "Potential: BIP, " + params;
     params += " n: " + stat_file::convert_to_string(power, 4);
     params += " A: " + stat_file::convert_to_string(a, 4);
@@ -741,12 +753,6 @@ std::string MD::set_simulation_params(double &rho, double &T, double &power,
 }
 
 std::string MD::get_lattice_structure() { return __lattice; }
-
-bool MD::get_compression_flag() { return __compress; }
-
-void MD::set_compression_flag(bool is_compressing) {
-  __compress = is_compressing;
-}
 
 bool MD::get_visualisation_flag() { return __visualise; }
 

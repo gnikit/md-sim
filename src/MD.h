@@ -13,6 +13,7 @@
  * to transition to SPH
  */
 #pragma once
+#include <algorithm>   // std::find
 #include <chrono>      // CPU run-time
 #include <ctime>       // std::chrono
 #include <functional>  // funciton pointers
@@ -104,21 +105,20 @@ class MD {
 
   /* Visualisation flag */
   bool __visualise;
-
- public:
   bool fixed_seed;
 
+ public:
   /**
    * Contructor to initialise the fluid parameters
    *
    * @param step_number: number of iterations
-   * @param particles_per_axis: number of particles for x, y and z axes
+   * @param particles: number of particles for x, y and z axes
    * @param lattice: type of lattice for the initial position of the particles
    *                 + Simple Cubic
    *                 + Face Centred Cubic
    *                 + Body Centred Cubic
    */
-  MD(size_t step_number, size_t particles_per_axis, std::string lattice);
+  MD(size_t step_number, std::vector<size_t> particles, std::string lattice);
 
   ~MD();
 
@@ -134,9 +134,8 @@ class MD {
    * @param collect_rdf_after: delay the collection of the RDF data to ensure
    *                           melting of the fluid.
    */
-  void load_options(std::string out_directory, bool is_compressing,
-                    bool track_particles, size_t rdf_bins,
-                    size_t collect_rdf_after);
+  void load_options(std::string out_directory, bool track_particles,
+                    size_t rdf_bins, size_t collect_rdf_after);
 
   /**
    * Executes the fluid simulation. It includes all statistical methods
@@ -294,10 +293,6 @@ class MD {
   std::string get_simulation_name();
 
   std::string get_lattice_structure();
-
-  bool get_compression_flag();
-
-  void set_compression_flag(bool is_compressing);
 
   bool get_visualisation_flag();
 

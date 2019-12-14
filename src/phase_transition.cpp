@@ -111,3 +111,9 @@ void phase_transition::run_backwards(std::string SIMULATION_NAME,
                "*****************************\n"
             << std::endl;
 }
+
+bool phase_transition::get_compression_flag() { return __compress; }
+
+void phase_transition::set_compression_flag(bool is_compressing) {
+  __compress = is_compressing;
+}

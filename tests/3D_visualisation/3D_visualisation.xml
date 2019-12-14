@@ -1,24 +1,34 @@
 <?xml version='1.0' encoding='utf-8'?>
 <input_variables>
   <constructor>
-    <steps>10</steps>
-    <particles_per_axis>8</particles_per_axis>
-    <lattice>SC</lattice>
+    <steps>
+      <integer_value rank="0">10</integer_value>
+    </steps>
+    <particles>
+      <integer_value rank="1" shape="3">8 8 8</integer_value>
+    </particles>
+    <lattice name="SC"/>
   </constructor>
   <options>
     <output_dir>.</output_dir>
-    <compression>false</compression>
-    <rdf_bins>200</rdf_bins>
-    <track_particles>true</track_particles>
-    <rdf_equilibrate>0</rdf_equilibrate>
+    <rdf_bins>
+      <integer_value rank="0">200</integer_value>
+    </rdf_bins>
+    <track_particles/>
+    <rdf_equilibrate>
+      <integer_value rank="0">0</integer_value>
+    </rdf_equilibrate>
   </options>
-  <simulation_input name="NormalRun">
+  <simulation_type name="NormalRun">
     <simulation_name>visual_</simulation_name>
-    <pp>LJ</pp>
-    <rho>0.5</rho>
-    <T>1.0</T>
-    <n>8</n>
-    <A>0.5</A>
-  </simulation_input>
-  <enable_testing>true</enable_testing>
+    <pair_potential name="LennardJones">
+      <density>
+        <real_value rank="0">0.5</real_value>
+      </density>
+      <temperature>
+        <real_value rank="0">1.0</real_value>
+      </temperature>
+    </pair_potential>
+  </simulation_type>
+  <enable_testing/>
 </input_variables>

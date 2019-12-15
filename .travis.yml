@@ -33,6 +33,7 @@ script:
   - export CC=/usr/bin/gcc-7
   - export CXX=/usr/bin/g++-7
   - g++ -v
+  - cd spud && ./configure && make
   - make toolkit
   - make
   - make examples

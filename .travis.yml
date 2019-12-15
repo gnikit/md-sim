@@ -34,9 +34,6 @@ script:
   - export CC=/usr/bin/gcc-7
   - export CXX=/usr/bin/g++-7
   - g++ -v
-  # Configuring and compiling libspud
-  - cd spud && ./configure && make && cd ..
-  - make toolkit
   - make
   - make examples
   - make test

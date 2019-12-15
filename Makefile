@@ -5,7 +5,7 @@ RM := rm -rf
 
 default: libmd
 
-all: libmd examples
+all: libmd examples shcemas
 
 examples: libmd
 	@echo "MAKE MD examples"
@@ -35,9 +35,11 @@ debug:
 	@echo "MAKE examples"
 	@cd examples && $(MAKE) debug
 
-schemas: toolkit
+# TODO: this needs fixing, spud-preprocess has not been installed
+#		for that you need to run make install in spud
+schemas:
 	# If the user has installed libspud see fluidity project on github
-	@$(bash ./spud/bin/spud-preprocess schemas/main_schema.rnc)
+	spud-preprocess schemas/main_schema.rnc
 
 toolkit:
 	@echo "MAKE tools"

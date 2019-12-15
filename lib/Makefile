@@ -5,7 +5,10 @@ spud := ../spud
 
 all:
 	@echo "MAKE spud"
-	@cd $(spud) && $(MAKE)
+ifeq ("$(wildcard $(spud)/libspud.a)","")
+	@echo "Configuring and compiling libspud"
+	@cd $(spud) && ./configure && $(MAKE)
+endif
 	@cp $(spud)/libspud.a .
 	@cp $(spud)/include/* ../include
 	

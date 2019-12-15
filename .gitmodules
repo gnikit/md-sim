@@ -7,3 +7,4 @@
 [submodule "spud"]
 	path = spud
 	url = https://github.com/FluidityProject/spud.git
+	ignore = dirty

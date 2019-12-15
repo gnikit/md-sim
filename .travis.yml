@@ -19,7 +19,7 @@ addons:
       - python3.8-venv
 
 before_install:
-  - pyenv global $(pyenv whence 2to3)  # activate all python versions
+  - pyenv global $(pyenv whence 2to3) # activate all python versions
   - PY_CMD=python3
   - $PY_CMD -m pip install --user --upgrade pip wheel setuptools
 install:
@@ -30,11 +30,12 @@ install:
 script:
   - sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc
   - sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++
-    # Export CC and CXX to tell cmake which compiler to use
+  # Export CC and CXX to tell cmake which compiler to use
   - export CC=/usr/bin/gcc-7
   - export CXX=/usr/bin/g++-7
   - g++ -v
-  - cd spud && ./configure && make
+  # Configuring and compiling libspud
+  - cd spud && ./configure && make && cd ..
   - make toolkit
   - make
   - make examples

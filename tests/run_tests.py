@@ -49,7 +49,7 @@ def run_file(test_dir, xml_input):
 
 
 def get_test_result(test_results):
-    if any in test_results is False:
+    if False in test_results:
         print('Failure: ', test_results)
         return False
     else:
@@ -269,11 +269,11 @@ class TestLatticeStructures(unittest.TestCase):
 
         # Test variables
         pos_test = np.loadtxt(
-            f'{sim_name}Positions_Velocities{test_string}', usecols=(1, 2, 3), unpack=True)
+            f'{sim_name}Positions_Velocities{test_string}', usecols=(0, 1, 2), unpack=True)
 
         # Reference variables
         pos_ref = np.loadtxt('test_positions.log',
-                             usecols=(1, 2, 3), unpack=True)
+                             usecols=(0, 1, 2), unpack=True)
 
         # Test data for consistency
         result = np.allclose(pos_ref, pos_test)
@@ -302,11 +302,11 @@ class TestLatticeStructures(unittest.TestCase):
 
         # Test variables
         pos_test = np.loadtxt(
-            f'{sim_name}Positions_Velocities{test_string}', usecols=(1, 2, 3), unpack=True)
+            f'{sim_name}Positions_Velocities{test_string}', usecols=(0, 1, 2), unpack=True)
 
         # Reference variables
         pos_ref = np.loadtxt('test_positions.log',
-                             usecols=(1, 2, 3), unpack=True)
+                             usecols=(0, 1, 2), unpack=True)
 
         # Test data for consistency
         result = np.allclose(pos_ref, pos_test)
@@ -335,11 +335,11 @@ class TestLatticeStructures(unittest.TestCase):
 
         # Test variables
         pos_test = np.loadtxt(
-            f'{sim_name}Positions_Velocities{test_string}', usecols=(1, 2, 3), unpack=True)
+            f'{sim_name}Positions_Velocities{test_string}', usecols=(0, 1, 2), unpack=True)
 
         # Reference variables
         pos_ref = np.loadtxt('test_positions.log',
-                             usecols=(1, 2, 3), unpack=True)
+                             usecols=(0, 1, 2), unpack=True)
 
         # Test data for consistency
         result = np.allclose(pos_ref, pos_test)
@@ -387,15 +387,15 @@ class Test3DVisualisation(unittest.TestCase):
         z_tracks_ref = np.loadtxt('test_z.log')
 
         # Test for consistency
-        result = np.allclose(x_tracks, x_tracks_ref)
+        result = np.allclose(x_tracks, x_tracks_ref, rtol=1.0e-4)
         print(f'Testing x-axis tracking consistency with reference: {result}')
         test_results.append(result)
 
-        result = np.allclose(y_tracks, y_tracks_ref)
+        result = np.allclose(y_tracks, y_tracks_ref, rtol=1.0e-4)
         print(f'Testing y-axis tracking consistency with reference: {result}')
         test_results.append(result)
 
-        result = np.allclose(z_tracks, z_tracks_ref)
+        result = np.allclose(z_tracks, z_tracks_ref, rtol=1.0e-4)
         print(f'Testing z-axis tracking consistency with reference: {result}')
         test_results.append(result)
 
@@ -436,6 +436,7 @@ class TestConstructors(unittest.TestCase):
         # Test for consistency
         result = np.allclose(data, data_ref)
         print(f'Testing Data file consistency with reference: {result}')
+
         test_results.append(result)
 
         print(f'Exiting: {f_dir}')

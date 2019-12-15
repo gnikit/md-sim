@@ -4,3 +4,6 @@
 [submodule "tools/md-tools"]
 	path = tools/md-tools
 	url = https://github.com/gnikit/md-tools.git
+[submodule "spud"]
+	path = spud
+	url = https://github.com/FluidityProject/spud.git

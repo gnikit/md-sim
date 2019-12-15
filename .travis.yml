@@ -14,6 +14,7 @@ addons:
     packages:
       - gcc-7
       - g++-7
+      - gfortran
       - python3.8-dev
       - python3.8-venv
 

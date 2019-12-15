@@ -23,7 +23,7 @@ using pair_potential_type = std::tuple<double, double> (*)(double &, double,
  * Pair potentials supported:
  * BIP or BoundedInversePower Bounded Inverse Power
  * GCM or GaussianCoreModel: Gaussian Core Model
- * Exp or Exponential: Exponential potential
+ * EXP or Exponential: Exponential potential
  * LJ or LennardJones:  Lennard-Jones potential
  */
 

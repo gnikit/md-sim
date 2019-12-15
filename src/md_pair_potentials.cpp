@@ -62,8 +62,8 @@ std::tuple<double, double> BIP_pp::get_force(double &r, double power,
   return std::make_tuple(ff, u);
 }
 
-std::tuple<double, double> GCM_pp::get_force(double &r, double m = 0,
-                                             double C = 0) {
+std::tuple<double, double> GCM_pp::get_force(double &r, double m = NAN,
+                                             double C = NAN) {
   auto [ff, u] = MD_tools::GCM_force(r);
   return std::make_tuple(ff, u);
 }
@@ -73,8 +73,8 @@ std::tuple<double, double> Exp_pp::get_force(double &r, double m, double C) {
   return std::make_tuple(ff, u);
 }
 
-std::tuple<double, double> LJ_pp::get_force(double &r, double m = 0,
-                                            double C = 0) {
+std::tuple<double, double> LJ_pp::get_force(double &r, double m = NAN,
+                                            double C = NAN) {
   auto [ff, u] = MD_tools::LJ_force(r);
   return std::make_tuple(ff, u);
 }
@@ -87,10 +87,10 @@ std::tuple<double, double> LJ_pp::get_force(double &r, double m = 0,
  */
 
 std::map<std::string, pair_potential_type> get_force_funcs = {
-    {"GCM", &GCM_pp::get_force},
-    {"EXP", &Exp_pp::get_force},
-    {"BIP", &BIP_pp::get_force},
-    {"LJ", &LJ_pp::get_force}};
+    {"GCM", &GCM_pp::get_force}, {"GaussianCoreModel", &GCM_pp::get_force},
+    {"EXP", &Exp_pp::get_force}, {"Exponential", &Exp_pp::get_force},
+    {"BIP", &BIP_pp::get_force}, {"BoundedInversePower", &BIP_pp::get_force},
+    {"LJ", &LJ_pp::get_force},   {"LennardJones", &LJ_pp::get_force}};
 
 /* Global hash table function, returning a different type of object per key */
 pair_potential_type get_force_func(std::string pp_type) {

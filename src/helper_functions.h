@@ -12,7 +12,9 @@ class helper_functions {
   /* data */
  public:
   static std::vector<int> linspace(int a, int b, size_t N);
+
   static std::vector<double> linspace(double a, double b, size_t N);
+
   static std::tuple<double, double> linfit(const std::vector<double>& x,
                                            const std::vector<double>& y);
 };

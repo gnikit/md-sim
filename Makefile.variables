@@ -5,10 +5,10 @@ CXXFLAGS  += $(STD) -pthread -Wall
 DCXXFLAGS += $(STD) -pthread -g -Wall
 
 
-INC = -I ../include -I ../tools/FileIO -I ../tools/tinyxml2
+INC = -I ../include -I ../tools/FileIO
 LN  = -L ../lib
 
-LINKER = $(INC) $(LN) -lmd -ltinyxml2 -lstdc++fs
+LINKER = $(INC) $(LN) -lmd -lspud -lstdc++fs
 
 # Test if we have intel compilers in our PATH
 ifeq (, $(shell which icpc))

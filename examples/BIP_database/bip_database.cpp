@@ -36,10 +36,10 @@ void MakeDataBase() {
         for (size_t j = 0; j < A1.size(); ++j) {
           std::cout << " run num: " << num << std::endl;
 
-          MD* run1 = new MD(STEPS, 10, "SC");
-          MD* run2 = new MD(STEPS, 10, "SC");
-          MD* run3 = new MD(STEPS, 10, "SC");
-          MD* run4 = new MD(STEPS, 10, "SC");
+          MD* run1 = new MD(STEPS, {10, 10, 10}, "SC");
+          MD* run2 = new MD(STEPS, {10, 10, 10}, "SC");
+          MD* run3 = new MD(STEPS, {10, 10, 10}, "SC");
+          MD* run4 = new MD(STEPS, {10, 10, 10}, "SC");
 
           // ? set temperature manually in default machine
           std::thread th1(&MD::simulation, run1, "", rho[d], T[t], n[i], A1[j],

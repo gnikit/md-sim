@@ -12,7 +12,7 @@ int main() {
    * density iterations by equating the compression timestep to 1
    *
    */
-  phase_transition run(compress_steps, 7, "FCC");
+  phase_transition run(compress_steps, {7, 7, 7}, "FCC");
   run.set_compression_flag(true);
   run.set_rdf_collect_after(500);
 

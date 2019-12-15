@@ -41,9 +41,9 @@ void MakeDataBase() {
       for (size_t i = 0; i < n.size(); ++i) {
         std::cout << " run num: " << num << std::endl;
 
-        MD* run1 = new MD(STEPS, 8, "SC");
+        MD* run1 = new MD(STEPS, {8, 8, 8}, "SC");
         run1->set_rdf_collect_after(5000);
-        MD* run2 = new MD(STEPS, 8, "SC");
+        MD* run2 = new MD(STEPS, {8, 8, 8}, "SC");
         run2->set_rdf_collect_after(5000);
 
         // ? set temperature manually in default machine

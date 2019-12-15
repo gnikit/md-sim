@@ -1,52 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<grammar xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+<grammar xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="">
+  <!-- The SPUD base schema -->
+  <include href="spud_base.rng"/>
   <!--
-    The SPUD base schema
-    include "spud_base.rnc"
     TODO: force constructor compression to false when enabling and vice versa
+    TODO: remove compression parameter fom options, is set by phase_transition
   -->
   <define name="lattice_type">
-    <element name="lattice">
-      <a:documentation>Available initial lattice formations:
-
-SC: Simple Cubic
-
-FCC: Face Centred Cubic
-
-BCC: Body Centred Cubic</a:documentation>
-      <choice>
-        <value>SC</value>
-        <value>FCC</value>
-        <value>BCC</value>
-        <value>RANDOM</value>
-      </choice>
-      <!--
-        ## Randomise the positions of the particles in the lattice
-        ## using a normal distribution.
-        element random {"true",
-            ## The variance of the normal distribution
-            element variance {xsd:double} }?
-      -->
-    </element>
+    <choice>
+      <element name="lattice">
+        <a:documentation>SC: Simple Cubic</a:documentation>
+        <attribute name="name">
+          <value>SC</value>
+        </attribute>
+        <ref name="comment"/>
+      </element>
+      <element name="lattice">
+        <a:documentation>FCC: Face Centred Cubic</a:documentation>
+        <attribute name="name">
+          <value>FCC</value>
+        </attribute>
+        <ref name="comment"/>
+      </element>
+      <element name="lattice">
+        <a:documentation>BCC: Body Centred Cubic</a:documentation>
+        <attribute name="name">
+          <value>BCC</value>
+        </attribute>
+        <ref name="comment"/>
+      </element>
+      <element name="lattice">
+        <a:documentation>RANDOM: Randomise the positions of the particles in the lattice</a:documentation>
+        <attribute name="name">
+          <value>RANDOM</value>
+        </attribute>
+        <element name="variance">
+          <a:documentation>Variance of the normal istributions</a:documentation>
+          <ref name="real"/>
+        </element>
+        <element name="fixed_seed">
+          <a:documentation>Fix the seed of the normal distribution</a:documentation>
+          <choice>
+            <value>true</value>
+            <value>false</value>
+          </choice>
+        </element>
+      </element>
+    </choice>
   </define>
   <define name="constructor_types">
     <element name="constructor">
       <a:documentation>Constructor initialisation for MD or phase_transition objects.</a:documentation>
       <element name="steps">
         <a:documentation>Number of iteration steps the MD algorithm should run for.</a:documentation>
-        <data type="integer"/>
+        <ref name="integer"/>
+        <ref name="comment"/>
       </element>
-      <element name="particles_per_axis">
-        <a:documentation>Number of particles per axis (x, y, z).
+      <!--
+        element particles {
+            attribute x { xsd:integer },
+            attribute y { xsd:integer },
+            attribute z { xsd:integer }
+        },
+      -->
+      <element name="particles">
+        <a:documentation>Number of particles per axis (x y z).
 This in combination with the lattice formation will yield
 a total number of particles equal to:
 
-SC: particles_per_axis **3
+SC: particles **3
 
-FCC: particles_per_axis **3 *4
+FCC: particles **3 *4
 
-BCC: particles_per_axis **3 *2</a:documentation>
-        <data type="integer"/>
+BCC: particles **3 *2</a:documentation>
+        <ref name="integer_vector"/>
+        <ref name="comment"/>
       </element>
       <ref name="lattice_type"/>
     </element>
@@ -61,22 +89,17 @@ BCC: particles_per_axis **3 *2</a:documentation>
         </element>
       </optional>
       <optional>
-        <element name="compression">
-          <a:documentation>Set the flag for incremental resizing of the simulation box.
-Set to true for phase transition studies else set to false.</a:documentation>
-          <choice>
-            <value>true</value>
-            <value>false</value>
-          </choice>
-        </element>
-      </optional>
-      <optional>
+        <!--
+          ## Set the flag for incremental resizing of the simulation box.
+          ## Set to true for phase transition studies else set to false.
+          element compression { empty }?,
+        -->
         <element name="rdf_bins">
           <a:documentation>Accuracy of the Radial Distribution Function (RDF).
 A large number of bins will result into a very accurate RDF,
 however if the simulation is short (small number of steps) the
 results will be dominated by statistical noise.</a:documentation>
-          <data type="integer"/>
+          <ref name="integer"/>
         </element>
       </optional>
       <optional>
@@ -85,10 +108,7 @@ results will be dominated by statistical noise.</a:documentation>
 particles for the entire simulation.
 The datafiles can then be viewed with the python tools.
 NOTE: For large simulations this will be slow.</a:documentation>
-          <choice>
-            <value>true</value>
-            <value>false</value>
-          </choice>
+          <empty/>
         </element>
       </optional>
       <optional>
@@ -96,7 +116,7 @@ NOTE: For large simulations this will be slow.</a:documentation>
           <a:documentation>An equilibration period for the RDF in time step units.
 The RDF will begin to be collected rdf_equilibrate steps
 from the start of the simulation.</a:documentation>
-          <data type="integer"/>
+          <ref name="integer"/>
         </element>
       </optional>
     </element>
@@ -107,83 +127,101 @@ from the start of the simulation.</a:documentation>
       <data type="string"/>
     </element>
   </define>
-  <define name="simulation_potentials">
-    <element name="pp">
-      <a:documentation>Available pair potentials:
-
-BIP: Bounded Inverse Power, 1/(r**2 + a**2)**n
-
-GCM: Gaussian Core Model, exp(-r**2)
-
-EXP: Exponential Potential, A * exp(-r**n)
-
-LJ: Lennard-Jones Potential, 1/r**12 - 1/r**6
-</a:documentation>
-      <choice>
-        <value>BIP</value>
-        <value>EXP</value>
-        <value>GCM</value>
-        <value>LJ</value>
-      </choice>
-    </element>
+  <define name="potentials">
+    <choice>
+      <element name="pair_potential">
+        <a:documentation>LJ: Lennard-Jones Potential, 1/r**12 - 1/r**6</a:documentation>
+        <attribute name="name">
+          <value>LennardJones</value>
+        </attribute>
+        <ref name="simulation_parameters"/>
+        <ref name="comment"/>
+      </element>
+      <element name="pair_potential">
+        <a:documentation>GCM: Gaussian Core Model, exp(-r**2)</a:documentation>
+        <attribute name="name">
+          <value>GaussianCoreModel</value>
+        </attribute>
+        <ref name="simulation_parameters"/>
+        <ref name="comment"/>
+      </element>
+      <element name="pair_potential">
+        <a:documentation>EXP: Exponential Potential, A * exp(-r**n)</a:documentation>
+        <attribute name="name">
+          <value>Exponential</value>
+        </attribute>
+        <ref name="simulation_parameters"/>
+        <ref name="pair_potential_parameters"/>
+        <ref name="comment"/>
+      </element>
+      <element name="pair_potential">
+        <a:documentation>BIP: Bounded Inverse Power, 1/(r**2 + a**2)**n</a:documentation>
+        <attribute name="name">
+          <value>BoundedInversePower</value>
+        </attribute>
+        <ref name="simulation_parameters"/>
+        <ref name="pair_potential_parameters"/>
+        <ref name="comment"/>
+      </element>
+    </choice>
   </define>
   <define name="simulation_parameters">
-    <element name="rho">
+    <element name="density">
       <a:documentation>Fluid density (unitless).</a:documentation>
-      <data type="double"/>
+      <ref name="real"/>
     </element>
-    <element name="T">
+    <element name="temperature">
       <a:documentation>Fluid temperature (unitless).</a:documentation>
-      <data type="double"/>
+      <ref name="real"/>
     </element>
-    <element name="n">
+  </define>
+  <define name="pair_potential_parameters">
+    <element name="potential_strength">
       <a:documentation>Pair potential strength.
 Normal values are between 6 - 12.</a:documentation>
-      <data type="double"/>
+      <ref name="real"/>
     </element>
-    <element name="A">
+    <element name="softening_parameter">
       <a:documentation>Softening parameter. Only applicable for BIP and EXP pair potentials.
 Normal values usually range between 0 - 2.0. With 0 corresponding to
 no-smoothening and 2.0 to a very smoothed fluid.</a:documentation>
-      <data type="double"/>
+      <ref name="real"/>
     </element>
   </define>
   <define name="simulation_single">
     <ref name="simulation_name"/>
-    <ref name="simulation_potentials"/>
-    <ref name="simulation_parameters"/>
+    <ref name="potentials"/>
   </define>
   <define name="simulation_compress">
     <ref name="simulation_name"/>
-    <ref name="simulation_potentials"/>
+    <ref name="potentials"/>
     <element name="final_density">
       <a:documentation>The density that the compression aims to reach.</a:documentation>
-      <data type="double"/>
+      <ref name="real"/>
     </element>
     <element name="density_increment">
       <a:documentation>The density increment used to increase/decrease the current density
 in order to meed the final density.</a:documentation>
-      <data type="double"/>
+      <ref name="real"/>
     </element>
-    <ref name="simulation_parameters"/>
   </define>
   <define name="simulation">
     <choice>
-      <element name="simulation_input">
+      <element name="simulation_type">
         <a:documentation>Input variables for a single MD::simulation.</a:documentation>
         <attribute name="name">
           <value>NormalRun</value>
         </attribute>
         <ref name="simulation_single"/>
       </element>
-      <element name="simulation_input">
+      <element name="simulation_type">
         <a:documentation>Input variables for a compression/phase transition run.</a:documentation>
         <attribute name="name">
           <value>CompressionRun</value>
         </attribute>
         <ref name="simulation_compress"/>
       </element>
-      <element name="simulation_input">
+      <element name="simulation_type">
         <a:documentation>Run a forward series of compressions/expansions followed by
 expansions/compressions in the opposite direction of the phase diagram.</a:documentation>
         <attribute name="name">
@@ -201,13 +239,12 @@ expansions/compressions in the opposite direction of the phase diagram.</a:docum
         <ref name="options"/>
       </optional>
       <ref name="simulation"/>
-      <element name="enable_testing">
-        <a:documentation>Enable for unit testing.</a:documentation>
-        <choice>
-          <value>true</value>
-          <value>false</value>
-        </choice>
-      </element>
+      <optional>
+        <element name="enable_testing">
+          <a:documentation>Enable for unit testing.</a:documentation>
+          <empty/>
+        </element>
+      </optional>
     </element>
   </start>
 </grammar>

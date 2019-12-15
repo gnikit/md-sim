@@ -16,15 +16,15 @@
 using pair_potential_type = std::tuple<double, double> (*)(double &, double,
                                                            double);
 
-/*
+/**
  * A class responsible for implementing different
  * pair potentials in the MD class.
  *
  * Pair potentials supported:
- * BIP: Bounded Inverse Power
- * GCM: Gaussian Core Model
- * Exp: Exponential potential
- * LJ:  Lennard-Jones potential
+ * BIP or BoundedInversePower Bounded Inverse Power
+ * GCM or GaussianCoreModel: Gaussian Core Model
+ * EXP or Exponential: Exponential potential
+ * LJ or LennardJones:  Lennard-Jones potential
  */
 
 class MD_tools {

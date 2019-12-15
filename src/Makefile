@@ -7,7 +7,7 @@ INCLUDE := ../include
 # FILES := $(filter-out main.cpp , $(basename $(wildcard *.cpp)))
 FILES := $(basename $(wildcard *.cpp))
 OBJS = MD.o isomorph.o md_pair_potentials.o stat_file_logger.o \
-	   phase_transition.o helper_functions.o
+	   phase_transition.o helper_functions.o mdmain.o
 
 all: md libmd.a
 

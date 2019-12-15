@@ -1,5 +1,6 @@
 #include "MD.h"
 // TODO: create internal structures for quantities such as velocities, rs, fs,
+// todo: add logger https://github.com/gabime/spdlog
 
 // FileIO has to be loaded after the math libraries
 #include "FileIO.h"  // FileIO class
@@ -9,9 +10,11 @@
 MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
   // Assign number of iterations of the MD algorithm
   __steps = step_number;
+  std::cout << "Number of steps: " << __steps << std::endl;
 
   // Assign the type of lattice
   __lattice = lattice;
+  std::cout << "Lattice type: " << __lattice << std::endl;
 
   try {
     if (particles.empty()) {
@@ -41,6 +44,7 @@ MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
   } else {
     __N = __Nx * __Ny * __Nz;
   }
+  std::cout << "Number of particles: " << __N << std::endl;
 
   __dir = ".";
 
@@ -122,11 +126,15 @@ void MD::load_options(std::string out_directory = ".",
     }
   }
 
+  std::cout << "Output directory set to: " << __dir << std::endl;
+
   // Save all the positions for the fluid
   __visualise = track_particles;
+  std::cout << "Particle visualisation set to: " << __visualise << std::endl;
 
   // Accuracy of RDF
   __nhist = rdf_bins;
+  std::cout << "RDF accuracy set to: " << __nhist << " bins" << std::endl;
 
   // Ensuring the number of steps is greater than the rdf equilibration period
   try {
@@ -145,6 +153,7 @@ void MD::load_options(std::string out_directory = ".",
     std::cerr << "         rdf_wait is set to 0" << std::endl;
     __rdf_wait = 0;
   }
+  std::cout << "RDF equilibration period set to: " << __rdf_wait << std::endl;
 }
 
 // Methods for MD Analysis
@@ -321,6 +330,7 @@ double MD::verlet_algorithm(std::vector<double> &rx, std::vector<double> &ry,
 
     // Apply periodic boundary conditions to ensure particles remain
     // inside the box
+    // todo: make boundary conditions routines
     if (rx[i] > __L) rx[i] = rx[i] - __L;
     if (rx[i] < 0.0) rx[i] = rx[i] + __L;
     if (ry[i] > __L) ry[i] = ry[i] - __L;
@@ -437,7 +447,7 @@ void MD::structure_factor(std::vector<double> &rx, std::vector<double> &ry,
 
 void MD::simulation(std::string simulation_name, double DENSITY,
                     double TEMPERATURE, double POWER = NAN, double A_CST = NAN,
-                    std::string pp_type = "GCM") {
+                    std::string pp_type = "LennardJones") {
   // Initialise the variables with the input parameters
   // Name the simulation. This will be used as a prefix in the files
   __simulation_name = simulation_name;
@@ -494,7 +504,7 @@ void MD::simulation(std::string simulation_name, double DENSITY,
         __dir + logger.file_naming("/" + __simulation_name + "RDF", __steps,
                                    __N, __rho, __T0, __power, __a_cst);
 
-    logger.open_files(data, rdf, pos);
+    logger.open_files(data, rdf, pos); //todo: make more general
     logger.time_stamp(logger.DATA,
                       "# step \t rho \t T \t U \t K \t Pc \t Pk \t MSD \t VAF "
                       "\t SFx \t SFy \t SFz");
@@ -715,28 +725,28 @@ std::string MD::set_simulation_params(double &rho, double &T, double &power,
       "Fluid parameters: rho: " + stat_file::convert_to_string(rho, 4) +
       " T: " + stat_file::convert_to_string(T, 4);
 
-  params = "Lattice: " + get_lattice_structure() + "\n";
+  params = "Lattice: " + get_lattice_structure() + "\n" + params;
 
-  if (pp_type == "GCM" || pp_type == "GaussianCoreModel") {
-    params = "Potential: GCM, " + params;
+  if (pp_type == "GaussianCoreModel") {
+    params = "Potential: GaussianCoreModel, " + params;
     __power = NAN;  // Set the variable to NAN to be ignore by the logger
     __a_cst = NAN;  // Set the variable to NAN to be ignore by the logger
   }
 
-  else if (pp_type == "LJ" || pp_type == "LennardJones") {
-    params = "Potential: LJ, " + params;
+  else if (pp_type == "LennardJones") {
+    params = "Potential: LennardJones, " + params;
     __power = NAN;  // Set the variable to NAN to be ignore by the logger
     __a_cst = NAN;  // Set the variable to NAN to be ignore by the logger
   }
 
-  else if (pp_type == "EXP" || pp_type == "Exponential") {
-    params = "Potential: EXP, " + params;
+  else if (pp_type == "Exponential") {
+    params = "Potential: Exponential, " + params;
     params += " m: " + stat_file::convert_to_string(power, 4);
     params += " C: " + stat_file::convert_to_string(a, 4);
   }
 
-  else if (pp_type == "BIP" || pp_type == "BoundedInversePower") {
-    params = "Potential: BIP, " + params;
+  else if (pp_type == "BoundedInversePower") {
+    params = "Potential: BoundedInversePower, " + params;
     params += " n: " + stat_file::convert_to_string(power, 4);
     params += " A: " + stat_file::convert_to_string(a, 4);
   }

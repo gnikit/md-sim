@@ -152,7 +152,8 @@ class MD {
    *               When 'a' = 0, then fluid is pure MD, increasing
    *               'a' results into softening of the pair potential.
    * @param pp_type: The type of the pair potential the simulation is
-   *                 modelling. Options are "BIP", "GCM", "EXP", "LJ"
+   *                 modelling. Options are "BoundedInversePower",
+   *                 "GaussianCoreModel", "Exponential", "LennardJones"
    */
   void simulation(std::string simulation_name, double DENSITY,
                   double TEMPERATURE, double POWER, double A_CST,

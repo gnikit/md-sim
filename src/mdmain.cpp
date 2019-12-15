@@ -3,6 +3,8 @@
 using namespace Spud;
 
 int md_options_interface::mdmain(std::string xml_file) {
+  std::cout << "In mdmain" << std::endl;
+
   // load the xml file in memory
   load_options(xml_file);
   constructor_type constructor;
@@ -59,11 +61,15 @@ int md_options_interface::mdmain(std::string xml_file) {
   } else
     std::cerr << "Unrecognised simulation_name provided in xml" << std::endl;
 
+  std::cout << "Exiting mdmain" << std::endl;
+
   return 0;
 }
 
 int md_options_interface::load_constructor_options(
     constructor_type& constructor_options) {
+  std::cout << "In load_constructor_options" << std::endl;
+
   std::string path = "/constructor";
   OptionError error;
 
@@ -81,10 +87,14 @@ int md_options_interface::load_constructor_options(
   error = get_option(path + "/lattice/name", constructor_options.lattice);
   assert(error == SPUD_NO_ERROR);
 
+  std::cout << "Exiting load_constructor_options" << std::endl;
+
   return 0;
 }
 
 int md_options_interface::load_additional_options(options_type& options) {
+  std::cout << "In load_additional_options" << std::endl;
+
   std::string path = "/options";
   OptionError error;
   int temp;
@@ -107,11 +117,16 @@ int md_options_interface::load_additional_options(options_type& options) {
     assert(error == SPUD_NO_ERROR);
     options.rdf_wait = static_cast<size_t>(temp);
   }
+
+  std::cout << "Exiting load_additional_options" << std::endl;
+
   return 0;
 }
 
 int md_options_interface::load_simulation_options(
     simulation_type& sim_options) {
+  std::cout << "In load_simulation_options" << std::endl;
+
   std::string path = "/simulation_type";
   OptionError error;
 
@@ -132,8 +147,7 @@ int md_options_interface::load_simulation_options(
   assert(error == SPUD_NO_ERROR);
 
   if (have_option(pp_path + "/potential_strength")) {
-    error =
-        get_option(pp_path + "/potential_strength", sim_options.power);
+    error = get_option(pp_path + "/potential_strength", sim_options.power);
     assert(error == SPUD_NO_ERROR);
   }
   if (have_option(pp_path + "/softening_parameter")) {
@@ -148,12 +162,20 @@ int md_options_interface::load_simulation_options(
     error = get_option(path + "/density_increment", sim_options.density_inc);
     assert(error == SPUD_NO_ERROR);
   }
+
+  std::cout << "Exiting load_simulation_options" << std::endl;
+
   return 0;
 }
 
 int md_options_interface::load_test_options(test_type& test) {
+  std::cout << "In load_test_options" << std::endl;
+
   std::string path = "/enable_testing";
 
   if (have_option(path)) test.is_testing = true;
+
+  std::cout << "Exiting load_test_options" << std::endl;
+
   return 0;
 }

@@ -2,10 +2,7 @@
 <grammar xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="">
   <!-- The SPUD base schema -->
   <include href="spud_base.rng"/>
-  <!--
-    TODO: force constructor compression to false when enabling and vice versa
-    TODO: remove compression parameter fom options, is set by phase_transition
-  -->
+  <!-- TODO: fix phase transition variables -->
   <define name="lattice_type">
     <choice>
       <element name="lattice">
@@ -35,7 +32,7 @@
           <value>RANDOM</value>
         </attribute>
         <element name="variance">
-          <a:documentation>Variance of the normal istributions</a:documentation>
+          <a:documentation>Variance of the normal distributions</a:documentation>
           <ref name="real"/>
         </element>
         <element name="fixed_seed">
@@ -48,9 +45,9 @@
       </element>
     </choice>
   </define>
-  <define name="constructor_types">
-    <element name="constructor">
-      <a:documentation>Constructor initialisation for MD or phase_transition objects.</a:documentation>
+  <define name="setup_sim">
+    <element name="setup">
+      <a:documentation>setup initialisation for MD or phase_transition objects.</a:documentation>
       <element name="steps">
         <a:documentation>Number of iteration steps the MD algorithm should run for.</a:documentation>
         <ref name="integer"/>
@@ -77,49 +74,51 @@ BCC: particles **3 *2</a:documentation>
         <ref name="comment"/>
       </element>
       <ref name="lattice_type"/>
+      <optional>
+        <ref name="options"/>
+      </optional>
     </element>
   </define>
   <define name="options">
-    <element name="options">
-      <a:documentation>Set a series of options for fine-tunning an MD run</a:documentation>
-      <optional>
-        <element name="output_dir">
-          <a:documentation>Output directory for the files to be produced during a simulation.</a:documentation>
-          <data type="string"/>
-        </element>
-      </optional>
-      <optional>
-        <!--
-          ## Set the flag for incremental resizing of the simulation box.
-          ## Set to true for phase transition studies else set to false.
-          element compression { empty }?,
-        -->
-        <element name="rdf_bins">
-          <a:documentation>Accuracy of the Radial Distribution Function (RDF).
+    <ref name="simulation_name"/>
+    <ref name="iterative_methods"/>
+    <optional>
+      <element name="output_dir">
+        <a:documentation>Output directory for the files to be produced during a simulation.</a:documentation>
+        <data type="string"/>
+      </element>
+    </optional>
+    <optional>
+      <!--
+        ## Set the flag for incremental resizing of the simulation box.
+        ## Set to true for phase transition studies else set to false.
+        element compression { empty }?,
+      -->
+      <element name="rdf_bins">
+        <a:documentation>Accuracy of the Radial Distribution Function (RDF).
 A large number of bins will result into a very accurate RDF,
 however if the simulation is short (small number of steps) the
 results will be dominated by statistical noise.</a:documentation>
-          <ref name="integer"/>
-        </element>
-      </optional>
-      <optional>
-        <element name="track_particles">
-          <a:documentation>If enabled will save in ASCII format the positions of all the
+        <ref name="integer"/>
+      </element>
+    </optional>
+    <optional>
+      <element name="rdf_equilibrate">
+        <a:documentation>An equilibration period for the RDF in time step units.
+The RDF will begin to be collected rdf_equilibrate steps
+from the start of the simulation.</a:documentation>
+        <ref name="integer"/>
+      </element>
+    </optional>
+    <optional>
+      <element name="track_particles">
+        <a:documentation>If enabled will save in ASCII format the positions of all the
 particles for the entire simulation.
 The datafiles can then be viewed with the python tools.
 NOTE: For large simulations this will be slow.</a:documentation>
-          <empty/>
-        </element>
-      </optional>
-      <optional>
-        <element name="rdf_equilibrate">
-          <a:documentation>An equilibration period for the RDF in time step units.
-The RDF will begin to be collected rdf_equilibrate steps
-from the start of the simulation.</a:documentation>
-          <ref name="integer"/>
-        </element>
-      </optional>
-    </element>
+        <empty/>
+      </element>
+    </optional>
   </define>
   <define name="simulation_name">
     <element name="simulation_name">
@@ -174,6 +173,24 @@ from the start of the simulation.</a:documentation>
       <a:documentation>Fluid temperature (unitless).</a:documentation>
       <ref name="real"/>
     </element>
+    <optional>
+      <element name="dt">
+        <a:documentation>Time step</a:documentation>
+        <ref name="real"/>
+        <optional>
+          <element name="normalise_with_temperature">
+            <empty/>
+          </element>
+        </optional>
+      </element>
+    </optional>
+    <optional>
+      <element name="cut_off">
+        <a:documentation>Radius cut-off
+The simulation is only run within this radius of the box</a:documentation>
+        <ref name="real"/>
+      </element>
+    </optional>
   </define>
   <define name="pair_potential_parameters">
     <element name="potential_strength">
@@ -189,11 +206,9 @@ no-smoothening and 2.0 to a very smoothed fluid.</a:documentation>
     </element>
   </define>
   <define name="simulation_single">
-    <ref name="simulation_name"/>
     <ref name="potentials"/>
   </define>
   <define name="simulation_compress">
-    <ref name="simulation_name"/>
     <ref name="potentials"/>
     <element name="final_density">
       <a:documentation>The density that the compression aims to reach.</a:documentation>
@@ -231,13 +246,23 @@ expansions/compressions in the opposite direction of the phase diagram.</a:docum
       </element>
     </choice>
   </define>
+  <define name="iterative_methods">
+    <element name="iterative_method">
+      <choice>
+        <attribute name="name">
+          <value>VerletAlgorithm</value>
+        </attribute>
+        <attribute name="name">
+          <value>RK4 </value>
+        </attribute>
+      </choice>
+    </element>
+    <ref name="comment"/>
+  </define>
   <start>
     <element name="input_variables">
       <a:documentation>Input variables for a molecular dynamics simulation</a:documentation>
-      <ref name="constructor_types"/>
-      <optional>
-        <ref name="options"/>
-      </optional>
+      <ref name="setup_sim"/>
       <ref name="simulation"/>
       <optional>
         <element name="enable_testing">

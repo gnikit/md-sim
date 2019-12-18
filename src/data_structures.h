@@ -1,6 +1,4 @@
 
-#include <algorithm>
-#include <iterator>
 #include <map>
 #include <string>
 #include <vector>
@@ -69,100 +67,10 @@ struct vector_3d {
   std::vector<double> x;
   std::vector<double> y;
   std::vector<double> z;
-
-  vector_3d(std::vector<double> x_in = {0}, std::vector<double> y_in = {0},
-            std::vector<double> z_in = {0}) {
-    x.swap(x_in);
-    y.swap(y_in);
-    z.swap(z_in);
-  }
-
-  vector_3d(size_t x_size, size_t y_size, size_t z_size) {
-    x.resize(x_size);
-    y.resize(y_size);
-    z.resize(z_size);
-  }
-  vector_3d(size_t size) : vector_3d(size, size, size) {}
-
-  inline vector_3d operator=(const vector_3d& a) {
-    x = a.x;
-    y = a.y;
-    z = a.z;
-    return *this;
-  }
-
-  inline vector_3d operator+(const vector_3d& a) const {
-    vector_3d temp(a.x.size(), a.y.size(), a.z.size());
-    std::transform(x.begin(), x.end(), a.x.begin(), temp.x.begin(),
-                   std::plus<double>());
-    std::transform(y.begin(), y.end(), a.y.begin(), temp.y.begin(),
-                   std::plus<double>());
-    std::transform(z.begin(), z.end(), a.z.begin(), temp.z.begin(),
-                   std::plus<double>());
-    return vector_3d(temp);
-  }
-
-  inline vector_3d operator-(const vector_3d& a) const {
-    vector_3d temp(a.x.size(), a.y.size(), a.z.size());
-    std::transform(x.begin(), x.end(), a.x.begin(), temp.x.begin(),
-                   std::minus<double>());
-    std::transform(y.begin(), y.end(), a.y.begin(), temp.y.begin(),
-                   std::minus<double>());
-    std::transform(z.begin(), z.end(), a.z.begin(), temp.z.begin(),
-                   std::minus<double>());
-    return vector_3d(temp);
-  };
-
-  inline vector_3d operator*(const vector_3d& a) const {
-    vector_3d temp(a.x.size(), a.y.size(), a.z.size());
-    std::transform(x.begin(), x.end(), a.x.begin(), temp.x.begin(),
-                   std::multiplies<double>());
-    std::transform(y.begin(), y.end(), a.y.begin(), temp.y.begin(),
-                   std::multiplies<double>());
-    std::transform(z.begin(), z.end(), a.z.begin(), temp.z.begin(),
-                   std::multiplies<double>());
-    return vector_3d(temp);
-  }
-
-  inline vector_3d operator/(const vector_3d& a) const {
-    vector_3d temp(a.x.size(), a.y.size(), a.z.size());
-    std::transform(x.begin(), x.end(), a.x.begin(), temp.x.begin(),
-                   std::divides<double>());
-    std::transform(y.begin(), y.end(), a.y.begin(), temp.y.begin(),
-                   std::divides<double>());
-    std::transform(z.begin(), z.end(), a.z.begin(), temp.z.begin(),
-                   std::divides<double>());
-    return vector_3d(temp);
-  }
 };
 
 struct point_3d {
   double x;
   double y;
   double z;
-
-  point_3d(double x = 0, double y = 0, double z = 0) : x(x), y(y), z(z) {}
-
-  inline point_3d operator=(const point_3d& a) {
-    x = a.x;
-    y = a.y;
-    z = a.z;
-    return *this;
-  }
-
-  inline point_3d operator+(const point_3d& a) const {
-    return point_3d(x + a.x, y + a.y, z + a.z);
-  }
-
-  inline point_3d operator-(const point_3d& a) const {
-    return point_3d(x - a.x, y - a.y, z - a.z);
-  };
-
-  inline point_3d operator*(const point_3d& a) const {
-    return point_3d(x * a.x, y * a.y, z * a.z);
-  }
-
-  inline point_3d operator/(const point_3d& a) const {
-    return point_3d(x / a.x, y / a.y, z / a.z);
-  }
 };

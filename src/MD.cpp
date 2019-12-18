@@ -551,6 +551,72 @@ void MD::structure_factor(vector_3d &r) {
   sf.z.push_back(kz);
 }
 
+std::tuple<double, double> MD::calculate_forces(size_t &step_idx,
+                                                pair_potential_type force) {
+  // Resetting forces
+  std::fill(f.x.begin(), f.x.end(), 0);
+  std::fill(f.y.begin(), f.y.end(), 0);
+  std::fill(f.z.begin(), f.z.end(), 0);
+
+  // Reseting <Potential> U to 0
+  double U = 0;   // Potential Energy
+  double PC = 0;  // Configurational Pressure
+
+  size_t i, j, igr;
+  for (i = 0; i < options.N - 1; ++i) {
+    for (j = i + 1; j < options.N; ++j) {
+      // distance between particle i and j
+      double x = r.x[i] - r.x[j];  // Separation distance
+      double y = r.y[i] - r.y[j];  // between particles i and j
+      double z = r.z[i] - r.z[j];  // in Cartesian
+
+      // Get the shortest image of the two particles
+      // if the particles are near the periodic boundary,
+      // this image is their reflection.
+      if (x > (0.5 * options.L)) x = x - options.L;
+      if (x < (-0.5 * options.L)) x = x + options.L;
+      if (y > (0.5 * options.L)) y = y - options.L;
+      if (y < (-0.5 * options.L)) y = y + options.L;
+      if (z > (0.5 * options.L)) z = z - options.L;
+      if (z < (-0.5 * options.L)) z = z + options.L;
+
+      // Pair potential radius
+      double radius = sqrt((x * x) + (y * y) + (z * z));
+
+      // Force loop
+      if (radius < options.cut_off) {
+        // Allows the user to choose different pair potentials
+        auto [ff, temp_u] = force(radius, options.power, options.a_cst);
+
+        // Average potential energy
+        U += temp_u;
+
+        // Configurational pressure
+        PC += radius * ff;
+
+        // Canceling the ij and ji pairs
+        // Taking the lower triangular matrix
+        f.x[i] += x * ff / radius;
+        f.x[j] -= x * ff / radius;
+        f.y[i] += y * ff / radius;
+        f.y[j] -= y * ff / radius;
+        f.z[i] += z * ff / radius;
+        f.z[j] -= z * ff / radius;
+
+        // Radial Distribution
+        // measured with a delay, since the system requires a few thousand
+        // time-steps to reach equilibrium
+        if (step_idx > options.rdf_options.rdf_wait) {
+          igr = round(options.rdf_options.rdf_bins * radius / options.cut_off);
+          rdf[igr] += 1;
+        }
+      }
+    }
+  }
+
+  return std::make_tuple(U, PC);
+}
+
 void MD::simulation(std::string simulation_name, double DENSITY,
                     double TEMPERATURE, double POWER, double A_CST,
                     std::string pp_type) {
@@ -582,8 +648,7 @@ void MD::simulation() {
 
   /* Gets the pair potential for the simulation based on a map of the
      initials of the pair potential and the pair potential itself. */
-  pair_potential_type pair_potential_force =
-      get_force_func(options.potential_type);
+  pair_potential_type force = get_force_func(options.potential_type);
 
   // Generating the filenames for the output
   // Start a new stream only if the fluid is not being compressed
@@ -654,8 +719,7 @@ void MD::simulation() {
         // Force loop
         if (radius < options.cut_off) {
           // Allows the user to choose different pair potentials
-          auto [ff, temp_u] =
-              pair_potential_force(radius, options.power, options.a_cst);
+          auto [ff, temp_u] = force(radius, options.power, options.a_cst);
 
           // Average potential energy
           U += temp_u;

@@ -167,13 +167,14 @@ class MD {
    *                    defined and not passed as arguments
    * @return KE: kinetic energy (unormalised)
    */
-  double verlet_algorithm(vector_3d &r, vector_3d &v, vector_3d &f,
-                        bool sample_msd);
+  double verlet_algorithm(vector_3d &r, vector_3d &v, vector_3d &f, bool msd);
 
-  void rk4_algorithm(vector_3d &r, vector_3d &v, vector_3d &f);
+  double rk4_algorithm(vector_3d &r, vector_3d &v, vector_3d &f, bool msd);
 
-  double stepping_algorithm(vector_3d &r, vector_3d &v, vector_3d &f,
-                            bool sample_msd);
+  double stepping_algorithm(vector_3d &r, vector_3d &v, vector_3d &f, bool msd);
+
+  std::tuple<double, double> calculate_forces(size_t &step_index,
+                                              pair_potential_type potential);
 
   void apply_boundary_conditions();
   /**

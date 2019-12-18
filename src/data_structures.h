@@ -73,4 +73,29 @@ struct point_3d {
   double x;
   double y;
   double z;
+
+  point_3d(double x = 0, double y = 0, double z = 0) : x(x), y(y), z(z) {}
+
+  inline point_3d operator=(const point_3d& a) {
+    x = a.x;
+    y = a.y;
+    z = a.z;
+    return *this;
+  }
+
+  inline point_3d operator+(const point_3d& a) const {
+    return point_3d(x + a.x, y + a.y, z + a.z);
+  }
+
+  inline point_3d operator-(const point_3d& a) const {
+    return point_3d(x - a.x, y - a.y, z - a.z);
+  };
+
+  inline point_3d operator*(const point_3d& a) const {
+    return point_3d(x * a.x, y * a.y, z * a.z);
+  }
+
+  inline point_3d operator/(const point_3d& a) const {
+    return point_3d(x / a.x, y / a.y, z / a.z);
+  }
 };

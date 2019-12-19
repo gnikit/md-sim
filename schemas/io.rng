@@ -33,7 +33,7 @@ particles for the entire simulation.
 The datafiles can then be viewed with the python tools.
 NOTE: For large simulations this will be slow.</a:documentation>
         <attribute name="name">
-          <value>true</value>
+          <value>false</value>
         </attribute>
       </element>
       <element name="track_particles">
@@ -42,7 +42,7 @@ particles for the entire simulation.
 The datafiles can then be viewed with the python tools.
 NOTE: For large simulations this will be slow.</a:documentation>
         <attribute name="name">
-          <value>false</value>
+          <value>true</value>
         </attribute>
       </element>
     </choice>

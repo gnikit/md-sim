@@ -28,14 +28,24 @@ struct test_options_type {
   bool is_testing = false;  // fixes the seed for regression testing
 };
 
-struct options_type {
+struct io_options_type {
+  bool msd = true;                   // mean square displacement output
+  bool rdf = true;                   // radial distribution function output
+  bool vaf = true;                   // velocity autocorrelation output
+  bool energies = true;              // potential energy output
+  bool pressure = true;              // configurational pressure output
+  bool position = true;              // particles' last positions output
+  bool sf = true;                    // structure factor output
+  bool visualise = false;            // save all positions, of all particles
   std::string dir = ".";             // file output directory
-  std::string simulation_type = "";  // type of simulation e.g. NormalRun
   std::string simulation_name = "";  // simulation prefix/ name
+};
+
+struct options_type {
+  std::string simulation_type = "";  // type of simulation e.g. NormalRun
   std::string potential_type = "";   // pair potential type
   std::string stepping_alg = "";     // iterative algorithm of particles
   std::string lattice = "";          // lattice formation
-  bool visualise = false;            // save all positions, of all particles
   std::vector<size_t> particles;     // number of particles in each axis
   double random_lattice_var = 0;     // variance of dist for random lattice
   size_t steps = 2000;               // number of total iterations
@@ -53,6 +63,7 @@ struct options_type {
   double cut_off = 0;                // cut off radius of simulation
   double scale_v = 0;                // velocity scaling
 
+  io_options_type io_options;
   rdf_options_type rdf_options;
   compression_options_type compression_options;
   test_options_type test_options;
@@ -98,4 +109,26 @@ struct point_3d {
   inline point_3d operator/(const point_3d& a) const {
     return point_3d(x / a.x, y / a.y, z / a.z);
   }
+};
+
+struct data_type {
+  vector_3d r;      // Position Arrays
+  vector_3d v;      // Velocity Arrays
+  vector_3d f;      // Force arrays
+  vector_3d Cv;     // VAF arrays
+  vector_3d MSD_r;  // used in MSD calculation
+  vector_3d MSD;    // MSD arrays
+  vector_3d sf;     // Structure factor k-arrays
+
+  std::vector<double> Cr;
+  std::vector<double> msd;
+  std::vector<double> u_en;
+  std::vector<double> k_en;
+  std::vector<double> pc;
+  std::vector<double> pk;
+  std::vector<double> temperature;
+  std::vector<double> density;
+  std::vector<double> rdf;
+
+  options_type options;
 };

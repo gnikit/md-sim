@@ -8,8 +8,17 @@
       <integer_value rank="1" shape="3">8 8 8</integer_value>
     </particles>
     <lattice name="SC"/>
-    <simulation_name>missing_options_</simulation_name>
   </setup>
+  <io>
+    <simulation_name>missing_options_</simulation_name>
+    <track_particles name="false"/>
+    <energies name="true"/>
+    <pressure name="true"/>
+    <msd name="true"/>
+    <rdf name="true"/>
+    <vaf name="true"/>
+    <positions name="true"/>
+  </io>
   <simulation_type name="NormalRun">
     <pair_potential name="LennardJones">
       <density>

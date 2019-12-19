@@ -8,7 +8,6 @@
       <integer_value rank="1" shape="3">8 8 8</integer_value>
     </particles>
     <lattice name="SC"/>
-    <simulation_name>bip_potential_test_</simulation_name>
     <rdf_bins>
       <integer_value rank="0">200</integer_value>
     </rdf_bins>
@@ -16,6 +15,16 @@
       <integer_value rank="0">300</integer_value>
     </rdf_equilibrate>
   </setup>
+  <io>
+    <simulation_name>bip_potential_test_</simulation_name>
+    <track_particles name="false"/>
+    <energies name="true"/>
+    <pressure name="true"/>
+    <msd name="true"/>
+    <rdf name="true"/>
+    <vaf name="true"/>
+    <positions name="true"/>
+  </io>
   <simulation_type name="NormalRun">
     <pair_potential name="BoundedInversePower">
       <density>

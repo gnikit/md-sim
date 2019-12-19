@@ -8,8 +8,6 @@
       <integer_value rank="1" shape="3">8 8 8</integer_value>
     </particles>
     <lattice name="SC"/>
-    <simulation_name>lj_potential_test_</simulation_name>
-    <output_dir>.</output_dir>
     <rdf_bins>
       <integer_value rank="0">200</integer_value>
     </rdf_bins>
@@ -17,6 +15,17 @@
       <integer_value rank="0">300</integer_value>
     </rdf_equilibrate>
   </setup>
+  <io>
+    <simulation_name>lj_potential_test_</simulation_name>
+    <output_dir>.</output_dir>
+    <track_particles name="false"/>
+    <energies name="true"/>
+    <pressure name="true"/>
+    <msd name="true"/>
+    <rdf name="true"/>
+    <vaf name="true"/>
+    <positions name="true"/>
+  </io>
   <simulation_type name="NormalRun">
     <pair_potential name="LennardJones">
       <density>

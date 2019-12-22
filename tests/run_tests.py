@@ -269,11 +269,11 @@ class TestLatticeStructures(unittest.TestCase):
 
         # Test variables
         pos_test = np.loadtxt(
-            f'{sim_name}Positions_Velocities{test_string}', usecols=(0, 1, 2), unpack=True)
+            f'{sim_name}Positions_Velocities{test_string}', usecols=(1, 2, 3), unpack=True)
 
         # Reference variables
         pos_ref = np.loadtxt('test_positions.log',
-                             usecols=(0, 1, 2), unpack=True)
+                             usecols=(1, 2, 3), unpack=True)
 
         # Test data for consistency
         result = np.allclose(pos_ref, pos_test)
@@ -302,11 +302,11 @@ class TestLatticeStructures(unittest.TestCase):
 
         # Test variables
         pos_test = np.loadtxt(
-            f'{sim_name}Positions_Velocities{test_string}', usecols=(0, 1, 2), unpack=True)
+            f'{sim_name}Positions_Velocities{test_string}', usecols=(1, 2, 3), unpack=True)
 
         # Reference variables
         pos_ref = np.loadtxt('test_positions.log',
-                             usecols=(0, 1, 2), unpack=True)
+                             usecols=(1, 2, 3), unpack=True)
 
         # Test data for consistency
         result = np.allclose(pos_ref, pos_test)
@@ -335,11 +335,11 @@ class TestLatticeStructures(unittest.TestCase):
 
         # Test variables
         pos_test = np.loadtxt(
-            f'{sim_name}Positions_Velocities{test_string}', usecols=(0, 1, 2), unpack=True)
+            f'{sim_name}Positions_Velocities{test_string}', usecols=(1, 2, 3), unpack=True)
 
         # Reference variables
         pos_ref = np.loadtxt('test_positions.log',
-                             usecols=(0, 1, 2), unpack=True)
+                             usecols=(1, 2, 3), unpack=True)
 
         # Test data for consistency
         result = np.allclose(pos_ref, pos_test)

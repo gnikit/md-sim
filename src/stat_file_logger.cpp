@@ -8,10 +8,6 @@ stat_file::stat_file() {}
 
 std::vector<std::ofstream> stat_file::open_files(
     std::vector<std::string> const &file_names) {
-  /**
-   * Open/Create if file does not exist.
-   * Overwrites existing data.
-   */
   std::vector<std::ofstream> file_streams;
   for (size_t file = 0; file < file_names.size(); ++file) {
     std::ofstream temp;
@@ -32,11 +28,17 @@ void stat_file::write_data_file(
   size_t rows = all_output_vectors[0].size();
   for (auto const &i : all_output_vectors)
     if (i.size() > rows) rows = i.size();
-  
+
   for (size_t i = 0; i < rows; ++i) {
     std::string line = "";
     for (size_t vec = 0; vec < all_output_vectors.size(); ++vec) {
-      line += '\t' + convert_to_string(all_output_vectors[vec][i], 10);
+      try {
+        line += '\t' + convert_to_string(all_output_vectors.at(vec).at(i), 10);
+      }
+      // if the array goes out of bounds then just add 0s
+      catch (const std::out_of_range &e) {
+        line += '\t' + "0." + std::string(10, '0');
+      }
     }
     // The main data file is always the first entry in the vector of streams
     file_stream << (i + 1) << line << std::endl;
@@ -45,14 +47,6 @@ void stat_file::write_data_file(
 
 void stat_file::time_stamp(std::ofstream &file_stream,
                            std::string const &variables) {
-  /**
-   * Dates the file and allows the input of a header
-   * Input a file stream to write and string of characters to display as
-   * headers.
-   *
-   * @param &stream: Stream that should be timestaped
-   * @param variables: A header that can be included underneath the timestamp
-   */
   std::chrono::time_point<std::chrono::system_clock> instance;
   instance = std::chrono::system_clock::now();
   std::time_t date_time = std::chrono::system_clock::to_time_t(instance);
@@ -65,21 +59,6 @@ std::string stat_file::file_naming(std::string const &prefix,
                                    double const &DENSITY,
                                    double const &TEMPERATURE,
                                    double const &POWER, double const &A_cst) {
-  /**
-   * Generates a unique filename for the simulation results to be stored.
-   * The method infers from the constructor the number of particles used
-   * and the duration of the simulation (steps).
-   *
-   * @param prefix: File name preceeding the file id
-   * @param DENSITY: Fluid density
-   * @param TEMPERATURE: Fluid temperature
-   * @param POWER: Pair potential power
-   * @param A_cst: Softening parameter constant
-   *
-   * @return: string structured as follows
-   *          INPUT_DIR/prefix_step_#_particles_#_rho_#_T_#_n_#_A_#.log
-   */
-
   // Individual streams handling double to string conversions
   std::stringstream A_stream, rho_stream, T_stream;
 
@@ -116,15 +95,6 @@ std::string stat_file::file_naming(std::string const &prefix,
 
 std::string stat_file::convert_to_string(const double &x,
                                          const int &precision) {
-  /**
-   * Convert doubles to a string with a variable degree of precision.
-   *
-   * @param &x: Double number to be converted
-   * @param &precision: Precision of the double when converted to string
-   *
-   * @return: string
-   */
-
   std::ostringstream ss;
   ss.str(std::string());  // don't forget to empty the stream
   ss << std::fixed << std::setprecision(precision) << x;
@@ -132,13 +102,6 @@ std::string stat_file::convert_to_string(const double &x,
   return ss.str();
 }
 
-/**
- * @brief a wrapper for the FileIO::Write2File method
- * 
- * @param output_quantities 
- * @param fstream 
- * @param header 
- */
 void stat_file::write_file(std::vector<std::vector<double>> &output_quantities,
                            std::ofstream &fstream, std::string const &header) {
   std::string new_header = "";

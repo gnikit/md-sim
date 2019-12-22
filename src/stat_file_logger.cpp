@@ -1,41 +1,51 @@
 #include "stat_file_logger.h"
+#include "FileIO.h"
 
 // Passes the name of the variable to a stream
 #define GET_VAR_NAME(stream, variable) (stream) << #variable
 
 stat_file::stat_file() {}
 
-void stat_file::open_files(std::string &data, std::string &rdf,
-                           std::string &pos) {
-  /*
+std::vector<std::ofstream> stat_file::open_files(
+    std::vector<std::string> const &file_names) {
+  /**
    * Open/Create if file does not exist.
    * Overwrites existing data.
    */
+  std::vector<std::ofstream> file_streams;
+  for (size_t file = 0; file < file_names.size(); ++file) {
+    std::ofstream temp;
+    temp.open(file_names[file], std::ios::out | std::ios::trunc);
+    file_streams.push_back(std::move(temp));
+  }
 
-  DATA.open(data, std::ios::out | std::ios::trunc);
-  RDF.open(rdf, std::ios::out | std::ios::trunc);
-  POS.open(pos, std::ios::out | std::ios::trunc);
+  return file_streams;
 }
 
 void stat_file::write_data_file(
-    size_t STEPS, std::vector<double> &density,
-    std::vector<double> &temperature, std::vector<double> &u_en,
-    std::vector<double> &k_en, std::vector<double> &pc, std::vector<double> &pk,
-    std::vector<double> &msd, std::vector<double> &Cr, std::vector<double> &sfx,
-    std::vector<double> &sfy, std::vector<double> &sfz) {
-  /*
-   * Writes values of parameters to Data file.
-   */
-  for (size_t i = 0; i < STEPS; ++i) {
-    DATA << (i + 1) << '\t' << density[i] << '\t' << temperature[i] << '\t'
-         << u_en[i] << '\t' << k_en[i] << '\t' << pc[i] << '\t' << pk[i] << '\t'
-         << msd[i] << '\t' << Cr[i] << '\t' << sfx[i] << '\t' << sfy[i] << '\t'
-         << sfz[i] << std::endl;
+    std::ofstream &file_stream, std::string const &header,
+    std::vector<std::vector<double>> const &all_output_vectors) {
+  // Write the timestamp and header to the stream
+  time_stamp(file_stream, header);
+
+  // Find the largest size vector in all our vectors
+  size_t rows = all_output_vectors[0].size();
+  for (auto const &i : all_output_vectors)
+    if (i.size() > rows) rows = i.size();
+  
+  for (size_t i = 0; i < rows; ++i) {
+    std::string line = "";
+    for (size_t vec = 0; vec < all_output_vectors.size(); ++vec) {
+      line += '\t' + convert_to_string(all_output_vectors[vec][i], 10);
+    }
+    // The main data file is always the first entry in the vector of streams
+    file_stream << (i + 1) << line << std::endl;
   }
 }
 
-void stat_file::time_stamp(std::ofstream &stream, std::string variables) {
-  /*
+void stat_file::time_stamp(std::ofstream &file_stream,
+                           std::string const &variables) {
+  /**
    * Dates the file and allows the input of a header
    * Input a file stream to write and string of characters to display as
    * headers.
@@ -46,14 +56,16 @@ void stat_file::time_stamp(std::ofstream &stream, std::string variables) {
   std::chrono::time_point<std::chrono::system_clock> instance;
   instance = std::chrono::system_clock::now();
   std::time_t date_time = std::chrono::system_clock::to_time_t(instance);
-  stream << "# Created on: " << std::ctime(&date_time);
-  stream << variables << std::endl;
+  file_stream << "# Created on: " << std::ctime(&date_time);
+  file_stream << variables << std::endl;
 }
 
-std::string stat_file::file_naming(std::string prefix, size_t &STEPS, size_t &N,
-                                   double &DENSITY, double &TEMPERATURE,
-                                   double &POWER, double &A_cst) {
-  /*
+std::string stat_file::file_naming(std::string const &prefix,
+                                   size_t const &STEPS, size_t const &N,
+                                   double const &DENSITY,
+                                   double const &TEMPERATURE,
+                                   double const &POWER, double const &A_cst) {
+  /**
    * Generates a unique filename for the simulation results to be stored.
    * The method infers from the constructor the number of particles used
    * and the duration of the simulation (steps).
@@ -104,7 +116,7 @@ std::string stat_file::file_naming(std::string prefix, size_t &STEPS, size_t &N,
 
 std::string stat_file::convert_to_string(const double &x,
                                          const int &precision) {
-  /*
+  /**
    * Convert doubles to a string with a variable degree of precision.
    *
    * @param &x: Double number to be converted
@@ -118,4 +130,20 @@ std::string stat_file::convert_to_string(const double &x,
   ss << std::fixed << std::setprecision(precision) << x;
 
   return ss.str();
+}
+
+/**
+ * @brief a wrapper for the FileIO::Write2File method
+ * 
+ * @param output_quantities 
+ * @param fstream 
+ * @param header 
+ */
+void stat_file::write_file(std::vector<std::vector<double>> &output_quantities,
+                           std::ofstream &fstream, std::string const &header) {
+  std::string new_header = "";
+  time_stamp(fstream, new_header);
+  new_header += header;
+  FileIO::Write2File<double>(output_quantities, fstream, "\t", new_header,
+                             false);
 }

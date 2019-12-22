@@ -11,26 +11,29 @@ class stat_file {
  public:
   std::string _step_to_str, _particles_to_str, _rho_to_str, _T_to_str;
   std::string _n_to_str, _A_to_str;
-  std::string rdf, data, pos;
   std::string _dir, _FILE_ID;
-  std::ofstream RDF, DATA, POS;
+  std::vector<std::string> file_names;
 
   // Initialise them before doing any IO operations
   stat_file();
-  void open_files(std::string &data, std::string &rdf, std::string &pos);
 
-  void write_data_file(size_t STEPS, std::vector<double> &density,
-                       std::vector<double> &temperature,
-                       std::vector<double> &u_en, std::vector<double> &k_en,
-                       std::vector<double> &pc, std::vector<double> &pk,
-                       std::vector<double> &msd, std::vector<double> &Cr,
-                       std::vector<double> &sfx, std::vector<double> &sfy,
-                       std::vector<double> &sfz);
-  void time_stamp(std::ofstream &, std::string variables);
+  static std::vector<std::ofstream> open_files(
+      std::vector<std::string> const &file_names);
 
-  std::string file_naming(std::string prefix, size_t &STEPS, size_t &N,
-                          double &DENSITY, double &TEMPERATURE, double &POWER,
-                          double &A_cst);
+  static void write_data_file(
+      std::ofstream &file_stream, std::string const &header,
+      std::vector<std::vector<double>> const &all_output_vectors);
+
+  static void time_stamp(std::ofstream &file_stream,
+                         std::string const &variables);
+
+  std::string file_naming(std::string const &prefix, size_t const &STEPS,
+                          size_t const &N, double const &DENSITY,
+                          double const &TEMPERATURE, double const &POWER,
+                          double const &A_cst);
 
   static std::string convert_to_string(const double &x, const int &precision);
+
+  void write_file(std::vector<std::vector<double>> &output_quantities,
+                  std::ofstream &fstream, std::string const &header);
 };

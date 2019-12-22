@@ -3,19 +3,14 @@
 // todo: add logger https://github.com/gabime/spdlog
 // TODO: scale the box by Lx, Ly, Lz and L is the average of the 3
 
-// FileIO has to be loaded after the math libraries
-#include "FileIO.h"  // FileIO class
-
-#pragma warning(disable : 4996)  //_CRT_SECURE_NO_WARNINGS
-
 MD::MD() {}
 
 MD::MD(options_type &input_options) {
   // Test whether the input directory exists
-  if (!input_options.dir.empty()) {
+  if (!input_options.io_options.dir.empty()) {
     try {
-      options.dir = input_options.dir;
-      if (!fs::exists(options.dir)) {
+      options.io_options.dir = input_options.io_options.dir;
+      if (!fs::exists(options.io_options.dir)) {
         throw
           "input out_directory in MD constructor does not exist.\n"
           "Use a valid directory for output files to be saved";
@@ -26,19 +21,22 @@ MD::MD(options_type &input_options) {
       exit(1);
     }
   }
-  std::cout << "Output directory set to: " << options.dir << std::endl;
+  std::cout << "Output directory set to: " << options.io_options.dir
+            << std::endl;
 
   // Pass type of simulation
   options.simulation_type = input_options.simulation_type;
   std::cout << "Simulation type: " << options.simulation_type << std::endl;
 
   // Pass simulation name if any
-  options.simulation_name = input_options.simulation_name;
-  std::cout << "Simulation name: " << options.simulation_name << std::endl;
+  options.io_options.simulation_name = input_options.io_options.simulation_name;
+  std::cout << "Simulation name: " << options.io_options.simulation_name
+            << std::endl;
 
   // Save all the positions for the fluid
-  options.visualise = input_options.visualise;
-  std::cout << "Particle visualisation: " << options.visualise << std::endl;
+  options.io_options.visualise = input_options.io_options.visualise;
+  std::cout << "Particle visualisation: " << options.io_options.visualise
+            << std::endl;
 
   // Pass stepping algorithm
   // todo: test string against availbale options
@@ -208,13 +206,13 @@ MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
   }
   std::cout << "Number of particles: " << options.N << std::endl;
 
-  options.dir = ".";
+  options.io_options.dir = ".";
 
   // If compress is true, then STEPS = steps_per_compression
   options.compression_options.compression = false;
 
   // Save all the positions for the fluid
-  options.visualise = false;
+  options.io_options.visualise = false;
 
   // Accuracy of RDF
   options.rdf_options.rdf_bins = 500;
@@ -470,18 +468,19 @@ void MD::velocity_autocorrelation_function(vector_3d &Cv, vector_3d &v) {
 }
 
 void MD::radial_distribution_function(double &rho, double &cut_off,
-                                      size_t &bins, size_t &particles) {
+                                      size_t &bins, size_t &particles,
+                                      std::ofstream &fstream) {
   double R = 0;
   double norm = 1;
   // Exclude the self particle interaction from the density
   double cor_rho = rho * (particles - 1) / particles;
   double dr = cut_off / bins;
 
-  logger.RDF << "# particles (N): " << particles << " steps: " << options.steps
-             << " rho: " << rho << " bins: " << bins
-             << " cut_off (rg): " << cut_off << " dr: " << dr << std::endl;
-  logger.RDF << "# Radius (r)" << '\t' << "Normalised" << '\t' << "Unormalised"
-             << std::endl;
+  fstream << "# particles (N): " << particles << " steps: " << options.steps
+          << " rho: " << rho << " bins: " << bins
+          << " cut_off (rg): " << cut_off << " dr: " << dr << std::endl;
+  fstream << "# Radius (r)" << '\t' << "Normalised" << '\t' << "Unormalised"
+          << std::endl;
 
   for (size_t i = 1; i < bins; ++i) {
     R = cut_off * i / bins;
@@ -492,7 +491,7 @@ void MD::radial_distribution_function(double &rho, double &cut_off,
                       (options.steps - options.rdf_options.rdf_wait) *
                       (pow((R + (dr / 2.0)), 3) - pow((R - (dr / 2.0)), 3)));
 
-    logger.RDF << R << '\t' << rdf[i] / norm << '\t' << rdf[i] << std::endl;
+    fstream << R << '\t' << rdf[i] / norm << '\t' << rdf[i] << std::endl;
   }
 }
 
@@ -623,7 +622,7 @@ void MD::simulation(std::string simulation_name, double DENSITY,
   // NOTE: this is a legacy routine and it will be removed in the future
   // Initialise the variables with the input parameters
   // Name the simulation. This will be used as a prefix in the files
-  options.simulation_name = simulation_name;
+  options.io_options.simulation_name = simulation_name;
   options.density = DENSITY;
   options.target_temperature = TEMPERATURE;
   options.power = POWER;
@@ -634,6 +633,7 @@ void MD::simulation(std::string simulation_name, double DENSITY,
 }
 
 void MD::simulation() {
+  // Preallocate storage space
   set_vector_sizes();
 
   std::cout << "***************************\n"
@@ -649,34 +649,6 @@ void MD::simulation() {
   /* Gets the pair potential for the simulation based on a map of the
      initials of the pair potential and the pair potential itself. */
   pair_potential_type force = get_force_func(options.potential_type);
-
-  // Generating the filenames for the output
-  // Start a new stream only if the fluid is not being compressed
-  if (options.compression_options.compress_count == 0) {
-    std::string data =
-        options.dir + logger.file_naming("/" + options.simulation_name + "Data",
-                                         options.steps, options.N,
-                                         options.density,
-                                         options.target_temperature,
-                                         options.power, options.a_cst);
-    std::string pos =
-        options.dir +
-        logger.file_naming(
-            "/" + options.simulation_name + "Positions_Velocities",
-            options.steps, options.N, options.density,
-            options.target_temperature, options.power, options.a_cst);
-    std::string rdf =
-        options.dir + logger.file_naming("/" + options.simulation_name + "RDF",
-                                         options.steps, options.N,
-                                         options.density,
-                                         options.target_temperature,
-                                         options.power, options.a_cst);
-
-    logger.open_files(data, rdf, pos);  // todo: make more general
-    logger.time_stamp(logger.DATA,
-                      "# step \t rho \t T \t U \t K \t Pc \t Pk \t MSD \t VAF "
-                      "\t SFx \t SFy \t SFz");
-  }
 
   std::chrono::steady_clock::time_point begin =
       std::chrono::steady_clock::now();
@@ -706,12 +678,12 @@ void MD::simulation() {
         // Get the shortest image of the two particles
         // if the particles are near the periodic boundary,
         // this image is their reflection.
-        if (x > (0.5 * options.L)) x = x - options.L;
-        if (x < (-0.5 * options.L)) x = x + options.L;
-        if (y > (0.5 * options.L)) y = y - options.L;
-        if (y < (-0.5 * options.L)) y = y + options.L;
-        if (z > (0.5 * options.L)) z = z - options.L;
-        if (z < (-0.5 * options.L)) z = z + options.L;
+        if (x > (0.5 * options.Lx)) x -= options.Lx;
+        if (x < (-0.5 * options.Lx)) x += options.Lx;
+        if (y > (0.5 * options.Ly)) y -= options.Ly;
+        if (y < (-0.5 * options.Ly)) y += options.Ly;
+        if (z > (0.5 * options.Lz)) z -= options.Lz;
+        if (z < (-0.5 * options.Lz)) z += options.Lz;
 
         // Pair potential radius
         double radius = sqrt((x * x) + (y * y) + (z * z));
@@ -748,39 +720,45 @@ void MD::simulation() {
       }
     }
 
-    // Average Potential Energy per particle
-    u_en.push_back(U / options.N);
-
-    // Average Configurational Pressure Pc
-    pc.push_back(PC / (3 * options.volume));
-
     // Isothermal Calibration
     options.scale_v =
         sqrt(options.target_temperature /
              options.temperature);  // using T & KE from prev timestep
 
     options.kinetic_energy = verlet_algorithm(r, v, f, true);
-    mean_square_displacement(MSD, MSD_r);
-    velocity_autocorrelation_function(Cv, v);
+
+    if (options.io_options.msd) mean_square_displacement(MSD, MSD_r);
+
+    if (options.io_options.vaf) velocity_autocorrelation_function(Cv, v);
+
+    // Calculate the structure factor k-vectors
+    if (options.io_options.sf) structure_factor(r);
 
     // Average Temperature
     options.temperature = options.kinetic_energy / (1.5 * options.N);
     temperature.push_back(options.temperature);
 
-    // Kinetic Pressure
-    pk.push_back(options.density * options.temperature);
-
-    // Average Kinetic Energy
-    k_en.push_back(options.kinetic_energy / options.N);
-
     // Density
     density.push_back(options.density);
 
-    // Calculate the structure factor k-vectors
-    structure_factor(r);
+    if (options.io_options.pressure) {
+      // Average Configurational Pressure Pc
+      pc.push_back(PC / (3 * options.volume));
+
+      // Kinetic Pressure
+      pk.push_back(options.density * options.temperature);
+    }
+
+    if (options.io_options.energies) {
+      // Average Potential Energy per particle
+      u_en.push_back(U / options.N);
+
+      // Average Kinetic Energy
+      k_en.push_back(options.kinetic_energy / options.N);
+    }
 
     // Save positions for visualisation with Python
-    if (options.visualise) {
+    if (options.io_options.visualise) {
       // Reserve memory for the position vectors
       (*pos_x)[step_idx].reserve(options.N);
       (*pos_y)[step_idx].reserve(options.N);
@@ -792,50 +770,11 @@ void MD::simulation() {
       (*pos_z)[step_idx] = r.z;
     }
   }
+  /****************************************************************************/
   // simulation Ends HERE
 
-  if (options.visualise) {
-    // Save particle positions to files
-    FileIO f;
-    // Write the arrays as jagged,(hence transposed), this creates rows=STEPS
-    // and columns=PARTICLES
-    f.Write2File<double>(
-        *pos_x,
-        logger.file_naming(
-            options.dir + "/" + options.simulation_name + "x_data",
-            options.steps, options.N, options.density,
-            options.target_temperature, options.power, options.a_cst),
-        "\t", true);
-    f.Write2File<double>(
-        *pos_y,
-        logger.file_naming(
-            options.dir + "/" + options.simulation_name + "y_data",
-            options.steps, options.N, options.density,
-            options.target_temperature, options.power, options.a_cst),
-        "\t", true);
-    f.Write2File<double>(
-        *pos_z,
-        logger.file_naming(
-            options.dir + "/" + options.simulation_name + "z_data",
-            options.steps, options.N, options.density,
-            options.target_temperature, options.power, options.a_cst),
-        "\t", true);
-  }
-
-  logger.write_data_file(options.steps, density, temperature, u_en, k_en, pc,
-                         pk, msd, Cr, sf.x, sf.y, sf.z);
-  // Saving Last Position
-  // todo: if we are compressing, save the last position of the compression step
-  logger.time_stamp(logger.POS, "# X\tY\tZ\tVx\tVy\tVz\tFx\tFy\tFz");
-
-  for (size_t el = 0; el < r.x.size(); ++el) {
-    logger.POS << r.x[el] << '\t' << r.y[el] << '\t' << r.z[el] << '\t'
-               << v.x[el] << '\t' << v.y[el] << '\t' << v.z[el] << '\t'
-               << f.x[el] << '\t' << f.y[el] << '\t' << f.z[el] << std::endl;
-  }
-
-  radial_distribution_function(options.density, options.cut_off,
-                               options.rdf_options.rdf_bins, options.N);
+  // Write to files
+  file_output();
 
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   std::cout
@@ -864,10 +803,10 @@ void MD::reset_values(bool force_reset) {
   // Do not close streams and do not clear position and velocity vectors
   // in the case where the fluid is being compressed
   if (!options.compression_options.compression || force_reset) {
-    // Close streams
-    logger.RDF.close();
-    logger.DATA.close();
-    logger.POS.close();
+    // // Close streams
+    // for (size_t i = 0; i < streams.size(); ++i) {
+    //   streams[i].close();
+    // }
     // Clear values, size, but reserve capacity
     r.x.clear();
     r.y.clear();
@@ -951,21 +890,157 @@ void MD::set_vector_sizes() {
   v.y.reserve(options.N);
   v.z.reserve(options.N);
   /* RDF */
-  rdf.resize(options.rdf_options.rdf_bins + 1, 0);  // gr with Index igr
+  if (options.io_options.rdf)
+    rdf.resize(options.rdf_options.rdf_bins + 1, 0);  // gr with Index igr
   /* Forces/Acceleration */
   f.x.resize(options.N, 0);
   f.y.resize(options.N, 0);
   f.z.resize(options.N, 0);
   /* Structure factor k-arrays */
-  sf.x.reserve(options.N);
-  sf.y.reserve(options.N);
-  sf.z.reserve(options.N);
+  if (options.io_options.sf) {
+    sf.x.reserve(options.N);
+    sf.y.reserve(options.N);
+    sf.z.reserve(options.N);
+  }
   /* Observed Quantities */
-  Cr.reserve(options.steps);    // Velocity Autocorrelation Function
-  msd.reserve(options.steps);   // Mean Square Displacement
-  u_en.reserve(options.steps);  // Average Potential Energy
-  k_en.reserve(options.steps);  // Average Kinetic Energy
-  pc.reserve(options.steps);    // Configurational Pressure
-  pk.reserve(options.steps);    // Kinetic Pressure
+  if (options.io_options.vaf)
+    Cr.reserve(options.steps);  // Velocity Autocorrelation Function
+  if (options.io_options.msd)
+    msd.reserve(options.steps);  // Mean Square Displacement
+  if (options.io_options.energies) {
+    u_en.reserve(options.steps);  // Average Potential Energy
+    k_en.reserve(options.steps);  // Average Kinetic Energy
+  }
+  if (options.io_options.pressure) {
+    pc.reserve(options.steps);  // Configurational Pressure
+    pk.reserve(options.steps);  // Kinetic Pressure
+  }
   temperature.reserve(options.steps);
+}
+
+void MD::save_visualisation_arrays() {
+  // Write the arrays as jagged,(hence transposed), this creates rows=STEPS
+  // and columns=PARTICLES
+  std::ofstream out_x(
+      logger.file_naming(options.io_options.dir + "/" +
+                             options.io_options.simulation_name + "x_data",
+                         options.steps, options.N, options.density,
+                         options.target_temperature, options.power,
+                         options.a_cst),
+      std::ofstream::trunc | std::ofstream::out);
+  logger.write_file(*pos_x, out_x, "");
+  out_x.close();
+
+  std::ofstream out_y(
+      logger.file_naming(options.io_options.dir + "/" +
+                             options.io_options.simulation_name + "y_data",
+                         options.steps, options.N, options.density,
+                         options.target_temperature, options.power,
+                         options.a_cst),
+      std::ofstream::trunc | std::ofstream::out);
+  logger.write_file(*pos_y, out_y, "");
+  out_y.close();
+
+  std::ofstream out_z(
+      logger.file_naming(options.io_options.dir + "/" +
+                             options.io_options.simulation_name + "z_data",
+                         options.steps, options.N, options.density,
+                         options.target_temperature, options.power,
+                         options.a_cst),
+      std::ofstream::trunc | std::ofstream::out);
+  logger.write_file(*pos_z, out_z, "");
+  out_z.close();
+}
+
+void MD::file_output() {
+  // Generating the filenames for the output
+
+  // Always open the data file stream since the temperature and density
+  // are always written
+  logger.file_names.push_back(
+      options.io_options.dir +
+      logger.file_naming("/" + options.io_options.simulation_name + "Data",
+                         options.steps, options.N, options.density,
+                         options.target_temperature, options.power,
+                         options.a_cst));
+
+  if (options.io_options.position) {
+    logger.file_names.push_back(
+        options.io_options.dir +
+        logger.file_naming(
+            "/" + options.io_options.simulation_name + "Positions_Velocities",
+            options.steps, options.N, options.density,
+            options.target_temperature, options.power, options.a_cst));
+  }
+
+  if (options.io_options.rdf) {
+    logger.file_names.push_back(
+        options.io_options.dir +
+        logger.file_naming("/" + options.io_options.simulation_name + "RDF",
+                           options.steps, options.N, options.density,
+                           options.target_temperature, options.power,
+                           options.a_cst));
+  }
+
+  // Save particle positions to files
+  if (options.io_options.visualise) save_visualisation_arrays();
+
+  // Create a map with all the streams
+  std::vector<std::ofstream> all_streams = logger.open_files(logger.file_names);
+  std::map<std::string, std::ofstream> streams;
+  streams["data"] = std::move(all_streams[0]);
+
+  for (size_t stream = 1; stream < all_streams.size(); ++stream) {
+    if (options.io_options.position && !streams.count("position"))
+      streams["position"] = std::move(all_streams[stream]);
+    else if (options.io_options.rdf && !streams.count("rdf"))
+      streams["rdf"] = std::move(all_streams[stream]);
+    else
+      std::cerr << "Unrecognised stream in all_streams" << std::endl;
+  }
+
+  // generate the correct header depending on io_options
+  std::vector<std::vector<double>> output_quantities = {density, temperature};
+  std::string header = "# step\trho\tT";
+
+  if (options.io_options.energies) {
+    output_quantities.push_back(u_en);
+    output_quantities.push_back(k_en);
+    header += "\tU\tK";
+  }
+  if (options.io_options.pressure) {
+    output_quantities.push_back(pc);
+    output_quantities.push_back(pk);
+    header += "\tPc\tPk";
+  }
+  if (options.io_options.msd) {
+    output_quantities.push_back(msd);
+    header += "\tMSD";
+  }
+  if (options.io_options.vaf) {
+    output_quantities.push_back(Cr);
+    header += "\tVAF";
+  }
+  if (options.io_options.sf) {
+    output_quantities.push_back(sf.x);
+    output_quantities.push_back(sf.y);
+    output_quantities.push_back(sf.z);
+    header += "\tSFx\tSFy\tSFz";
+  }
+  logger.write_data_file(streams["data"], header, output_quantities);
+
+  // Saving Last Position
+  if (options.io_options.position) {
+    logger.write_data_file(streams["position"],
+                           "# particle\tx\ty\tz\tvx\tvy\tvz\tax\tay\taz",
+                           {r.x, r.y, r.z, v.x, v.y, v.z, f.x, f.y, f.z});
+  }
+
+  if (options.io_options.rdf) {
+    radial_distribution_function(options.density, options.cut_off,
+                                 options.rdf_options.rdf_bins, options.N,
+                                 streams["rdf"]);
+  }
+
+  for (auto &[key, val] : streams) val.close();
 }

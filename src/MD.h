@@ -201,7 +201,7 @@ class MD {
    * @param particles: total number of particles
    */
   void radial_distribution_function(double &rho, double &cut_off, size_t &bins,
-                                    size_t &particles);
+                                    size_t &particles, std::ofstream &fstream);
 
   /**
    * Performs the Mean Square Displacement calculation for the fluid.
@@ -239,4 +239,8 @@ class MD {
    */
   std::string set_simulation_params(double &rho, double &T, double &power,
                                     double &a, std::string &pp_type);
+
+  void save_visualisation_arrays();
+
+  void file_output();
 };

@@ -13,6 +13,8 @@ class md_options_interface {
 
   static int load_setup_options(options_type& options);
 
+  static int load_io_options(io_options_type& io);
+
   static int load_simulation_options(options_type& options);
 
   static int load_test_options(test_options_type& test);

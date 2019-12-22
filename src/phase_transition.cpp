@@ -54,7 +54,7 @@ void phase_transition::crystallisation() {
     std::cout << "Runing MD::simulation " << comp_step + 1 << "/"
               << total_comp_steps << std::endl;
 
-    simulation(options.simulation_name, current_rho, options.target_temperature,
+    simulation(options.io_options.simulation_name, current_rho, options.target_temperature,
                options.power, options.a_cst, options.potential_type);
 
     // Holds the box length of the previous simulation just run
@@ -85,7 +85,7 @@ void phase_transition::crystallisation(std::string SIMULATION_NAME,
                                        double DENSITY_INC, double TEMPERATURE,
                                        double POWER, double A_CST,
                                        std::string pp_type) {
-  options.simulation_name = SIMULATION_NAME;
+  options.io_options.simulation_name = SIMULATION_NAME;
   options.density = DENSITY;
   options.compression_options.density_final = FINAL_DENSITY;
   options.compression_options.density_inc = DENSITY_INC;
@@ -108,7 +108,7 @@ void phase_transition::two_way_compression() {
                "***************************\n"
             << std::endl;
 
-  crystallisation("forward_" + options.simulation_name, options.density,
+  crystallisation("forward_" + options.io_options.simulation_name, options.density,
                   options.compression_options.density_final,
                   options.compression_options.density_inc,
                   options.target_temperature, options.power, options.a_cst,
@@ -120,7 +120,7 @@ void phase_transition::two_way_compression() {
                "****************************\n"
             << std::endl;
 
-  crystallisation("backward_" + options.simulation_name,
+  crystallisation("backward_" + options.io_options.simulation_name,
                   options.compression_options.density_final, options.density,
                   -options.compression_options.density_inc,
                   options.target_temperature, options.power, options.a_cst,

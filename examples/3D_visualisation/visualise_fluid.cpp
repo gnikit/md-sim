@@ -10,8 +10,16 @@
  */
 
 int main() {
-  size_t steps = 1000;
-  MD run(steps, {5, 5, 5}, "SC");
-  run.set_visualisation_flag(true);
-  run.simulation("3D_view_", 0.5, 0.5, 8, 0.5, "BIP");
+  options_type opts;
+  opts.steps = 1000;
+  opts.particles = {5, 5, 5};
+  opts.lattice = "SC";
+  opts.potential_type = "BoundedInversePower";
+  opts.density = 0.5;
+  opts.target_temperature = 0.5;
+  opts.power = 8;
+  opts.io_options.simulation_name = "3D_view_";
+  
+  MD run(opts);
+  run.simulation();
 }

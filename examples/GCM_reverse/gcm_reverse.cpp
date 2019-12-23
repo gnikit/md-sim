@@ -14,7 +14,6 @@ int main() {
    */
   phase_transition run(compress_steps, {7, 7, 7}, "FCC");
   run.set_compression_flag(true);
-  run.set_rdf_collect_after(500);
-
-  run.run_backwards("compress_", 0.05, 0.15, 0.05, 0.003, 0, 0, "GCM");
+  // todo: fix phase transition
+  // run.two_way_compression("compress_", 0.05, 0.15, 0.05, 0.003, 0, 0);
 }

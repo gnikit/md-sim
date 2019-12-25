@@ -1,7 +1,6 @@
 #include "MD.h"
 // todo: add logger https://github.com/gabime/spdlog
 // TODO: scale the box by Lx, Ly, Lz in a tensor form
-// todo: make input data types const where applicable
 
 MD::MD() {}
 
@@ -421,7 +420,7 @@ void MD::mb_distribution(vector_3d &v, double TEMPERATURE) {
   }
 }
 
-double MD::verlet_algorithm(vector_3d &r, vector_3d &v, vector_3d &f,
+double MD::verlet_algorithm(vector_3d &r, vector_3d &v, vector_3d const &f,
                             bool sample_msd = true) {
   size_t i;
   double KE = 0;
@@ -463,7 +462,8 @@ double MD::verlet_algorithm(vector_3d &r, vector_3d &v, vector_3d &f,
   return KE;
 }
 
-void MD::velocity_autocorrelation_function(vector_3d &Cv, vector_3d &v) {
+void MD::velocity_autocorrelation_function(vector_3d const &Cv,
+                                           vector_3d const &v) {
   double cr_temp = 0; /* resets the sum every time step */
   double m = 1.0;     /* particle mass */
   size_t i;
@@ -475,8 +475,9 @@ void MD::velocity_autocorrelation_function(vector_3d &Cv, vector_3d &v) {
   Cr.push_back((cr_temp / options.N) / norm);
 }
 
-void MD::radial_distribution_function(double &rho, double &cut_off,
-                                      size_t &bins, size_t &particles,
+void MD::radial_distribution_function(double const &rho, double const &cut_off,
+                                      size_t const &bins,
+                                      size_t const &particles,
                                       std::ofstream &fstream) {
   double R = 0;
   double norm = 1;
@@ -503,7 +504,8 @@ void MD::radial_distribution_function(double &rho, double &cut_off,
   }
 }
 
-void MD::mean_square_displacement(vector_3d &MSD, vector_3d &MSD_r) {
+void MD::mean_square_displacement(vector_3d const &MSD,
+                                  vector_3d const &MSD_r) {
   double msd_temp = 0;
 
   for (size_t i = 0; i < options.N; ++i) {
@@ -514,7 +516,7 @@ void MD::mean_square_displacement(vector_3d &MSD, vector_3d &MSD_r) {
   msd.push_back(msd_temp / options.N);
 }
 
-void MD::structure_factor(vector_3d &r) {
+void MD::structure_factor(vector_3d const &r) {
   double s = pow((options.N / options.density), (1.0 / 3.0));
   double fkx1 = 2.0 * PI / (s / (2.0 * options.Nx));
   double fky1 = 2.0 * PI / (s / (2.0 * options.Ny));
@@ -558,8 +560,8 @@ void MD::structure_factor(vector_3d &r) {
   sf.z.push_back(kz);
 }
 
-std::tuple<double, double> MD::calculate_forces(size_t &step_idx,
-                                                pair_potential_type force) {
+std::tuple<double, double> MD::calculate_forces(
+    size_t const &step_idx, pair_potential_type const &force) {
   /* Resetting forces */
   std::fill(f.x.begin(), f.x.end(), 0);
   std::fill(f.y.begin(), f.y.end(), 0);
@@ -663,6 +665,7 @@ void MD::simulation() {
 
   /* Initialise the simulation, lattice params and much more */
   options.kinetic_energy = initialise(r, v, options.target_temperature);
+
   size_t step_idx;
   for (step_idx = 0; step_idx < options.steps; ++step_idx) {
     /* Forces loop */

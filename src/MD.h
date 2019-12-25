@@ -178,7 +178,8 @@ class MD {
    *                    defined and not passed as arguments
    * @return KE: kinetic energy (unormalised)
    */
-  double verlet_algorithm(vector_3d &r, vector_3d &v, vector_3d &f, bool msd);
+  double verlet_algorithm(vector_3d &r, vector_3d &v, vector_3d const &f,
+                          bool msd);
 
   double rk4_algorithm(vector_3d &r, vector_3d &v, vector_3d &f, bool msd);
 
@@ -194,8 +195,8 @@ class MD {
    * @param potential: Type of the pair potential
    * @return std::tuple<double, double> Potential Energy, Configuration Pressure
    */
-  std::tuple<double, double> calculate_forces(size_t &step_index,
-                                              pair_potential_type potential);
+  std::tuple<double, double> calculate_forces(size_t const &step_idx,
+                                              pair_potential_type const &force);
 
   void apply_boundary_conditions();
 
@@ -207,7 +208,8 @@ class MD {
    * @param Cv: holds the particle velocities at t = 0
    * @param v: velocity vectors of particles
    */
-  void velocity_autocorrelation_function(vector_3d &Cv, vector_3d &v);
+  void velocity_autocorrelation_function(vector_3d const &Cv,
+                                         vector_3d const &v);
 
   /**
    * Calculates the Radial Distribution Function for the fluid
@@ -222,8 +224,9 @@ class MD {
    * @param bins: number of bins, accuracy of the RDF histogram
    * @param particles: total number of particles
    */
-  void radial_distribution_function(double &rho, double &cut_off, size_t &bins,
-                                    size_t &particles, std::ofstream &fstream);
+  void radial_distribution_function(double const &rho, double const &cut_off,
+                                    size_t const &bins, size_t const &particles,
+                                    std::ofstream &fstream);
 
   /**
    * Performs the Mean Square Displacement calculation for the fluid.
@@ -237,7 +240,7 @@ class MD {
    * @param MSD: vectors containing the particle positions at t = 0
    * @param MSD_r: position vectors of particles, with no boundaries
    */
-  void mean_square_displacement(vector_3d &MSD, vector_3d &MSD_r);
+  void mean_square_displacement(vector_3d const &MSD, vector_3d const &MSD_r);
 
   /**
    * Calculates the structure factor, which is computed as a Fourier Transform.
@@ -245,7 +248,7 @@ class MD {
    *
    * @param r: position vectors of particles
    */
-  void structure_factor(vector_3d &r);
+  void structure_factor(vector_3d const &r);
 
   /**
    * Sets the internal class variables for the fluid according to

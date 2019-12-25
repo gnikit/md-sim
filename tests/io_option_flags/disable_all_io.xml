@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<input_variables>
+  <setup>
+    <steps>
+      <integer_value rank="0">100</integer_value>
+    </steps>
+    <particles>
+      <integer_value rank="1" shape="3">5 5 5</integer_value>
+    </particles>
+    <lattice name="SC"/>
+  </setup>
+  <io>
+    <simulation_name>disable_all_io_</simulation_name>
+    <track_particles name="false"/>
+    <energies name="false"/>
+    <pressure name="false"/>
+    <msd name="false"/>
+    <vaf name="false"/>
+    <sf name="false"/>
+    <rdf name="false"/>
+    <positions name="false"/>
+  </io>
+  <simulation_type name="NormalRun">
+    <pair_potential name="LennardJones">
+      <density>
+        <real_value rank="0">1.0</real_value>
+      </density>
+      <temperature>
+        <real_value rank="0">1.0</real_value>
+      </temperature>
+    </pair_potential>
+  </simulation_type>
+  <enable_testing/>
+</input_variables>

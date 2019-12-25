@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="">
+  <include href="spud_base.rng"/>
+  <define name="io_options">
+    <element name="io">
+      <a:documentation>Handles the output quantities that are stored in the data files</a:documentation>
+      <optional>
+        <element name="simulation_name">
+          <a:documentation>Name of the simulation, to be used as prefix to all output files.</a:documentation>
+          <data type="string"/>
+        </element>
+      </optional>
+      <optional>
+        <element name="output_dir">
+          <a:documentation>Output directory for the files to be produced during a simulation.</a:documentation>
+          <data type="string"/>
+        </element>
+      </optional>
+      <ref name="track_particles"/>
+      <ref name="data_io"/>
+      <ref name="pressure_io"/>
+      <ref name="msd_io"/>
+      <ref name="vaf_io"/>
+      <ref name="structure_factor_io"/>
+      <ref name="rdf_io"/>
+      <ref name="save_last_positions_io"/>
+    </element>
+  </define>
+  <define name="track_particles">
+    <choice>
+      <element name="track_particles">
+        <a:documentation>If enabled will save in ASCII format the positions of all the
+particles for the entire simulation.
+The datafiles can then be viewed with the python tools.
+NOTE: For large simulations this will be slow.</a:documentation>
+        <attribute name="name">
+          <value>false</value>
+        </attribute>
+      </element>
+      <element name="track_particles">
+        <a:documentation>If enabled will save in ASCII format the positions of all the
+particles for the entire simulation.
+The datafiles can then be viewed with the python tools.
+NOTE: For large simulations this will be slow.</a:documentation>
+        <attribute name="name">
+          <value>true</value>
+        </attribute>
+      </element>
+    </choice>
+  </define>
+  <define name="msd_io">
+    <choice>
+      <element name="msd">
+        <a:documentation>Mean square displacement output enabled</a:documentation>
+        <attribute name="name">
+          <value>true</value>
+        </attribute>
+      </element>
+      <element name="msd">
+        <a:documentation>Mean square displacement output disabled</a:documentation>
+        <attribute name="name">
+          <value>false</value>
+        </attribute>
+      </element>
+    </choice>
+  </define>
+  <define name="rdf_io">
+    <choice>
+      <element name="rdf">
+        <a:documentation>radial distribution function output enabled</a:documentation>
+        <attribute name="name">
+          <value>true</value>
+        </attribute>
+      </element>
+      <element name="rdf">
+        <a:documentation>radial distribution function output disabled</a:documentation>
+        <attribute name="name">
+          <value>false</value>
+        </attribute>
+      </element>
+    </choice>
+  </define>
+  <define name="vaf_io">
+    <choice>
+      <element name="vaf">
+        <a:documentation>velocity autocorrelation output enabled</a:documentation>
+        <attribute name="name">
+          <value>true</value>
+        </attribute>
+      </element>
+      <element name="vaf">
+        <a:documentation>velocity autocorrelation output disabled</a:documentation>
+        <attribute name="name">
+          <value>false</value>
+        </attribute>
+      </element>
+    </choice>
+  </define>
+  <define name="data_io">
+    <choice>
+      <element name="energies">
+        <a:documentation>potential energy output enabled</a:documentation>
+        <attribute name="name">
+          <value>true</value>
+        </attribute>
+      </element>
+      <element name="energies">
+        <a:documentation>potential energy output disabled</a:documentation>
+        <attribute name="name">
+          <value>false</value>
+        </attribute>
+      </element>
+    </choice>
+  </define>
+  <define name="pressure_io">
+    <choice>
+      <element name="pressure">
+        <a:documentation>kinetic pressure output enabled</a:documentation>
+        <attribute name="name">
+          <value>true</value>
+        </attribute>
+      </element>
+      <element name="pressure">
+        <a:documentation>kinetic pressure output disabled</a:documentation>
+        <attribute name="name">
+          <value>false</value>
+        </attribute>
+      </element>
+    </choice>
+  </define>
+  <define name="structure_factor_io">
+    <choice>
+      <element name="sf">
+        <a:documentation>structure factor output enabled</a:documentation>
+        <attribute name="name">
+          <value>true</value>
+        </attribute>
+      </element>
+      <element name="sf">
+        <a:documentation>structure factor output disabled</a:documentation>
+        <attribute name="name">
+          <value>false</value>
+        </attribute>
+      </element>
+    </choice>
+  </define>
+  <define name="save_last_positions_io">
+    <choice>
+      <element name="positions">
+        <a:documentation>position, velocities and accelerations output enabled</a:documentation>
+        <attribute name="name">
+          <value>true</value>
+        </attribute>
+      </element>
+      <element name="positions">
+        <a:documentation>position, velocities and accelerations output disabled</a:documentation>
+        <attribute name="name">
+          <value>false</value>
+        </attribute>
+      </element>
+    </choice>
+  </define>
+</grammar>

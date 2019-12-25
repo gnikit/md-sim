@@ -1,5 +1,6 @@
 # The SPUD base schema
 include "spud_base.rnc"
+include "io.rnc"
 #TODO: fix phase transition variables
 lattice_type =
 (
@@ -70,12 +71,7 @@ setup_sim =
 
 options =
 (
-    simulation_name,
-
     iterative_methods,
-
-    ## Output directory for the files to be produced during a simulation.
-    element output_dir { string }?,
 
     # ## Set the flag for incremental resizing of the simulation box.
     # ## Set to true for phase transition studies else set to false.
@@ -90,20 +86,7 @@ options =
     ## An equilibration period for the RDF in time step units.
     ## The RDF will begin to be collected rdf_equilibrate steps
     ## from the start of the simulation.
-    element rdf_equilibrate { integer }?,
-
-    ## If enabled will save in ASCII format the positions of all the
-    ## particles for the entire simulation.
-    ## The datafiles can then be viewed with the python tools.
-    ## NOTE: For large simulations this will be slow.
-    element track_particles { empty }?
-
-)
-
-simulation_name =
-(
-    ## Name of the simulation, to be used as prefix to all output files.
-    element simulation_name { string }
+    element rdf_equilibrate { integer }?
 )
 
 potentials =
@@ -236,7 +219,7 @@ iterative_methods =
         attribute name { "VerletAlgorithm" }|
 
         attribute name { "RK4 "}
-    
+
     },
     comment
 )
@@ -247,6 +230,8 @@ start =
     element input_variables {
 
         setup_sim,
+
+        io_options,
 
         simulation,
 

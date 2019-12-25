@@ -269,11 +269,11 @@ class TestLatticeStructures(unittest.TestCase):
 
         # Test variables
         pos_test = np.loadtxt(
-            f'{sim_name}Positions_Velocities{test_string}', usecols=(0, 1, 2), unpack=True)
+            f'{sim_name}Positions_Velocities{test_string}', usecols=(1, 2, 3), unpack=True)
 
         # Reference variables
         pos_ref = np.loadtxt('test_positions.log',
-                             usecols=(0, 1, 2), unpack=True)
+                             usecols=(1, 2, 3), unpack=True)
 
         # Test data for consistency
         result = np.allclose(pos_ref, pos_test)
@@ -302,11 +302,11 @@ class TestLatticeStructures(unittest.TestCase):
 
         # Test variables
         pos_test = np.loadtxt(
-            f'{sim_name}Positions_Velocities{test_string}', usecols=(0, 1, 2), unpack=True)
+            f'{sim_name}Positions_Velocities{test_string}', usecols=(1, 2, 3), unpack=True)
 
         # Reference variables
         pos_ref = np.loadtxt('test_positions.log',
-                             usecols=(0, 1, 2), unpack=True)
+                             usecols=(1, 2, 3), unpack=True)
 
         # Test data for consistency
         result = np.allclose(pos_ref, pos_test)
@@ -335,11 +335,11 @@ class TestLatticeStructures(unittest.TestCase):
 
         # Test variables
         pos_test = np.loadtxt(
-            f'{sim_name}Positions_Velocities{test_string}', usecols=(0, 1, 2), unpack=True)
+            f'{sim_name}Positions_Velocities{test_string}', usecols=(1, 2, 3), unpack=True)
 
         # Reference variables
         pos_ref = np.loadtxt('test_positions.log',
-                             usecols=(0, 1, 2), unpack=True)
+                             usecols=(1, 2, 3), unpack=True)
 
         # Test data for consistency
         result = np.allclose(pos_ref, pos_test)
@@ -438,6 +438,53 @@ class TestConstructors(unittest.TestCase):
         print(f'Testing Data file consistency with reference: {result}')
 
         test_results.append(result)
+
+        self.assertTrue(get_test_result(test_results))
+
+        print(f'Exiting: {f_dir}')
+
+
+class TestIOOptions(unittest.TestCase):
+
+    def setUp(self):
+        print('-'*80)
+
+    def tearDown(self):
+        call(['make', 'clean'])
+        os.chdir('..')
+        print('-'*80)
+
+    def test_io_disable(self):
+        f_dir = 'io_option_flags'
+        print(f'Entering: {f_dir}')
+
+        setup_ok = run_file(f_dir, 'disable_all_io.xml')
+        self.assertTrue(setup_ok)
+
+        os.chdir(f_dir)
+        test_results = []
+
+        test_string = 'Data_step_100_particles_125_rho_1.0000_T_1.0000.log'
+        sim_name = 'disable_all_io_'
+
+        # Test variables
+        data = np.loadtxt(f'{sim_name}{test_string}')
+
+        # Reference variables
+        data_ref = np.loadtxt('test_data.log')
+
+        # Test for consistency
+        result = np.allclose(data, data_ref)
+        print(f'Testing Data file consistency with reference: {result}')
+
+        test_results.append(result)
+
+        # Test if an RDF file has been generated in the output dir
+        files = os.listdir('./')
+        result = not 'disable_all_io_RDF_step_100_particles_125_rho_1.0000_T_1.0000.log' in files
+        test_results.append(result)
+
+        self.assertTrue(get_test_result(test_results))
 
         print(f'Exiting: {f_dir}')
 

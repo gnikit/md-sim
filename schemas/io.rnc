@@ -1,0 +1,101 @@
+include "spud_base.rnc"
+
+io_options =
+(
+    ## Handles the output quantities that are stored in the data files
+    element io {
+
+        ## Name of the simulation, to be used as prefix to all output files.
+        element simulation_name { string }?,
+
+        ## Output directory for the files to be produced during a simulation.
+        element output_dir { string }?,
+
+        track_particles,
+
+        data_io,
+
+        pressure_io,
+
+        msd_io,
+
+        vaf_io,
+
+        structure_factor_io,
+
+        rdf_io,
+
+        save_last_positions_io
+
+    }
+)
+
+track_particles =
+(
+    ## If enabled will save in ASCII format the positions of all the
+    ## particles for the entire simulation.
+    ## The datafiles can then be viewed with the python tools.
+    ## NOTE: For large simulations this will be slow.
+    element track_particles { attribute name { "false" } }|
+    ## If enabled will save in ASCII format the positions of all the
+    ## particles for the entire simulation.
+    ## The datafiles can then be viewed with the python tools.
+    ## NOTE: For large simulations this will be slow.
+    element track_particles { attribute name { "true" } }
+)
+
+msd_io =
+(
+    ## Mean square displacement output enabled
+    element msd { attribute name { "true" } }|
+    ## Mean square displacement output disabled
+    element msd { attribute name { "false" } }
+)
+
+rdf_io =
+(
+    ## radial distribution function output enabled
+    element rdf { attribute name { "true" } }|
+    ## radial distribution function output disabled
+    element rdf { attribute name { "false" } }
+)
+
+vaf_io =
+(
+    ## velocity autocorrelation output enabled
+    element vaf { attribute name { "true" } }|
+    ## velocity autocorrelation output disabled
+    element vaf { attribute name { "false" } }
+)
+
+data_io =
+(
+    ## potential energy output enabled
+    element energies { attribute name { "true" } }|
+    ## potential energy output disabled
+    element energies { attribute name { "false" } }
+)
+
+pressure_io =
+(
+    ## kinetic pressure output enabled
+    element pressure { attribute name { "true" } }|
+    ## kinetic pressure output disabled
+    element pressure { attribute name { "false" } }
+)
+
+structure_factor_io =
+(
+    ## structure factor output enabled
+    element sf { attribute name { "true" } }|
+    ## structure factor output disabled
+    element sf { attribute name { "false" } }
+)
+
+save_last_positions_io =
+(
+    ## position, velocities and accelerations output enabled
+    element positions { attribute name { "true" } }|
+    ## position, velocities and accelerations output disabled
+    element positions { attribute name { "false" } }
+)

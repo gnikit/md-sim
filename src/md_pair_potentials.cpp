@@ -11,7 +11,7 @@ std::tuple<double, double> MD_tools::BIP_force(double &r, double n, double a) {
    *
    * @return std::tuple<double, double>: <Force, Potential energy>
    */
-  // Force for particles separated a distance r
+  /* Force for particles separated a distance r */
   double ff = (n)*r * pow(sqrt(r * r + a * a), ((-n - 2.0)));
   double u = pow(sqrt(r * r + a * a), (-n));
   return std::make_tuple(ff, u);
@@ -26,7 +26,7 @@ std::tuple<double, double> MD_tools::GCM_force(double &r) {
    *
    * @return std::tuple<double, double>: <Force, Potential energy>
    */
-  // Gaussian-force with sigma=1 and epsilon=1
+  /* Gaussian-force with sigma=1 and epsilon=1 */
   double ff = 2 * r * exp(-r * r);
   double u = exp(-r * r);
   return std::make_tuple(ff, u);
@@ -95,6 +95,6 @@ std::map<std::string, pair_potential_type> get_force_funcs = {
 /* Global hash table function, returning a different type of object per key */
 pair_potential_type get_force_func(std::string pp_type) {
   pair_potential_type pp = get_force_funcs[pp_type];
-  if (!pp) pp = get_force_funcs["BIP"];  // Default case
+  if (!pp) pp = get_force_funcs["BIP"];  /* Default case */
   return pp;
 }

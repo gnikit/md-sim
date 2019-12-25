@@ -42,14 +42,22 @@ void MakeDataBase() {
           MD* run4 = new MD(STEPS, {10, 10, 10}, "SC");
 
           // ? set temperature manually in default machine
-          std::thread th1(&MD::simulation, run1, "", rho[d], T[t], n[i], A1[j],
-                          "BIP");
-          std::thread th2(&MD::simulation, run2, "", rho[d], T[t], n[i], A2[j],
-                          "BIP");
-          std::thread th3(&MD::simulation, run3, "", rho[d], T[t], n[i], A3[j],
-                          "BIP");
-          std::thread th4(&MD::simulation, run4, "", rho[d], T[t], n[i], A4[j],
-                          "BIP");
+          std::thread th1(
+              static_cast<void (MD::*)(std::string, double, double, double,
+                                       double, std::string)>(&MD::simulation),
+              run1, "", rho[d], T[t], n[i], A1[j], "BoundedInversePower");
+          std::thread th2(
+              static_cast<void (MD::*)(std::string, double, double, double,
+                                       double, std::string)>(&MD::simulation),
+              run2, "", rho[d], T[t], n[i], A2[j], "BoundedInversePower");
+          std::thread th3(
+              static_cast<void (MD::*)(std::string, double, double, double,
+                                       double, std::string)>(&MD::simulation),
+              run3, "", rho[d], T[t], n[i], A3[j], "BoundedInversePower");
+          std::thread th4(
+              static_cast<void (MD::*)(std::string, double, double, double,
+                                       double, std::string)>(&MD::simulation),
+              run4, "", rho[d], T[t], n[i], A4[j], "BoundedInversePower");
 
           th1.join();
           th2.join();

@@ -3,18 +3,17 @@
 using namespace Spud;
 
 int md_options_interface::mdmain(std::string xml_file) {
-  std::cout << "In mdmain" << std::endl;
-
-  // load the xml file in memory
+  /* load the xml file in memory */
   load_options(xml_file);
   options_type opts;
 
-  // load all opts
+  /* load all opts */
   load_setup_options(opts);
+  load_io_options(opts.io_options);
   load_simulation_options(opts);
   load_test_options(opts.test_options);
 
-  // determine which class to call
+  /* determine which class to call */
   if (opts.simulation_type == "NormalRun") {
     MD run(opts);
 
@@ -23,25 +22,21 @@ int md_options_interface::mdmain(std::string xml_file) {
   } else if (opts.simulation_type == "CompressionRun") {
     phase_transition run(opts);
 
-    run.crystallisation();
+    run.crystallisation(opts);
 
   } else if (opts.simulation_type == "ReverseCompressionRun") {
     phase_transition run(opts);
 
     if (opts.test_options.is_testing) run.enable_testing(true);
 
-    run.two_way_compression();
+    run.two_way_compression(opts);
   } else
     std::cerr << "Unrecognised simulation_name provided in xml" << std::endl;
-
-  std::cout << "Exiting mdmain" << std::endl;
 
   return 0;
 }
 
 int md_options_interface::load_setup_options(options_type& options) {
-  std::cout << "In load_constructor" << std::endl;
-
   std::string path = "/setup";
   OptionError error;
 
@@ -59,14 +54,6 @@ int md_options_interface::load_setup_options(options_type& options) {
   error = get_option(path + "/lattice/name", options.lattice);
   assert(error == SPUD_NO_ERROR);
 
-  error = get_option(path + "/simulation_name", options.simulation_name);
-  assert(error == SPUD_NO_ERROR);
-
-  if (have_option(path + "/output_dir")) {
-    error = get_option(path + "/output_dir", options.dir);
-    assert(error == SPUD_NO_ERROR);
-  }
-
   if (have_option(path + "/rdf_bins")) {
     error = get_option(path + "/rdf_bins", temp);
     assert(error == SPUD_NO_ERROR);
@@ -79,16 +66,87 @@ int md_options_interface::load_setup_options(options_type& options) {
     options.rdf_options.rdf_wait = static_cast<size_t>(temp);
   }
 
-  if (have_option(path + "/track_particles")) options.visualise = true;
+  if (have_option(path + "/track_particles"))
+    options.io_options.visualise = true;
 
-  std::cout << "Exiting load_additional_options" << std::endl;
+  return 0;
+}
+
+int md_options_interface::load_io_options(io_options_type& io) {
+  std::string path = "/io";
+  std::string temp;
+  OptionError error;
+
+  if (have_option(path + "/simulation_name")) {
+    error = get_option(path + "/simulation_name", io.simulation_name);
+    assert(error == SPUD_NO_ERROR);
+  }
+
+  if (have_option(path + "/output_dir")) {
+    error = get_option(path + "/output_dir", io.dir);
+    assert(error == SPUD_NO_ERROR);
+  }
+
+  error = get_option(path + "/track_particles/name", temp);
+  assert(error == SPUD_NO_ERROR);
+  if (temp == "true")
+    io.visualise = true;
+  else
+    io.visualise = false;
+
+  error = get_option(path + "/energies/name", temp);
+  assert(error == SPUD_NO_ERROR);
+  if (temp == "true")
+    io.energies = true;
+  else
+    io.energies = false;
+
+  error = get_option(path + "/pressure/name", temp);
+  assert(error == SPUD_NO_ERROR);
+  if (temp == "true")
+    io.pressure = true;
+  else
+    io.pressure = false;
+
+  error = get_option(path + "/msd/name", temp);
+  assert(error == SPUD_NO_ERROR);
+  if (temp == "true")
+    io.msd = true;
+  else
+    io.msd = false;
+
+  error = get_option(path + "/vaf/name", temp);
+  assert(error == SPUD_NO_ERROR);
+  if (temp == "true")
+    io.vaf = true;
+  else
+    io.vaf = false;
+
+  error = get_option(path + "/sf/name", temp);
+  assert(error == SPUD_NO_ERROR);
+  if (temp == "true")
+    io.sf = true;
+  else
+    io.sf = false;
+
+  error = get_option(path + "/rdf/name", temp);
+  assert(error == SPUD_NO_ERROR);
+  if (temp == "true")
+    io.rdf = true;
+  else
+    io.rdf = false;
+
+  error = get_option(path + "/positions/name", temp);
+  assert(error == SPUD_NO_ERROR);
+  if (temp == "true")
+    io.position = true;
+  else
+    io.position = false;
 
   return 0;
 }
 
 int md_options_interface::load_simulation_options(options_type& opts) {
-  std::cout << "In load_simulation_options" << std::endl;
-
   std::string path = "/simulation_type";
   OptionError error;
 
@@ -140,19 +198,13 @@ int md_options_interface::load_simulation_options(options_type& opts) {
     assert(error == SPUD_NO_ERROR);
   }
 
-  std::cout << "Exiting load_simulation_options" << std::endl;
-
   return 0;
 }
 
 int md_options_interface::load_test_options(test_options_type& test) {
-  std::cout << "In load_test_options" << std::endl;
-
   std::string path = "/enable_testing";
 
   if (have_option(path)) test.is_testing = true;
-
-  std::cout << "Exiting load_test_options" << std::endl;
 
   return 0;
 }

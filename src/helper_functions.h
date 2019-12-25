@@ -1,6 +1,7 @@
 #pragma once
 #include <algorithm>
 #include <exception>
+#include <iostream>
 #include <numeric>
 #include <tuple>
 #include <vector>
@@ -11,10 +12,15 @@ class helper_functions {
  private:
   /* data */
  public:
-  static std::vector<int> linspace(int a, int b, size_t N);
+  static std::vector<int> linspace(int const& a, int const& b, size_t const& N);
 
-  static std::vector<double> linspace(double a, double b, size_t N);
+  static std::vector<double> linspace(double const& a, double const& b,
+                                      size_t const& N);
 
-  static std::tuple<double, double> linfit(const std::vector<double>& x,
-                                           const std::vector<double>& y);
+  static std::tuple<double, double> linfit(std::vector<double> const& x,
+                                           std::vector<double> const& y);
+
+  static std::string repeat(std::string const& str, int times);
+
+  static std::string pad_string(std::string const& str, size_t const& pad);
 };

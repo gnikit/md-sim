@@ -1,9 +1,9 @@
 #include <iostream>
 #include "MD.h"
 
-// Load Intel math lib if available
+/* Load Intel math lib if available */
 #if defined(__INTEL_COMPILER)
-#include <mathimf.h>  // Intel Math library
+#include <mathimf.h> /* Intel Math library */
 #define COMPILER "INTEL"
 #else
 #include <math.h>
@@ -26,14 +26,13 @@ class phase_transition : public MD {
    * of particles in the box.
    *
    */
-  void crystallisation(); //! will not work for reverse compression
+  void crystallisation(options_type &options);
   void crystallisation(std::string SIMULATION_NAME, double DENSITY,
                        double FINAL_DENSITY, double DENSITY_INC,
                        double TEMPERATURE, double POWER, double A_CST,
                        std::string pp_type);
 
-  
-  void two_way_compression();
+  void two_way_compression(options_type &options);
 
   void detect_transition();
 

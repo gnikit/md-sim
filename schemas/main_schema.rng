@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<grammar xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="">
+<grammar xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns="http://relaxng.org/ns/structure/1.0">
   <!-- The SPUD base schema -->
   <include href="spud_base.rng"/>
+  <include href="io.rng"/>
   <!-- TODO: fix phase transition variables -->
   <define name="lattice_type">
     <choice>
@@ -80,14 +81,7 @@ BCC: particles **3 *2</a:documentation>
     </element>
   </define>
   <define name="options">
-    <ref name="simulation_name"/>
     <ref name="iterative_methods"/>
-    <optional>
-      <element name="output_dir">
-        <a:documentation>Output directory for the files to be produced during a simulation.</a:documentation>
-        <data type="string"/>
-      </element>
-    </optional>
     <optional>
       <!--
         ## Set the flag for incremental resizing of the simulation box.
@@ -110,21 +104,6 @@ from the start of the simulation.</a:documentation>
         <ref name="integer"/>
       </element>
     </optional>
-    <optional>
-      <element name="track_particles">
-        <a:documentation>If enabled will save in ASCII format the positions of all the
-particles for the entire simulation.
-The datafiles can then be viewed with the python tools.
-NOTE: For large simulations this will be slow.</a:documentation>
-        <empty/>
-      </element>
-    </optional>
-  </define>
-  <define name="simulation_name">
-    <element name="simulation_name">
-      <a:documentation>Name of the simulation, to be used as prefix to all output files.</a:documentation>
-      <data type="string"/>
-    </element>
   </define>
   <define name="potentials">
     <choice>
@@ -263,6 +242,7 @@ expansions/compressions in the opposite direction of the phase diagram.</a:docum
     <element name="input_variables">
       <a:documentation>Input variables for a molecular dynamics simulation</a:documentation>
       <ref name="setup_sim"/>
+      <ref name="io_options"/>
       <ref name="simulation"/>
       <optional>
         <element name="enable_testing">

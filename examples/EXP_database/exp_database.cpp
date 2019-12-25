@@ -12,7 +12,7 @@
 #include <math.h>
 #endif
 
-#define STEPS 50000
+#define STEPS 10000
 
 void MakeDataBase();
 
@@ -42,15 +42,17 @@ void MakeDataBase() {
         std::cout << " run num: " << num << std::endl;
 
         MD* run1 = new MD(STEPS, {8, 8, 8}, "SC");
-        run1->set_rdf_collect_after(5000);
         MD* run2 = new MD(STEPS, {8, 8, 8}, "SC");
-        run2->set_rdf_collect_after(5000);
 
         // ? set temperature manually in default machine
-        std::thread th1(&MD::simulation, run1, "", rho[d], T[t], n[i],
-                        exp(0.25), "EXP");
-        std::thread th2(&MD::simulation, run2, "", rho[d], T[t], n[i],
-                        exp(0.75), "EXP");
+        std::thread th1(
+            static_cast<void (MD::*)(std::string, double, double, double,
+                                     double, std::string)>(&MD::simulation),
+            run1, "", rho[d], T[t], n[i], exp(0.25), "Exponential");
+        std::thread th2(
+            static_cast<void (MD::*)(std::string, double, double, double,
+                                     double, std::string)>(&MD::simulation),
+            run2, "", rho[d], T[t], n[i], exp(0.75), "Exponential");
 
         th1.join();
         th2.join();

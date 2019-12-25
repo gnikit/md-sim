@@ -21,8 +21,9 @@
     <energies name="true"/>
     <pressure name="true"/>
     <msd name="true"/>
-    <rdf name="true"/>
     <vaf name="true"/>
+    <sf name="true"/>
+    <rdf name="true"/>
     <positions name="true"/>
   </io>
   <simulation_type name="NormalRun">

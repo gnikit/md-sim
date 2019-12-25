@@ -58,26 +58,27 @@ struct io_options_type {
 };
 
 struct options_type {
-  std::string simulation_type = ""; /* type of simulation e.g. NormalRun */
-  std::string potential_type = "";  /* pair potential type */
-  std::string stepping_alg = "";    /* iterative algorithm of particles */
-  std::string lattice = "";         /* lattice formation */
-  std::vector<size_t> particles;    /* number of particles in each axis */
-  double random_lattice_var = 0;    /* variance of dist for random lattice */
-  size_t steps = 2000;              /* number of total iterations */
-  size_t Nx, Ny, Nz, N = 0;         /* Particles in the x, y, z and total */
-  double Lx, Ly, Lz, L = 0;         /* Individual box lengths */
-  double volume = 0;                /* volume of the box */
-  double dt = 0.005;                /* timestep */
-  bool normalise_dt_w_temp = true;  /* normalise the timestep with T0 */
-  double density = 0.5;             /* density */
-  double target_temperature = 0;    /* target/ Thermostat temperature */
-  double temperature = 0;           /* simulation temperature */
-  double power = 0;                 /* pair potential intensity */
-  double a_cst = 0;                 /* generic softening parameter */
-  double kinetic_energy = 0;        /* kinetic energy */
-  double cut_off = 0;               /* cut off radius of simulation */
-  double scale_v = 0;               /* velocity scaling */
+  std::string simulation_type = "";  /* type of simulation e.g. NormalRun */
+  std::string potential_type = "";   /* pair potential type */
+  std::string stepping_alg = "";     /* iterative algorithm of particles */
+  std::string lattice = "";          /* lattice formation */
+  std::string iterative_method = ""; /* stepping algorithm of the fluid */
+  std::vector<size_t> particles;     /* number of particles in each axis */
+  double random_lattice_var = 0;     /* variance of dist for random lattice */
+  size_t steps = 2000;               /* number of total iterations */
+  size_t Nx, Ny, Nz, N = 0;          /* Particles in the x, y, z and total */
+  double Lx, Ly, Lz, L = 0;          /* Individual box lengths */
+  double volume = 0;                 /* volume of the box */
+  double dt = 0.005;                 /* timestep */
+  bool normalise_dt_w_temp = true;   /* normalise the timestep with T0 */
+  double density = 0.5;              /* density */
+  double target_temperature = 0;     /* target/ Thermostat temperature */
+  double temperature = 0;            /* simulation temperature */
+  double power = 0;                  /* pair potential intensity */
+  double a_cst = 0;                  /* generic softening parameter */
+  double kinetic_energy = 0;         /* kinetic energy */
+  double cut_off = 0;                /* cut off radius of simulation */
+  double scale_v = 0;                /* velocity scaling */
 
   io_options_type io_options;
   rdf_options_type rdf_options;

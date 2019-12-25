@@ -54,6 +54,9 @@ int md_options_interface::load_setup_options(options_type& options) {
   error = get_option(path + "/lattice/name", options.lattice);
   assert(error == SPUD_NO_ERROR);
 
+  error = get_option(path + "/iterative_method/name", options.iterative_method);
+  assert(error == SPUD_NO_ERROR);
+
   if (have_option(path + "/rdf_bins")) {
     error = get_option(path + "/rdf_bins", temp);
     assert(error == SPUD_NO_ERROR);

@@ -1,7 +1,7 @@
 #include "MD.h"
-// TODO: create internal structures for quantities such as velocities, rs, fs,
 // todo: add logger https://github.com/gabime/spdlog
 // TODO: scale the box by Lx, Ly, Lz in a tensor form
+// todo: make input data types const where applicable
 
 MD::MD() {}
 

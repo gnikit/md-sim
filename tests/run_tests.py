@@ -439,6 +439,9 @@ class TestConstructors(unittest.TestCase):
 
         test_results.append(result)
 
+        self.assertTrue(get_test_result(test_results))
+
+        print(f'Exiting: {f_dir}')
         print(f'Exiting: {f_dir}')
 
 

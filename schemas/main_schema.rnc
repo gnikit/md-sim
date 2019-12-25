@@ -65,7 +65,7 @@ setup_sim =
 
         lattice_type,
 
-        options?
+        options
     }
 )
 
@@ -215,13 +215,20 @@ simulation =
 
 iterative_methods =
 (
+    ## Steps the fluid through time using the Verlet algorithm
     element iterative_method {
-        attribute name { "VerletAlgorithm" }|
 
-        attribute name { "RK4 "}
+        attribute name { "VerletAlgorithm" },
+        
+        comment
+    }|
+    ## Steps the fluid through time using a fourth Order Runge-Kutta
+    element iterative_method {
 
-    },
-    comment
+        attribute name { "RK4" },
+
+        comment
+    }
 )
 
 start =

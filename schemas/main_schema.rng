@@ -75,9 +75,7 @@ BCC: particles **3 *2</a:documentation>
         <ref name="comment"/>
       </element>
       <ref name="lattice_type"/>
-      <optional>
-        <ref name="options"/>
-      </optional>
+      <ref name="options"/>
     </element>
   </define>
   <define name="options">
@@ -226,17 +224,22 @@ expansions/compressions in the opposite direction of the phase diagram.</a:docum
     </choice>
   </define>
   <define name="iterative_methods">
-    <element name="iterative_method">
-      <choice>
+    <choice>
+      <element name="iterative_method">
+        <a:documentation>Steps the fluid through time using the Verlet algorithm</a:documentation>
         <attribute name="name">
           <value>VerletAlgorithm</value>
         </attribute>
+        <ref name="comment"/>
+      </element>
+      <element name="iterative_method">
+        <a:documentation>Steps the fluid through time using a fourth Order Runge-Kutta</a:documentation>
         <attribute name="name">
-          <value>RK4 </value>
+          <value>RK4</value>
         </attribute>
-      </choice>
-    </element>
-    <ref name="comment"/>
+        <ref name="comment"/>
+      </element>
+    </choice>
   </define>
   <start>
     <element name="input_variables">

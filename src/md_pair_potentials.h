@@ -4,15 +4,15 @@
 #include <map>
 #include <tuple>
 
-// Load Intel math lib if available
+/* Load Intel math lib if available */
 #if defined(__INTEL_COMPILER)
-#include <mathimf.h>  // Intel Math library
+#include <mathimf.h>  /* Intel Math library */
 #define COMPILER "INTEL"
 #else
 #include <math.h>
 #endif
 
-// *NOTE: currently the pair potentials are limited to a 3 argument parameters.
+/* *NOTE: currently the pair potentials are limited to a 3 argument parameters. */
 using pair_potential_type = std::tuple<double, double> (*)(double &, double,
                                                            double);
 

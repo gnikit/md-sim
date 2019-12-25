@@ -1,7 +1,7 @@
 #include "stat_file_logger.h"
 #include "FileIO.h"
 
-// Passes the name of the variable to a stream
+/* Passes the name of the variable to a stream */
 #define GET_VAR_NAME(stream, variable) (stream) << #variable
 
 stat_file::stat_file() {}
@@ -21,10 +21,10 @@ std::vector<std::ofstream> stat_file::open_files(
 void stat_file::write_data_file(
     std::ofstream &file_stream, std::string const &header,
     std::vector<std::vector<double>> const &all_output_vectors) {
-  // Write the timestamp and header to the stream
+  /* Write the timestamp and header to the stream */
   time_stamp(file_stream, header);
 
-  // Find the largest size vector in all our vectors
+  /* Find the largest size vector in all our vectors */
   size_t rows = all_output_vectors[0].size();
   for (auto const &i : all_output_vectors)
     if (i.size() > rows) rows = i.size();
@@ -35,12 +35,12 @@ void stat_file::write_data_file(
       try {
         line += '\t' + convert_to_string(all_output_vectors.at(vec).at(i), 10);
       }
-      // if the array goes out of bounds then just add 0s
+      /* if the array goes out of bounds then just add 0s */
       catch (const std::out_of_range &e) {
-        line += '\t' + "0." + std::string(10, '0');
+        line += '\t' + "0.0000000000";
       }
     }
-    // The main data file is always the first entry in the vector of streams
+    /* The main data file is always the first entry in the vector of streams */
     file_stream << (i + 1) << line << std::endl;
   }
 }
@@ -59,7 +59,7 @@ std::string stat_file::file_naming(std::string const &prefix,
                                    double const &DENSITY,
                                    double const &TEMPERATURE,
                                    double const &POWER, double const &A_cst) {
-  // Individual streams handling double to string conversions
+  /* Individual streams handling double to string conversions */
   std::stringstream A_stream, rho_stream, T_stream;
 
   rho_stream << std::fixed << std::setprecision(4) << DENSITY;    // 4 decimals
@@ -70,7 +70,7 @@ std::string stat_file::file_naming(std::string const &prefix,
   _rho_to_str = "_rho_" + rho_stream.str();
   _T_to_str = "_T_" + T_stream.str();
 
-  // Do not add an A parameter or a potential strength in case they are NAN
+  /* Do not add an A parameter or a potential strength in case they are NAN */
   if (isnan(POWER))
     _n_to_str = "";
   else
@@ -79,24 +79,24 @@ std::string stat_file::file_naming(std::string const &prefix,
   if (isnan(A_cst))
     _A_to_str = "";
   else {
-    A_stream << std::fixed << std::setprecision(5) << A_cst;  // 5 decimals
+    A_stream << std::fixed << std::setprecision(5) << A_cst; /* 5 decimals */
     _A_to_str = "_A_" + A_stream.str();
   }
 
   _FILE_ID = _step_to_str + _particles_to_str + _rho_to_str + _T_to_str +
              _n_to_str + _A_to_str;
 
-  // Explicit defitions
+  /* Explicit defitions */
   std::string _FILE_EXT = ".log";
 
-  // Path addition
+  /* Path addition */
   return prefix + _FILE_ID + _FILE_EXT;
 }
 
 std::string stat_file::convert_to_string(const double &x,
                                          const int &precision) {
   std::ostringstream ss;
-  ss.str(std::string());  // don't forget to empty the stream
+  ss.str(std::string()); /* don't forget to empty the stream */
   ss << std::fixed << std::setprecision(precision) << x;
 
   return ss.str();

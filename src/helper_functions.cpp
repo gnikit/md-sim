@@ -37,7 +37,7 @@ std::tuple<double, double> helper_functions::linfit(
    * and returns the slope (a) and y-intercept (b) of the fit.
    */
 
-  // Test the supplied vectors are of equal length
+  /* Test the supplied vectors are of equal length */
   if (x.size() != y.size()) throw "X and Y are unequal sizes";
 
   const auto n = x.size();
@@ -49,9 +49,9 @@ std::tuple<double, double> helper_functions::linfit(
   const auto denominator = (n * s_xx - s_x * s_x);
   if (denominator == 0) throw "Denominator is 0";
 
-  // Slope of the linear fit
+  /* Slope of the linear fit */
   const auto a = (n * s_xy - s_x * s_y) / denominator;
-  // Y-intercept of the linear fit
+  /* Y-intercept of the linear fit */
   const auto b = (s_y * s_xx - s_x * s_xy) / denominator;
 
   return std::make_tuple(a, b);

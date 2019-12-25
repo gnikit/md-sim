@@ -2,7 +2,7 @@
 
 // todo: not sure if this calls the MD(options_type) constructor
 phase_transition::phase_transition(options_type &input_options) {
-  // Pass compressing options
+  /* Pass compressing options */
   options.compression_options.compression =
       input_options.compression_options.compression;
   options.compression_options.density_final =
@@ -44,7 +44,7 @@ void phase_transition::crystallisation() {
     exit(1);
   }
 
-  // Number of compressions to occur
+  /* Number of compressions to occur */
   size_t total_comp_steps =
       abs(ceil((options.compression_options.density_final - options.density) /
                options.compression_options.density_inc)) +
@@ -54,22 +54,23 @@ void phase_transition::crystallisation() {
     std::cout << "Runing MD::simulation " << comp_step + 1 << "/"
               << total_comp_steps << std::endl;
 
-    simulation(options.io_options.simulation_name, current_rho, options.target_temperature,
-               options.power, options.a_cst, options.potential_type);
+    simulation(options.io_options.simulation_name, current_rho,
+               options.target_temperature, options.power, options.a_cst,
+               options.potential_type);
 
-    // Holds the box length of the previous simulation just run
+    /* Holds the box length of the previous simulation just run */
     old_box_length = options.N;
 
-    // Density incrementation
+    /* Density incrementation */
     current_rho += options.compression_options.density_inc;
 
-    // Simulation updates old_box_length
-    // the updated current_rho can generate the new box length
-    // This value gets recalculated in the next Simulation
+    /* Simulation updates old_box_length
+       the updated current_rho can generate the new box length
+       This value gets recalculated in the next Simulation */
     options.L = pow((options.N / current_rho), 1.0 / 3.0);
     double box_length_ratio = options.N / old_box_length;
 
-    // Rescalling the positional vectors
+    /* Rescalling the positional vectors */
     for (size_t i = 0; i < options.N; ++i) {
       r.x[i] *= box_length_ratio;
       r.y[i] *= box_length_ratio;
@@ -108,8 +109,8 @@ void phase_transition::two_way_compression() {
                "***************************\n"
             << std::endl;
 
-  crystallisation("forward_" + options.io_options.simulation_name, options.density,
-                  options.compression_options.density_final,
+  crystallisation("forward_" + options.io_options.simulation_name,
+                  options.density, options.compression_options.density_final,
                   options.compression_options.density_inc,
                   options.target_temperature, options.power, options.a_cst,
                   options.potential_type);

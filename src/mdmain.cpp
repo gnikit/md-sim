@@ -5,17 +5,17 @@ using namespace Spud;
 int md_options_interface::mdmain(std::string xml_file) {
   std::cout << "In mdmain" << std::endl;
 
-  // load the xml file in memory
+  /* load the xml file in memory */
   load_options(xml_file);
   options_type opts;
 
-  // load all opts
+  /* load all opts */
   load_setup_options(opts);
   load_io_options(opts.io_options);
   load_simulation_options(opts);
   load_test_options(opts.test_options);
 
-  // determine which class to call
+  /* determine which class to call */
   if (opts.simulation_type == "NormalRun") {
     MD run(opts);
 

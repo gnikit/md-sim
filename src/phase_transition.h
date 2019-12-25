@@ -1,9 +1,9 @@
 #include <iostream>
 #include "MD.h"
 
-// Load Intel math lib if available
+/* Load Intel math lib if available */
 #if defined(__INTEL_COMPILER)
-#include <mathimf.h>  // Intel Math library
+#include <mathimf.h>  /* Intel Math library */
 #define COMPILER "INTEL"
 #else
 #include <math.h>

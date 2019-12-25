@@ -1,4 +1,4 @@
-/*
+/**
  * Ioannis Nikiteas 13/7/2017
  *
  * BSc Dissertation:
@@ -6,32 +6,27 @@
  * Smoothed Particle Hydrodynamics
  *
  * University: Royal Holloway University of London
- *
- * A program meant to simulate a MD fluid with an only
- * repulsive BIP pair-potential. Increasing the parameter A
- * creates a coarse-graining effect for the system allowing it
- * to transition to SPH
  */
 #pragma once
-#include <algorithm>   // std::find
-#include <chrono>      // CPU run-time
-#include <ctime>       // std::chrono
-#include <functional>  // funciton pointers
-#include <iomanip>     // setprecision
-#include <numeric>     // accumulate
-#include <random>      // normal_dist
-#include <sstream>     // stringstream
-#include <vector>      // vectors
+#include <algorithm>  /* std::find */
+#include <chrono>     /* CPU run-time */
+#include <ctime>      /* std::chrono */
+#include <functional> /* funciton pointers */
+#include <iomanip>    /* setprecision */
+#include <numeric>    /* accumulate */
+#include <random>     /* normal_dist */
+#include <sstream>    /* stringstream */
+#include <vector>     /* vectors */
 
 #include "data_structures.h"
 #include "md_pair_potentials.h"
 #include "stat_file_logger.h"
 
-// Check for Compiler support
+/* Check for Compiler support */
 // TODO: in future C++ versions, rm fs:: from global scope and mv in constructor
 #if __cplusplus <= 201103L
 #error This library requires at least C++17 compiler support
-// If C++ version C++2a or above use
+/* If C++ version C++2a or above use */
 #elif __cplusplus >= 201709
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -40,9 +35,9 @@ namespace fs = std::filesystem;
 namespace fs = std::experimental::filesystem;
 #endif
 
-// Load Intel math lib if available
+/* Load Intel math lib if available */
 #if defined(__INTEL_COMPILER)
-#include <mathimf.h>  // Intel Math library
+#include <mathimf.h> /* Intel Math library */
 #define COMPILER "INTEL"
 #else
 #include <math.h>
@@ -50,15 +45,15 @@ namespace fs = std::experimental::filesystem;
 
 class MD {
  protected:
-  vector_3d r;      // Position Arrays
-  vector_3d v;      // Velocity Arrays
-  vector_3d f;      // Force arrays
-  vector_3d Cv;     // VAF arrays
-  vector_3d MSD_r;  // used in MSD calculation
-  vector_3d MSD;    // MSD arrays
-  vector_3d sf;     // Structure factor k-arrays
+  vector_3d r;     /* Position Arrays */
+  vector_3d v;     /* Velocity Arrays */
+  vector_3d f;     /* Force arrays */
+  vector_3d Cv;    /* VAF arrays */
+  vector_3d MSD_r; /* used in MSD calculation */
+  vector_3d MSD;   /* MSD arrays */
+  vector_3d sf;    /* Structure factor k-arrays */
 
-  // Statistical quantity vectors, VAF, MSD, Energies and pressures
+  /* Statistical quantity vectors, VAF, MSD, Energies and pressures */
   std::vector<double> Cr, msd, u_en, k_en, pc, pk, temperature, density, rdf;
 
   /* Constructor variables */
@@ -119,23 +114,38 @@ class MD {
    */
   void reset_values(bool force_reset = false);
 
+  /**
+   * @brief Fixes the random seed in the velocity generation distributions
+   *
+   * @param is_testing: boolean flag
+   */
   void enable_testing(bool is_testing);
 
  protected:
+  /**
+   * @brief Set the vector sizes. Resizes all vectors and containers
+   *
+   */
   void set_vector_sizes();
 
-  /** //todo: complete
-   * @brief
+  /**
+   * @brief Outputs the positions r of the particles, based on the input
+   * lattice formation. The available lattice formations are
+   *    + Simple Cubic
+   *    + Face Centred Cubic
+   *    + Body Centred Cubic
+   *    + Random positions
    *
-   * @param r
+   * @param lattice: type of lattice
+   * @param r: particle positions
    */
-  void choose_lattice_formation(vector_3d &r);
+  void choose_lattice_formation(std::string &lattice, vector_3d &r);
 
   /**
    * Initialises the:
    * + Position Arrays
    * + Velocity Arrays
-   * + Conserves/ Scales momentum == 0
+   * + Conserves/ Scales momentum
    * + Temperature
    * + Velocity Autocorrelation Function
    *
@@ -173,10 +183,21 @@ class MD {
 
   double stepping_algorithm(vector_3d &r, vector_3d &v, vector_3d &f, bool msd);
 
+  /**
+   * @brief Calculates the forces interactions of a given pair potential
+   * within the specified cutoff distance for a single step iteration
+   *
+   * @param step_index: The number of the current iteration. Only used to
+   *                    determine if the sampling of the RDF should occur, if
+   *                    an equilibration period has been supplied.
+   * @param potential: Type of the pair potential
+   * @return std::tuple<double, double> Potential Energy, Configuration Pressure
+   */
   std::tuple<double, double> calculate_forces(size_t &step_index,
                                               pair_potential_type potential);
 
   void apply_boundary_conditions();
+
   /**
    * Calculates the Velocity Autocorrelation Function for the fluid.
    * The method stores the values into the Cr vector and uses internally
@@ -236,11 +257,20 @@ class MD {
    * @param a: softening parameter
    * @param pp_type: pair potential type
    * @return string containing simulation run parameters
-   */
+   */ //todo: pass options type
   std::string set_simulation_params(double &rho, double &T, double &power,
                                     double &a, std::string &pp_type);
 
+  /**
+   * @brief IO wrapper for saving into file the positions of the particles
+   * at each time step
+   *
+   */
   void save_visualisation_arrays();
 
+  /**
+   * @brief Manages all the IO operations, file streams, file creation etc.
+   *
+   */
   void file_output();
 };

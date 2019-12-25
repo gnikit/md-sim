@@ -1,9 +1,9 @@
 #pragma once
-#include <math.h>  // isnan
+#include <math.h> /* isnan */
 #include <chrono>
 #include <fstream>
-#include <iomanip>  // setprecision
-#include <sstream>  // stringstream
+#include <iomanip> /* setprecision */
+#include <sstream> /* stringstream */
 #include <string>
 #include <vector>
 
@@ -14,7 +14,7 @@ class stat_file {
   std::string _dir, _FILE_ID;
   std::vector<std::string> file_names;
 
-  // Initialise them before doing any IO operations
+  /* Initialise them before doing any IO operations */
   stat_file();
 
   /**

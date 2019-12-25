@@ -1,12 +1,12 @@
 #include "MD.h"
 // TODO: create internal structures for quantities such as velocities, rs, fs,
 // todo: add logger https://github.com/gabime/spdlog
-// TODO: scale the box by Lx, Ly, Lz and L is the average of the 3
+// TODO: scale the box by Lx, Ly, Lz in a tensor form
 
 MD::MD() {}
 
 MD::MD(options_type &input_options) {
-  // Test whether the input directory exists
+  /* Test whether the input directory exists */
   if (!input_options.io_options.dir.empty()) {
     try {
       options.io_options.dir = input_options.io_options.dir;
@@ -24,34 +24,34 @@ MD::MD(options_type &input_options) {
   std::cout << "Output directory set to: " << options.io_options.dir
             << std::endl;
 
-  // Pass type of simulation
+  /* Pass type of simulation */
   options.simulation_type = input_options.simulation_type;
   std::cout << "Simulation type: " << options.simulation_type << std::endl;
 
-  // Pass simulation name if any
+  /* Pass simulation name if any */
   options.io_options.simulation_name = input_options.io_options.simulation_name;
   std::cout << "Simulation name: " << options.io_options.simulation_name
             << std::endl;
 
-  // Save all the positions for the fluid
+  /* Save all the positions for the fluid */
   options.io_options.visualise = input_options.io_options.visualise;
   std::cout << "Particle visualisation: " << options.io_options.visualise
             << std::endl;
 
-  // Pass stepping algorithm
+  /* Pass stepping algorithm */
   // todo: test string against availbale options
   options.stepping_alg = input_options.stepping_alg;
   std::cout << "Iterative algorithm: " << options.stepping_alg << std::endl;
 
-  // Pass number of iterations
+  /* Pass number of iterations */
   options.steps = input_options.steps;
   std::cout << "Number of steps: " << options.steps << std::endl;
 
-  // Pass particles and lattice
+  /* Pass particles and lattice */
   options.lattice = input_options.lattice;
   std::cout << "Initial lattice: " << options.lattice << std::endl;
 
-  // Pass particles
+  /* Pass particles */
   try {
     if (input_options.particles.empty()) {
       throw "The supplied particles vector is empty";
@@ -71,7 +71,7 @@ MD::MD(options_type &input_options) {
   }
   options.particles = input_options.particles;
 
-  // Calculate the total number of particles N based on the lattice
+  /* Calculate the total number of particles N based on the lattice */
   options.Nx = input_options.particles[0];
   options.Ny = input_options.particles[1];
   options.Nz = input_options.particles[2];
@@ -84,8 +84,8 @@ MD::MD(options_type &input_options) {
   }
   std::cout << "Number of particles: " << options.N << std::endl;
 
-  // Pass physical parameters
-  // Pass the pair potential
+  /* Pass physical parameters */
+  /* Pass the pair potential */
   options.potential_type = input_options.potential_type;
   std::cout << "Pair potential: " << options.potential_type << std::endl;
 
@@ -106,17 +106,18 @@ MD::MD(options_type &input_options) {
 
   options.a_cst = input_options.a_cst;
 
-  // Initialise scaling variables
-  options.dt = 0.005 / sqrt(options.target_temperature);  // todo: add to schema
-  // Box length scaling
+  /* Initialise scaling variables */
+  options.dt =
+      0.005 / sqrt(options.target_temperature); /* todo: add to schema */
+  /* Box length scaling */
   options.L = pow((options.N / options.density), 1.0 / 3.0);
-  options.Lx = options.Ly = options.Lz = options.L;  // todo: questionable!
+  options.Lx = options.Ly = options.Lz = options.L; /* todo: questionable! */
   options.volume = options.N / options.density;
 
-  // cut_off definition
+  /* cut_off definition */
   if (input_options.cut_off > 0) {
     options.cut_off = input_options.cut_off;
-    // if cut-off is too large rescale it
+    /* if cut-off is too large rescale it */
     if (options.cut_off > options.L / 2.0) {
       std::cerr << "Warning: cutoff was too large!\n"
                    "Setting cut-off to half the length box\n"
@@ -125,18 +126,19 @@ MD::MD(options_type &input_options) {
       options.cut_off = options.L / 2.0;
     }
   } else {
-    // Hard coded into 1/3 of the box length
-    // NOTE: Large cut offs increase the runtime exponentially
+    /* Hard coded into 1/3 of the box length */
+    /* NOTE: Large cut offs increase the runtime exponentially */
     options.cut_off = options.L / 3.0;
   }
 
-  // Set boundary conditions //todo
+  /* Set boundary conditions //todo */
 
-  // Accuracy of RDF
+  /* Accuracy of RDF */
   options.rdf_options.rdf_bins = input_options.rdf_options.rdf_bins;
   std::cout << "RDF bins: " << options.rdf_options.rdf_bins << std::endl;
 
-  // Ensuring the number of steps is greater than the rdf equilibration period
+  /* Ensuring the number of steps is greater than the rdf equilibration period
+   */
   try {
     /* The number of iterations the data collection of RDF is postponed
        in order to allow the fluid to lose its internal cubic lattice */
@@ -155,7 +157,7 @@ MD::MD(options_type &input_options) {
   }
   std::cout << "RDF equilibration period set to: "
             << options.rdf_options.rdf_wait << std::endl;
-  // Pass testing options
+  /* Pass testing options */
   options.test_options.is_testing = input_options.test_options.is_testing;
   std::cout << "Testing: " << options.test_options.is_testing << std::endl;
 
@@ -168,11 +170,11 @@ MD::MD(options_type &input_options) {
 }
 
 MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
-  // Assign number of iterations of the MD algorithm
+  /* Assign number of iterations of the MD algorithm */
   options.steps = step_number;
   std::cout << "Number of steps: " << options.steps << std::endl;
 
-  // Assign the type of lattice
+  /* Assign the type of lattice */
   options.lattice = lattice;
   std::cout << "Lattice type: " << options.lattice << std::endl;
 
@@ -193,7 +195,7 @@ MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
     exit(1);
   }
 
-  // Calculate the total number of particles N based on the lattice
+  /* Calculate the total number of particles N based on the lattice */
   options.Nx = particles[0];
   options.Ny = particles[1];
   options.Nz = particles[2];
@@ -208,18 +210,18 @@ MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
 
   options.io_options.dir = ".";
 
-  // If compress is true, then STEPS = steps_per_compression
+  /* If compress is true, then STEPS = steps_per_compression */
   options.compression_options.compression = false;
 
-  // Save all the positions for the fluid
+  /* Save all the positions for the fluid */
   options.io_options.visualise = false;
 
-  // Accuracy of RDF
+  /* Accuracy of RDF */
   options.rdf_options.rdf_bins = 500;
 
   options.rdf_options.rdf_wait = 0;
 
-  // For efficiency, memory in the containers is reserved before use
+  /* For efficiency, memory in the containers is reserved before use */
   /* Positions */
   r.x.reserve(options.N);
   r.y.reserve(options.N);
@@ -229,7 +231,7 @@ MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
   v.y.reserve(options.N);
   v.z.reserve(options.N);
   /* RDF */
-  rdf.resize(options.rdf_options.rdf_bins + 1, 0);  // gr with Index igr
+  rdf.resize(options.rdf_options.rdf_bins + 1, 0); /* gr with Index igr */
   /* Forces/Acceleration */
   f.x.resize(options.N, 0);
   f.y.resize(options.N, 0);
@@ -239,12 +241,12 @@ MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
   sf.y.reserve(options.N);
   sf.z.reserve(options.N);
   /* Observed Quantities */
-  Cr.reserve(options.steps);    // Velocity Autocorrelation Function
-  msd.reserve(options.steps);   // Mean Square Displacement
-  u_en.reserve(options.steps);  // Average Potential Energy
-  k_en.reserve(options.steps);  // Average Kinetic Energy
-  pc.reserve(options.steps);    // Configurational Pressure
-  pk.reserve(options.steps);    // Kinetic Pressure
+  Cr.reserve(options.steps);   /* Velocity Autocorrelation Function */
+  msd.reserve(options.steps);  /* Mean Square Displacement */
+  u_en.reserve(options.steps); /* Average Potential Energy */
+  k_en.reserve(options.steps); /* Average Kinetic Energy */
+  pc.reserve(options.steps);   /* Configurational Pressure */
+  pk.reserve(options.steps);   /* Kinetic Pressure */
   temperature.reserve(options.steps);
 
   /* Visualisation vectors on the heap*/
@@ -256,25 +258,26 @@ MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
   options.test_options.is_testing = false;
 }
 
-// Delegating constructors with reduced number of arguments
-// https://en.wikipedia.org/wiki/C++11#Object_construction_improvement
-// Convinient constructor to use for simple cases
+/* Delegating constructors with reduced number of arguments
+ https://en.wikipedia.org/wiki/C++11#Object_construction_improvement
+ Convinient constructor to use for simple cases
+ */
 
 MD::~MD() {
-  // Destroy the vectors allocated on the heap
+  /* Destroy the vectors allocated on the heap */
   delete pos_x;
   delete pos_y;
   delete pos_z;
 }
 
-void MD::choose_lattice_formation(vector_3d &r) {
-  if (options.lattice == "FCC") {
-    // Coordinates for the FCC lattice
+void MD::choose_lattice_formation(std::string &lattice, vector_3d &r) {
+  if (lattice == "FCC") {
+    /* Coordinates for the FCC lattice */
     double x_c[4] = {0.25, 0.75, 0.75, 0.25};
     double y_c[4] = {0.25, 0.75, 0.25, 0.75};
     double z_c[4] = {0.25, 0.25, 0.75, 0.75};
 
-    // Loop over the the corner coordinates of the FCC and then x, y, z
+    /* Loop over the the corner coordinates of the FCC and then x, y, z */
     for (size_t c = 0; c < 4; ++c) {
       for (size_t i = 0; i < options.Nx; ++i) {
         for (size_t j = 0; j < options.Ny; ++j) {
@@ -288,8 +291,8 @@ void MD::choose_lattice_formation(vector_3d &r) {
     }
   }
 
-  // BCC lattice
-  else if (options.lattice == "BCC") {
+  /* BCC lattice */
+  else if (lattice == "BCC") {
     double x_c[2] = {0.25, 0.75};
     double y_c[2] = {0.25, 0.75};
     double z_c[2] = {0.25, 0.75};
@@ -307,7 +310,7 @@ void MD::choose_lattice_formation(vector_3d &r) {
     }
   }
 
-  else if (options.lattice == "RANDOM") {
+  else if (lattice == "RANDOM") {
     r.x.resize(options.N);
     r.y.resize(options.N);
     r.z.resize(options.N);
@@ -315,7 +318,7 @@ void MD::choose_lattice_formation(vector_3d &r) {
     mb_distribution(r, options.random_lattice_var);
   }
 
-  // Simple Cubic lattice
+  /* Simple Cubic lattice */
   else {
     for (size_t i = 0; i < options.Nx; ++i) {
       for (size_t j = 0; j < options.Ny; ++j) {
@@ -329,59 +332,64 @@ void MD::choose_lattice_formation(vector_3d &r) {
   }
 }
 
-// Methods for MD Analysis
 double MD::initialise(vector_3d &r, vector_3d &v, double TEMPERATURE) {
-  // Initialise position matrix and velocity matrix from Cubic Centred Lattice
+  /* Initialise position matrix and velocity matrix from Cubic Centred Lattice
+   */
   if (!options.compression_options.compression ||
       (options.compression_options.compression &&
        options.compression_options.compress_count == 0)) {
-    // Select the lattice formation
-    choose_lattice_formation(r);
+    /* Select the lattice formation */
+    choose_lattice_formation(options.lattice, r);
 
-    // Generates Maxwell-Boltzmann distribution
+    /* Generates Maxwell-Boltzmann distribution */
     mb_distribution(v, TEMPERATURE);
   }
 
-  // Calculate the average velocities
+  /* Calculate the average velocities */
   double mean_vx = std::accumulate(v.x.begin(), v.x.end(), 0.0) / options.N;
   double mean_vy = std::accumulate(v.y.begin(), v.y.end(), 0.0) / options.N;
   double mean_vz = std::accumulate(v.z.begin(), v.z.end(), 0.0) / options.N;
-  // Conserve the momentum of the fluid by subsracting the average velocities
-  // using a lambda expression
+  /* Conserve the momentum of the fluid by subsracting the average velocities
+     using a lambda expression */
   std::for_each(v.x.begin(), v.x.end(), [mean_vx](double &d) { d -= mean_vx; });
   std::for_each(v.y.begin(), v.y.end(), [mean_vy](double &d) { d -= mean_vy; });
   std::for_each(v.z.begin(), v.z.end(), [mean_vz](double &d) { d -= mean_vz; });
 
   size_t i;
-  // Temperature calculation, statistically
+  /* Temperature calculation, statistically */
   double KE = 0;
   for (i = 0; i < options.N; ++i) {
     KE += 0.5 * (v.x[i] * v.x[i] + v.y[i] * v.y[i] + v.z[i] * v.z[i]);
   }
   options.temperature = KE / (1.5 * options.N);
-  options.scale_v = sqrt(TEMPERATURE / options.temperature);  // scaling factor
+  options.scale_v =
+      sqrt(TEMPERATURE / options.temperature); /* scaling factor */
 
-  // Velocity scaling
+  /* Velocity scaling */
   for (i = 0; i < options.N; ++i) {
     v.x[i] *= options.scale_v;
     v.y[i] *= options.scale_v;
     v.z[i] *= options.scale_v;
   }
 
-  // A copy of the r vectors where the BC will not be applied
-  MSD_r.x = r.x;
-  MSD_r.y = r.y;
-  MSD_r.z = r.z;
+  if (options.io_options.msd) {
+    /* A copy of the r vectors where the BC will not be applied */
+    MSD_r.x = r.x;
+    MSD_r.y = r.y;
+    MSD_r.z = r.z;
 
-  // MSD initialisation, storing first positions of particles
-  MSD.x = r.x;
-  MSD.y = r.y;
-  MSD.z = r.z;
+    /* MSD initialisation, storing first positions of particles */
+    MSD.x = r.x;
+    MSD.y = r.y;
+    MSD.z = r.z;
+  }
 
-  // VAF initialisation, storing first velocities of particles
-  Cv.x = v.x;
-  Cv.y = v.y;
-  Cv.z = v.z;
+  if (options.io_options.vaf) {
+    /* VAF initialisation, storing first velocities of particles */
+    Cv.x = v.x;
+    Cv.y = v.y;
+    Cv.z = v.z;
+  }
 
   return KE;
 }
@@ -393,11 +401,11 @@ void MD::mb_distribution(vector_3d &v, double TEMPERATURE) {
   double var = sqrt(TEMPERATURE * kb / m);
   double mean = 0;
 
-  // Use current time as seed for random generator
+  /* Use current time as seed for random generator */
   std::srand(std::time(nullptr));
   int random_variable = std::rand();
   if (options.test_options.is_testing)
-    random_variable = 666;  // Fixing it for testing
+    random_variable = 666; /* Fixing it for testing */
 
   std::default_random_engine generator;
   generator.seed(random_variable);
@@ -420,29 +428,29 @@ double MD::verlet_algorithm(vector_3d &r, vector_3d &v, vector_3d &f,
 
   for (i = 0; i < options.N; ++i) {
     /*************************************************************************/
-    // Step velocities forward in time
+    /* Step velocities forward in time */
     v.x[i] = v.x[i] * options.scale_v + f.x[i] * options.dt;
     v.y[i] = v.y[i] * options.scale_v + f.y[i] * options.dt;
     v.z[i] = v.z[i] * options.scale_v + f.z[i] * options.dt;
 
-    // Step positions forward in time
+    /* Step positions forward in time */
     r.x[i] = r.x[i] + v.x[i] * options.dt;
     r.y[i] = r.y[i] + v.y[i] * options.dt;
     r.z[i] = r.z[i] + v.z[i] * options.dt;
 
     if (sample_msd) {
-      // MSD stepping
+      /* MSD stepping */
       MSD_r.x[i] += v.x[i] * options.dt;
       MSD_r.y[i] += v.y[i] * options.dt;
       MSD_r.z[i] += v.z[i] * options.dt;
     }
-    /**********************************************************************/
+    /**************************************************************************/
 
-    // Kinetic Energy Calculation
+    /* Kinetic Energy Calculation */
     KE += 0.5 * (v.x[i] * v.x[i] + v.y[i] * v.y[i] + v.z[i] * v.z[i]);
 
-    // Apply periodic boundary conditions to ensure particles remain
-    // inside the box
+    /* Apply periodic boundary conditions to ensure particles remain
+       inside the box */
     // todo: make boundary conditions routines
     if (r.x[i] > options.Lx) r.x[i] = r.x[i] - options.Lx;
     if (r.x[i] < 0.0) r.x[i] = r.x[i] + options.Lx;
@@ -456,8 +464,8 @@ double MD::verlet_algorithm(vector_3d &r, vector_3d &v, vector_3d &f,
 }
 
 void MD::velocity_autocorrelation_function(vector_3d &Cv, vector_3d &v) {
-  double cr_temp = 0;  // resets the sum every time step
-  double m = 1.0;      // particle mass
+  double cr_temp = 0; /* resets the sum every time step */
+  double m = 1.0;     /* particle mass */
   size_t i;
   /* The peak of the VAF is located at 3kb*T/m */
   double norm = 3 * options.target_temperature / m;
@@ -472,7 +480,7 @@ void MD::radial_distribution_function(double &rho, double &cut_off,
                                       std::ofstream &fstream) {
   double R = 0;
   double norm = 1;
-  // Exclude the self particle interaction from the density
+  /* Exclude the self particle interaction from the density */
   double cor_rho = rho * (particles - 1) / particles;
   double dr = cut_off / bins;
 
@@ -484,9 +492,9 @@ void MD::radial_distribution_function(double &rho, double &cut_off,
 
   for (size_t i = 1; i < bins; ++i) {
     R = cut_off * i / bins;
-    // Volume between 2 spheres, accounting for double counting
-    // hence the 2/3*pi*((R+dr)**3 - R**3)
-    // Accounting for the rdf_wait time steps
+    /* Volume between 2 spheres, accounting for double counting
+     hence the 2/3*pi*((R+dr)**3 - R**3)
+     Accounting for the rdf_wait time steps */
     norm = cor_rho * (2.0 / 3.0 * PI * particles *
                       (options.steps - options.rdf_options.rdf_wait) *
                       (pow((R + (dr / 2.0)), 3) - pow((R - (dr / 2.0)), 3)));
@@ -552,26 +560,26 @@ void MD::structure_factor(vector_3d &r) {
 
 std::tuple<double, double> MD::calculate_forces(size_t &step_idx,
                                                 pair_potential_type force) {
-  // Resetting forces
+  /* Resetting forces */
   std::fill(f.x.begin(), f.x.end(), 0);
   std::fill(f.y.begin(), f.y.end(), 0);
   std::fill(f.z.begin(), f.z.end(), 0);
 
-  // Reseting <Potential> U to 0
-  double U = 0;   // Potential Energy
-  double PC = 0;  // Configurational Pressure
+  /* Reseting <Potential> U to 0 */
+  double U = 0;  /* Potential Energy */
+  double PC = 0; /* Configurational Pressure */
 
   size_t i, j, igr;
   for (i = 0; i < options.N - 1; ++i) {
     for (j = i + 1; j < options.N; ++j) {
-      // distance between particle i and j
-      double x = r.x[i] - r.x[j];  // Separation distance
-      double y = r.y[i] - r.y[j];  // between particles i and j
-      double z = r.z[i] - r.z[j];  // in Cartesian
+      /* distance between particle i and j */
+      double x = r.x[i] - r.x[j]; /* Separation distance */
+      double y = r.y[i] - r.y[j]; /* between particles i and j */
+      double z = r.z[i] - r.z[j]; /* in Cartesian */
 
-      // Get the shortest image of the two particles
-      // if the particles are near the periodic boundary,
-      // this image is their reflection.
+      /* Get the shortest image of the two particles
+         if the particles are near the periodic boundary,
+         this image is their reflection. */
       if (x > (0.5 * options.L)) x = x - options.L;
       if (x < (-0.5 * options.L)) x = x + options.L;
       if (y > (0.5 * options.L)) y = y - options.L;
@@ -579,22 +587,22 @@ std::tuple<double, double> MD::calculate_forces(size_t &step_idx,
       if (z > (0.5 * options.L)) z = z - options.L;
       if (z < (-0.5 * options.L)) z = z + options.L;
 
-      // Pair potential radius
+      /* Pair potential radius */
       double radius = sqrt((x * x) + (y * y) + (z * z));
 
-      // Force loop
+      /* Force loop */
       if (radius < options.cut_off) {
-        // Allows the user to choose different pair potentials
+        /* Allows the user to choose different pair potentials */
         auto [ff, temp_u] = force(radius, options.power, options.a_cst);
 
-        // Average potential energy
-        U += temp_u;
+        /* Average potential energy */
+        if (options.io_options.energies) U += temp_u;
 
-        // Configurational pressure
-        PC += radius * ff;
+        /* Configurational pressure */
+        if (options.io_options.pressure) PC += radius * ff;
 
-        // Canceling the ij and ji pairs
-        // Taking the lower triangular matrix
+        /* Canceling the ij and ji pairs
+           Taking the lower triangular matrix */
         f.x[i] += x * ff / radius;
         f.x[j] -= x * ff / radius;
         f.y[i] += y * ff / radius;
@@ -602,12 +610,15 @@ std::tuple<double, double> MD::calculate_forces(size_t &step_idx,
         f.z[i] += z * ff / radius;
         f.z[j] -= z * ff / radius;
 
-        // Radial Distribution
-        // measured with a delay, since the system requires a few thousand
-        // time-steps to reach equilibrium
-        if (step_idx > options.rdf_options.rdf_wait) {
-          igr = round(options.rdf_options.rdf_bins * radius / options.cut_off);
-          rdf[igr] += 1;
+        /* Radial Distribution
+           measured with a delay, since the system requires a few thousand
+           time-steps to reach equilibrium */
+        if (options.io_options.rdf) {
+          if (step_idx > options.rdf_options.rdf_wait) {
+            igr =
+                round(options.rdf_options.rdf_bins * radius / options.cut_off);
+            rdf[igr] += 1;
+          }
         }
       }
     }
@@ -619,9 +630,9 @@ std::tuple<double, double> MD::calculate_forces(size_t &step_idx,
 void MD::simulation(std::string simulation_name, double DENSITY,
                     double TEMPERATURE, double POWER, double A_CST,
                     std::string pp_type) {
-  // NOTE: this is a legacy routine and it will be removed in the future
-  // Initialise the variables with the input parameters
-  // Name the simulation. This will be used as a prefix in the files
+  /* NOTE: this is a legacy routine and it will be removed in the future
+     Initialise the variables with the input parameters
+     Name the simulation. This will be used as a prefix in the files */
   options.io_options.simulation_name = simulation_name;
   options.density = DENSITY;
   options.target_temperature = TEMPERATURE;
@@ -633,14 +644,14 @@ void MD::simulation(std::string simulation_name, double DENSITY,
 }
 
 void MD::simulation() {
-  // Preallocate storage space
+  /* Preallocate storage space */
   set_vector_sizes();
 
   std::cout << "***************************\n"
                "** MD simulation started **\n"
                "***************************\n"
             << std::endl;
-  // Sets the unneeded variables (A and/or n) to NAN depending on the pp-type
+  /* Sets the unneeded variables (A and/or n) to NAN depending on the pp-type */
   std::cout << set_simulation_params(options.density,
                                      options.target_temperature, options.power,
                                      options.a_cst, options.potential_type)
@@ -653,31 +664,31 @@ void MD::simulation() {
   std::chrono::steady_clock::time_point begin =
       std::chrono::steady_clock::now();
 
-  // Initialise the simulation, lattice params and much more
+  /* Initialise the simulation, lattice params and much more */
   options.kinetic_energy = initialise(r, v, options.target_temperature);
   size_t step_idx;
   for (step_idx = 0; step_idx < options.steps; ++step_idx) {
-    // Forces loop
-    // Resetting forces
+    /* Forces loop */
+    /* Resetting forces to zero */
     std::fill(f.x.begin(), f.x.end(), 0);
     std::fill(f.y.begin(), f.y.end(), 0);
     std::fill(f.z.begin(), f.z.end(), 0);
 
-    // Reseting <Potential> U to 0
-    double U = 0;   // Potential Energy
-    double PC = 0;  // Configurational Pressure
+    /* Reseting <Potential> U to 0 */
+    double U = 0;  /* Potential Energy */
+    double PC = 0; /* Configurational Pressure */
 
     size_t i, j, igr;
     for (i = 0; i < options.N - 1; ++i) {
       for (j = i + 1; j < options.N; ++j) {
-        // distance between particle i and j
-        double x = r.x[i] - r.x[j];  // Separation distance
-        double y = r.y[i] - r.y[j];  // between particles i and j
-        double z = r.z[i] - r.z[j];  // in Cartesian
+        /* distance between particle i and j */
+        double x = r.x[i] - r.x[j]; /* Separation distance */
+        double y = r.y[i] - r.y[j]; /* between particles i and j */
+        double z = r.z[i] - r.z[j]; /* in Cartesian */
 
-        // Get the shortest image of the two particles
-        // if the particles are near the periodic boundary,
-        // this image is their reflection.
+        /* Get the shortest image of the two particles
+           if the particles are near the periodic boundary,
+           this image is their reflection. */
         if (x > (0.5 * options.Lx)) x -= options.Lx;
         if (x < (-0.5 * options.Lx)) x += options.Lx;
         if (y > (0.5 * options.Ly)) y -= options.Ly;
@@ -685,22 +696,22 @@ void MD::simulation() {
         if (z > (0.5 * options.Lz)) z -= options.Lz;
         if (z < (-0.5 * options.Lz)) z += options.Lz;
 
-        // Pair potential radius
+        /* Pair potential radius */
         double radius = sqrt((x * x) + (y * y) + (z * z));
 
-        // Force loop
+        /* Force loop */
         if (radius < options.cut_off) {
-          // Allows the user to choose different pair potentials
+          /* Allows the user to choose different pair potentials */
           auto [ff, temp_u] = force(radius, options.power, options.a_cst);
 
-          // Average potential energy
+          /* Average potential energy */
           U += temp_u;
 
-          // Configurational pressure
+          /* Configurational pressure */
           PC += radius * ff;
 
-          // Canceling the ij and ji pairs
-          // Taking the lower triangular matrix
+          /* Canceling the ij and ji pairs
+             Taking the lower triangular matrix */
           f.x[i] += x * ff / radius;
           f.x[j] -= x * ff / radius;
           f.y[i] += y * ff / radius;
@@ -708,9 +719,9 @@ void MD::simulation() {
           f.z[i] += z * ff / radius;
           f.z[j] -= z * ff / radius;
 
-          // Radial Distribution
-          // measured with a delay, since the system requires a few thousand
-          // time-steps to reach equilibrium
+          /* Radial Distribution
+             measured with a delay, since the system requires a few thousand
+             time-steps to reach equilibrium */
           if (step_idx > options.rdf_options.rdf_wait) {
             igr =
                 round(options.rdf_options.rdf_bins * radius / options.cut_off);
@@ -720,10 +731,9 @@ void MD::simulation() {
       }
     }
 
-    // Isothermal Calibration
-    options.scale_v =
-        sqrt(options.target_temperature /
-             options.temperature);  // using T & KE from prev timestep
+    /* Isothermal Calibration */
+    /* using T & KE from prev timestep */
+    options.scale_v = sqrt(options.target_temperature / options.temperature);
 
     options.kinetic_energy = verlet_algorithm(r, v, f, true);
 
@@ -731,49 +741,49 @@ void MD::simulation() {
 
     if (options.io_options.vaf) velocity_autocorrelation_function(Cv, v);
 
-    // Calculate the structure factor k-vectors
+    /* Calculate the structure factor k-vectors */
     if (options.io_options.sf) structure_factor(r);
 
-    // Average Temperature
+    /* Average Temperature */
     options.temperature = options.kinetic_energy / (1.5 * options.N);
     temperature.push_back(options.temperature);
 
-    // Density
+    /* Density */
     density.push_back(options.density);
 
     if (options.io_options.pressure) {
-      // Average Configurational Pressure Pc
+      /* Average Configurational Pressure Pc */
       pc.push_back(PC / (3 * options.volume));
 
-      // Kinetic Pressure
+      /* Kinetic Pressure */
       pk.push_back(options.density * options.temperature);
     }
 
     if (options.io_options.energies) {
-      // Average Potential Energy per particle
+      /* Average Potential Energy per particle */
       u_en.push_back(U / options.N);
 
-      // Average Kinetic Energy
+      /* Average Kinetic Energy */
       k_en.push_back(options.kinetic_energy / options.N);
     }
 
-    // Save positions for visualisation with Python
+    /* Save positions for visualisation with Python */
     if (options.io_options.visualise) {
-      // Reserve memory for the position vectors
+      /* Reserve memory for the position vectors */
       (*pos_x)[step_idx].reserve(options.N);
       (*pos_y)[step_idx].reserve(options.N);
       (*pos_z)[step_idx].reserve(options.N);
 
-      // Populate the vectors with the current positions
+      /* Populate the vectors with the current positions */
       (*pos_x)[step_idx] = r.x;
       (*pos_y)[step_idx] = r.y;
       (*pos_z)[step_idx] = r.z;
     }
   }
   /****************************************************************************/
-  // simulation Ends HERE
+  /* simulation Ends HERE */
 
-  // Write to files
+  /* Write to files */
   file_output();
 
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
@@ -790,7 +800,7 @@ void MD::simulation() {
                "******************************\n"
             << std::endl;
 
-  // Close file streams, makes simulation reusable in loops
+  /* Close file streams, makes simulation reusable in loops */
   reset_values();
 }
 
@@ -800,14 +810,10 @@ void MD::reset_values(bool force_reset) {
     which will throw an exception
   */
 
-  // Do not close streams and do not clear position and velocity vectors
-  // in the case where the fluid is being compressed
+  /* Do not close streams and do not clear position and velocity vectors
+     in the case where the fluid is being compressed */
   if (!options.compression_options.compression || force_reset) {
-    // // Close streams
-    // for (size_t i = 0; i < streams.size(); ++i) {
-    //   streams[i].close();
-    // }
-    // Clear values, size, but reserve capacity
+    /* Clear values, size, but reserve capacity */
     r.x.clear();
     r.y.clear();
     r.z.clear();
@@ -816,11 +822,11 @@ void MD::reset_values(bool force_reset) {
     v.z.clear();
     options.compression_options.compress_count = 0;
   }
-  // Reset the MSD initial vectors
+  /* Reset the MSD initial vectors */
   MSD_r.x.clear();
   MSD_r.y.clear();
   MSD_r.z.clear();
-  // Clear monitored quantities
+  /* Clear monitored quantities */
   density.clear();
   temperature.clear();
   u_en.clear();
@@ -829,7 +835,7 @@ void MD::reset_values(bool force_reset) {
   pk.clear();
   msd.clear();
   Cr.clear();
-  rdf.resize(options.rdf_options.rdf_bins + 1, 0);  // gr with Index igr
+  rdf.resize(options.rdf_options.rdf_bins + 1, 0); /* gr with Index igr */
 }
 
 std::string MD::set_simulation_params(double &rho, double &T, double &power,
@@ -842,14 +848,18 @@ std::string MD::set_simulation_params(double &rho, double &T, double &power,
 
   if (pp_type == "GaussianCoreModel") {
     params = "Potential: GaussianCoreModel, " + params;
-    options.power = NAN;  // Set the variable to NAN to be ignore by the logger
-    options.a_cst = NAN;  // Set the variable to NAN to be ignore by the logger
+    options.power =
+        NAN; /* Set the variable to NAN to be ignore by the logger */
+    options.a_cst =
+        NAN; /* Set the variable to NAN to be ignore by the logger */
   }
 
   else if (pp_type == "LennardJones") {
     params = "Potential: LennardJones, " + params;
-    options.power = NAN;  // Set the variable to NAN to be ignore by the logger
-    options.a_cst = NAN;  // Set the variable to NAN to be ignore by the logger
+    options.power =
+        NAN; /* Set the variable to NAN to be ignore by the logger */
+    options.a_cst =
+        NAN; /* Set the variable to NAN to be ignore by the logger */
   }
 
   else if (pp_type == "Exponential") {
@@ -880,7 +890,7 @@ void MD::enable_testing(bool is_testing) {
 }
 
 void MD::set_vector_sizes() {
-  // For efficiency, memory in the containers is reserved before use
+  /* For efficiency, memory in the containers is reserved before use */
   /* Positions */
   r.x.reserve(options.N);
   r.y.reserve(options.N);
@@ -891,7 +901,7 @@ void MD::set_vector_sizes() {
   v.z.reserve(options.N);
   /* RDF */
   if (options.io_options.rdf)
-    rdf.resize(options.rdf_options.rdf_bins + 1, 0);  // gr with Index igr
+    rdf.resize(options.rdf_options.rdf_bins + 1, 0); /* gr with Index igr */
   /* Forces/Acceleration */
   f.x.resize(options.N, 0);
   f.y.resize(options.N, 0);
@@ -904,23 +914,23 @@ void MD::set_vector_sizes() {
   }
   /* Observed Quantities */
   if (options.io_options.vaf)
-    Cr.reserve(options.steps);  // Velocity Autocorrelation Function
+    Cr.reserve(options.steps); /* Velocity Autocorrelation Function */
   if (options.io_options.msd)
-    msd.reserve(options.steps);  // Mean Square Displacement
+    msd.reserve(options.steps); /* Mean Square Displacement */
   if (options.io_options.energies) {
-    u_en.reserve(options.steps);  // Average Potential Energy
-    k_en.reserve(options.steps);  // Average Kinetic Energy
+    u_en.reserve(options.steps); /* Average Potential Energy */
+    k_en.reserve(options.steps); /* Average Kinetic Energy */
   }
   if (options.io_options.pressure) {
-    pc.reserve(options.steps);  // Configurational Pressure
-    pk.reserve(options.steps);  // Kinetic Pressure
+    pc.reserve(options.steps); /* Configurational Pressure */
+    pk.reserve(options.steps); /* Kinetic Pressure */
   }
   temperature.reserve(options.steps);
 }
 
 void MD::save_visualisation_arrays() {
-  // Write the arrays as jagged,(hence transposed), this creates rows=STEPS
-  // and columns=PARTICLES
+  /* Write the arrays as jagged,(hence transposed), this creates rows=STEPS */
+  /* and columns=PARTICLES */
   std::ofstream out_x(
       logger.file_naming(options.io_options.dir + "/" +
                              options.io_options.simulation_name + "x_data",
@@ -953,10 +963,10 @@ void MD::save_visualisation_arrays() {
 }
 
 void MD::file_output() {
-  // Generating the filenames for the output
+  /* Generating the filenames for the output */
 
-  // Always open the data file stream since the temperature and density
-  // are always written
+  /* Always open the data file stream since the temperature and density */
+  /* are always written */
   logger.file_names.push_back(
       options.io_options.dir +
       logger.file_naming("/" + options.io_options.simulation_name + "Data",
@@ -982,10 +992,10 @@ void MD::file_output() {
                            options.a_cst));
   }
 
-  // Save particle positions to files
+  /* Save particle positions to files */
   if (options.io_options.visualise) save_visualisation_arrays();
 
-  // Create a map with all the streams
+  /* Create a map with all the streams */
   std::vector<std::ofstream> all_streams = logger.open_files(logger.file_names);
   std::map<std::string, std::ofstream> streams;
   streams["data"] = std::move(all_streams[0]);
@@ -999,7 +1009,7 @@ void MD::file_output() {
       std::cerr << "Unrecognised stream in all_streams" << std::endl;
   }
 
-  // generate the correct header depending on io_options
+  /* generate the correct header depending on io_options */
   std::vector<std::vector<double>> output_quantities = {density, temperature};
   std::string header = "# step\trho\tT";
 
@@ -1029,7 +1039,7 @@ void MD::file_output() {
   }
   logger.write_data_file(streams["data"], header, output_quantities);
 
-  // Saving Last Position
+  /* Saving Last Position */
   if (options.io_options.position) {
     logger.write_data_file(streams["position"],
                            "# particle\tx\ty\tz\tvx\tvy\tvz\tax\tay\taz",

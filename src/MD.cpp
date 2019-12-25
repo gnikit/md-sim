@@ -269,6 +269,201 @@ MD::~MD() {
   delete pos_z;
 }
 
+void MD::simulation() {
+  /* Preallocate storage space */
+  set_vector_sizes();
+
+  std::cout << "***************************\n"
+               "** MD simulation started **\n"
+               "***************************\n"
+            << std::endl;
+  /* Sets the unneeded variables (A and/or n) to NAN depending on the pp-type */
+  std::cout << set_simulation_params(options.density,
+                                     options.target_temperature, options.power,
+                                     options.a_cst, options.potential_type)
+            << std::endl;
+
+  /* Gets the pair potential for the simulation based on a map of the
+     initials of the pair potential and the pair potential itself. */
+  pair_potential_type force = get_force_func(options.potential_type);
+
+  std::chrono::steady_clock::time_point begin =
+      std::chrono::steady_clock::now();
+  /****************************************************************************/
+  /* Initialise the simulation, lattice params and much more */
+  options.kinetic_energy = initialise(r, v, options.target_temperature);
+
+  size_t step_idx;
+  for (step_idx = 0; step_idx < options.steps; ++step_idx) {
+    /* Forces loop */
+    auto [U, PC] = calculate_forces(step_idx, force);
+
+    /* Isothermal Calibration */
+    /* using T & KE from prev timestep */
+    options.scale_v = sqrt(options.target_temperature / options.temperature);
+
+    options.kinetic_energy = verlet_algorithm(r, v, f, options.io_options.msd);
+
+    if (options.io_options.msd) mean_square_displacement(MSD, MSD_r);
+
+    if (options.io_options.vaf) velocity_autocorrelation_function(Cv, v);
+
+    /* Calculate the structure factor k-vectors */
+    if (options.io_options.sf) structure_factor(r);
+
+    /* Average Temperature */
+    options.temperature = options.kinetic_energy / (1.5 * options.N);
+    temperature.push_back(options.temperature);
+
+    /* Density */
+    density.push_back(options.density);
+
+    if (options.io_options.pressure) {
+      /* Average Configurational Pressure Pc */
+      pc.push_back(PC / (3 * options.volume));
+
+      /* Kinetic Pressure */
+      pk.push_back(options.density * options.temperature);
+    }
+
+    if (options.io_options.energies) {
+      /* Average Potential Energy per particle */
+      u_en.push_back(U / options.N);
+
+      /* Average Kinetic Energy */
+      k_en.push_back(options.kinetic_energy / options.N);
+    }
+
+    /* Save positions for visualisation with Python */
+    if (options.io_options.visualise) {
+      /* Reserve memory for the position vectors */
+      (*pos_x)[step_idx].reserve(options.N);
+      (*pos_y)[step_idx].reserve(options.N);
+      (*pos_z)[step_idx].reserve(options.N);
+
+      /* Populate the vectors with the current positions */
+      (*pos_x)[step_idx] = r.x;
+      (*pos_y)[step_idx] = r.y;
+      (*pos_z)[step_idx] = r.z;
+    }
+  }
+  /****************************************************************************/
+  /* simulation Ends HERE */
+
+  /* Write to files */
+  file_output();
+
+  std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+  std::cout
+      << "CPU run time = "
+      << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() /
+             60
+      << " min "
+      << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() %
+             60
+      << "s" << std::endl;
+  std::cout << "******************************\n"
+               "** MD simulation terminated **\n"
+               "******************************\n"
+            << std::endl;
+
+  /* Close file streams, makes simulation reusable in loops */
+  reset_values();
+}
+
+void MD::simulation(std::string simulation_name, double DENSITY,
+                    double TEMPERATURE, double POWER, double A_CST,
+                    std::string pp_type) {
+  /* NOTE: this is a legacy routine and it will be removed in the future
+     Initialise the variables with the input parameters
+     Name the simulation. This will be used as a prefix in the files */
+  options.io_options.simulation_name = simulation_name;
+  options.density = DENSITY;
+  options.target_temperature = TEMPERATURE;
+  options.power = POWER;
+  options.a_cst = A_CST;
+  options.potential_type = pp_type;
+
+  simulation();
+}
+
+void MD::reset_values(bool force_reset) {
+  /*
+    bc the stream might be closed and the user might then call reset_values
+    which will throw an exception
+  */
+
+  /* Do not close streams and do not clear position and velocity vectors
+     in the case where the fluid is being compressed */
+  if (!options.compression_options.compression || force_reset) {
+    /* Clear values, size, but reserve capacity */
+    r.x.clear();
+    r.y.clear();
+    r.z.clear();
+    v.x.clear();
+    v.y.clear();
+    v.z.clear();
+    options.compression_options.compress_count = 0;
+  }
+  /* Reset the MSD initial vectors */
+  MSD_r.x.clear();
+  MSD_r.y.clear();
+  MSD_r.z.clear();
+  /* Clear monitored quantities */
+  density.clear();
+  temperature.clear();
+  u_en.clear();
+  k_en.clear();
+  pc.clear();
+  pk.clear();
+  msd.clear();
+  Cr.clear();
+  rdf.resize(options.rdf_options.rdf_bins + 1, 0); /* gr with Index igr */
+}
+
+void MD::enable_testing(bool is_testing) {
+  options.test_options.is_testing = is_testing;
+}
+
+void MD::set_vector_sizes() {
+  /* For efficiency, memory in the containers is reserved before use */
+  /* Positions */
+  r.x.reserve(options.N);
+  r.y.reserve(options.N);
+  r.z.reserve(options.N);
+  /* Velocities */
+  v.x.reserve(options.N);
+  v.y.reserve(options.N);
+  v.z.reserve(options.N);
+  /* RDF */
+  if (options.io_options.rdf)
+    rdf.resize(options.rdf_options.rdf_bins + 1, 0); /* gr with Index igr */
+  /* Forces/Acceleration */
+  f.x.resize(options.N, 0);
+  f.y.resize(options.N, 0);
+  f.z.resize(options.N, 0);
+  /* Structure factor k-arrays */
+  if (options.io_options.sf) {
+    sf.x.reserve(options.N);
+    sf.y.reserve(options.N);
+    sf.z.reserve(options.N);
+  }
+  /* Observed Quantities */
+  if (options.io_options.vaf)
+    Cr.reserve(options.steps); /* Velocity Autocorrelation Function */
+  if (options.io_options.msd)
+    msd.reserve(options.steps); /* Mean Square Displacement */
+  if (options.io_options.energies) {
+    u_en.reserve(options.steps); /* Average Potential Energy */
+    k_en.reserve(options.steps); /* Average Kinetic Energy */
+  }
+  if (options.io_options.pressure) {
+    pc.reserve(options.steps); /* Configurational Pressure */
+    pk.reserve(options.steps); /* Kinetic Pressure */
+  }
+  temperature.reserve(options.steps);
+}
+
 void MD::choose_lattice_formation(std::string &lattice, vector_3d &r) {
   if (lattice == "FCC") {
     /* Coordinates for the FCC lattice */
@@ -420,6 +615,9 @@ void MD::mb_distribution(vector_3d &v, double TEMPERATURE) {
   }
 }
 
+double MD::stepping_algorithm(vector_3d &r, vector_3d &v, vector_3d const &f,
+                              bool msd) {}
+
 double MD::verlet_algorithm(vector_3d &r, vector_3d &v, vector_3d const &f,
                             bool sample_msd = true) {
   size_t i;
@@ -460,6 +658,75 @@ double MD::verlet_algorithm(vector_3d &r, vector_3d &v, vector_3d const &f,
   }
 
   return KE;
+}
+
+double MD::rk4_algorithm(vector_3d &r, vector_3d &v, vector_3d const &f,
+                         bool msd) {}
+
+std::tuple<double, double> MD::calculate_forces(
+    size_t const &step_idx, pair_potential_type const &force) {
+  /* Resetting forces */
+  std::fill(f.x.begin(), f.x.end(), 0);
+  std::fill(f.y.begin(), f.y.end(), 0);
+  std::fill(f.z.begin(), f.z.end(), 0);
+
+  /* Reseting <Potential> U to 0 */
+  double U = 0;  /* Potential Energy */
+  double PC = 0; /* Configurational Pressure */
+
+  size_t i, j, igr;
+  for (i = 0; i < options.N - 1; ++i) {
+    for (j = i + 1; j < options.N; ++j) {
+      /* distance between particle i and j */
+      double x = r.x[i] - r.x[j]; /* Separation distance */
+      double y = r.y[i] - r.y[j]; /* between particles i and j */
+      double z = r.z[i] - r.z[j]; /* in Cartesian */
+
+      /* Get the shortest image of the two particles
+         if the particles are near the periodic boundary,
+         this image is their reflection. */
+      if (x > (0.5 * options.Lx)) x -= options.Lx;
+      if (x < (-0.5 * options.Lx)) x += options.Lx;
+      if (y > (0.5 * options.Ly)) y -= options.Ly;
+      if (y < (-0.5 * options.Ly)) y += options.Ly;
+      if (z > (0.5 * options.Lz)) z -= options.Lz;
+      if (z < (-0.5 * options.Lz)) z += options.Lz;
+
+      /* Pair potential radius */
+      double radius = sqrt((x * x) + (y * y) + (z * z));
+
+      /* Force loop */
+      if (radius < options.cut_off) {
+        /* Allows the user to choose different pair potentials */
+        auto [ff, temp_u] = force(radius, options.power, options.a_cst);
+
+        /* Average potential energy */
+        if (options.io_options.energies) U += temp_u;
+
+        /* Configurational pressure */
+        if (options.io_options.pressure) PC += radius * ff;
+
+        /* Canceling the ij and ji pairs
+           Taking the lower triangular matrix */
+        f.x[i] += x * ff / radius;
+        f.x[j] -= x * ff / radius;
+        f.y[i] += y * ff / radius;
+        f.y[j] -= y * ff / radius;
+        f.z[i] += z * ff / radius;
+        f.z[j] -= z * ff / radius;
+
+        /* Radial Distribution
+           measured with a delay, since the system requires a few thousand
+           time-steps to reach equilibrium */
+        if (options.io_options.rdf && step_idx > options.rdf_options.rdf_wait) {
+          igr = round(options.rdf_options.rdf_bins * radius / options.cut_off);
+          rdf[igr] += 1;
+        }
+      }
+    }
+  }
+
+  return std::make_tuple(U, PC);
 }
 
 void MD::velocity_autocorrelation_function(vector_3d const &Cv,
@@ -560,224 +827,6 @@ void MD::structure_factor(vector_3d const &r) {
   sf.z.push_back(kz);
 }
 
-std::tuple<double, double> MD::calculate_forces(
-    size_t const &step_idx, pair_potential_type const &force) {
-  /* Resetting forces */
-  std::fill(f.x.begin(), f.x.end(), 0);
-  std::fill(f.y.begin(), f.y.end(), 0);
-  std::fill(f.z.begin(), f.z.end(), 0);
-
-  /* Reseting <Potential> U to 0 */
-  double U = 0;  /* Potential Energy */
-  double PC = 0; /* Configurational Pressure */
-
-  size_t i, j, igr;
-  for (i = 0; i < options.N - 1; ++i) {
-    for (j = i + 1; j < options.N; ++j) {
-      /* distance between particle i and j */
-      double x = r.x[i] - r.x[j]; /* Separation distance */
-      double y = r.y[i] - r.y[j]; /* between particles i and j */
-      double z = r.z[i] - r.z[j]; /* in Cartesian */
-
-      /* Get the shortest image of the two particles
-         if the particles are near the periodic boundary,
-         this image is their reflection. */
-      if (x > (0.5 * options.Lx)) x -= options.Lx;
-      if (x < (-0.5 * options.Lx)) x += options.Lx;
-      if (y > (0.5 * options.Ly)) y -= options.Ly;
-      if (y < (-0.5 * options.Ly)) y += options.Ly;
-      if (z > (0.5 * options.Lz)) z -= options.Lz;
-      if (z < (-0.5 * options.Lz)) z += options.Lz;
-
-      /* Pair potential radius */
-      double radius = sqrt((x * x) + (y * y) + (z * z));
-
-      /* Force loop */
-      if (radius < options.cut_off) {
-        /* Allows the user to choose different pair potentials */
-        auto [ff, temp_u] = force(radius, options.power, options.a_cst);
-
-        /* Average potential energy */
-        if (options.io_options.energies) U += temp_u;
-
-        /* Configurational pressure */
-        if (options.io_options.pressure) PC += radius * ff;
-
-        /* Canceling the ij and ji pairs
-           Taking the lower triangular matrix */
-        f.x[i] += x * ff / radius;
-        f.x[j] -= x * ff / radius;
-        f.y[i] += y * ff / radius;
-        f.y[j] -= y * ff / radius;
-        f.z[i] += z * ff / radius;
-        f.z[j] -= z * ff / radius;
-
-        /* Radial Distribution
-           measured with a delay, since the system requires a few thousand
-           time-steps to reach equilibrium */
-        if (options.io_options.rdf && step_idx > options.rdf_options.rdf_wait) {
-          igr = round(options.rdf_options.rdf_bins * radius / options.cut_off);
-          rdf[igr] += 1;
-        }
-      }
-    }
-  }
-
-  return std::make_tuple(U, PC);
-}
-
-void MD::simulation(std::string simulation_name, double DENSITY,
-                    double TEMPERATURE, double POWER, double A_CST,
-                    std::string pp_type) {
-  /* NOTE: this is a legacy routine and it will be removed in the future
-     Initialise the variables with the input parameters
-     Name the simulation. This will be used as a prefix in the files */
-  options.io_options.simulation_name = simulation_name;
-  options.density = DENSITY;
-  options.target_temperature = TEMPERATURE;
-  options.power = POWER;
-  options.a_cst = A_CST;
-  options.potential_type = pp_type;
-
-  simulation();
-}
-
-void MD::simulation() {
-  /* Preallocate storage space */
-  set_vector_sizes();
-
-  std::cout << "***************************\n"
-               "** MD simulation started **\n"
-               "***************************\n"
-            << std::endl;
-  /* Sets the unneeded variables (A and/or n) to NAN depending on the pp-type */
-  std::cout << set_simulation_params(options.density,
-                                     options.target_temperature, options.power,
-                                     options.a_cst, options.potential_type)
-            << std::endl;
-
-  /* Gets the pair potential for the simulation based on a map of the
-     initials of the pair potential and the pair potential itself. */
-  pair_potential_type force = get_force_func(options.potential_type);
-
-  std::chrono::steady_clock::time_point begin =
-      std::chrono::steady_clock::now();
-
-  /* Initialise the simulation, lattice params and much more */
-  options.kinetic_energy = initialise(r, v, options.target_temperature);
-
-  size_t step_idx;
-  for (step_idx = 0; step_idx < options.steps; ++step_idx) {
-    /* Forces loop */
-    auto [U, PC] = calculate_forces(step_idx, force);
-
-    /* Isothermal Calibration */
-    /* using T & KE from prev timestep */
-    options.scale_v = sqrt(options.target_temperature / options.temperature);
-
-    options.kinetic_energy = verlet_algorithm(r, v, f, options.io_options.msd);
-
-    if (options.io_options.msd) mean_square_displacement(MSD, MSD_r);
-
-    if (options.io_options.vaf) velocity_autocorrelation_function(Cv, v);
-
-    /* Calculate the structure factor k-vectors */
-    if (options.io_options.sf) structure_factor(r);
-
-    /* Average Temperature */
-    options.temperature = options.kinetic_energy / (1.5 * options.N);
-    temperature.push_back(options.temperature);
-
-    /* Density */
-    density.push_back(options.density);
-
-    if (options.io_options.pressure) {
-      /* Average Configurational Pressure Pc */
-      pc.push_back(PC / (3 * options.volume));
-
-      /* Kinetic Pressure */
-      pk.push_back(options.density * options.temperature);
-    }
-
-    if (options.io_options.energies) {
-      /* Average Potential Energy per particle */
-      u_en.push_back(U / options.N);
-
-      /* Average Kinetic Energy */
-      k_en.push_back(options.kinetic_energy / options.N);
-    }
-
-    /* Save positions for visualisation with Python */
-    if (options.io_options.visualise) {
-      /* Reserve memory for the position vectors */
-      (*pos_x)[step_idx].reserve(options.N);
-      (*pos_y)[step_idx].reserve(options.N);
-      (*pos_z)[step_idx].reserve(options.N);
-
-      /* Populate the vectors with the current positions */
-      (*pos_x)[step_idx] = r.x;
-      (*pos_y)[step_idx] = r.y;
-      (*pos_z)[step_idx] = r.z;
-    }
-  }
-  /****************************************************************************/
-  /* simulation Ends HERE */
-
-  /* Write to files */
-  file_output();
-
-  std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-  std::cout
-      << "CPU run time = "
-      << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() /
-             60
-      << " min "
-      << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() %
-             60
-      << "s" << std::endl;
-  std::cout << "******************************\n"
-               "** MD simulation terminated **\n"
-               "******************************\n"
-            << std::endl;
-
-  /* Close file streams, makes simulation reusable in loops */
-  reset_values();
-}
-
-void MD::reset_values(bool force_reset) {
-  /*
-    bc the stream might be closed and the user might then call reset_values
-    which will throw an exception
-  */
-
-  /* Do not close streams and do not clear position and velocity vectors
-     in the case where the fluid is being compressed */
-  if (!options.compression_options.compression || force_reset) {
-    /* Clear values, size, but reserve capacity */
-    r.x.clear();
-    r.y.clear();
-    r.z.clear();
-    v.x.clear();
-    v.y.clear();
-    v.z.clear();
-    options.compression_options.compress_count = 0;
-  }
-  /* Reset the MSD initial vectors */
-  MSD_r.x.clear();
-  MSD_r.y.clear();
-  MSD_r.z.clear();
-  /* Clear monitored quantities */
-  density.clear();
-  temperature.clear();
-  u_en.clear();
-  k_en.clear();
-  pc.clear();
-  pk.clear();
-  msd.clear();
-  Cr.clear();
-  rdf.resize(options.rdf_options.rdf_bins + 1, 0); /* gr with Index igr */
-}
-
 std::string MD::set_simulation_params(double &rho, double &T, double &power,
                                       double &a, std::string &pp_type) {
   std::string params =
@@ -823,49 +872,6 @@ std::string MD::set_simulation_params(double &rho, double &T, double &power,
   }
 
   return params;
-}
-
-void MD::enable_testing(bool is_testing) {
-  options.test_options.is_testing = is_testing;
-}
-
-void MD::set_vector_sizes() {
-  /* For efficiency, memory in the containers is reserved before use */
-  /* Positions */
-  r.x.reserve(options.N);
-  r.y.reserve(options.N);
-  r.z.reserve(options.N);
-  /* Velocities */
-  v.x.reserve(options.N);
-  v.y.reserve(options.N);
-  v.z.reserve(options.N);
-  /* RDF */
-  if (options.io_options.rdf)
-    rdf.resize(options.rdf_options.rdf_bins + 1, 0); /* gr with Index igr */
-  /* Forces/Acceleration */
-  f.x.resize(options.N, 0);
-  f.y.resize(options.N, 0);
-  f.z.resize(options.N, 0);
-  /* Structure factor k-arrays */
-  if (options.io_options.sf) {
-    sf.x.reserve(options.N);
-    sf.y.reserve(options.N);
-    sf.z.reserve(options.N);
-  }
-  /* Observed Quantities */
-  if (options.io_options.vaf)
-    Cr.reserve(options.steps); /* Velocity Autocorrelation Function */
-  if (options.io_options.msd)
-    msd.reserve(options.steps); /* Mean Square Displacement */
-  if (options.io_options.energies) {
-    u_en.reserve(options.steps); /* Average Potential Energy */
-    k_en.reserve(options.steps); /* Average Kinetic Energy */
-  }
-  if (options.io_options.pressure) {
-    pc.reserve(options.steps); /* Configurational Pressure */
-    pk.reserve(options.steps); /* Kinetic Pressure */
-  }
-  temperature.reserve(options.steps);
 }
 
 void MD::save_visualisation_arrays() {

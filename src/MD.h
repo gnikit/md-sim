@@ -169,6 +169,9 @@ class MD {
    */
   void mb_distribution(vector_3d &v, double TEMPERATURE);
 
+  double stepping_algorithm(vector_3d &r, vector_3d &v, vector_3d const &f,
+                            bool msd);
+
   /**
    *  An iterative leap-frog Verlet Algorithm.
    *
@@ -181,9 +184,8 @@ class MD {
   double verlet_algorithm(vector_3d &r, vector_3d &v, vector_3d const &f,
                           bool msd);
 
-  double rk4_algorithm(vector_3d &r, vector_3d &v, vector_3d &f, bool msd);
-
-  double stepping_algorithm(vector_3d &r, vector_3d &v, vector_3d &f, bool msd);
+  double rk4_algorithm(vector_3d &r, vector_3d &v, vector_3d const &f,
+                       bool msd);
 
   /**
    * @brief Calculates the forces interactions of a given pair potential

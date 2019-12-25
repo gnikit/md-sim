@@ -39,6 +39,22 @@ struct io_options_type {
   bool visualise = false;           /* save all positions, of all particles */
   std::string dir = ".";            /* file output directory */
   std::string simulation_name = ""; /* simulation prefix/ name */
+
+  io_options_type() {}
+  io_options_type& operator=(io_options_type const& rhs) {
+    msd = rhs.msd;
+    rdf = rhs.rdf;
+    vaf = rhs.vaf;
+    energies = rhs.energies;
+    pressure = rhs.pressure;
+    position = rhs.position;
+    sf = rhs.sf;
+    visualise = rhs.visualise;
+    dir = rhs.dir;
+    simulation_name = rhs.simulation_name;
+
+    return *this;
+  }
 };
 
 struct options_type {

@@ -19,6 +19,7 @@
 #include <vector>     /* vectors */
 
 #include "data_structures.h"
+#include "helper_functions.h"
 #include "md_pair_potentials.h"
 #include "stat_file_logger.h"
 

@@ -20,8 +20,9 @@
       <ref name="data_io"/>
       <ref name="pressure_io"/>
       <ref name="msd_io"/>
-      <ref name="rdf_io"/>
       <ref name="vaf_io"/>
+      <ref name="structure_factor_io"/>
+      <ref name="rdf_io"/>
       <ref name="save_last_positions_io"/>
     </element>
   </define>

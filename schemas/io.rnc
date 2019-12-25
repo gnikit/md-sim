@@ -19,9 +19,11 @@ io_options =
 
         msd_io,
 
-        rdf_io,
-
         vaf_io,
+
+        structure_factor_io,
+
+        rdf_io,
 
         save_last_positions_io
 

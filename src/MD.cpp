@@ -9,8 +9,7 @@ MD::MD(options_type &input_options) {
   /* Test whether the input directory exists */
   if (!input_options.io_options.dir.empty()) {
     try {
-      options.io_options.dir = input_options.io_options.dir;
-      if (!fs::exists(options.io_options.dir)) {
+      if (!fs::exists(input_options.io_options.dir)) {
         throw
           "input out_directory in MD constructor does not exist.\n"
           "Use a valid directory for output files to be saved";
@@ -21,20 +20,21 @@ MD::MD(options_type &input_options) {
       exit(1);
     }
   }
+
+  /* Pass all io options */
+  options.io_options = input_options.io_options;
+
   std::cout << "Output directory set to: " << options.io_options.dir
             << std::endl;
 
-  /* Pass type of simulation */
-  options.simulation_type = input_options.simulation_type;
+  /* Print type of simulation */
   std::cout << "Simulation type: " << options.simulation_type << std::endl;
 
-  /* Pass simulation name if any */
-  options.io_options.simulation_name = input_options.io_options.simulation_name;
+  /* Print simulation name if any */
   std::cout << "Simulation name: " << options.io_options.simulation_name
             << std::endl;
 
   /* Save all the positions for the fluid */
-  options.io_options.visualise = input_options.io_options.visualise;
   std::cout << "Particle visualisation: " << options.io_options.visualise
             << std::endl;
 
@@ -111,7 +111,7 @@ MD::MD(options_type &input_options) {
       0.005 / sqrt(options.target_temperature); /* todo: add to schema */
   /* Box length scaling */
   options.L = pow((options.N / options.density), 1.0 / 3.0);
-  options.Lx = options.Ly = options.Lz = options.L; /* todo: questionable! */
+  options.Lx = options.Ly = options.Lz = options.L;  // todo: questionable!
   options.volume = options.N / options.density;
 
   /* cut_off definition */
@@ -722,7 +722,8 @@ void MD::simulation() {
           /* Radial Distribution
              measured with a delay, since the system requires a few thousand
              time-steps to reach equilibrium */
-          if (step_idx > options.rdf_options.rdf_wait) {
+          if (options.io_options.rdf &&
+              step_idx > options.rdf_options.rdf_wait) {
             igr =
                 round(options.rdf_options.rdf_bins * radius / options.cut_off);
             rdf[igr] += 1;
@@ -735,7 +736,7 @@ void MD::simulation() {
     /* using T & KE from prev timestep */
     options.scale_v = sqrt(options.target_temperature / options.temperature);
 
-    options.kinetic_energy = verlet_algorithm(r, v, f, true);
+    options.kinetic_energy = verlet_algorithm(r, v, f, options.io_options.msd);
 
     if (options.io_options.msd) mean_square_displacement(MSD, MSD_r);
 

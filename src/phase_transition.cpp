@@ -13,7 +13,7 @@ phase_transition::phase_transition(options_type &input_options) {
       input_options.compression_options.reverse_comp;
 }
 
-void phase_transition::crystallisation() {
+void phase_transition::crystallisation(options_type &options) {
   set_compression_flag(true);
 
   // todo: many features do not work at this moment like particle tracking
@@ -95,10 +95,10 @@ void phase_transition::crystallisation(std::string SIMULATION_NAME,
   options.a_cst = A_CST;
   options.potential_type = pp_type;
 
-  crystallisation();
+  crystallisation(options);
 }
 
-void phase_transition::two_way_compression() {
+void phase_transition::two_way_compression(options_type &options) {
   /*
    * //todo: implement in schema
    *

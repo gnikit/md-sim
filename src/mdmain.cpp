@@ -24,14 +24,14 @@ int md_options_interface::mdmain(std::string xml_file) {
   } else if (opts.simulation_type == "CompressionRun") {
     phase_transition run(opts);
 
-    run.crystallisation();
+    run.crystallisation(opts);
 
   } else if (opts.simulation_type == "ReverseCompressionRun") {
     phase_transition run(opts);
 
     if (opts.test_options.is_testing) run.enable_testing(true);
 
-    run.two_way_compression();
+    run.two_way_compression(opts);
   } else
     std::cerr << "Unrecognised simulation_name provided in xml" << std::endl;
 

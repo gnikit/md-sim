@@ -62,9 +62,8 @@ struct io_options_type {
 struct options_type {
   string simulation_type = "";       /* type of simulation e.g. NormalRun */
   string potential_type = "";        /* pair potential type */
-  string stepping_alg = "";          /* iterative algorithm of particles */
   string lattice = "";               /* lattice formation */
-  string iterative_method = "";      /* stepping algorithm of the fluid */
+  string iterative_method = "";      /* iterative algorithm of particles */
   vector<size_t> particles{1, 1, 1}; /* number of particles in each axis */
   double random_lattice_var = 0;     /* variance of dist for random lattice */
   size_t steps = 2000;               /* number of total iterations */
@@ -94,7 +93,6 @@ struct options_type {
   options_type& operator=(options_type const& rhs) {
     simulation_type = rhs.simulation_type;
     potential_type = rhs.potential_type;
-    stepping_alg = rhs.stepping_alg;
     lattice = rhs.lattice;
     iterative_method = rhs.iterative_method;
 

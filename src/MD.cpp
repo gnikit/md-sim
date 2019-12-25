@@ -20,8 +20,8 @@ MD::MD(options_type &input_options) {
     }
   }
 
-  /* Pass all io options */
-  options.io_options = input_options.io_options;
+  /* Pass all relevant options through the overloaded operator */
+  options = input_options;
 
   std::cout << "Output directory set to: " << options.io_options.dir
             << std::endl;
@@ -33,21 +33,17 @@ MD::MD(options_type &input_options) {
   std::cout << "Simulation name: " << options.io_options.simulation_name
             << std::endl;
 
-  /* Save all the positions for the fluid */
+  /* Print fluid visualisation flag */
   std::cout << "Particle visualisation: " << options.io_options.visualise
             << std::endl;
 
-  /* Pass stepping algorithm */
-  // todo: test string against availbale options
-  options.stepping_alg = input_options.stepping_alg;
-  std::cout << "Iterative algorithm: " << options.stepping_alg << std::endl;
+  /* Print stepping algorithm */
+  std::cout << "Iterative algorithm: " << options.iterative_method << std::endl;
 
-  /* Pass number of iterations */
-  options.steps = input_options.steps;
+  /* Print number of iterations */
   std::cout << "Number of steps: " << options.steps << std::endl;
 
-  /* Pass particles and lattice */
-  options.lattice = input_options.lattice;
+  /* Print lattice */
   std::cout << "Initial lattice: " << options.lattice << std::endl;
 
   /* Pass particles */
@@ -63,12 +59,12 @@ MD::MD(options_type &input_options) {
             "The supplied particles vector contains a 0\n"
             "particles cannot be 0 in x, y or z";
     }
+    options.particles = input_options.particles;
 
   } catch (const char *msg) {
     std::cerr << "Error: " << msg << std::endl;
     exit(1);
   }
-  options.particles = input_options.particles;
 
   /* Calculate the total number of particles N based on the lattice */
   options.Nx = input_options.particles[0];
@@ -83,27 +79,19 @@ MD::MD(options_type &input_options) {
   }
   std::cout << "Number of particles: " << options.N << std::endl;
 
-  /* Pass physical parameters */
-  /* Pass the pair potential */
-  options.potential_type = input_options.potential_type;
+  /* Physical parameters */
+  /* Print the pair potential */
   std::cout << "Pair potential: " << options.potential_type << std::endl;
 
-  if (input_options.density > 0)
-    options.density = input_options.density;
-  else {
+  if (options.density < 0) {
     std::cerr << "Error: Negative density supplied" << std::endl;
     exit(1);
   }
 
-  if (input_options.target_temperature > 0)
-    options.target_temperature = input_options.target_temperature;
-  else {
+  if (options.target_temperature < 0) {
     std::cerr << "Error: Negative temperature supplied" << std::endl;
     exit(1);
   }
-  options.power = input_options.power;
-
-  options.a_cst = input_options.a_cst;
 
   /* Initialise scaling variables */
   options.dt =
@@ -114,8 +102,8 @@ MD::MD(options_type &input_options) {
   options.volume = options.N / options.density;
 
   /* cut_off definition */
-  if (input_options.cut_off > 0) {
-    options.cut_off = input_options.cut_off;
+  /* Default value of cut off is 0, check if it has been changed */
+  if (options.cut_off > 0) {
     /* if cut-off is too large rescale it */
     if (options.cut_off > options.L / 2.0) {
       std::cerr << "Warning: cutoff was too large!\n"
@@ -130,10 +118,9 @@ MD::MD(options_type &input_options) {
     options.cut_off = options.L / 3.0;
   }
 
-  /* Set boundary conditions //todo */
+  /* Set boundary conditions */ //todo: create
 
   /* Accuracy of RDF */
-  options.rdf_options.rdf_bins = input_options.rdf_options.rdf_bins;
   std::cout << "RDF bins: " << options.rdf_options.rdf_bins << std::endl;
 
   /* Ensuring the number of steps is greater than the rdf equilibration period
@@ -141,7 +128,6 @@ MD::MD(options_type &input_options) {
   try {
     /* The number of iterations the data collection of RDF is postponed
        in order to allow the fluid to lose its internal cubic lattice */
-    options.rdf_options.rdf_wait = input_options.rdf_options.rdf_wait;
 
     /* Substraction of size_ts if negative results into logic errors
        hence the use of an int temp; */
@@ -156,8 +142,7 @@ MD::MD(options_type &input_options) {
   }
   std::cout << "RDF equilibration period set to: "
             << options.rdf_options.rdf_wait << std::endl;
-  /* Pass testing options */
-  options.test_options.is_testing = input_options.test_options.is_testing;
+  /* Print testing options */
   std::cout << "Testing: " << options.test_options.is_testing << std::endl;
 
   /* Visualisation vectors on the heap*/

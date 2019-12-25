@@ -182,7 +182,8 @@ int md_options_interface::load_simulation_options(options_type& opts) {
 
     if (have_option(pp_path + "/dt/normalise_with_temperature"))
       opts.normalise_dt_w_temp = true;
-  }
+  } else
+    opts.normalise_dt_w_temp = false;
 
   if (have_option(path + "/final_density")) {
     error = get_option(path + "/final_density",

@@ -387,15 +387,15 @@ class Test3DVisualisation(unittest.TestCase):
         z_tracks_ref = np.loadtxt('test_z.log')
 
         # Test for consistency
-        result = np.allclose(x_tracks, x_tracks_ref, rtol=1.0e-4)
+        result = np.allclose(x_tracks, x_tracks_ref, rtol=1.0e-10)
         print(f'Testing x-axis tracking consistency with reference: {result}')
         test_results.append(result)
 
-        result = np.allclose(y_tracks, y_tracks_ref, rtol=1.0e-4)
+        result = np.allclose(y_tracks, y_tracks_ref, rtol=1.0e-10)
         print(f'Testing y-axis tracking consistency with reference: {result}')
         test_results.append(result)
 
-        result = np.allclose(z_tracks, z_tracks_ref, rtol=1.0e-4)
+        result = np.allclose(z_tracks, z_tracks_ref, rtol=1.0e-10)
         print(f'Testing z-axis tracking consistency with reference: {result}')
         test_results.append(result)
 

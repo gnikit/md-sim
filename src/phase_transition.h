@@ -13,19 +13,29 @@ class phase_transition : public MD {
  public:
   using MD::MD;
 
+  phase_transition(options_type &input_options);
+
+  /**
+   * Compress the fluid to get the phase boundary for a specific temperature.
+   *
+   * ceil((FINAL_DENSITY - DENSITY) / DENSITY_INC) compressions of STEPS length
+   * Performs repeated compresss of the fluid by periodically
+   * incrementing the density of the fluid.
+   * As a consequence the box length, the scaling factor and the
+   * position vectors are also scaled in order to conserve the number
+   * of particles in the box.
+   *
+   */
+  void crystallisation(); //! will not work for reverse compression
   void crystallisation(std::string SIMULATION_NAME, double DENSITY,
                        double FINAL_DENSITY, double DENSITY_INC,
                        double TEMPERATURE, double POWER, double A_CST,
                        std::string pp_type);
 
-  void run_backwards(std::string SIMULATION_NAME, double DENSITY,
-                     double FINAL_DENSITY, double DENSITY_INC,
-                     double TEMPERATURE, double POWER, double A_CST,
-                     std::string pp_type);
+  
+  void two_way_compression();
 
   void detect_transition();
-
-  bool get_compression_flag();
 
   void set_compression_flag(bool is_compressing);
 };

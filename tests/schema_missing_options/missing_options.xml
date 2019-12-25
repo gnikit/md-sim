@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <input_variables>
-  <constructor>
+  <setup>
     <steps>
       <integer_value rank="0">100</integer_value>
     </steps>
@@ -8,10 +8,9 @@
       <integer_value rank="1" shape="3">8 8 8</integer_value>
     </particles>
     <lattice name="SC"/>
-  </constructor>
-  <options/>
-  <simulation_type name="NormalRun">
     <simulation_name>missing_options_</simulation_name>
+  </setup>
+  <simulation_type name="NormalRun">
     <pair_potential name="LennardJones">
       <density>
         <real_value rank="0">0.5</real_value>

@@ -7,57 +7,30 @@ int md_options_interface::mdmain(std::string xml_file) {
 
   // load the xml file in memory
   load_options(xml_file);
-  constructor_type constructor;
-  options_type options;
-  simulation_type sim_options;
-  test_type test_options;
+  options_type opts;
 
-  // load all options
-  load_constructor_options(constructor);
-  load_additional_options(options);
-  load_simulation_options(sim_options);
-  load_test_options(test_options);
+  // load all opts
+  load_setup_options(opts);
+  load_simulation_options(opts);
+  load_test_options(opts.test_options);
 
   // determine which class to call
-  if (sim_options.simulation_type == "NormalRun") {
-    MD run(constructor.steps, constructor.particles, constructor.lattice);
+  if (opts.simulation_type == "NormalRun") {
+    MD run(opts);
 
-    run.load_options(options.dir, options.track_particles, options.rdf_bins,
-                     options.rdf_wait);
+    run.simulation();
 
-    if (test_options.is_testing) run.enable_testing(true);
+  } else if (opts.simulation_type == "CompressionRun") {
+    phase_transition run(opts);
 
-    run.simulation(sim_options.simulation_name, sim_options.density,
-                   sim_options.temperature, sim_options.power,
-                   sim_options.a_cst, sim_options.potential_type);
+    run.crystallisation();
 
-  } else if (sim_options.simulation_type == "CompressionRun") {
-    phase_transition run(constructor.steps, constructor.particles,
-                         constructor.lattice);
+  } else if (opts.simulation_type == "ReverseCompressionRun") {
+    phase_transition run(opts);
 
-    run.load_options(options.dir, options.track_particles, options.rdf_bins,
-                     options.rdf_wait);
+    if (opts.test_options.is_testing) run.enable_testing(true);
 
-    if (test_options.is_testing) run.enable_testing(true);
-
-    run.run_backwards(sim_options.simulation_name, sim_options.density,
-                      sim_options.density_final, sim_options.density_inc,
-                      sim_options.temperature, sim_options.power,
-                      sim_options.a_cst, sim_options.potential_type);
-
-  } else if (sim_options.simulation_type == "ReverseCompressionRun") {
-    phase_transition run(constructor.steps, constructor.particles,
-                         constructor.lattice);
-
-    run.load_options(options.dir, options.track_particles, options.rdf_bins,
-                     options.rdf_wait);
-
-    if (test_options.is_testing) run.enable_testing(true);
-
-    run.run_backwards(sim_options.simulation_name, sim_options.density,
-                      sim_options.density_final, sim_options.density_inc,
-                      sim_options.temperature, sim_options.power,
-                      sim_options.a_cst, sim_options.potential_type);
+    run.two_way_compression();
   } else
     std::cerr << "Unrecognised simulation_name provided in xml" << std::endl;
 
@@ -66,11 +39,10 @@ int md_options_interface::mdmain(std::string xml_file) {
   return 0;
 }
 
-int md_options_interface::load_constructor_options(
-    constructor_type& constructor_options) {
-  std::cout << "In load_constructor_options" << std::endl;
+int md_options_interface::load_setup_options(options_type& options) {
+  std::cout << "In load_constructor" << std::endl;
 
-  std::string path = "/constructor";
+  std::string path = "/setup";
   OptionError error;
 
   int temp;
@@ -78,26 +50,17 @@ int md_options_interface::load_constructor_options(
 
   error = get_option(path + "/steps", temp);
   assert(error == SPUD_NO_ERROR);
-  constructor_options.steps = static_cast<size_t>(temp);
+  options.steps = static_cast<size_t>(temp);
 
   error = get_option(path + "/particles", temp_v);
   assert(error == SPUD_NO_ERROR);
-  constructor_options.particles.assign(temp_v.begin(), temp_v.end());
+  options.particles.assign(temp_v.begin(), temp_v.end());
 
-  error = get_option(path + "/lattice/name", constructor_options.lattice);
+  error = get_option(path + "/lattice/name", options.lattice);
   assert(error == SPUD_NO_ERROR);
 
-  std::cout << "Exiting load_constructor_options" << std::endl;
-
-  return 0;
-}
-
-int md_options_interface::load_additional_options(options_type& options) {
-  std::cout << "In load_additional_options" << std::endl;
-
-  std::string path = "/options";
-  OptionError error;
-  int temp;
+  error = get_option(path + "/simulation_name", options.simulation_name);
+  assert(error == SPUD_NO_ERROR);
 
   if (have_option(path + "/output_dir")) {
     error = get_option(path + "/output_dir", options.dir);
@@ -107,59 +70,73 @@ int md_options_interface::load_additional_options(options_type& options) {
   if (have_option(path + "/rdf_bins")) {
     error = get_option(path + "/rdf_bins", temp);
     assert(error == SPUD_NO_ERROR);
-    options.rdf_bins = static_cast<size_t>(temp);
+    options.rdf_options.rdf_bins = static_cast<size_t>(temp);
   }
-
-  if (have_option(path + "/track_particles")) options.track_particles = true;
 
   if (have_option(path + "/rdf_equilibrate")) {
     error = get_option(path + "/rdf_equilibrate", temp);
     assert(error == SPUD_NO_ERROR);
-    options.rdf_wait = static_cast<size_t>(temp);
+    options.rdf_options.rdf_wait = static_cast<size_t>(temp);
   }
+
+  if (have_option(path + "/track_particles")) options.visualise = true;
 
   std::cout << "Exiting load_additional_options" << std::endl;
 
   return 0;
 }
 
-int md_options_interface::load_simulation_options(
-    simulation_type& sim_options) {
+int md_options_interface::load_simulation_options(options_type& opts) {
   std::cout << "In load_simulation_options" << std::endl;
 
   std::string path = "/simulation_type";
   OptionError error;
 
-  error = get_option(path + "/name", sim_options.simulation_type);
-  assert(error == SPUD_NO_ERROR);
-
-  error = get_option(path + "/simulation_name", sim_options.simulation_name);
+  error = get_option(path + "/name", opts.simulation_type);
   assert(error == SPUD_NO_ERROR);
 
   std::string pp_path = path + "/pair_potential";
-  error = get_option(pp_path + "/name", sim_options.potential_type);
+  error = get_option(pp_path + "/name", opts.potential_type);
   assert(error == SPUD_NO_ERROR);
 
-  error = get_option(pp_path + "/density", sim_options.density);
+  error = get_option(pp_path + "/density", opts.density);
   assert(error == SPUD_NO_ERROR);
 
-  error = get_option(pp_path + "/temperature", sim_options.temperature);
+  error = get_option(pp_path + "/temperature", opts.target_temperature);
   assert(error == SPUD_NO_ERROR);
 
   if (have_option(pp_path + "/potential_strength")) {
-    error = get_option(pp_path + "/potential_strength", sim_options.power);
+    error = get_option(pp_path + "/potential_strength", opts.power);
     assert(error == SPUD_NO_ERROR);
   }
+
   if (have_option(pp_path + "/softening_parameter")) {
-    error = get_option(pp_path + "/softening_parameter", sim_options.a_cst);
+    error = get_option(pp_path + "/softening_parameter", opts.a_cst);
     assert(error == SPUD_NO_ERROR);
   }
+
+  if (have_option(pp_path + "/dt")) {
+    error = get_option(pp_path + "/dt", opts.dt);
+    assert(error == SPUD_NO_ERROR);
+
+    if (have_option(pp_path + "/dt/normalise_with_temperature"))
+      opts.normalise_dt_w_temp = true;
+  }
+
   if (have_option(path + "/final_density")) {
-    error = get_option(path + "/final_density", sim_options.density_final);
+    error = get_option(path + "/final_density",
+                       opts.compression_options.density_final);
     assert(error == SPUD_NO_ERROR);
   }
+
+  if (have_option(pp_path + "/cut_off")) {
+    error = get_option(pp_path + "/cut_off", opts.cut_off);
+    assert(error = SPUD_NO_ERROR);
+  }
+
   if (have_option(path + "/density_increment")) {
-    error = get_option(path + "/density_increment", sim_options.density_inc);
+    error = get_option(path + "/density_increment",
+                       opts.compression_options.density_inc);
     assert(error == SPUD_NO_ERROR);
   }
 
@@ -168,7 +145,7 @@ int md_options_interface::load_simulation_options(
   return 0;
 }
 
-int md_options_interface::load_test_options(test_type& test) {
+int md_options_interface::load_test_options(test_options_type& test) {
   std::cout << "In load_test_options" << std::endl;
 
   std::string path = "/enable_testing";

@@ -1,7 +1,6 @@
 # The SPUD base schema
 include "spud_base.rnc"
-# TODO: force constructor compression to false when enabling and vice versa
-# TODO: remove compression parameter fom options, is set by phase_transition
+#TODO: fix phase transition variables
 lattice_type =
 (
     ## SC: Simple Cubic
@@ -22,17 +21,17 @@ lattice_type =
     ## RANDOM: Randomise the positions of the particles in the lattice
     element lattice {
         attribute name {"RANDOM"},
-        ## Variance of the normal istributions
+        ## Variance of the normal distributions
         element variance {real},
         ## Fix the seed of the normal distribution
         element fixed_seed {"true" | "false"}
     }
 )
 
-constructor_types =
+setup_sim =
 (
-    ## Constructor initialisation for MD or phase_transition objects.
-    element constructor {
+    ## setup initialisation for MD or phase_transition objects.
+    element setup {
 
         ## Number of iteration steps the MD algorithm should run for.
         element steps {
@@ -63,39 +62,42 @@ constructor_types =
             comment
         },
 
-        lattice_type
+        lattice_type,
+
+        options?
     }
 )
 
 options =
 (
-    ## Set a series of options for fine-tunning an MD run
-    element options {
+    simulation_name,
 
-        ## Output directory for the files to be produced during a simulation.
-        element output_dir { string }?,
+    iterative_methods,
 
-        # ## Set the flag for incremental resizing of the simulation box.
-        # ## Set to true for phase transition studies else set to false.
-        # element compression { empty }?,
+    ## Output directory for the files to be produced during a simulation.
+    element output_dir { string }?,
 
-        ## Accuracy of the Radial Distribution Function (RDF).
-        ## A large number of bins will result into a very accurate RDF,
-        ## however if the simulation is short (small number of steps) the
-        ## results will be dominated by statistical noise.
-        element rdf_bins { integer }?,
+    # ## Set the flag for incremental resizing of the simulation box.
+    # ## Set to true for phase transition studies else set to false.
+    # element compression { empty }?,
 
-        ## If enabled will save in ASCII format the positions of all the
-        ## particles for the entire simulation.
-        ## The datafiles can then be viewed with the python tools.
-        ## NOTE: For large simulations this will be slow.
-        element track_particles { empty }?,
+    ## Accuracy of the Radial Distribution Function (RDF).
+    ## A large number of bins will result into a very accurate RDF,
+    ## however if the simulation is short (small number of steps) the
+    ## results will be dominated by statistical noise.
+    element rdf_bins { integer }?,
 
-        ## An equilibration period for the RDF in time step units.
-        ## The RDF will begin to be collected rdf_equilibrate steps
-        ## from the start of the simulation.
-        element rdf_equilibrate { integer }?
-    }
+    ## An equilibration period for the RDF in time step units.
+    ## The RDF will begin to be collected rdf_equilibrate steps
+    ## from the start of the simulation.
+    element rdf_equilibrate { integer }?,
+
+    ## If enabled will save in ASCII format the positions of all the
+    ## particles for the entire simulation.
+    ## The datafiles can then be viewed with the python tools.
+    ## NOTE: For large simulations this will be slow.
+    element track_particles { empty }?
+
 )
 
 simulation_name =
@@ -158,7 +160,17 @@ simulation_parameters =
     element density { real },
 
     ## Fluid temperature (unitless).
-    element temperature { real }
+    element temperature { real },
+
+    ## Time step
+    element dt {
+        real,
+        element normalise_with_temperature { empty }?
+    }?,
+
+    ## Radius cut-off
+    ## The simulation is only run within this radius of the box
+    element cut_off { real }?
 )
 
 pair_potential_parameters =
@@ -175,16 +187,12 @@ pair_potential_parameters =
 
 simulation_single =
 (
-    simulation_name,
-
     potentials
 
 )
 
 simulation_compress =
 (
-    simulation_name,
-
     potentials,
 
     ## The density that the compression aims to reach.
@@ -222,14 +230,23 @@ simulation =
     }
 )
 
+iterative_methods =
+(
+    element iterative_method {
+        attribute name { "VerletAlgorithm" }|
+
+        attribute name { "RK4 "}
+    
+    },
+    comment
+)
+
 start =
 (
     ## Input variables for a molecular dynamics simulation
     element input_variables {
 
-        constructor_types,
-
-        options?,
+        setup_sim,
 
         simulation,
 

@@ -1,41 +1,41 @@
 #include "phase_transition.h"
 
-void phase_transition::crystallisation(std::string SIMULATION_NAME,
-                                       double DENSITY, double FINAL_DENSITY,
-                                       double DENSITY_INC, double TEMPERATURE,
-                                       double POWER, double A_CST,
-                                       std::string pp_type) {
-  /*
-   * Compress the fluid to get the phase boundary for a specific temperature.
-   *
-   * ceil((FINAL_DENSITY - DENSITY) / DENSITY_INC) compressions of STEPS length
-   * Performs repeated compresss of the fluid by periodically
-   * incrementing the density of the fluid.
-   * As a consequence the box length, the scaling factor and the
-   * position vectors are also scaled in order to conserve the number
-   * of particles in the box.
-   *
-   */
+// todo: not sure if this calls the MD(options_type) constructor
+phase_transition::phase_transition(options_type &input_options) {
+  // Pass compressing options
+  options.compression_options.compression =
+      input_options.compression_options.compression;
+  options.compression_options.density_final =
+      input_options.compression_options.density_final;
+  options.compression_options.density_inc =
+      input_options.compression_options.density_inc;
+  options.compression_options.reverse_comp =
+      input_options.compression_options.reverse_comp;
+}
 
+void phase_transition::crystallisation() {
   set_compression_flag(true);
 
   // todo: many features do not work at this moment like particle tracking
   // todo: the POS << time_stamp stream will be a mess, same with RDF
-  double current_rho = DENSITY;
+  double current_rho = options.density;
   double old_box_length = 0;
 
   try {
-    if (FINAL_DENSITY > DENSITY && DENSITY_INC > 0) {
+    if (options.compression_options.density_final > options.density &&
+        options.compression_options.density_inc > 0) {
       std::runtime_error(
           "You are attempting to compress the fluid:"
           "Final density has to be smaller than initial density");
     }
-    if (FINAL_DENSITY < DENSITY && DENSITY_INC < 0) {
+    if (options.compression_options.density_final < options.density &&
+        options.compression_options.density_inc < 0) {
       std::runtime_error(
           "You are attempting to melt the crystal:"
           "Final density has to be larger than initial density");
     }
-    if (DENSITY_INC > FINAL_DENSITY) {
+    if (options.compression_options.density_inc >
+        options.compression_options.density_final) {
       std::runtime_error(
           "Density increment has to be smaller than final density");
     }
@@ -46,44 +46,58 @@ void phase_transition::crystallisation(std::string SIMULATION_NAME,
 
   // Number of compressions to occur
   size_t total_comp_steps =
-      abs(ceil((FINAL_DENSITY - DENSITY) / DENSITY_INC)) + 1;
+      abs(ceil((options.compression_options.density_final - options.density) /
+               options.compression_options.density_inc)) +
+      1;
 
   for (size_t comp_step = 0; comp_step < total_comp_steps; comp_step++) {
     std::cout << "Runing MD::simulation " << comp_step + 1 << "/"
               << total_comp_steps << std::endl;
 
-    simulation(SIMULATION_NAME, current_rho, TEMPERATURE, POWER, A_CST,
-               pp_type);
+    simulation(options.simulation_name, current_rho, options.target_temperature,
+               options.power, options.a_cst, options.potential_type);
 
     // Holds the box length of the previous simulation just run
-    old_box_length = __L;
+    old_box_length = options.N;
 
     // Density incrementation
-    current_rho += DENSITY_INC;
+    current_rho += options.compression_options.density_inc;
 
     // Simulation updates old_box_length
     // the updated current_rho can generate the new box length
     // This value gets recalculated in the next Simulation
-    __L = pow((__N / current_rho), 1.0 / 3.0);
-    double box_length_ratio = __L / old_box_length;
+    options.L = pow((options.N / current_rho), 1.0 / 3.0);
+    double box_length_ratio = options.N / old_box_length;
 
     // Rescalling the positional vectors
-    for (size_t i = 0; i < __N; ++i) {
-      rx[i] *= box_length_ratio;
-      ry[i] *= box_length_ratio;
-      rz[i] *= box_length_ratio;
+    for (size_t i = 0; i < options.N; ++i) {
+      r.x[i] *= box_length_ratio;
+      r.y[i] *= box_length_ratio;
+      r.z[i] *= box_length_ratio;
     }
-    ++c_counter;
+    ++options.compression_options.compress_count;
   }
 
   reset_values(true);
 }
+void phase_transition::crystallisation(std::string SIMULATION_NAME,
+                                       double DENSITY, double FINAL_DENSITY,
+                                       double DENSITY_INC, double TEMPERATURE,
+                                       double POWER, double A_CST,
+                                       std::string pp_type) {
+  options.simulation_name = SIMULATION_NAME;
+  options.density = DENSITY;
+  options.compression_options.density_final = FINAL_DENSITY;
+  options.compression_options.density_inc = DENSITY_INC;
+  options.target_temperature = TEMPERATURE;
+  options.power = POWER;
+  options.a_cst = A_CST;
+  options.potential_type = pp_type;
 
-void phase_transition::run_backwards(std::string SIMULATION_NAME,
-                                     double DENSITY, double FINAL_DENSITY,
-                                     double DENSITY_INC, double TEMPERATURE,
-                                     double POWER, double A_CST,
-                                     std::string pp_type) {
+  crystallisation();
+}
+
+void phase_transition::two_way_compression() {
   /*
    * //todo: implement in schema
    *
@@ -94,8 +108,11 @@ void phase_transition::run_backwards(std::string SIMULATION_NAME,
                "***************************\n"
             << std::endl;
 
-  crystallisation("forward_" + SIMULATION_NAME, DENSITY, FINAL_DENSITY,
-                  DENSITY_INC, TEMPERATURE, POWER, A_CST, pp_type);
+  crystallisation("forward_" + options.simulation_name, options.density,
+                  options.compression_options.density_final,
+                  options.compression_options.density_inc,
+                  options.target_temperature, options.power, options.a_cst,
+                  options.potential_type);
 
   std::cout << "****************************\n"
                "** Finished Forward Run:  **\n"
@@ -103,8 +120,11 @@ void phase_transition::run_backwards(std::string SIMULATION_NAME,
                "****************************\n"
             << std::endl;
 
-  crystallisation("backward_" + SIMULATION_NAME, FINAL_DENSITY, DENSITY,
-                  -DENSITY_INC, TEMPERATURE, POWER, A_CST, pp_type);
+  crystallisation("backward_" + options.simulation_name,
+                  options.compression_options.density_final, options.density,
+                  -options.compression_options.density_inc,
+                  options.target_temperature, options.power, options.a_cst,
+                  options.potential_type);
 
   std::cout << "*****************************\n"
                "** Finished Backward Run: **\n"
@@ -112,8 +132,6 @@ void phase_transition::run_backwards(std::string SIMULATION_NAME,
             << std::endl;
 }
 
-bool phase_transition::get_compression_flag() { return __compress; }
-
 void phase_transition::set_compression_flag(bool is_compressing) {
-  __compress = is_compressing;
+  options.compression_options.compression = is_compressing;
 }

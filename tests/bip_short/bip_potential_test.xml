@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <input_variables>
-  <constructor>
+  <setup>
     <steps>
       <integer_value rank="0">2000</integer_value>
     </steps>
@@ -8,18 +8,15 @@
       <integer_value rank="1" shape="3">8 8 8</integer_value>
     </particles>
     <lattice name="SC"/>
-  </constructor>
-  <options>
-    <output_dir>.</output_dir>
+    <simulation_name>bip_potential_test_</simulation_name>
     <rdf_bins>
       <integer_value rank="0">200</integer_value>
     </rdf_bins>
     <rdf_equilibrate>
       <integer_value rank="0">300</integer_value>
     </rdf_equilibrate>
-  </options>
+  </setup>
   <simulation_type name="NormalRun">
-    <simulation_name>bip_potential_test_</simulation_name>
     <pair_potential name="BoundedInversePower">
       <density>
         <real_value rank="0">0.5</real_value>

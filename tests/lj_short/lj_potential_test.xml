@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <input_variables>
-  <constructor>
+  <setup>
     <steps>
       <integer_value rank="0">2000</integer_value>
     </steps>
@@ -8,8 +8,7 @@
       <integer_value rank="1" shape="3">8 8 8</integer_value>
     </particles>
     <lattice name="SC"/>
-  </constructor>
-  <options>
+    <simulation_name>lj_potential_test_</simulation_name>
     <output_dir>.</output_dir>
     <rdf_bins>
       <integer_value rank="0">200</integer_value>
@@ -17,9 +16,8 @@
     <rdf_equilibrate>
       <integer_value rank="0">300</integer_value>
     </rdf_equilibrate>
-  </options>
+  </setup>
   <simulation_type name="NormalRun">
-    <simulation_name>lj_potential_test_</simulation_name>
     <pair_potential name="LennardJones">
       <density>
         <real_value rank="0">0.5</real_value>

@@ -3,8 +3,10 @@
 #include <string>
 #include <vector>
 
+using namespace std;
+
 struct rdf_options_type {
-  size_t rdf_bins = 0;
+  size_t rdf_bins = 200;
   size_t rdf_wait = 0;
 };
 struct compression_options_type {
@@ -21,7 +23,7 @@ struct boundary_contions_options_type {
    * of the boundary, e.g. Reflective, HardWall,
    * while the 2d array holds the points for the 2D surface
    */
-  std::vector<std::map<std::string, std::vector<std::vector<double>>>> bc;
+  vector<map<string, vector<vector<double>>>> bc;
 };
 
 struct test_options_type {
@@ -29,16 +31,16 @@ struct test_options_type {
 };
 
 struct io_options_type {
-  bool msd = true;                  /* mean square displacement output */
-  bool rdf = true;                  /* radial distribution function output */
-  bool vaf = true;                  /* velocity autocorrelation output */
-  bool energies = true;             /* potential energy output */
-  bool pressure = true;             /* configurational pressure output */
-  bool position = true;             /* particles' last positions output */
-  bool sf = true;                   /* structure factor output */
-  bool visualise = false;           /* save all positions, of all particles */
-  std::string dir = ".";            /* file output directory */
-  std::string simulation_name = ""; /* simulation prefix/ name */
+  bool msd = true;             /* mean square displacement output */
+  bool rdf = true;             /* radial distribution function output */
+  bool vaf = true;             /* velocity autocorrelation output */
+  bool energies = true;        /* potential energy output */
+  bool pressure = true;        /* configurational pressure output */
+  bool position = true;        /* particles' last positions output */
+  bool sf = true;              /* structure factor output */
+  bool visualise = false;      /* save all positions, of all particles */
+  string dir = ".";            /* file output directory */
+  string simulation_name = ""; /* simulation prefix/ name */
 
   io_options_type() {}
   io_options_type& operator=(io_options_type const& rhs) {
@@ -58,12 +60,12 @@ struct io_options_type {
 };
 
 struct options_type {
-  std::string simulation_type = "";  /* type of simulation e.g. NormalRun */
-  std::string potential_type = "";   /* pair potential type */
-  std::string stepping_alg = "";     /* iterative algorithm of particles */
-  std::string lattice = "";          /* lattice formation */
-  std::string iterative_method = ""; /* stepping algorithm of the fluid */
-  std::vector<size_t> particles;     /* number of particles in each axis */
+  string simulation_type = "";       /* type of simulation e.g. NormalRun */
+  string potential_type = "";        /* pair potential type */
+  string stepping_alg = "";          /* iterative algorithm of particles */
+  string lattice = "";               /* lattice formation */
+  string iterative_method = "";      /* stepping algorithm of the fluid */
+  vector<size_t> particles{1, 1, 1}; /* number of particles in each axis */
   double random_lattice_var = 0;     /* variance of dist for random lattice */
   size_t steps = 2000;               /* number of total iterations */
   size_t Nx, Ny, Nz, N = 0;          /* Particles in the x, y, z and total */
@@ -86,15 +88,44 @@ struct options_type {
   test_options_type test_options;
 
   /* Default constructor */
-  // options_type();
-  // // Copy constructor
-  // options_type(const options_type &copy);
+  options_type() {}
+
+  /* Overloaded assignment operator */
+  options_type& operator=(options_type const& rhs) {
+    simulation_type = rhs.simulation_type;
+    potential_type = rhs.potential_type;
+    stepping_alg = rhs.stepping_alg;
+    lattice = rhs.lattice;
+    iterative_method = rhs.iterative_method;
+
+    random_lattice_var = rhs.random_lattice_var;
+    steps = rhs.steps;
+
+    density = rhs.density;
+    target_temperature = rhs.target_temperature;
+    power = rhs.power;
+    a_cst = rhs.a_cst;
+
+    cut_off = rhs.cut_off;
+
+    /* Passing RDF options */
+    rdf_options.rdf_bins = rhs.rdf_options.rdf_bins;
+    rdf_options.rdf_wait = rhs.rdf_options.rdf_wait;
+
+    /* testing options */
+    test_options.is_testing = rhs.test_options.is_testing;
+
+    /* Passing the io options */
+    io_options = rhs.io_options;
+
+    return *this;
+  }
 };
 
 struct vector_3d {
-  std::vector<double> x;
-  std::vector<double> y;
-  std::vector<double> z;
+  vector<double> x;
+  vector<double> y;
+  vector<double> z;
 };
 
 struct point_3d {
@@ -137,15 +168,15 @@ struct data_type {
   vector_3d MSD;   /* MSD arrays */
   vector_3d sf;    /* Structure factor k-arrays */
 
-  std::vector<double> Cr;
-  std::vector<double> msd;
-  std::vector<double> u_en;
-  std::vector<double> k_en;
-  std::vector<double> pc;
-  std::vector<double> pk;
-  std::vector<double> temperature;
-  std::vector<double> density;
-  std::vector<double> rdf;
+  vector<double> Cr;
+  vector<double> msd;
+  vector<double> u_en;
+  vector<double> k_en;
+  vector<double> pc;
+  vector<double> pk;
+  vector<double> temperature;
+  vector<double> density;
+  vector<double> rdf;
 
   options_type options;
 };

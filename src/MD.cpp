@@ -118,7 +118,7 @@ MD::MD(options_type &input_options) {
     options.cut_off = options.L / 3.0;
   }
 
-  /* Set boundary conditions */ //todo: create
+  /* Set boundary conditions */  // todo: create
 
   /* Accuracy of RDF */
   std::cout << "RDF bins: " << options.rdf_options.rdf_bins << std::endl;
@@ -287,7 +287,8 @@ void MD::simulation() {
     /* using T & KE from prev timestep */
     options.scale_v = sqrt(options.target_temperature / options.temperature);
 
-    options.kinetic_energy = verlet_algorithm(r, v, f, options.io_options.msd);
+    options.kinetic_energy =
+        stepping_algorithm(r, v, f, options.io_options.msd);
 
     if (options.io_options.msd) mean_square_displacement(MSD, MSD_r);
 
@@ -446,6 +447,15 @@ void MD::set_vector_sizes() {
     pc.reserve(options.steps); /* Configurational Pressure */
     pk.reserve(options.steps); /* Kinetic Pressure */
   }
+  if (options.io_options.msd) {
+    MSD.x.resize(options.N, 0);
+    MSD.y.resize(options.N, 0);
+    MSD.z.resize(options.N, 0);
+
+    MSD_r.x.resize(options.N, 0);
+    MSD_r.y.resize(options.N, 0);
+    MSD_r.z.resize(options.N, 0);
+  }
   temperature.reserve(options.steps);
 }
 
@@ -600,16 +610,37 @@ void MD::mb_distribution(vector_3d &v, double TEMPERATURE) {
   }
 }
 
-double MD::stepping_algorithm(vector_3d &r, vector_3d &v, vector_3d const &f,
-                              bool msd) {}
+double MD::stepping_algorithm(vector_3d &r, vector_3d &v, vector_3d &f,
+                              bool msd_io) {
+  size_t i;
+  double KE = 0;
+  /*************************************************************************/
+  if (options.iterative_method == "VerletAlgorithm")
+    KE = verlet_algorithm(r, v, f);
 
-double MD::verlet_algorithm(vector_3d &r, vector_3d &v, vector_3d const &f,
-                            bool sample_msd = true) {
+  else if (options.iterative_method == "VelocityVerlet")
+    KE = velocity_verlet(r, v, f);
+
+  if (msd_io) {
+    /* MSD stepping */
+    for (i = 0; i < options.N; ++i) {
+      MSD_r.x[i] += v.x[i] * options.dt;
+      MSD_r.y[i] += v.y[i] * options.dt;
+      MSD_r.z[i] += v.z[i] * options.dt;
+    }
+  }
+  /**************************************************************************/
+
+  apply_boundary_conditions(r);
+
+  return KE;
+}
+
+double MD::verlet_algorithm(vector_3d &r, vector_3d &v, vector_3d const &f) {
   size_t i;
   double KE = 0;
 
   for (i = 0; i < options.N; ++i) {
-    /*************************************************************************/
     /* Step velocities forward in time */
     v.x[i] = v.x[i] * options.scale_v + f.x[i] * options.dt;
     v.y[i] = v.y[i] * options.scale_v + f.y[i] * options.dt;
@@ -620,33 +651,40 @@ double MD::verlet_algorithm(vector_3d &r, vector_3d &v, vector_3d const &f,
     r.y[i] = r.y[i] + v.y[i] * options.dt;
     r.z[i] = r.z[i] + v.z[i] * options.dt;
 
-    if (sample_msd) {
-      /* MSD stepping */
-      MSD_r.x[i] += v.x[i] * options.dt;
-      MSD_r.y[i] += v.y[i] * options.dt;
-      MSD_r.z[i] += v.z[i] * options.dt;
-    }
-    /**************************************************************************/
-
     /* Kinetic Energy Calculation */
     KE += 0.5 * (v.x[i] * v.x[i] + v.y[i] * v.y[i] + v.z[i] * v.z[i]);
-
-    /* Apply periodic boundary conditions to ensure particles remain
-       inside the box */
-    // todo: make boundary conditions routines
-    if (r.x[i] > options.Lx) r.x[i] = r.x[i] - options.Lx;
-    if (r.x[i] < 0.0) r.x[i] = r.x[i] + options.Lx;
-    if (r.y[i] > options.Ly) r.y[i] = r.y[i] - options.Ly;
-    if (r.y[i] < 0.0) r.y[i] = r.y[i] + options.Ly;
-    if (r.z[i] > options.Lz) r.z[i] = r.z[i] - options.Lz;
-    if (r.z[i] < 0.0) r.z[i] = r.z[i] + options.Lz;
   }
 
   return KE;
 }
 
-double MD::rk4_algorithm(vector_3d &r, vector_3d &v, vector_3d const &f,
-                         bool msd) {}
+double MD::velocity_verlet(vector_3d &r, vector_3d &v, vector_3d &f) {
+  size_t i;
+  double KE = 0;
+
+  for (i = 0; i < options.N; ++i) {
+    r.x[i] += v.x[i] * options.dt + 0.5 * f.x[i] * options.dt * options.dt;
+    r.y[i] += v.y[i] * options.dt + 0.5 * f.y[i] * options.dt * options.dt;
+    r.z[i] += v.z[i] * options.dt + 0.5 * f.z[i] * options.dt * options.dt;
+
+    v.x[i] += 0.5 * f.x[i] * options.dt;
+    v.y[i] += 0.5 * f.y[i] * options.dt;
+    v.z[i] += 0.5 * f.z[i] * options.dt;
+  }
+  pair_potential_type force = get_force_func(options.potential_type);
+  calculate_forces(0, force);
+
+  for (i = 0; i < options.N; ++i) {
+    v.x[i] += 0.5 * f.x[i] * options.dt;
+    v.y[i] += 0.5 * f.y[i] * options.dt;
+    v.z[i] += 0.5 * f.z[i] * options.dt;
+
+    /* Kinetic Energy Calculation */
+    KE += 0.5 * (v.x[i] * v.x[i] + v.y[i] * v.y[i] + v.z[i] * v.z[i]);
+  }
+
+  return KE;
+}
 
 std::tuple<double, double> MD::calculate_forces(
     size_t const &step_idx, pair_potential_type const &force) {
@@ -714,6 +752,19 @@ std::tuple<double, double> MD::calculate_forces(
   return std::make_tuple(U, PC);
 }
 
+void MD::apply_boundary_conditions(vector_3d &r) {
+  /* Apply periodic boundary conditions to ensure particles remain
+   inside the box */
+  size_t i;
+  for (i = 0; i < options.N; ++i) {
+    if (r.x[i] > options.Lx) r.x[i] = r.x[i] - options.Lx;
+    if (r.x[i] < 0.0) r.x[i] = r.x[i] + options.Lx;
+    if (r.y[i] > options.Ly) r.y[i] = r.y[i] - options.Ly;
+    if (r.y[i] < 0.0) r.y[i] = r.y[i] + options.Ly;
+    if (r.z[i] > options.Lz) r.z[i] = r.z[i] - options.Lz;
+    if (r.z[i] < 0.0) r.z[i] = r.z[i] + options.Lz;
+  }
+}
 void MD::velocity_autocorrelation_function(vector_3d const &Cv,
                                            vector_3d const &v) {
   double cr_temp = 0; /* resets the sum every time step */

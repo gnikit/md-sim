@@ -43,7 +43,7 @@ struct io_options_type {
   string simulation_name = ""; /* simulation prefix/ name */
 
   io_options_type() {}
-  io_options_type& operator=(io_options_type const& rhs) {
+  inline io_options_type& operator=(io_options_type const& rhs) {
     msd = rhs.msd;
     rdf = rhs.rdf;
     vaf = rhs.vaf;
@@ -90,7 +90,7 @@ struct options_type {
   options_type() {}
 
   /* Overloaded assignment operator */
-  options_type& operator=(options_type const& rhs) {
+  inline options_type& operator=(options_type const& rhs) {
     simulation_type = rhs.simulation_type;
     potential_type = rhs.potential_type;
     lattice = rhs.lattice;
@@ -118,12 +118,6 @@ struct options_type {
 
     return *this;
   }
-};
-
-struct vector_3d {
-  vector<double> x;
-  vector<double> y;
-  vector<double> z;
 };
 
 struct point_3d {
@@ -155,6 +149,12 @@ struct point_3d {
   inline point_3d operator/(const point_3d& a) const {
     return point_3d(x / a.x, y / a.y, z / a.z);
   }
+};
+
+struct vector_3d {
+  vector<double> x;
+  vector<double> y;
+  vector<double> z;
 };
 
 struct data_type {

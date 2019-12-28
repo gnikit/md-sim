@@ -169,8 +169,7 @@ class MD {
    */
   void mb_distribution(vector_3d &v, double TEMPERATURE);
 
-  double stepping_algorithm(vector_3d &r, vector_3d &v, vector_3d const &f,
-                            bool msd);
+  double stepping_algorithm(vector_3d &r, vector_3d &v, vector_3d &f, bool msd);
 
   /**
    *  An iterative leap-frog Verlet Algorithm.
@@ -181,11 +180,9 @@ class MD {
    *                    defined and not passed as arguments
    * @return KE: kinetic energy (unormalised)
    */
-  double verlet_algorithm(vector_3d &r, vector_3d &v, vector_3d const &f,
-                          bool msd);
+  double verlet_algorithm(vector_3d &r, vector_3d &v, vector_3d const &f);
 
-  double rk4_algorithm(vector_3d &r, vector_3d &v, vector_3d const &f,
-                       bool msd);
+  double velocity_verlet(vector_3d &r, vector_3d &v, vector_3d &f);
 
   /**
    * @brief Calculates the forces interactions of a given pair potential
@@ -200,7 +197,7 @@ class MD {
   std::tuple<double, double> calculate_forces(size_t const &step_idx,
                                               pair_potential_type const &force);
 
-  void apply_boundary_conditions();
+  void apply_boundary_conditions(vector_3d &r);
 
   /**
    * Calculates the Velocity Autocorrelation Function for the fluid.

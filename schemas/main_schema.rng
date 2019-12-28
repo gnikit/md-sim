@@ -235,7 +235,7 @@ expansions/compressions in the opposite direction of the phase diagram.</a:docum
       <element name="iterative_method">
         <a:documentation>Steps the fluid through time using a fourth Order Runge-Kutta</a:documentation>
         <attribute name="name">
-          <value>RK4</value>
+          <value>VelocityVerlet</value>
         </attribute>
         <ref name="comment"/>
       </element>

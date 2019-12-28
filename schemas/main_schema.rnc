@@ -225,7 +225,7 @@ iterative_methods =
     ## Steps the fluid through time using a fourth Order Runge-Kutta
     element iterative_method {
 
-        attribute name { "RK4" },
+        attribute name { "VelocityVerlet" },
 
         comment
     }

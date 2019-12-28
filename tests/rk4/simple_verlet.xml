@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='utf-8'?>
+<input_variables>
+  <setup>
+    <steps>
+      <integer_value rank="0">5000</integer_value>
+    </steps>
+    <particles>
+      <integer_value rank="1" shape="3">6 6 6</integer_value>
+    </particles>
+    <lattice name="SC"/>
+    <iterative_method name="VerletAlgorithm"/>
+  </setup>
+  <io>
+    <simulation_name>simple_verlet_</simulation_name>
+    <track_particles name="false"/>
+    <energies name="true"/>
+    <pressure name="true"/>
+    <msd name="true"/>
+    <vaf name="true"/>
+    <sf name="true"/>
+    <rdf name="true"/>
+    <positions name="true"/>
+  </io>
+  <simulation_type name="NormalRun">
+    <pair_potential name="LennardJones">
+      <density>
+        <real_value rank="0">0.5</real_value>
+      </density>
+      <temperature>
+        <real_value rank="0">1.0</real_value>
+      </temperature>
+    </pair_potential>
+  </simulation_type>
+  <enable_testing/>
+</input_variables>

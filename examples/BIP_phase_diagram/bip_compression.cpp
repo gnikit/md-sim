@@ -16,6 +16,7 @@ int main() {
   for (const auto& i : temperature_array) {
     phase_transition run(STEPS_PER_COMPRESSION, {10, 10, 10}, "SC");
     run.set_compression_flag(true);
-    run.crystallisation("compress_fwd_", 0.05, 0.1, 0.01, i, 12, 0, "BIP");
+    run.crystallisation("compress_fwd_", 0.05, 0.1, 0.01, i, 12, 0,
+                        "BoundedInversePower");
   }
 }

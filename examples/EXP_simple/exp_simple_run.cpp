@@ -15,5 +15,5 @@
 int main() {
   size_t steps = 5000;
   MD run(steps, {10, 10, 10}, "SC");
-  run.simulation("exp_simple_run_", 0.5, 0.5, 8, 0.5, "EXP");
+  run.simulation("exp_simple_run_", 0.5, 0.5, 8, 0.5, "Exponential");
 }

@@ -20,6 +20,7 @@ int main() {
 
   for (size_t t = 0; t < t2.size(); ++t) {
     run.crystallisation("compress_fwd_" + std::to_string(t), rho_start, rho_end,
-                        (rho_end - rho_start) / 20, t2[t], NAN, NAN, "GCM");
+                        (rho_end - rho_start) / 20, t2[t], NAN, NAN,
+                        "GaussianCoreModel");
   }
 }

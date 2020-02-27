@@ -15,5 +15,5 @@
 int main() {
   size_t steps = 5000;
   MD run(steps, {10, 10, 10}, "SC");
-  run.simulation("lj_simple_run_", 0.5, 0.5, NAN, NAN, "LJ");
+  run.simulation("lj_simple_run_", 0.5, 0.5, NAN, NAN, "LennardJones");
 }

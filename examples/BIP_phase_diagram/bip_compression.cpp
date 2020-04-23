@@ -6,7 +6,7 @@
 typedef std::vector<double> vec1d;
 
 int main() {
-  vec1d temperature_array = helper_functions::linspace(0.006, 0.01, 1);
+  vec1d temperature_array = linspace(0.006, 0.01, 1);
   /*
    * Adjust the DENSITY, FINAL_DENSITY for the fluid->solid transition and then
    * re-adjust it for the solid->fluid. Otherwise the simulations will sample

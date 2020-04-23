@@ -1,7 +1,6 @@
 #include "helper_functions.h"
 
-std::vector<int> helper_functions::linspace(int const& a, int const& b,
-                                            size_t const& N) {
+std::vector<int> linspace(int const& a, int const& b, size_t const& N) {
   /*
    * Produces an equally spaced vector of N increments
    * in the inclusive range of [a, b]
@@ -16,12 +15,8 @@ std::vector<int> helper_functions::linspace(int const& a, int const& b,
   return xs;
 }
 
-std::vector<double> helper_functions::linspace(double const& a, double const& b,
-                                               size_t const& N) {
-  /*
-   * Produces an equally spaced vector of N increments
-   * in the inclusive range of [a, b]
-   */
+std::vector<double> linspace(double const& a, double const& b,
+                             size_t const& N) {
   double h = (b - a) / static_cast<double>(N - 1);
   std::vector<double> xs(N);
   std::vector<double>::iterator x;
@@ -32,13 +27,8 @@ std::vector<double> helper_functions::linspace(double const& a, double const& b,
   return xs;
 }
 
-std::tuple<double, double> helper_functions::linfit(
-    std::vector<double> const& x, std::vector<double> const& y) {
-  /*
-   * Calculates a simple linear regression fit
-   * and returns the slope (a) and y-intercept (b) of the fit.
-   */
-
+std::tuple<double, double> linfit(std::vector<double> const& x,
+                                  std::vector<double> const& y) {
   /* Test the supplied vectors are of equal length */
   if (x.size() != y.size()) throw "X and Y are unequal sizes";
 
@@ -59,15 +49,41 @@ std::tuple<double, double> helper_functions::linfit(
   return std::make_tuple(a, b);
 }
 
-std::string helper_functions::repeat(std::string const& str, int times) {
+double rms(std::vector<double> const& x) {
+  double rms_val = 0;
+  for (const auto& i : x) rms_val += i * i;
+  rms_val = sqrt(rms_val / size(x));
+
+  return rms_val;
+}
+
+double l2norm(std::vector<double> const& x) {
+  double l2norm_val = 0;
+  for (const auto& i : x) l2norm_val += i * i;
+  l2norm_val = sqrt(l2norm_val);
+
+  return l2norm_val;
+}
+
+std::vector<double> vector_stats(std::vector<double> const& x) {
+  const auto [min, max] = std::minmax_element(x.begin(), x.end());
+  const double mean = std::accumulate(x.begin(), x.end(), 0.0) / size(x);
+  const double l2norm_val = l2norm(x);
+  const double rms_val = rms(x);
+
+  std::vector<double> stat{*min, *max, mean, l2norm_val, rms_val};
+
+  return stat;
+}
+
+std::string repeat(std::string const& str, int times) {
   std::string result;
   result.reserve(times * str.length());  // avoid repeated reallocation
   for (int a = 0; a < times; a++) result += str;
   return result;
 }
 
-std::string helper_functions::pad_string(std::string const& str,
-                                         size_t const& pad) {
+std::string pad_string(std::string const& str, size_t const& pad) {
   size_t pad_size = 0;
   if (pad > str.size())
     pad_size = pad - str.size();

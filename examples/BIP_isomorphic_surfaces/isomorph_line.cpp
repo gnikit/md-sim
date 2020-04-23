@@ -13,7 +13,7 @@ int main() {
   /* Potential power strength */
   size_t n = 8;
   /* Generate Temperature vector for isomorph */
-  vec1d T_iso = helper_functions::linspace(0.5, 2.0, 5);
+  vec1d T_iso = linspace(0.5, 2.0, 5);
   /* Empty containers for density and a_par */
   vec1d rho_iso, A_iso;
   vec1d rho_iso_h, A_iso_h;

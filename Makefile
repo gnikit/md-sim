@@ -5,7 +5,7 @@ RM := rm -rf
 
 default: libmd
 
-all: libmd examples shcemas
+all: libmd examples schemas
 
 examples: libmd
 	@echo "MAKE MD examples"

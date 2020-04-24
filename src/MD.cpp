@@ -1062,27 +1062,42 @@ void MD::file_output(stat_file &logger) {
 }
 
 std::vector<double> MD::calculate_run_stats() {
+  /* Pass density as the first entry */
   std::vector<double> stat{options.density};
 
   /* Mean Square Displacement */
-  std::vector<double> temp = vector_stats(msd);
-  stat.insert(stat.end(), temp.begin(), temp.end());
-  /* Velocity Autocorrelation Function */
-  temp = vector_stats(Cr);
-  stat.insert(stat.end(), temp.begin(), temp.end());
+  if (options.io_options.msd) {
+    std::vector<double> temp = vector_stats(msd);
+    stat.insert(stat.end(), temp.begin(), temp.end());
+  }
+
+  if (options.io_options.vaf) {
+    /* Velocity Autocorrelation Function */
+    std::vector<double> temp = vector_stats(Cr);
+    stat.insert(stat.end(), temp.begin(), temp.end());
+  }
+
   /* Structure Factor */
-  temp = vector_stats(sf.x);
-  stat.insert(stat.end(), temp.begin(), temp.end());
-  temp = vector_stats(sf.y);
-  stat.insert(stat.end(), temp.begin(), temp.end());
-  temp = vector_stats(sf.z);
-  stat.insert(stat.end(), temp.begin(), temp.end());
+  if (options.io_options.sf) {
+    std::vector<double> temp = vector_stats(sf.x);
+    stat.insert(stat.end(), temp.begin(), temp.end());
+    temp = vector_stats(sf.y);
+    stat.insert(stat.end(), temp.begin(), temp.end());
+    temp = vector_stats(sf.z);
+    stat.insert(stat.end(), temp.begin(), temp.end());
+  }
+
   /* Potential Energy */
-  temp = vector_stats(u_en);
-  stat.insert(stat.end(), temp.begin(), temp.end());
+  if (options.io_options.energies) {
+    std::vector<double> temp = vector_stats(u_en);
+    stat.insert(stat.end(), temp.begin(), temp.end());
+  }
+
   /* Configurational Pressure */
-  temp = vector_stats(pc);
-  stat.insert(stat.end(), temp.begin(), temp.end());
+  if (options.io_options.pressure) {
+    std::vector<double> temp = vector_stats(pc);
+    stat.insert(stat.end(), temp.begin(), temp.end());
+  }
 
   return stat;
 }

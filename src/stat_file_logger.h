@@ -40,6 +40,7 @@ class stat_file {
       std::vector<std::vector<double>> const &all_output_vectors);
 
   /**
+   * @brief
    * Dates the file and allows the input of a header
    * Input a file stream to write and string of characters to display as
    * headers.
@@ -51,6 +52,7 @@ class stat_file {
                          std::string const &variables);
 
   /**
+   * @brief
    * Generates a unique filename for the simulation results to be stored.
    * The method infers from the constructor the number of particles used
    * and the duration of the simulation (steps).
@@ -70,7 +72,7 @@ class stat_file {
                           double const &A_cst);
 
   /**
-   * Convert doubles to a string with a variable degree of precision.
+   *  @brief Convert doubles to a string with a variable degree of precision.
    *
    * @param &x: Double number to be converted
    * @param &precision: Precision of the double when converted to string

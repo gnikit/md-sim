@@ -13,9 +13,14 @@ class phase_transition : public MD {
  public:
   using MD::MD;
 
+ protected:
+  std::ofstream compression_stats;
+
+ public:
   phase_transition(options_type &input_options);
 
   /**
+   * @brief
    * Compress the fluid to get the phase boundary for a specific temperature.
    *
    * ceil((FINAL_DENSITY - DENSITY) / DENSITY_INC) compressions of STEPS length

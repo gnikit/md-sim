@@ -110,3 +110,13 @@ void stat_file::write_file(std::vector<std::vector<double>> &output_quantities,
   FileIO::Write2File<double>(output_quantities, fstream, "\t", new_header,
                              false);
 }
+
+void stat_file::write_file_line(std::vector<double> const &output_line,
+                                std::ofstream &fstream, int index) {
+  /* If the index is no-negative write it in file */
+  if (index >= 0) fstream << index << '\t';
+
+  std::string line = "";
+  for (auto const &i : output_line) line += '\t' + convert_to_string(i, 10);
+  fstream << line << std::endl;
+}

@@ -165,8 +165,6 @@ MD::MD(options_type &input_options) {
   pos_x = new std::vector<std::vector<double>>(options.steps);
   pos_y = new std::vector<std::vector<double>>(options.steps);
   pos_z = new std::vector<std::vector<double>>(options.steps);
-
-  PI = acos(-1.0);
 }
 
 MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
@@ -254,7 +252,6 @@ MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
   pos_y = new std::vector<std::vector<double>>(options.steps);
   pos_z = new std::vector<std::vector<double>>(options.steps);
 
-  PI = acos(-1.0);
   options.test_options.is_testing = false;
 }
 
@@ -785,7 +782,7 @@ void MD::simulation() {
   /* simulation Ends HERE */
 
   /* Write to files */
-  file_output();
+  file_output(logger);
 
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   std::cout
@@ -963,7 +960,7 @@ void MD::save_visualisation_arrays() {
   out_z.close();
 }
 
-void MD::file_output() {
+void MD::file_output(stat_file &logger) {
   /* Generating the filenames for the output */
 
   /* Always open the data file stream since the temperature and density */
@@ -1015,6 +1012,7 @@ void MD::file_output() {
   std::string header = "# step\trho\tT";
 
   if (options.io_options.energies) {
+    // todo: I should be passing the pointer to u_en rather than the values
     output_quantities.push_back(u_en);
     output_quantities.push_back(k_en);
     header += "\tU\tK";

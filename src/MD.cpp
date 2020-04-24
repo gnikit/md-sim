@@ -6,6 +6,9 @@
 MD::MD() {}
 
 MD::MD(options_type &input_options) {
+  /* Perform a shallow copy of the input_options to options */
+  options = input_options;
+
   /* Test whether the input directory exists */
   if (!input_options.io_options.dir.empty()) {
     try {
@@ -160,6 +163,10 @@ MD::MD(options_type &input_options) {
   /* Pass testing options */
   options.test_options.is_testing = input_options.test_options.is_testing;
   std::cout << "Testing: " << options.test_options.is_testing << std::endl;
+
+  /* Pass the options reference back to input_options to update the variable.
+   * Routines in the phase_transition class depend on this line*/
+  input_options = options;
 
   /* Visualisation vectors on the heap*/
   pos_x = new std::vector<std::vector<double>>(options.steps);

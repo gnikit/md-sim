@@ -1,17 +1,7 @@
 #include "phase_transition.h"
 
-// todo: not sure if this calls the MD(options_type) constructor
-phase_transition::phase_transition(options_type &input_options) {
-  /* Pass compressing options */
-  options.compression_options.compression =
-      input_options.compression_options.compression;
-  options.compression_options.density_final =
-      input_options.compression_options.density_final;
-  options.compression_options.density_inc =
-      input_options.compression_options.density_inc;
-  options.compression_options.reverse_comp =
-      input_options.compression_options.reverse_comp;
-}
+phase_transition::phase_transition(options_type &input_options)
+    : MD(input_options) {}
 
 void phase_transition::crystallisation(options_type &options) {
   set_compression_flag(true);
@@ -50,6 +40,40 @@ void phase_transition::crystallisation(options_type &options) {
                options.compression_options.density_inc)) +
       1;
 
+  /* Open a stream to output the compression stats summary */
+  if (options.io_options.compression_stats) {
+    /* The logger class is only used to generate the filename */
+    stat_file temp_logger;
+    std::string compression_stats_fname = temp_logger.file_naming(
+        options.io_options.dir + "/" + options.io_options.simulation_name +
+            "Compression_statistics",
+        options.steps, options.N, options.density, options.target_temperature,
+        options.power, options.a_cst);
+
+    /* Open file stream */
+    compression_stats.open(compression_stats_fname,
+                           std::ios::out | std::ios::trunc);
+
+    /* Create the header in the order that get_run_stats generates them
+       @note This has been hard coded */
+    std::string header = "# compress_step\trho";
+    if (options.io_options.msd)
+      header += "\tmin(MSD)\tmax(MSD)\tav(MSD)\tl2norm(MSD)\trms(MSD)";
+    if (options.io_options.vaf) header += "\tVAF";
+    if (options.io_options.sf) {
+      header += "\tmin(SFx)\tmax(SFx)\tav(SFx)\tl2norm(SFx)\trms(SFx)";
+      header += "\tmin(SFy)\tmax(SFy)\tav(SFy)\tl2norm(SFy)\trms(SFy)";
+      header += "\tmin(SFz)\tmax(SFz)\tav(SFz)\tl2norm(SFz)\trms(SFz)";
+    }
+    if (options.io_options.energies)
+      header += "\tmin(U)\tmax(U)\tav(U)\tl2norm(U)\trms(U)";
+    if (options.io_options.pressure)
+      header += "\tmin(Pc)\tmax(Pc)\tav(Pc)\tl2norm(Pc)\trms(Pc)";
+
+    /* Write the header */
+    compression_stats << header << std::endl;
+  }
+
   for (size_t comp_step = 0; comp_step < total_comp_steps; comp_step++) {
     std::cout << "Runing MD::simulation " << comp_step + 1 << "/"
               << total_comp_steps << std::endl;
@@ -57,6 +81,13 @@ void phase_transition::crystallisation(options_type &options) {
     simulation(options.io_options.simulation_name, current_rho,
                options.target_temperature, options.power, options.a_cst,
                options.potential_type);
+
+    /* Write a summary of the stats of the simulation run */
+    if (options.io_options.compression_stats) {
+      std::vector<double> run_data = get_run_stats();
+      stat_file temp_logger;
+      temp_logger.write_file_line(run_stats, compression_stats, comp_step);
+    }
 
     /* Holds the box length of the previous simulation just run */
     old_box_length = options.N;
@@ -79,8 +110,10 @@ void phase_transition::crystallisation(options_type &options) {
     ++options.compression_options.compress_count;
   }
 
+  if (options.io_options.compression_stats) compression_stats.close();
   reset_values(true);
 }
+
 void phase_transition::crystallisation(std::string SIMULATION_NAME,
                                        double DENSITY, double FINAL_DENSITY,
                                        double DENSITY_INC, double TEMPERATURE,

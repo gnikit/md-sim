@@ -55,7 +55,8 @@ class MD {
   vector_3d sf;    /* Structure factor k-arrays */
 
   /* Statistical quantity vectors, VAF, MSD, Energies and pressures */
-  std::vector<double> Cr, msd, u_en, k_en, pc, pk, temperature, density, rdf;
+  std::vector<double> Cr, msd, u_en, k_en, pc, pk, temperature, density, rdf,
+      run_stats;
 
   /* Constructor variables */
   options_type options;
@@ -280,7 +281,32 @@ class MD {
 
   /**
    * @brief Manages all the IO operations, file streams, file creation etc.
-   *
    */
   void file_output(stat_file &logger);
+
+  /**
+   * @brief Get the statistics (min max mean l2norm rms) of the run quantities:
+   *  + Mean Square Displacement
+   *  + Velocity Autocorrelation Function
+   *  + Structure Factor
+   *  + Potential Energy
+   *  + Configurational Pressure
+   *
+   * This routine is intended to be called at the end of the simulation run
+   * so as the vector quantities have been correctly calculated.
+   *
+   * The quantities are not passed as arguments since the aim of this method is
+   * to be called outside the MD class.
+   *
+   * @return std::vector<double> Vector containing all stats in the order listed
+   */
+  std::vector<double> calculate_run_stats();
+
+  /**
+   * @brief Get the run_stats vector that has been precalculated by
+   *        calculate_run_stats
+   *
+   * @return std::vector<double> run_stats
+   */
+  std::vector<double> get_run_stats();
 };

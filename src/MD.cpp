@@ -781,6 +781,9 @@ void MD::simulation() {
   /****************************************************************************/
   /* simulation Ends HERE */
 
+  /* Calculate the statistics and store them in a vector */
+  run_stats = calculate_run_stats();
+
   /* Write to files */
   file_output(logger);
 
@@ -1051,5 +1054,37 @@ void MD::file_output(stat_file &logger) {
                                  streams["rdf"]);
   }
 
+  /* Close all the streams */
   for (auto &[key, val] : streams) val.close();
+  /* Empty the file_names generated since a compression calls the MD constructor
+     once, hence `logger` is created only once */
+  logger.file_names.clear();
 }
+
+std::vector<double> MD::calculate_run_stats() {
+  std::vector<double> stat{options.density};
+
+  /* Mean Square Displacement */
+  std::vector<double> temp = vector_stats(msd);
+  stat.insert(stat.end(), temp.begin(), temp.end());
+  /* Velocity Autocorrelation Function */
+  temp = vector_stats(Cr);
+  stat.insert(stat.end(), temp.begin(), temp.end());
+  /* Structure Factor */
+  temp = vector_stats(sf.x);
+  stat.insert(stat.end(), temp.begin(), temp.end());
+  temp = vector_stats(sf.y);
+  stat.insert(stat.end(), temp.begin(), temp.end());
+  temp = vector_stats(sf.z);
+  stat.insert(stat.end(), temp.begin(), temp.end());
+  /* Potential Energy */
+  temp = vector_stats(u_en);
+  stat.insert(stat.end(), temp.begin(), temp.end());
+  /* Configurational Pressure */
+  temp = vector_stats(pc);
+  stat.insert(stat.end(), temp.begin(), temp.end());
+
+  return stat;
+}
+
+std::vector<double> MD::get_run_stats() { return run_stats; }

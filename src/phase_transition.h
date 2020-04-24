@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iterator>
 #include "MD.h"
 
 /* Load Intel math lib if available */

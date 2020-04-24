@@ -29,6 +29,8 @@ void stat_file::write_data_file(
   for (auto const &i : all_output_vectors)
     if (i.size() > rows) rows = i.size();
 
+  /* This accesses the all_output_vectors with a column major ordering,
+     not the best for performance */
   for (size_t i = 0; i < rows; ++i) {
     std::string line = "";
     for (size_t vec = 0; vec < all_output_vectors.size(); ++vec) {

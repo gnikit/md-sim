@@ -6,6 +6,9 @@
 MD::MD() {}
 
 MD::MD(options_type &input_options) {
+  /* Perform a shallow copy of the input_options to options */
+  options = input_options;
+
   /* Test whether the input directory exists */
   if (!input_options.io_options.dir.empty()) {
     try {
@@ -161,12 +164,14 @@ MD::MD(options_type &input_options) {
   options.test_options.is_testing = input_options.test_options.is_testing;
   std::cout << "Testing: " << options.test_options.is_testing << std::endl;
 
+  /* Pass the options reference back to input_options to update the variable.
+   * Routines in the phase_transition class depend on this line*/
+  input_options = options;
+
   /* Visualisation vectors on the heap*/
   pos_x = new std::vector<std::vector<double>>(options.steps);
   pos_y = new std::vector<std::vector<double>>(options.steps);
   pos_z = new std::vector<std::vector<double>>(options.steps);
-
-  PI = acos(-1.0);
 }
 
 MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
@@ -254,7 +259,6 @@ MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
   pos_y = new std::vector<std::vector<double>>(options.steps);
   pos_z = new std::vector<std::vector<double>>(options.steps);
 
-  PI = acos(-1.0);
   options.test_options.is_testing = false;
 }
 
@@ -784,8 +788,11 @@ void MD::simulation() {
   /****************************************************************************/
   /* simulation Ends HERE */
 
+  /* Calculate the statistics and store them in a vector */
+  run_stats = calculate_run_stats();
+
   /* Write to files */
-  file_output();
+  file_output(logger);
 
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   std::cout
@@ -963,7 +970,7 @@ void MD::save_visualisation_arrays() {
   out_z.close();
 }
 
-void MD::file_output() {
+void MD::file_output(stat_file &logger) {
   /* Generating the filenames for the output */
 
   /* Always open the data file stream since the temperature and density */
@@ -1015,6 +1022,7 @@ void MD::file_output() {
   std::string header = "# step\trho\tT";
 
   if (options.io_options.energies) {
+    // todo: I should be passing the pointer to u_en rather than the values
     output_quantities.push_back(u_en);
     output_quantities.push_back(k_en);
     header += "\tU\tK";
@@ -1053,5 +1061,52 @@ void MD::file_output() {
                                  streams["rdf"]);
   }
 
+  /* Close all the streams */
   for (auto &[key, val] : streams) val.close();
+  /* Empty the file_names generated since a compression calls the MD constructor
+     once, hence `logger` is created only once */
+  logger.file_names.clear();
 }
+
+std::vector<double> MD::calculate_run_stats() {
+  /* Pass density as the first entry */
+  std::vector<double> stat{options.density};
+
+  /* Mean Square Displacement */
+  if (options.io_options.msd) {
+    std::vector<double> temp = vector_stats(msd);
+    stat.insert(stat.end(), temp.begin(), temp.end());
+  }
+
+  if (options.io_options.vaf) {
+    /* Velocity Autocorrelation Function */
+    std::vector<double> temp = vector_stats(Cr);
+    stat.insert(stat.end(), temp.begin(), temp.end());
+  }
+
+  /* Structure Factor */
+  if (options.io_options.sf) {
+    std::vector<double> temp = vector_stats(sf.x);
+    stat.insert(stat.end(), temp.begin(), temp.end());
+    temp = vector_stats(sf.y);
+    stat.insert(stat.end(), temp.begin(), temp.end());
+    temp = vector_stats(sf.z);
+    stat.insert(stat.end(), temp.begin(), temp.end());
+  }
+
+  /* Potential Energy */
+  if (options.io_options.energies) {
+    std::vector<double> temp = vector_stats(u_en);
+    stat.insert(stat.end(), temp.begin(), temp.end());
+  }
+
+  /* Configurational Pressure */
+  if (options.io_options.pressure) {
+    std::vector<double> temp = vector_stats(pc);
+    stat.insert(stat.end(), temp.begin(), temp.end());
+  }
+
+  return stat;
+}
+
+std::vector<double> MD::get_run_stats() { return run_stats; }

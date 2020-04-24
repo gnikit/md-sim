@@ -37,6 +37,7 @@ struct io_options_type {
   bool position = true;             /* particles' last positions output */
   bool sf = true;                   /* structure factor output */
   bool visualise = false;           /* save all positions, of all particles */
+  bool compression_stats = true;    /* create a separate log file with stats */
   std::string dir = ".";            /* file output directory */
   std::string simulation_name = ""; /* simulation prefix/ name */
 
@@ -50,6 +51,7 @@ struct io_options_type {
     position = rhs.position;
     sf = rhs.sf;
     visualise = rhs.visualise;
+    compression_stats = rhs.compression_stats;
     dir = rhs.dir;
     simulation_name = rhs.simulation_name;
 

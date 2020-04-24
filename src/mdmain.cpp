@@ -143,6 +143,15 @@ int md_options_interface::load_io_options(io_options_type& io) {
   else
     io.position = false;
 
+  if (have_option(path + "/compression_summary_stats")) {
+    error = get_option(path + "/compression_summary_stats/name", temp);
+    assert(error == SPUD_NO_ERROR);
+    if (temp == "true")
+      io.compression_stats = true;
+    else
+      io.compression_stats = false;
+  }
+
   return 0;
 }
 

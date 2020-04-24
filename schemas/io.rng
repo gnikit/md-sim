@@ -24,6 +24,9 @@
       <ref name="structure_factor_io"/>
       <ref name="rdf_io"/>
       <ref name="save_last_positions_io"/>
+      <optional>
+        <ref name="compression_summary_stats"/>
+      </optional>
     </element>
   </define>
   <define name="track_particles">
@@ -156,6 +159,28 @@ NOTE: For large simulations this will be slow.</a:documentation>
         <a:documentation>position, velocities and accelerations output disabled</a:documentation>
         <attribute name="name">
           <value>false</value>
+        </attribute>
+      </element>
+    </choice>
+  </define>
+  <define name="compression_summary_stats">
+    <choice>
+      <element name="compression_summary_stats">
+        <a:documentation>Output a summary file of each compression step,
+with the statistics of that run.
+The statistics involve min, max, average, l2norm and rms.
+&lt;b&gt; This makes sense only in a compression run &lt;/b&gt;</a:documentation>
+        <attribute name="name">
+          <value>false</value>
+        </attribute>
+      </element>
+      <element name="compression_summary_stats">
+        <a:documentation>Output a summary file of each compression step,
+with the statistics of that run.
+The statistics involve min, max, average, l2norm and rms.
+&lt;b&gt; This makes sense only in a compression run &lt;/b&gt;</a:documentation>
+        <attribute name="name">
+          <value>true</value>
         </attribute>
       </element>
     </choice>

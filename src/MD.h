@@ -55,7 +55,8 @@ class MD {
   vector_3d sf;    /* Structure factor k-arrays */
 
   /* Statistical quantity vectors, VAF, MSD, Energies and pressures */
-  std::vector<double> Cr, msd, u_en, k_en, pc, pk, temperature, density, rdf;
+  std::vector<double> Cr, msd, u_en, k_en, pc, pk, temperature, density, rdf,
+      run_stats;
 
   /* Constructor variables */
   options_type options;
@@ -66,7 +67,7 @@ class MD {
   std::vector<std::vector<double>> *pos_z;
 
  private:
-  double PI;
+  double const PI = acos(-1.0);
   /* Variables for storing inside the object the file ID */
   stat_file logger;
 
@@ -77,6 +78,7 @@ class MD {
   ~MD();
 
   /**
+   * @brief
    * Executes the fluid simulation. It includes all statistical methods
    * defined in this class. It monitors the following quantities
    * RDF, MSD, VAF, average particle energies & pressures.
@@ -86,6 +88,7 @@ class MD {
   void simulation();
 
   /**
+   * @brief
    * Identical to the simulation() but uses normal arguments
    * rather than the custom options data type. This results into
    * limited functionality.
@@ -107,11 +110,13 @@ class MD {
                   std::string pp_type);
 
   /**
+   * @brief
    * Closes open file streams and resets sizes and values to 0
    * Use it when running multiple simulations and recycling the same
    * MD object.
    *
-   * @force_reset: Will close file streams even when compression is turned on
+   * @param force_reset: Will close file streams even when compression is turned
+   * on
    */
   void reset_values(bool force_reset = false);
 
@@ -125,7 +130,6 @@ class MD {
  protected:
   /**
    * @brief Set the vector sizes. Resizes all vectors and containers
-   *
    */
   void set_vector_sizes();
 
@@ -143,12 +147,12 @@ class MD {
   void choose_lattice_formation(std::string &lattice, vector_3d &r);
 
   /**
-   * Initialises the:
-   * + Position Arrays
-   * + Velocity Arrays
-   * + Conserves/ Scales momentum
-   * + Temperature
-   * + Velocity Autocorrelation Function
+   * @brief Initialises the:
+   *  + Position Arrays
+   *  + Velocity Arrays
+   *  + Conserves/ Scales momentum
+   *  + Temperature
+   *  + Velocity Autocorrelation Function
    *
    * @param r: position vector of particles
    * @param v: velocity vectors of particles
@@ -158,6 +162,7 @@ class MD {
   double initialise(vector_3d &r, vector_3d &v, double TEMPERATURE);
 
   /**
+   * @brief
    * Generates velocities for based on the Maxwell Boltzmann distribution.
    * The MB dist in 3D is effectively the triple product of 3 Normal dist.
    *
@@ -170,7 +175,7 @@ class MD {
   void mb_distribution(vector_3d &v, double TEMPERATURE);
 
   /**
-   *  An iterative leap-frog Verlet Algorithm.
+   * @brief An iterative leap-frog Verlet Algorithm.
    *
    * @param r: position vectors of particles
    * @param v: velocity vectors of particles
@@ -200,6 +205,7 @@ class MD {
   void apply_boundary_conditions();
 
   /**
+   * @brief
    * Calculates the Velocity Autocorrelation Function for the fluid.
    * The method stores the values into the Cr vector and uses internally
    * the velocities of the particles.
@@ -210,6 +216,7 @@ class MD {
   void velocity_autocorrelation_function(vector_3d &Cv, vector_3d &v);
 
   /**
+   * @brief
    * Calculates the Radial Distribution Function for the fluid
    * based on the values that are stored in the gr vector
    * throughout the simulation.
@@ -226,6 +233,7 @@ class MD {
                                     size_t &particles, std::ofstream &fstream);
 
   /**
+   * @brief
    * Performs the Mean Square Displacement calculation for the fluid.
    * The method stores the MSD of the step in the msd vector.
    *
@@ -240,6 +248,7 @@ class MD {
   void mean_square_displacement(vector_3d &MSD, vector_3d &MSD_r);
 
   /**
+   * @brief
    * Calculates the structure factor, which is computed as a Fourier Transform.
    * The structure factor is more useful in FCC and BCC lattices
    *
@@ -248,6 +257,7 @@ class MD {
   void structure_factor(vector_3d &r);
 
   /**
+   * @brief
    * Sets the internal class variables for the fluid according to
    * the pair-potential selected.
    * Returns a string with all the simulation setup parameters
@@ -271,7 +281,32 @@ class MD {
 
   /**
    * @brief Manages all the IO operations, file streams, file creation etc.
-   *
    */
-  void file_output();
+  void file_output(stat_file &logger);
+
+  /**
+   * @brief Get the statistics (min max mean l2norm rms) of the run quantities:
+   *  + Mean Square Displacement
+   *  + Velocity Autocorrelation Function
+   *  + Structure Factor
+   *  + Potential Energy
+   *  + Configurational Pressure
+   *
+   * This routine is intended to be called at the end of the simulation run
+   * so as the vector quantities have been correctly calculated.
+   *
+   * The quantities are not passed as arguments since the aim of this method is
+   * to be called outside the MD class.
+   *
+   * @return std::vector<double> Vector containing all stats in the order listed
+   */
+  std::vector<double> calculate_run_stats();
+
+  /**
+   * @brief Get the run_stats vector that has been precalculated by
+   *        calculate_run_stats
+   *
+   * @return std::vector<double> run_stats
+   */
+  std::vector<double> get_run_stats();
 };

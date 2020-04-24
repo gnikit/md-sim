@@ -25,7 +25,9 @@ io_options =
 
         rdf_io,
 
-        save_last_positions_io
+        save_last_positions_io,
+
+        compression_summary_stats?
 
     }
 )
@@ -98,4 +100,18 @@ save_last_positions_io =
     element positions { attribute name { "true" } }|
     ## position, velocities and accelerations output disabled
     element positions { attribute name { "false" } }
+)
+
+compression_summary_stats =
+(
+    ## Output a summary file of each compression step,
+    ## with the statistics of that run.
+    ## The statistics involve min, max, average, l2norm and rms.
+    ## <b> This makes sense only in a compression run </b>
+    element compression_summary_stats { attribute name { "false" } }|
+    ## Output a summary file of each compression step,
+    ## with the statistics of that run.
+    ## The statistics involve min, max, average, l2norm and rms.
+    ## <b> This makes sense only in a compression run </b>
+    element compression_summary_stats { attribute name { "true" } }
 )

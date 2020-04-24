@@ -40,6 +40,7 @@ class stat_file {
       std::vector<std::vector<double>> const &all_output_vectors);
 
   /**
+   * @brief
    * Dates the file and allows the input of a header
    * Input a file stream to write and string of characters to display as
    * headers.
@@ -51,6 +52,7 @@ class stat_file {
                          std::string const &variables);
 
   /**
+   * @brief
    * Generates a unique filename for the simulation results to be stored.
    * The method infers from the constructor the number of particles used
    * and the duration of the simulation (steps).
@@ -70,7 +72,7 @@ class stat_file {
                           double const &A_cst);
 
   /**
-   * Convert doubles to a string with a variable degree of precision.
+   *  @brief Convert doubles to a string with a variable degree of precision.
    *
    * @param &x: Double number to be converted
    * @param &precision: Precision of the double when converted to string
@@ -88,4 +90,16 @@ class stat_file {
    */
   void write_file(std::vector<std::vector<double>> &output_quantities,
                   std::ofstream &fstream, std::string const &header);
+
+  /**
+   * @brief Write the output_line vector as a line to fstream (ends the line
+   * with and endl character). Also checks if fstream has been opened and if not
+   * it opens it.
+   *
+   * @param output_line: Double vector containing the line data
+   * @param fstream: Output file stream
+   * @param index: (optional) The row index for the line. If negative ignore
+   */
+  void write_file_line(std::vector<double> const &output_line,
+                       std::ofstream &fstream, int index = -1);
 };

@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='utf-8'?>
+<input_variables>
+  <setup>
+    <steps>
+      <integer_value rank="0">10</integer_value>
+    </steps>
+    <particles>
+      <integer_value rank="1" shape="3">4 4 4</integer_value>
+    </particles>
+    <lattice name="SC"/>
+    <rdf_bins>
+      <integer_value rank="0">100</integer_value>
+    </rdf_bins>
+    <rdf_equilibrate>
+      <integer_value rank="0">0</integer_value>
+    </rdf_equilibrate>
+  </setup>
+  <io>
+    <simulation_name>compress_stats_test_</simulation_name>
+    <track_particles name="false"/>
+    <energies name="true"/>
+    <pressure name="true"/>
+    <msd name="true"/>
+    <vaf name="true"/>
+    <sf name="true"/>
+    <rdf name="true"/>
+    <positions name="true"/>
+    <compression_summary_stats name="true"/>
+  </io>
+  <simulation_type name="CompressionRun">
+    <pair_potential name="GaussianCoreModel">
+      <density>
+        <real_value rank="0">0.5</real_value>
+      </density>
+      <temperature>
+        <real_value rank="0">0.5</real_value>
+      </temperature>
+    </pair_potential>
+    <final_density>
+      <real_value rank="0">1.0</real_value>
+    </final_density>
+    <density_increment>
+      <real_value rank="0">0.1</real_value>
+    </density_increment>
+  </simulation_type>
+  <enable_testing/>
+</input_variables>

@@ -489,5 +489,46 @@ class TestIOOptions(unittest.TestCase):
         print(f'Exiting: {f_dir}')
 
 
+class TestCompression(unittest.TestCase):
+
+    def setUp(self):
+        print('-'*80)
+
+    def tearDown(self):
+        call(['make', 'clean'])
+        os.chdir('..')
+        print('-'*80)
+
+    def compression_summary_stats(self):
+        f_dir = 'compress_summary_stats'
+        print(f'Entering: {f_dir}')
+
+        setup_ok = run_file(f_dir, 'disable_all_io.xml')
+        self.assertTrue(setup_ok)
+
+        os.chdir(f_dir)
+        test_results = []
+
+        test_string = ('Compression_statistics_step_10_particles_64'
+                       '_rho_0.5000_T_0.5000_n_0.00_A_0.00000.log')
+        sim_name = 'compress_stats_test_'
+
+        # Test variables
+        data = np.loadtxt(f'{sim_name}{test_string}')
+
+        # Reference variables
+        data_ref = np.loadtxt('test_data.log')
+
+        # Test for consistency
+        result = np.allclose(data, data_ref)
+        print(f'Testing Data file consistency with reference: {result}')
+
+        test_results.append(result)
+
+        self.assertTrue(get_test_result(test_results))
+
+        print(f'Exiting: {f_dir}')
+
+
 if __name__ == '__main__':
     unittest.main()

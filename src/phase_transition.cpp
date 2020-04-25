@@ -56,19 +56,19 @@ void phase_transition::crystallisation(options_type &options) {
 
     /* Create the header in the order that get_run_stats generates them
        @note This has been hard coded */
-    std::string header = "# compress_step\trho";
+    std::string header = "# compress_step,rho";
     if (options.io_options.msd)
-      header += "\tmin(MSD)\tmax(MSD)\tav(MSD)\tl2norm(MSD)\trms(MSD)";
-    if (options.io_options.vaf) header += "\tVAF";
+      header += ",min(MSD),max(MSD),av(MSD),l2norm(MSD),rms(MSD)";
+    if (options.io_options.vaf) header += ",VAF";
     if (options.io_options.sf) {
-      header += "\tmin(SFx)\tmax(SFx)\tav(SFx)\tl2norm(SFx)\trms(SFx)";
-      header += "\tmin(SFy)\tmax(SFy)\tav(SFy)\tl2norm(SFy)\trms(SFy)";
-      header += "\tmin(SFz)\tmax(SFz)\tav(SFz)\tl2norm(SFz)\trms(SFz)";
+      header += ",min(SFx),max(SFx),av(SFx),l2norm(SFx),rms(SFx)";
+      header += ",min(SFy),max(SFy),av(SFy),l2norm(SFy),rms(SFy)";
+      header += ",min(SFz),max(SFz),av(SFz),l2norm(SFz),rms(SFz)";
     }
     if (options.io_options.energies)
-      header += "\tmin(U)\tmax(U)\tav(U)\tl2norm(U)\trms(U)";
+      header += ",min(U),max(U),av(U),l2norm(U),rms(U)";
     if (options.io_options.pressure)
-      header += "\tmin(Pc)\tmax(Pc)\tav(Pc)\tl2norm(Pc)\trms(Pc)";
+      header += ",min(Pc),max(Pc),av(Pc),l2norm(Pc),rms(Pc)";
 
     /* Write the header */
     compression_stats << header << std::endl;

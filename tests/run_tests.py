@@ -81,15 +81,17 @@ class TestPotentials(unittest.TestCase):
         sim_name = 'bip_potential_test_'
 
         # Test variables
-        rdf_test = np.loadtxt(f'{sim_name}RDF{test_string}', unpack=True)
-        data_test = np.loadtxt(f'{sim_name}Data{test_string}', unpack=True)
+        rdf_test = np.loadtxt(
+            f'{sim_name}RDF{test_string}', delimiter=',', unpack=True)
+        data_test = np.loadtxt(
+            f'{sim_name}Data{test_string}', delimiter=',', unpack=True)
         pos_test = np.loadtxt(
-            f'{sim_name}Positions_Velocities{test_string}', unpack=True)
+            f'{sim_name}Positions_Velocities{test_string}', delimiter=',', unpack=True)
 
         # Reference variables
-        rdf_ref = np.loadtxt('test_rdf.log', unpack=True)
-        data_ref = np.loadtxt('test_data.log', unpack=True)
-        pos_ref = np.loadtxt('test_positions.log', unpack=True)
+        rdf_ref = np.loadtxt('test_rdf.log', delimiter=',', unpack=True)
+        data_ref = np.loadtxt('test_data.log', delimiter=',', unpack=True)
+        pos_ref = np.loadtxt('test_positions.log', delimiter=',', unpack=True)
 
         # Test data for consistency
         result = np.allclose(rdf_ref, rdf_test)
@@ -124,15 +126,17 @@ class TestPotentials(unittest.TestCase):
         sim_name = 'lj_potential_test_'
 
         # Test variables
-        rdf_test = np.loadtxt(f'{sim_name}RDF{test_string}', unpack=True)
-        data_test = np.loadtxt(f'{sim_name}Data{test_string}', unpack=True)
+        rdf_test = np.loadtxt(
+            f'{sim_name}RDF{test_string}', delimiter=',', unpack=True)
+        data_test = np.loadtxt(
+            f'{sim_name}Data{test_string}', delimiter=',', unpack=True)
         pos_test = np.loadtxt(
-            f'{sim_name}Positions_Velocities{test_string}', unpack=True)
+            f'{sim_name}Positions_Velocities{test_string}', delimiter=',', unpack=True)
 
         # Reference variables
-        rdf_ref = np.loadtxt('test_rdf.log', unpack=True)
-        data_ref = np.loadtxt('test_data.log', unpack=True)
-        pos_ref = np.loadtxt('test_positions.log', unpack=True)
+        rdf_ref = np.loadtxt('test_rdf.log', delimiter=',', unpack=True)
+        data_ref = np.loadtxt('test_data.log', delimiter=',', unpack=True)
+        pos_ref = np.loadtxt('test_positions.log', delimiter=',', unpack=True)
 
         # Test data for consistency
         result = np.allclose(rdf_ref, rdf_test)
@@ -169,15 +173,17 @@ class TestPotentials(unittest.TestCase):
         sim_name = 'exp_potential_test_'
 
         # Test variables
-        rdf_test = np.loadtxt(f'{sim_name}RDF{test_string}', unpack=True)
-        data_test = np.loadtxt(f'{sim_name}Data{test_string}', unpack=True)
+        rdf_test = np.loadtxt(
+            f'{sim_name}RDF{test_string}', delimiter=',', unpack=True)
+        data_test = np.loadtxt(
+            f'{sim_name}Data{test_string}', delimiter=',', unpack=True)
         pos_test = np.loadtxt(
-            f'{sim_name}Positions_Velocities{test_string}', unpack=True)
+            f'{sim_name}Positions_Velocities{test_string}', delimiter=',', unpack=True)
 
         # Reference variables
-        rdf_ref = np.loadtxt('test_rdf.log', unpack=True)
-        data_ref = np.loadtxt('test_data.log', unpack=True)
-        pos_ref = np.loadtxt('test_positions.log', unpack=True)
+        rdf_ref = np.loadtxt('test_rdf.log', delimiter=',', unpack=True)
+        data_ref = np.loadtxt('test_data.log', delimiter=',', unpack=True)
+        pos_ref = np.loadtxt('test_positions.log', delimiter=',', unpack=True)
 
         # Test data for consistency
         result = np.allclose(rdf_ref, rdf_test)
@@ -213,15 +219,17 @@ class TestPotentials(unittest.TestCase):
         sim_name = 'gcm_potential_test_'
 
         # Test variables
-        rdf_test = np.loadtxt(f'{sim_name}RDF{test_string}', unpack=True)
-        data_test = np.loadtxt(f'{sim_name}Data{test_string}', unpack=True)
+        rdf_test = np.loadtxt(
+            f'{sim_name}RDF{test_string}', delimiter=',', unpack=True)
+        data_test = np.loadtxt(
+            f'{sim_name}Data{test_string}', delimiter=',', unpack=True)
         pos_test = np.loadtxt(
-            f'{sim_name}Positions_Velocities{test_string}', unpack=True)
+            f'{sim_name}Positions_Velocities{test_string}', delimiter=',', unpack=True)
 
         # Reference variables
-        rdf_ref = np.loadtxt('test_rdf.log', unpack=True)
-        data_ref = np.loadtxt('test_data.log', unpack=True)
-        pos_ref = np.loadtxt('test_positions.log', unpack=True)
+        rdf_ref = np.loadtxt('test_rdf.log', delimiter=',', unpack=True)
+        data_ref = np.loadtxt('test_data.log', delimiter=',', unpack=True)
+        pos_ref = np.loadtxt('test_positions.log', delimiter=',', unpack=True)
 
         # Test data for consistency
         result = np.allclose(rdf_ref, rdf_test)
@@ -269,11 +277,12 @@ class TestLatticeStructures(unittest.TestCase):
 
         # Test variables
         pos_test = np.loadtxt(
-            f'{sim_name}Positions_Velocities{test_string}', usecols=(1, 2, 3), unpack=True)
+            f'{sim_name}Positions_Velocities{test_string}', usecols=(1, 2, 3),
+            delimiter=',', unpack=True)
 
         # Reference variables
         pos_ref = np.loadtxt('test_positions.log',
-                             usecols=(1, 2, 3), unpack=True)
+                             usecols=(1, 2, 3), delimiter=',', unpack=True)
 
         # Test data for consistency
         result = np.allclose(pos_ref, pos_test)
@@ -302,11 +311,12 @@ class TestLatticeStructures(unittest.TestCase):
 
         # Test variables
         pos_test = np.loadtxt(
-            f'{sim_name}Positions_Velocities{test_string}', usecols=(1, 2, 3), unpack=True)
+            f'{sim_name}Positions_Velocities{test_string}', usecols=(1, 2, 3),
+            delimiter=',', unpack=True)
 
         # Reference variables
         pos_ref = np.loadtxt('test_positions.log',
-                             usecols=(1, 2, 3), unpack=True)
+                             usecols=(1, 2, 3), delimiter=',', unpack=True)
 
         # Test data for consistency
         result = np.allclose(pos_ref, pos_test)
@@ -335,11 +345,12 @@ class TestLatticeStructures(unittest.TestCase):
 
         # Test variables
         pos_test = np.loadtxt(
-            f'{sim_name}Positions_Velocities{test_string}', usecols=(1, 2, 3), unpack=True)
+            f'{sim_name}Positions_Velocities{test_string}', usecols=(1, 2, 3),
+            delimiter=',', unpack=True)
 
         # Reference variables
         pos_ref = np.loadtxt('test_positions.log',
-                             usecols=(1, 2, 3), unpack=True)
+                             usecols=(1, 2, 3), delimiter=',', unpack=True)
 
         # Test data for consistency
         result = np.allclose(pos_ref, pos_test)
@@ -377,14 +388,14 @@ class Test3DVisualisation(unittest.TestCase):
         sim_name = 'visual_'
 
         # Test variables
-        x_tracks = np.loadtxt(f'{sim_name}x_data{test_string}')
-        y_tracks = np.loadtxt(f'{sim_name}y_data{test_string}')
-        z_tracks = np.loadtxt(f'{sim_name}z_data{test_string}')
+        x_tracks = np.loadtxt(f'{sim_name}x_data{test_string}', delimiter=',')
+        y_tracks = np.loadtxt(f'{sim_name}y_data{test_string}', delimiter=',')
+        z_tracks = np.loadtxt(f'{sim_name}z_data{test_string}', delimiter=',')
 
         # Reference variables
-        x_tracks_ref = np.loadtxt('test_x.log')
-        y_tracks_ref = np.loadtxt('test_y.log')
-        z_tracks_ref = np.loadtxt('test_z.log')
+        x_tracks_ref = np.loadtxt('test_x.log', delimiter=',')
+        y_tracks_ref = np.loadtxt('test_y.log', delimiter=',')
+        z_tracks_ref = np.loadtxt('test_z.log', delimiter=',')
 
         # Test for consistency
         result = np.allclose(x_tracks, x_tracks_ref, rtol=1.0e-4)
@@ -428,10 +439,10 @@ class TestConstructors(unittest.TestCase):
         sim_name = 'missing_options_'
 
         # Test variables
-        data = np.loadtxt(f'{sim_name}{test_string}')
+        data = np.loadtxt(f'{sim_name}{test_string}', delimiter=',')
 
         # Reference variables
-        data_ref = np.loadtxt('test_data.log')
+        data_ref = np.loadtxt('test_data.log', delimiter=',')
 
         # Test for consistency
         result = np.allclose(data, data_ref)
@@ -468,10 +479,10 @@ class TestIOOptions(unittest.TestCase):
         sim_name = 'disable_all_io_'
 
         # Test variables
-        data = np.loadtxt(f'{sim_name}{test_string}')
+        data = np.loadtxt(f'{sim_name}{test_string}', delimiter=',')
 
         # Reference variables
-        data_ref = np.loadtxt('test_data.log')
+        data_ref = np.loadtxt('test_data.log', delimiter=',')
 
         # Test for consistency
         result = np.allclose(data, data_ref)
@@ -514,10 +525,10 @@ class TestCompression(unittest.TestCase):
         sim_name = 'compress_stats_test_'
 
         # Test variables
-        data = np.loadtxt(f'{sim_name}{test_string}')
+        data = np.loadtxt(f'{sim_name}{test_string}', delimiter=',')
 
         # Reference variables
-        data_ref = np.loadtxt('test_data.log')
+        data_ref = np.loadtxt('test_data.log', delimiter=',')
 
         # Test for consistency
         result = np.allclose(data, data_ref)

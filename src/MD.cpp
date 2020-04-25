@@ -491,7 +491,7 @@ void MD::radial_distribution_function(double &rho, double &cut_off,
   fstream << "# particles (N): " << particles << " steps: " << options.steps
           << " rho: " << rho << " bins: " << bins
           << " cut_off (rg): " << cut_off << " dr: " << dr << std::endl;
-  fstream << "# Radius (r)" << '\t' << "Normalised" << '\t' << "Unormalised"
+  fstream << "# Radius (r)" << ',' << "Normalised" << ',' << "Unormalised"
           << std::endl;
 
   for (size_t i = 1; i < bins; ++i) {
@@ -503,7 +503,7 @@ void MD::radial_distribution_function(double &rho, double &cut_off,
                       (options.steps - options.rdf_options.rdf_wait) *
                       (pow((R + (dr / 2.0)), 3) - pow((R - (dr / 2.0)), 3)));
 
-    fstream << R << '\t' << rdf[i] / norm << '\t' << rdf[i] << std::endl;
+    fstream << R << ',' << rdf[i] / norm << ',' << rdf[i] << std::endl;
   }
 }
 
@@ -1019,39 +1019,39 @@ void MD::file_output(stat_file &logger) {
 
   /* generate the correct header depending on io_options */
   std::vector<std::vector<double>> output_quantities = {density, temperature};
-  std::string header = "# step\trho\tT";
+  std::string header = "# step,rho,T";
 
   if (options.io_options.energies) {
     // todo: I should be passing the pointer to u_en rather than the values
     output_quantities.push_back(u_en);
     output_quantities.push_back(k_en);
-    header += "\tU\tK";
+    header += ",U,K";
   }
   if (options.io_options.pressure) {
     output_quantities.push_back(pc);
     output_quantities.push_back(pk);
-    header += "\tPc\tPk";
+    header += ",Pc,Pk";
   }
   if (options.io_options.msd) {
     output_quantities.push_back(msd);
-    header += "\tMSD";
+    header += ",MSD";
   }
   if (options.io_options.vaf) {
     output_quantities.push_back(Cr);
-    header += "\tVAF";
+    header += ",VAF";
   }
   if (options.io_options.sf) {
     output_quantities.push_back(sf.x);
     output_quantities.push_back(sf.y);
     output_quantities.push_back(sf.z);
-    header += "\tSFx\tSFy\tSFz";
+    header += ",SFx,SFy,SFz";
   }
   logger.write_data_file(streams["data"], header, output_quantities);
 
   /* Saving Last Position */
   if (options.io_options.position) {
     logger.write_data_file(streams["position"],
-                           "# particle\tx\ty\tz\tvx\tvy\tvz\tax\tay\taz",
+                           "# particle,x,y,z,vx,vy,vz,ax,ay,az",
                            {r.x, r.y, r.z, v.x, v.y, v.z, f.x, f.y, f.z});
   }
 

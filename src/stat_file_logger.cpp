@@ -24,6 +24,8 @@ void stat_file::write_data_file(
   /* Write the timestamp and header to the stream */
   time_stamp(file_stream, header);
 
+  /* Delimiter string */
+  std::string del = ",";
   /* Find the largest size vector in all our vectors */
   size_t rows = all_output_vectors[0].size();
   for (auto const &i : all_output_vectors)
@@ -35,11 +37,11 @@ void stat_file::write_data_file(
     std::string line = "";
     for (size_t vec = 0; vec < all_output_vectors.size(); ++vec) {
       try {
-        line += '\t' + convert_to_string(all_output_vectors.at(vec).at(i), 10);
+        line += del + convert_to_string(all_output_vectors.at(vec).at(i), 10);
       }
       /* if the array goes out of bounds then just add 0s */
       catch (const std::out_of_range &e) {
-        line += '\t' + "0.0000000000";
+        line += del + "0.0000000000";
       }
     }
     /* The main data file is always the first entry in the vector of streams */
@@ -109,16 +111,16 @@ void stat_file::write_file(std::vector<std::vector<double>> &output_quantities,
   std::string new_header = "";
   time_stamp(fstream, new_header);
   new_header += header;
-  FileIO::Write2File<double>(output_quantities, fstream, "\t", new_header,
+  FileIO::Write2File<double>(output_quantities, fstream, ",", new_header,
                              false);
 }
 
 void stat_file::write_file_line(std::vector<double> const &output_line,
                                 std::ofstream &fstream, int index) {
   /* If the index is no-negative write it in file */
-  if (index >= 0) fstream << index << '\t';
+  if (index >= 0) fstream << index << ',';
 
   std::string line = "";
-  for (auto const &i : output_line) line += '\t' + convert_to_string(i, 10);
+  for (auto const &i : output_line) line += ',' + convert_to_string(i, 10);
   fstream << line << std::endl;
 }

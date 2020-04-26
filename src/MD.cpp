@@ -169,9 +169,8 @@ MD::MD(options_type &input_options) {
   input_options = options;
 
   /* Visualisation vectors on the heap*/
-  pos_x = new std::vector<std::vector<double>>(options.steps);
-  pos_y = new std::vector<std::vector<double>>(options.steps);
-  pos_z = new std::vector<std::vector<double>>(options.steps);
+  pos = new std::vector<std::vector<double>>(6);
+  for (size_t i = 0; i < (*pos).size(); ++i) (*pos)[i].reserve(options.N);
 }
 
 MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
@@ -255,10 +254,8 @@ MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
   temperature.reserve(options.steps);
 
   /* Visualisation vectors on the heap*/
-  pos_x = new std::vector<std::vector<double>>(options.steps);
-  pos_y = new std::vector<std::vector<double>>(options.steps);
-  pos_z = new std::vector<std::vector<double>>(options.steps);
-
+  pos = new std::vector<std::vector<double>>(6);
+  for (size_t i = 0; i < (*pos).size(); ++i) (*pos)[i].reserve(options.N);
   options.test_options.is_testing = false;
 }
 
@@ -269,9 +266,7 @@ MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
 
 MD::~MD() {
   /* Destroy the vectors allocated on the heap */
-  delete pos_x;
-  delete pos_y;
-  delete pos_z;
+  delete pos;
 }
 
 void MD::choose_lattice_formation(std::string &lattice, vector_3d &r) {
@@ -488,11 +483,10 @@ void MD::radial_distribution_function(double &rho, double &cut_off,
   double cor_rho = rho * (particles - 1) / particles;
   double dr = cut_off / bins;
 
-  fstream << "# particles (N): " << particles << " steps: " << options.steps
-          << " rho: " << rho << " bins: " << bins
-          << " cut_off (rg): " << cut_off << " dr: " << dr << std::endl;
-  fstream << "# Radius (r)" << ',' << "Normalised" << ',' << "Unormalised"
-          << std::endl;
+  fstream << "particles (N):," << particles << ",steps:," << options.steps
+          << ",rho:," << rho << ",bins:," << bins << ",cut_off (rg):,"
+          << cut_off << ",dr:," << dr << std::endl;
+  fstream << "Radius (r),Normalised,Unormalised" << std::endl;
 
   for (size_t i = 1; i < bins; ++i) {
     R = cut_off * i / bins;
@@ -774,15 +768,15 @@ void MD::simulation() {
 
     /* Save positions for visualisation with Python */
     if (options.io_options.visualise) {
-      /* Reserve memory for the position vectors */
-      (*pos_x)[step_idx].reserve(options.N);
-      (*pos_y)[step_idx].reserve(options.N);
-      (*pos_z)[step_idx].reserve(options.N);
-
-      /* Populate the vectors with the current positions */
-      (*pos_x)[step_idx] = r.x;
-      (*pos_y)[step_idx] = r.y;
-      (*pos_z)[step_idx] = r.z;
+      /* Pass the pointer to the positions 2D vector */
+      // todo: is that right???
+      (*pos)[0] = r.x;
+      (*pos)[1] = r.y;
+      (*pos)[2] = r.z;
+      (*pos)[3] = r.x; /* Used for scaling */
+      (*pos)[4] = r.y; /* Used for scaling */
+      (*pos)[5] = r.z; /* Used for scaling */
+      save_visualisation_arrays(step_idx);
     }
   }
   /****************************************************************************/
@@ -936,38 +930,14 @@ void MD::set_vector_sizes() {
   temperature.reserve(options.steps);
 }
 
-void MD::save_visualisation_arrays() {
-  /* Write the arrays as jagged,(hence transposed), this creates rows=STEPS */
-  /* and columns=PARTICLES */
-  std::ofstream out_x(
-      logger.file_naming(options.io_options.dir + "/" +
-                             options.io_options.simulation_name + "x_data",
-                         options.steps, options.N, options.density,
-                         options.target_temperature, options.power,
-                         options.a_cst),
-      std::ofstream::trunc | std::ofstream::out);
-  logger.write_file(*pos_x, out_x, "");
-  out_x.close();
-
-  std::ofstream out_y(
-      logger.file_naming(options.io_options.dir + "/" +
-                             options.io_options.simulation_name + "y_data",
-                         options.steps, options.N, options.density,
-                         options.target_temperature, options.power,
-                         options.a_cst),
-      std::ofstream::trunc | std::ofstream::out);
-  logger.write_file(*pos_y, out_y, "");
-  out_y.close();
-
-  std::ofstream out_z(
-      logger.file_naming(options.io_options.dir + "/" +
-                             options.io_options.simulation_name + "z_data",
-                         options.steps, options.N, options.density,
-                         options.target_temperature, options.power,
-                         options.a_cst),
-      std::ofstream::trunc | std::ofstream::out);
-  logger.write_file(*pos_z, out_z, "");
-  out_z.close();
+void MD::save_visualisation_arrays(size_t dump_no) {
+  std::string fname = options.io_options.dir + "/" +
+                      options.io_options.simulation_name + "xyz_data_" +
+                      std::to_string(dump_no) + ".csv";
+  std::ofstream out_xyz(fname, std::ofstream::trunc | std::ofstream::out);
+  logger.write_file(*pos, out_xyz,
+                    "x coord, y coord, z coord, x-pos, y-pos, z-pos");
+  out_xyz.close();
 }
 
 void MD::file_output(stat_file &logger) {
@@ -1000,9 +970,6 @@ void MD::file_output(stat_file &logger) {
                            options.a_cst));
   }
 
-  /* Save particle positions to files */
-  if (options.io_options.visualise) save_visualisation_arrays();
-
   /* Create a map with all the streams */
   std::vector<std::ofstream> all_streams = logger.open_files(logger.file_names);
   std::map<std::string, std::ofstream> streams;
@@ -1019,7 +986,7 @@ void MD::file_output(stat_file &logger) {
 
   /* generate the correct header depending on io_options */
   std::vector<std::vector<double>> output_quantities = {density, temperature};
-  std::string header = "# step,rho,T";
+  std::string header = "step,rho,T";
 
   if (options.io_options.energies) {
     // todo: I should be passing the pointer to u_en rather than the values
@@ -1051,8 +1018,9 @@ void MD::file_output(stat_file &logger) {
   /* Saving Last Position */
   if (options.io_options.position) {
     logger.write_data_file(streams["position"],
-                           "# particle,x,y,z,vx,vy,vz,ax,ay,az",
+                           "particle,x,y,z,vx,vy,vz,ax,ay,az",
                            {r.x, r.y, r.z, v.x, v.y, v.z, f.x, f.y, f.z});
+    // todo: for performance I think this should be 2D pointer of pointers
   }
 
   if (options.io_options.rdf) {

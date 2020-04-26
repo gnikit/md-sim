@@ -44,7 +44,7 @@ void stat_file::write_data_file(
       }
       /* if the array goes out of bounds then just add 0s */
       catch (const std::out_of_range &e) {
-        file_stream << del  << -666;
+        file_stream << del << -666;
       }
     }
     file_stream << std::endl;
@@ -109,20 +109,23 @@ std::string stat_file::convert_to_string(const double &x,
 }
 
 void stat_file::write_file(std::vector<std::vector<double>> &output_quantities,
-                           std::ofstream &fstream, std::string const &header) {
-  std::string new_header = "";
-  time_stamp(fstream, new_header);
-  new_header += header;
+                           std::ofstream &fstream, std::string const &header,
+                           size_t format) {
+  std::string del = ",";
   /* Write the 2D vector in a row major format, each vector is a row in file */
-  FileIO::Write2File<double>(output_quantities, fstream, ",", new_header, 0);
+  FileIO::Write2File<double>(output_quantities, fstream, del, header, format);
 }
 
 void stat_file::write_file_line(std::vector<double> const &output_line,
                                 std::ofstream &fstream, int index) {
+  std::string del = ",";
   /* If the index is no-negative write it in file */
-  if (index >= 0) fstream << index << ',';
+  if (index >= 0) fstream << index << del;
 
-  std::string line = "";
-  for (auto const &i : output_line) line += ',' + convert_to_string(i, 10);
-  fstream << line << std::endl;
+  fstream.precision(14);
+  fstream << std::scientific;
+  size_t i;
+  for (i = 0; i < output_line.size() - 1; ++i) fstream << output_line[i] << del;
+  /* Write the last entry without the delimiter just the EOL character */
+  fstream << output_line[i] << std::endl;
 }

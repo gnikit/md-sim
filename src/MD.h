@@ -62,9 +62,7 @@ class MD {
   options_type options;
 
   /* Visualisation vectors, initialised in constructor */
-  std::vector<std::vector<double>> *pos_x;
-  std::vector<std::vector<double>> *pos_y;
-  std::vector<std::vector<double>> *pos_z;
+  std::vector<std::vector<double>> *pos;
 
  private:
   double const PI = acos(-1.0);
@@ -277,7 +275,7 @@ class MD {
    * at each time step
    *
    */
-  void save_visualisation_arrays();
+  void save_visualisation_arrays(size_t dump_no);
 
   /**
    * @brief Manages all the IO operations, file streams, file creation etc.

@@ -89,7 +89,12 @@ class stat_file {
    * @param header: an optional header for the file
    */
   void write_file(std::vector<std::vector<double>> &output_quantities,
-                  std::ofstream &fstream, std::string const &header);
+                  std::ofstream &fstream, std::string const &header,
+                  size_t format = 1);
+
+  void write_file(std::vector<std::vector<double>*> &output_quantities,
+                  std::ofstream &fstream, std::string const &header,
+                  size_t format = 1);
 
   /**
    * @brief Write the output_line vector as a line to fstream (ends the line

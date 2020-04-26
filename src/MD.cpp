@@ -169,9 +169,8 @@ MD::MD(options_type &input_options) {
   input_options = options;
 
   /* Visualisation vectors on the heap*/
-  pos_x = new std::vector<std::vector<double>>(options.steps);
-  pos_y = new std::vector<std::vector<double>>(options.steps);
-  pos_z = new std::vector<std::vector<double>>(options.steps);
+  pos = new std::vector<std::vector<double>>(6);
+  for (size_t i = 0; i < (*pos).size(); ++i) (*pos)[i].reserve(options.N);
 }
 
 MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
@@ -255,10 +254,8 @@ MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
   temperature.reserve(options.steps);
 
   /* Visualisation vectors on the heap*/
-  pos_x = new std::vector<std::vector<double>>(options.steps);
-  pos_y = new std::vector<std::vector<double>>(options.steps);
-  pos_z = new std::vector<std::vector<double>>(options.steps);
-
+  pos = new std::vector<std::vector<double>>(6);
+  for (size_t i = 0; i < (*pos).size(); ++i) (*pos)[i].reserve(options.N);
   options.test_options.is_testing = false;
 }
 
@@ -269,9 +266,7 @@ MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
 
 MD::~MD() {
   /* Destroy the vectors allocated on the heap */
-  delete pos_x;
-  delete pos_y;
-  delete pos_z;
+  delete pos;
 }
 
 void MD::choose_lattice_formation(std::string &lattice, vector_3d &r) {
@@ -488,11 +483,10 @@ void MD::radial_distribution_function(double &rho, double &cut_off,
   double cor_rho = rho * (particles - 1) / particles;
   double dr = cut_off / bins;
 
-  fstream << "# particles (N): " << particles << " steps: " << options.steps
-          << " rho: " << rho << " bins: " << bins
-          << " cut_off (rg): " << cut_off << " dr: " << dr << std::endl;
-  fstream << "# Radius (r)" << ',' << "Normalised" << ',' << "Unormalised"
-          << std::endl;
+  fstream << "particles (N):," << particles << ",steps:," << options.steps
+          << ",rho:," << rho << ",bins:," << bins << ",cut_off (rg):,"
+          << cut_off << ",dr:," << dr << std::endl;
+  fstream << "Radius (r),Normalised,Unormalised" << std::endl;
 
   for (size_t i = 1; i < bins; ++i) {
     R = cut_off * i / bins;
@@ -584,12 +578,12 @@ std::tuple<double, double> MD::calculate_forces(size_t &step_idx,
       /* Get the shortest image of the two particles
          if the particles are near the periodic boundary,
          this image is their reflection. */
-      if (x > (0.5 * options.L)) x = x - options.L;
-      if (x < (-0.5 * options.L)) x = x + options.L;
-      if (y > (0.5 * options.L)) y = y - options.L;
-      if (y < (-0.5 * options.L)) y = y + options.L;
-      if (z > (0.5 * options.L)) z = z - options.L;
-      if (z < (-0.5 * options.L)) z = z + options.L;
+      if (x > (0.5 * options.L)) x -= options.L;
+      if (x < (-0.5 * options.L)) x += options.L;
+      if (y > (0.5 * options.L)) y -= options.L;
+      if (y < (-0.5 * options.L)) y += options.L;
+      if (z > (0.5 * options.L)) z -= options.L;
+      if (z < (-0.5 * options.L)) z += options.L;
 
       /* Pair potential radius */
       double radius = sqrt((x * x) + (y * y) + (z * z));
@@ -665,76 +659,13 @@ void MD::simulation() {
      initials of the pair potential and the pair potential itself. */
   pair_potential_type force = get_force_func(options.potential_type);
 
-  std::chrono::steady_clock::time_point begin =
-      std::chrono::steady_clock::now();
+  auto begin = std::chrono::high_resolution_clock::now();
 
   /* Initialise the simulation, lattice params and much more */
   options.kinetic_energy = initialise(r, v, options.target_temperature);
   size_t step_idx;
   for (step_idx = 0; step_idx < options.steps; ++step_idx) {
-    /* Forces loop */
-    /* Resetting forces to zero */
-    std::fill(f.x.begin(), f.x.end(), 0);
-    std::fill(f.y.begin(), f.y.end(), 0);
-    std::fill(f.z.begin(), f.z.end(), 0);
-
-    /* Reseting <Potential> U to 0 */
-    double U = 0;  /* Potential Energy */
-    double PC = 0; /* Configurational Pressure */
-
-    size_t i, j, igr;
-    for (i = 0; i < options.N - 1; ++i) {
-      for (j = i + 1; j < options.N; ++j) {
-        /* distance between particle i and j */
-        double x = r.x[i] - r.x[j]; /* Separation distance */
-        double y = r.y[i] - r.y[j]; /* between particles i and j */
-        double z = r.z[i] - r.z[j]; /* in Cartesian */
-
-        /* Get the shortest image of the two particles
-           if the particles are near the periodic boundary,
-           this image is their reflection. */
-        if (x > (0.5 * options.Lx)) x -= options.Lx;
-        if (x < (-0.5 * options.Lx)) x += options.Lx;
-        if (y > (0.5 * options.Ly)) y -= options.Ly;
-        if (y < (-0.5 * options.Ly)) y += options.Ly;
-        if (z > (0.5 * options.Lz)) z -= options.Lz;
-        if (z < (-0.5 * options.Lz)) z += options.Lz;
-
-        /* Pair potential radius */
-        double radius = sqrt((x * x) + (y * y) + (z * z));
-
-        /* Force loop */
-        if (radius < options.cut_off) {
-          /* Allows the user to choose different pair potentials */
-          auto [ff, temp_u] = force(radius, options.power, options.a_cst);
-
-          /* Average potential energy */
-          U += temp_u;
-
-          /* Configurational pressure */
-          PC += radius * ff;
-
-          /* Canceling the ij and ji pairs
-             Taking the lower triangular matrix */
-          f.x[i] += x * ff / radius;
-          f.x[j] -= x * ff / radius;
-          f.y[i] += y * ff / radius;
-          f.y[j] -= y * ff / radius;
-          f.z[i] += z * ff / radius;
-          f.z[j] -= z * ff / radius;
-
-          /* Radial Distribution
-             measured with a delay, since the system requires a few thousand
-             time-steps to reach equilibrium */
-          if (options.io_options.rdf &&
-              step_idx > options.rdf_options.rdf_wait) {
-            igr =
-                round(options.rdf_options.rdf_bins * radius / options.cut_off);
-            rdf[igr] += 1;
-          }
-        }
-      }
-    }
+    auto [U, PC] = calculate_forces(step_idx, force);
 
     /* Isothermal Calibration */
     /* using T & KE from prev timestep */
@@ -774,15 +705,15 @@ void MD::simulation() {
 
     /* Save positions for visualisation with Python */
     if (options.io_options.visualise) {
-      /* Reserve memory for the position vectors */
-      (*pos_x)[step_idx].reserve(options.N);
-      (*pos_y)[step_idx].reserve(options.N);
-      (*pos_z)[step_idx].reserve(options.N);
-
-      /* Populate the vectors with the current positions */
-      (*pos_x)[step_idx] = r.x;
-      (*pos_y)[step_idx] = r.y;
-      (*pos_z)[step_idx] = r.z;
+      /* Pass the pointer to the positions 2D vector */
+      // todo: is that right???
+      (*pos)[0] = r.x;
+      (*pos)[1] = r.y;
+      (*pos)[2] = r.z;
+      (*pos)[3] = r.x; /* Used for scaling */
+      (*pos)[4] = r.y; /* Used for scaling */
+      (*pos)[5] = r.z; /* Used for scaling */
+      save_visualisation_arrays(step_idx);
     }
   }
   /****************************************************************************/
@@ -794,15 +725,11 @@ void MD::simulation() {
   /* Write to files */
   file_output(logger);
 
-  std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-  std::cout
-      << "CPU run time = "
-      << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() /
-             60
-      << " min "
-      << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() %
-             60
-      << "s" << std::endl;
+  auto end = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> sim_time =
+      std::chrono::duration_cast<std::chrono::duration<double>>(end - begin);
+
+  std::cout << "CPU run time = " << sim_time.count() << "s" << std::endl;
   std::cout << "******************************\n"
                "** MD simulation terminated **\n"
                "******************************\n"
@@ -936,38 +863,14 @@ void MD::set_vector_sizes() {
   temperature.reserve(options.steps);
 }
 
-void MD::save_visualisation_arrays() {
-  /* Write the arrays as jagged,(hence transposed), this creates rows=STEPS */
-  /* and columns=PARTICLES */
-  std::ofstream out_x(
-      logger.file_naming(options.io_options.dir + "/" +
-                             options.io_options.simulation_name + "x_data",
-                         options.steps, options.N, options.density,
-                         options.target_temperature, options.power,
-                         options.a_cst),
-      std::ofstream::trunc | std::ofstream::out);
-  logger.write_file(*pos_x, out_x, "");
-  out_x.close();
-
-  std::ofstream out_y(
-      logger.file_naming(options.io_options.dir + "/" +
-                             options.io_options.simulation_name + "y_data",
-                         options.steps, options.N, options.density,
-                         options.target_temperature, options.power,
-                         options.a_cst),
-      std::ofstream::trunc | std::ofstream::out);
-  logger.write_file(*pos_y, out_y, "");
-  out_y.close();
-
-  std::ofstream out_z(
-      logger.file_naming(options.io_options.dir + "/" +
-                             options.io_options.simulation_name + "z_data",
-                         options.steps, options.N, options.density,
-                         options.target_temperature, options.power,
-                         options.a_cst),
-      std::ofstream::trunc | std::ofstream::out);
-  logger.write_file(*pos_z, out_z, "");
-  out_z.close();
+void MD::save_visualisation_arrays(size_t dump_no) {
+  std::string fname = options.io_options.dir + "/" +
+                      options.io_options.simulation_name + "xyz_data_" +
+                      std::to_string(dump_no) + ".csv";
+  std::ofstream out_xyz(fname, std::ofstream::trunc | std::ofstream::out);
+  logger.write_file(*pos, out_xyz,
+                    "x coord, y coord, z coord, x-pos, y-pos, z-pos");
+  out_xyz.close();
 }
 
 void MD::file_output(stat_file &logger) {
@@ -1000,9 +903,6 @@ void MD::file_output(stat_file &logger) {
                            options.a_cst));
   }
 
-  /* Save particle positions to files */
-  if (options.io_options.visualise) save_visualisation_arrays();
-
   /* Create a map with all the streams */
   std::vector<std::ofstream> all_streams = logger.open_files(logger.file_names);
   std::map<std::string, std::ofstream> streams;
@@ -1019,7 +919,7 @@ void MD::file_output(stat_file &logger) {
 
   /* generate the correct header depending on io_options */
   std::vector<std::vector<double>> output_quantities = {density, temperature};
-  std::string header = "# step,rho,T";
+  std::string header = "step,rho,T";
 
   if (options.io_options.energies) {
     // todo: I should be passing the pointer to u_en rather than the values
@@ -1051,8 +951,9 @@ void MD::file_output(stat_file &logger) {
   /* Saving Last Position */
   if (options.io_options.position) {
     logger.write_data_file(streams["position"],
-                           "# particle,x,y,z,vx,vy,vz,ax,ay,az",
+                           "particle,x,y,z,vx,vy,vz,ax,ay,az",
                            {r.x, r.y, r.z, v.x, v.y, v.z, f.x, f.y, f.z});
+    // todo: for performance I think this should be 2D pointer of pointers
   }
 
   if (options.io_options.rdf) {

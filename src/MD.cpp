@@ -659,8 +659,7 @@ void MD::simulation() {
      initials of the pair potential and the pair potential itself. */
   pair_potential_type force = get_force_func(options.potential_type);
 
-  std::chrono::steady_clock::time_point begin =
-      std::chrono::steady_clock::now();
+  auto begin = std::chrono::high_resolution_clock::now();
 
   /* Initialise the simulation, lattice params and much more */
   options.kinetic_energy = initialise(r, v, options.target_temperature);
@@ -726,15 +725,11 @@ void MD::simulation() {
   /* Write to files */
   file_output(logger);
 
-  std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-  std::cout
-      << "CPU run time = "
-      << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() /
-             60
-      << " min "
-      << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() %
-             60
-      << "s" << std::endl;
+  auto end = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> sim_time =
+      std::chrono::duration_cast<std::chrono::duration<double>>(end - begin);
+
+  std::cout << "CPU run time = " << sim_time.count() << "s" << std::endl;
   std::cout << "******************************\n"
                "** MD simulation terminated **\n"
                "******************************\n"

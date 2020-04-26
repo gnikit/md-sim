@@ -666,69 +666,7 @@ void MD::simulation() {
   options.kinetic_energy = initialise(r, v, options.target_temperature);
   size_t step_idx;
   for (step_idx = 0; step_idx < options.steps; ++step_idx) {
-    /* Forces loop */
-    /* Resetting forces to zero */
-    std::fill(f.x.begin(), f.x.end(), 0);
-    std::fill(f.y.begin(), f.y.end(), 0);
-    std::fill(f.z.begin(), f.z.end(), 0);
-
-    /* Reseting <Potential> U to 0 */
-    double U = 0;  /* Potential Energy */
-    double PC = 0; /* Configurational Pressure */
-
-    size_t i, j, igr;
-    for (i = 0; i < options.N - 1; ++i) {
-      for (j = i + 1; j < options.N; ++j) {
-        /* distance between particle i and j */
-        double x = r.x[i] - r.x[j]; /* Separation distance */
-        double y = r.y[i] - r.y[j]; /* between particles i and j */
-        double z = r.z[i] - r.z[j]; /* in Cartesian */
-
-        /* Get the shortest image of the two particles
-           if the particles are near the periodic boundary,
-           this image is their reflection. */
-        if (x > (0.5 * options.Lx)) x -= options.Lx;
-        if (x < (-0.5 * options.Lx)) x += options.Lx;
-        if (y > (0.5 * options.Ly)) y -= options.Ly;
-        if (y < (-0.5 * options.Ly)) y += options.Ly;
-        if (z > (0.5 * options.Lz)) z -= options.Lz;
-        if (z < (-0.5 * options.Lz)) z += options.Lz;
-
-        /* Pair potential radius */
-        double radius = sqrt((x * x) + (y * y) + (z * z));
-
-        /* Force loop */
-        if (radius < options.cut_off) {
-          /* Allows the user to choose different pair potentials */
-          auto [ff, temp_u] = force(radius, options.power, options.a_cst);
-
-          /* Average potential energy */
-          U += temp_u;
-
-          /* Configurational pressure */
-          PC += radius * ff;
-
-          /* Canceling the ij and ji pairs
-             Taking the lower triangular matrix */
-          f.x[i] += x * ff / radius;
-          f.x[j] -= x * ff / radius;
-          f.y[i] += y * ff / radius;
-          f.y[j] -= y * ff / radius;
-          f.z[i] += z * ff / radius;
-          f.z[j] -= z * ff / radius;
-
-          /* Radial Distribution
-             measured with a delay, since the system requires a few thousand
-             time-steps to reach equilibrium */
-          if (options.io_options.rdf &&
-              step_idx > options.rdf_options.rdf_wait) {
-            igr =
-                round(options.rdf_options.rdf_bins * radius / options.cut_off);
-            rdf[igr] += 1;
-          }
-        }
-      }
-    }
+    auto [U, PC] = calculate_forces(step_idx, force);
 
     /* Isothermal Calibration */
     /* using T & KE from prev timestep */

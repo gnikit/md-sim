@@ -24,6 +24,8 @@ void stat_file::write_data_file(
   /* Write the timestamp and header to the stream */
   time_stamp(file_stream, header);
 
+  file_stream.precision(14);
+  file_stream << std::scientific;
   /* Delimiter string */
   std::string del = ",";
   /* Find the largest size vector in all our vectors */
@@ -34,18 +36,18 @@ void stat_file::write_data_file(
   /* This accesses the all_output_vectors with a column major ordering,
      not the best for performance */
   for (size_t i = 0; i < rows; ++i) {
-    std::string line = "";
+    /* The main data file is always the first entry in the vector of streams */
+    file_stream << (i + 1);
     for (size_t vec = 0; vec < all_output_vectors.size(); ++vec) {
       try {
-        line += del + convert_to_string(all_output_vectors.at(vec).at(i), 10);
+        file_stream << del << all_output_vectors.at(vec).at(i);
       }
       /* if the array goes out of bounds then just add 0s */
       catch (const std::out_of_range &e) {
-        line += del + "0.0000000000";
+        file_stream << del  << -666;
       }
     }
-    /* The main data file is always the first entry in the vector of streams */
-    file_stream << (i + 1) << line << std::endl;
+    file_stream << std::endl;
   }
 }
 
@@ -111,8 +113,8 @@ void stat_file::write_file(std::vector<std::vector<double>> &output_quantities,
   std::string new_header = "";
   time_stamp(fstream, new_header);
   new_header += header;
-  FileIO::Write2File<double>(output_quantities, fstream, ",", new_header,
-                             false);
+  /* Write the 2D vector in a row major format, each vector is a row in file */
+  FileIO::Write2File<double>(output_quantities, fstream, ",", new_header, 0);
 }
 
 void stat_file::write_file_line(std::vector<double> const &output_line,

@@ -63,6 +63,9 @@ class MD {
 
   /* Visualisation vectors, initialised in constructor */
   std::vector<std::vector<double>> *pos;
+  // todo: remove or make default
+  // std::vector<std::vector<double>*> pos = {&r.x, &r.y, &r.z, &r.x, &r.y,
+  // &r.z};
 
  private:
   double const PI = acos(-1.0);

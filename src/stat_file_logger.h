@@ -92,6 +92,10 @@ class stat_file {
                   std::ofstream &fstream, std::string const &header,
                   size_t format = 1);
 
+  void write_file(std::vector<std::vector<double>*> &output_quantities,
+                  std::ofstream &fstream, std::string const &header,
+                  size_t format = 1);
+
   /**
    * @brief Write the output_line vector as a line to fstream (ends the line
    * with and endl character). Also checks if fstream has been opened and if not

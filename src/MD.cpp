@@ -578,12 +578,12 @@ std::tuple<double, double> MD::calculate_forces(size_t &step_idx,
       /* Get the shortest image of the two particles
          if the particles are near the periodic boundary,
          this image is their reflection. */
-      if (x > (0.5 * options.L)) x = x - options.L;
-      if (x < (-0.5 * options.L)) x = x + options.L;
-      if (y > (0.5 * options.L)) y = y - options.L;
-      if (y < (-0.5 * options.L)) y = y + options.L;
-      if (z > (0.5 * options.L)) z = z - options.L;
-      if (z < (-0.5 * options.L)) z = z + options.L;
+      if (x > (0.5 * options.L)) x -= options.L;
+      if (x < (-0.5 * options.L)) x += options.L;
+      if (y > (0.5 * options.L)) y -= options.L;
+      if (y < (-0.5 * options.L)) y += options.L;
+      if (z > (0.5 * options.L)) z -= options.L;
+      if (z < (-0.5 * options.L)) z += options.L;
 
       /* Pair potential radius */
       double radius = sqrt((x * x) + (y * y) + (z * z));

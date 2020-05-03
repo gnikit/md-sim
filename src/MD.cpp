@@ -420,13 +420,78 @@ void MD::mb_distribution(vector_3d &v, double TEMPERATURE) {
   }
 }
 
+double MD::stepping_algorithm(vector_3d &r, vector_3d &v, vector_3d &f,
+                              bool msd_io) {
+  size_t i;
+  double KE = 0;
+  /*************************************************************************/
+  if (options.iterative_method == "VerletAlgorithm")
+    KE = verlet_algorithm(r, v, f, msd_io);
+
+  else if (options.iterative_method == "VelocityVerlet")
+    KE = velocity_verlet(r, v, f);
+
+  if (msd_io) {
+    /* MSD stepping */
+    for (i = 0; i < options.N; ++i) {
+      MSD_r.x[i] += v.x[i] * options.dt;
+      MSD_r.y[i] += v.y[i] * options.dt;
+      MSD_r.z[i] += v.z[i] * options.dt;
+    }
+  }
+  /**************************************************************************/
+
+  apply_boundary_conditions(r, v);
+
+  return KE;
+}
+
+void MD::apply_boundary_conditions(vector_3d &r, vector_3d &v) {
+  /* Apply periodic boundary conditions to ensure particles remain
+   inside the box */
+  size_t i;
+  std::string boundary_condition = "Periodic";
+  if (boundary_condition == "Periodic") {
+    for (i = 0; i < options.N; ++i) {
+      if (r.x[i] > options.Lx) r.x[i] -= options.Lx;
+      if (r.x[i] < 0.0) r.x[i] += options.Lx;
+      if (r.y[i] > options.Ly) r.y[i] -= options.Ly;
+      if (r.y[i] < 0.0) r.y[i] += options.Ly;
+      if (r.z[i] > options.Lz) r.z[i] -= options.Lz;
+      if (r.z[i] < 0.0) r.z[i] += options.Lz;
+    }
+  } else if (boundary_condition == "HardWall") {
+    for (i = 0; i < options.N; ++i) {
+      // if (r.x[i] > options.Lx) r.x[i] = options.Lx - abs(r.x[i] -
+      // options.Lx);
+      if (r.x[i] > options.Lx) r.x[i] -= options.Lx;
+      if (r.x[i] > options.Lx) v.x[i] = -v.x[i];
+      // if (r.x[i] < 0.0) r.x[i] = abs(r.x[i]);
+      if (r.x[i] < 0.0) r.x[i] += options.Lx;
+      if (r.x[i] < 0.0) v.x[i] = -v.x[i];
+
+      // if (r.y[i] > options.Ly) r.y[i] = options.Ly - abs(r.y[i] -
+      // options.Ly);
+      if (r.y[i] > options.Ly) r.y[i] -= options.Ly;
+      if (r.y[i] > options.Ly) v.y[i] = -v.y[i];
+      // if (r.y[i] < 0.0) r.y[i] = abs(r.y[i]);
+      if (r.y[i] < 0.0) r.y[i] += options.Ly;
+      if (r.y[i] < 0.0) v.y[i] = -v.y[i];
+
+      if (r.z[i] > options.Lz) r.z[i] -= options.Lz;
+      if (r.z[i] > options.Lz) v.z[i] = -v.z[i];
+      if (r.z[i] < 0.0) r.z[i] += options.Lz;
+      if (r.z[i] < 0.0) v.z[i] = -v.z[i];
+    }
+  }
+}
+
 double MD::verlet_algorithm(vector_3d &r, vector_3d &v, vector_3d &f,
                             bool sample_msd = true) {
   size_t i;
   double KE = 0;
 
   for (i = 0; i < options.N; ++i) {
-    /*************************************************************************/
     /* Step velocities forward in time */
     v.x[i] = v.x[i] * options.scale_v + f.x[i] * options.dt;
     v.y[i] = v.y[i] * options.scale_v + f.y[i] * options.dt;
@@ -437,28 +502,38 @@ double MD::verlet_algorithm(vector_3d &r, vector_3d &v, vector_3d &f,
     r.y[i] = r.y[i] + v.y[i] * options.dt;
     r.z[i] = r.z[i] + v.z[i] * options.dt;
 
-    if (sample_msd) {
-      /* MSD stepping */
-      MSD_r.x[i] += v.x[i] * options.dt;
-      MSD_r.y[i] += v.y[i] * options.dt;
-      MSD_r.z[i] += v.z[i] * options.dt;
-    }
-    /**************************************************************************/
-
     /* Kinetic Energy Calculation */
     KE += 0.5 * (v.x[i] * v.x[i] + v.y[i] * v.y[i] + v.z[i] * v.z[i]);
-
-    /* Apply periodic boundary conditions to ensure particles remain
-       inside the box */
-    // todo: make boundary conditions routines
-    if (r.x[i] > options.Lx) r.x[i] = r.x[i] - options.Lx;
-    if (r.x[i] < 0.0) r.x[i] = r.x[i] + options.Lx;
-    if (r.y[i] > options.Ly) r.y[i] = r.y[i] - options.Ly;
-    if (r.y[i] < 0.0) r.y[i] = r.y[i] + options.Ly;
-    if (r.z[i] > options.Lz) r.z[i] = r.z[i] - options.Lz;
-    if (r.z[i] < 0.0) r.z[i] = r.z[i] + options.Lz;
   }
 
+  return KE;
+}
+
+double MD::velocity_verlet(vector_3d &r, vector_3d &v, vector_3d &f) {
+  double KE = 0;
+
+  for (size_t i = 0; i < options.N; ++i) {
+    r.x[i] += v.x[i] * options.dt + 0.5 * f.x[i] * options.dt * options.dt;
+    r.y[i] += v.y[i] * options.dt + 0.5 * f.y[i] * options.dt * options.dt;
+    r.z[i] += v.z[i] * options.dt + 0.5 * f.z[i] * options.dt * options.dt;
+
+    v.x[i] += 0.5 * f.x[i] * options.dt;
+    v.y[i] += 0.5 * f.y[i] * options.dt;
+    v.z[i] += 0.5 * f.z[i] * options.dt;
+
+    pair_potential_type force = get_force_func(options.potential_type);
+    size_t step = 0;
+    calculate_forces(step, force);
+
+    for (i = 0; i < options.N; ++i) {
+      v.x[i] += 0.5 * f.x[i] * options.dt;
+      v.y[i] += 0.5 * f.y[i] * options.dt;
+      v.z[i] += 0.5 * f.z[i] * options.dt;
+
+      /* Kinetic Energy Calculation */
+      KE += 0.5 * (v.x[i] * v.x[i] + v.y[i] * v.y[i] + v.z[i] * v.z[i]);
+    }
+  }
   return KE;
 }
 
@@ -611,12 +686,9 @@ std::tuple<double, double> MD::calculate_forces(size_t &step_idx,
         /* Radial Distribution
            measured with a delay, since the system requires a few thousand
            time-steps to reach equilibrium */
-        if (options.io_options.rdf) {
-          if (step_idx > options.rdf_options.rdf_wait) {
-            igr =
-                round(options.rdf_options.rdf_bins * radius / options.cut_off);
-            rdf[igr] += 1;
-          }
+        if (options.io_options.rdf && step_idx > options.rdf_options.rdf_wait) {
+          igr = round(options.rdf_options.rdf_bins * radius / options.cut_off);
+          rdf[igr] += 1;
         }
       }
     }
@@ -671,7 +743,8 @@ void MD::simulation() {
     /* using T & KE from prev timestep */
     options.scale_v = sqrt(options.target_temperature / options.temperature);
 
-    options.kinetic_energy = verlet_algorithm(r, v, f, options.io_options.msd);
+    options.kinetic_energy =
+        stepping_algorithm(r, v, f, options.io_options.msd);
 
     if (options.io_options.msd) mean_square_displacement(MSD, MSD_r);
 
@@ -964,8 +1037,8 @@ void MD::file_output(stat_file &logger) {
 
   /* Close all the streams */
   for (auto &[key, val] : streams) val.close();
-  /* Empty the file_names generated since a compression calls the MD constructor
-     once, hence `logger` is created only once */
+  /* Empty the file_names generated since a compression calls the MD
+     constructor once, hence `logger` is created only once */
   logger.file_names.clear();
 }
 

@@ -78,9 +78,11 @@ void phase_transition::crystallisation(options_type &options) {
     std::cout << "Runing MD::simulation " << comp_step + 1 << "/"
               << total_comp_steps << std::endl;
 
-    simulation(options.io_options.simulation_name, current_rho,
-               options.target_temperature, options.power, options.a_cst,
-               options.potential_type);
+    std::string prefix =
+        options.io_options.simulation_name + std::to_string(comp_step) + "_";
+
+    simulation(prefix, current_rho, options.target_temperature, options.power,
+               options.a_cst, options.potential_type);
 
     /* Write a summary of the stats of the simulation run */
     if (options.io_options.compression_stats) {

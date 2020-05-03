@@ -8,6 +8,7 @@
       <integer_value rank="1" shape="3">5 5 5</integer_value>
     </particles>
     <lattice name="SC"/>
+    <iterative_method name="VerletAlgorithm"/>
   </setup>
   <io>
     <simulation_name>disable_all_io_</simulation_name>

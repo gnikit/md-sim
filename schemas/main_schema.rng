@@ -75,19 +75,14 @@ BCC: particles **3 *2</a:documentation>
         <ref name="comment"/>
       </element>
       <ref name="lattice_type"/>
+      <ref name="iterative_methods"/>
       <optional>
         <ref name="options"/>
       </optional>
     </element>
   </define>
   <define name="options">
-    <ref name="iterative_methods"/>
     <optional>
-      <!--
-        ## Set the flag for incremental resizing of the simulation box.
-        ## Set to true for phase transition studies else set to false.
-        element compression { empty }?,
-      -->
       <element name="rdf_bins">
         <a:documentation>Accuracy of the Radial Distribution Function (RDF).
 A large number of bins will result into a very accurate RDF,
@@ -226,17 +221,20 @@ expansions/compressions in the opposite direction of the phase diagram.</a:docum
     </choice>
   </define>
   <define name="iterative_methods">
-    <element name="iterative_method">
-      <choice>
+    <choice>
+      <element name="iterative_method">
         <attribute name="name">
           <value>VerletAlgorithm</value>
         </attribute>
+        <ref name="comment"/>
+      </element>
+      <element name="iterative_method">
         <attribute name="name">
           <value>RK4 </value>
         </attribute>
-      </choice>
-    </element>
-    <ref name="comment"/>
+        <ref name="comment"/>
+      </element>
+    </choice>
   </define>
   <start>
     <element name="input_variables">

@@ -65,18 +65,14 @@ setup_sim =
 
         lattice_type,
 
+        iterative_methods,
+
         options?
     }
 )
 
 options =
 (
-    iterative_methods,
-
-    # ## Set the flag for incremental resizing of the simulation box.
-    # ## Set to true for phase transition studies else set to false.
-    # element compression { empty }?,
-
     ## Accuracy of the Radial Distribution Function (RDF).
     ## A large number of bins will result into a very accurate RDF,
     ## however if the simulation is short (small number of steps) the
@@ -215,13 +211,16 @@ simulation =
 
 iterative_methods =
 (
+    ## Step through time using the explicit Verlet algorithm
     element iterative_method {
-        attribute name { "VerletAlgorithm" }|
-
-        attribute name { "RK4 "}
-
-    },
-    comment
+        attribute name { "VerletAlgorithm" },
+        comment
+    }|
+    ## Step through time using the Runge-Kuta 4th order algorithm
+    element iterative_method {
+        attribute name { "RK4 "},
+        comment
+    }
 )
 
 start =

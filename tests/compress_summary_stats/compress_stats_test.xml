@@ -8,6 +8,7 @@
       <integer_value rank="1" shape="3">4 4 4</integer_value>
     </particles>
     <lattice name="SC"/>
+    <iterative_method name="VerletAlgorithm"/>
     <rdf_bins>
       <integer_value rank="0">100</integer_value>
     </rdf_bins>

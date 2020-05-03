@@ -186,8 +186,36 @@ class MD {
    */
   double verlet_algorithm(vector_3d &r, vector_3d &v, vector_3d &f, bool msd);
 
+  /**
+   * @brief 
+   * 
+   * @param r 
+   * @param v 
+   * @param f 
+   * @return double 
+   */
+  double velocity_verlet(vector_3d &r, vector_3d &v, vector_3d &f);
+
+  /**
+   * @brief 
+   * 
+   * @param r 
+   * @param v 
+   * @param f 
+   * @param msd 
+   * @return double 
+   */
   double rk4_algorithm(vector_3d &r, vector_3d &v, vector_3d &f, bool msd);
 
+  /**
+   * @brief Choose a stepping algorithm
+   * 
+   * @param r: position vectors of particles
+   * @param v: velocity vectors of particles
+   * @param f 
+   * @param msd 
+   * @return double 
+   */
   double stepping_algorithm(vector_3d &r, vector_3d &v, vector_3d &f, bool msd);
 
   /**
@@ -203,7 +231,12 @@ class MD {
   std::tuple<double, double> calculate_forces(size_t &step_index,
                                               pair_potential_type potential);
 
-  void apply_boundary_conditions();
+  /**
+   * @brief 
+   * 
+   * @param r 
+   */
+  void apply_boundary_conditions(vector_3d &r, vector_3d &v);
 
   /**
    * @brief

@@ -53,6 +53,8 @@ int md_options_interface::load_setup_options(options_type& options) {
 
   error = get_option(path + "/lattice/name", options.lattice);
   assert(error == SPUD_NO_ERROR);
+  error = get_option(path + "/iterative_method/name", options.iterative_method);
+  assert(error == SPUD_NO_ERROR);
 
   if (have_option(path + "/rdf_bins")) {
     error = get_option(path + "/rdf_bins", temp);
@@ -188,7 +190,8 @@ int md_options_interface::load_simulation_options(options_type& opts) {
 
     if (have_option(pp_path + "/dt/normalise_with_temperature"))
       opts.normalise_dt_w_temp = true;
-  }
+  } else
+    opts.normalise_dt_w_temp = false;
 
   if (have_option(path + "/final_density")) {
     error = get_option(path + "/final_density",

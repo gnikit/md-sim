@@ -8,6 +8,7 @@
       <integer_value rank="1" shape="3">8 8 8</integer_value>
     </particles>
     <lattice name="BCC"/>
+    <iterative_method name="VerletAlgorithm"/>
     <rdf_bins>
       <integer_value rank="0">200</integer_value>
     </rdf_bins>

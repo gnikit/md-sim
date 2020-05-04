@@ -124,6 +124,12 @@ class vector_3d {
 
   /****************************************************************************/
 
+  /**
+   * @brief Calculates the magnitude at each point of the vector_3d
+   * magnitude = sqrt(x^2 + y^2 + z^2)
+   * 
+   * @return std::vector<double> Magnitude
+   */
   std::vector<double> magnitude();
 };
 

@@ -227,23 +227,15 @@ MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
 
   /* For efficiency, memory in the containers is reserved before use */
   /* Positions */
-  r.x.reserve(options.N);
-  r.y.reserve(options.N);
-  r.z.reserve(options.N);
+  r.reserve(options.N);
   /* Velocities */
-  v.x.reserve(options.N);
-  v.y.reserve(options.N);
-  v.z.reserve(options.N);
+  v.reserve(options.N);
   /* RDF */
   rdf.resize(options.rdf_options.rdf_bins + 1, 0); /* gr with Index igr */
   /* Forces/Acceleration */
-  f.x.resize(options.N, 0);
-  f.y.resize(options.N, 0);
-  f.z.resize(options.N, 0);
+  f.resize(options.N, 0);
   /* Structure factor k-arrays */
-  sf.x.reserve(options.N);
-  sf.y.reserve(options.N);
-  sf.z.reserve(options.N);
+  sf.reserve(options.N);
   /* Observed Quantities */
   Cr.reserve(options.steps);   /* Velocity Autocorrelation Function */
   msd.reserve(options.steps);  /* Mean Square Displacement */
@@ -899,27 +891,17 @@ void MD::enable_testing(bool is_testing) {
 void MD::set_vector_sizes() {
   /* For efficiency, memory in the containers is reserved before use */
   /* Positions */
-  r.x.reserve(options.N);
-  r.y.reserve(options.N);
-  r.z.reserve(options.N);
+  r.reserve(options.N);
   /* Velocities */
-  v.x.reserve(options.N);
-  v.y.reserve(options.N);
-  v.z.reserve(options.N);
+  v.reserve(options.N);
   /* RDF */
   if (options.io_options.rdf)
     rdf.resize(options.rdf_options.rdf_bins + 1, 0); /* gr with Index igr */
   /* Forces/Acceleration */
-  f.x.resize(options.N, 0);
-  f.y.resize(options.N, 0);
-  f.z.resize(options.N, 0);
-  /* Structure factor k-arrays */
-  if (options.io_options.sf) {
-    sf.x.reserve(options.N);
-    sf.y.reserve(options.N);
-    sf.z.reserve(options.N);
-  }
+  f.resize(options.N, 0);
+
   /* Observed Quantities */
+  if (options.io_options.sf) sf.reserve(options.N); /* Structure Factor */
   if (options.io_options.vaf)
     Cr.reserve(options.steps); /* Velocity Autocorrelation Function */
   if (options.io_options.msd)

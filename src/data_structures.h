@@ -6,7 +6,7 @@
 using namespace std;
 
 struct rdf_options_type {
-  size_t rdf_bins = 0;
+  size_t rdf_bins = 100;
   size_t rdf_wait = 0;
 };
 struct compression_options_type {
@@ -99,6 +99,42 @@ struct vector_3d {
   vector<double> x;
   vector<double> y;
   vector<double> z;
+
+  /* Overloads of existing vector routines for ease of use */
+  /****************************************************************************/
+
+  void resize(size_t const& sz) {
+    x.resize(sz);
+    y.resize(sz);
+    z.resize(sz);
+  }
+
+  void resize(size_t const& sz, double val) {
+    x.resize(sz, val);
+    y.resize(sz, val);
+    z.resize(sz, val);
+  }
+
+  void resize(size_t const& szx, size_t const& szy, size_t const& szz) {
+    x.resize(szx);
+    y.resize(szy);
+    z.resize(szy);
+  }
+
+  /****************************************************************************/
+
+  void reserve(size_t const& sz) {
+    x.reserve(sz);
+    y.reserve(sz);
+    z.reserve(sz);
+  }
+
+  void reserve(size_t const& szx, size_t const& szy, size_t const& szz) {
+    x.reserve(szx);
+    y.reserve(szy);
+    z.reserve(szy);
+  }
+  /****************************************************************************/
 };
 
 struct point_3d {

@@ -4,10 +4,8 @@ LIB := ../lib
 BIN := ../bin
 INCLUDE := ../include
 
-# FILES := $(filter-out main.cpp , $(basename $(wildcard *.cpp)))
-FILES := $(basename $(wildcard *.cpp))
-OBJS = MD.o isomorph.o md_pair_potentials.o stat_file_logger.o \
-	   phase_transition.o helper_functions.o mdmain.o
+FILES := $(wildcard *.cpp)
+OBJS  := $(patsubst %.cpp, %.o, $(FILES))
 
 all: md libmd.a
 
@@ -21,10 +19,10 @@ libmd.a: $(OBJS)
 	ar rcvs $(LIB)/libmd.a $(OBJS)
 
 %.o: %.cpp
-	$(CXX) -c $(CXXFLAGS) $(LINKER) $<
+	$(CXX) -c $(CXXFLAGS) $(LINKER) $< -o $@
 	cp $@ $(INCLUDE)/$@
 
 
 clean:
-	$(RM) *.o $(BIN)/md $(LIB)/libmd.a
+	$(RM) $(OBJS) $(BIN)/md $(LIB)/libmd.a
 

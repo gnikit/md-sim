@@ -169,7 +169,7 @@ MD::MD(options_type &input_options) {
   input_options = options;
 
   /* Visualisation vectors on the heap*/
-  pos = new std::vector<std::vector<double>>(6);
+  pos = new std::vector<std::vector<double>>(4);
   for (size_t i = 0; i < (*pos).size(); ++i) (*pos)[i].reserve(options.N);
 }
 
@@ -246,7 +246,7 @@ MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
   temperature.reserve(options.steps);
 
   /* Visualisation vectors on the heap*/
-  pos = new std::vector<std::vector<double>>(6);
+  pos = new std::vector<std::vector<double>>(4);
   for (size_t i = 0; i < (*pos).size(); ++i) (*pos)[i].reserve(options.N);
   options.test_options.is_testing = false;
 }
@@ -322,13 +322,10 @@ void MD::simulation() {
     /* Save positions for visualisation with Python */
     if (options.io_options.visualise) {
       /* Pass the pointer to the positions 2D vector */
-      // todo: is that right???
       (*pos)[0] = r.x;
       (*pos)[1] = r.y;
       (*pos)[2] = r.z;
-      (*pos)[3] = r.x; /* Used for scaling */
-      (*pos)[4] = r.y; /* Used for scaling */
-      (*pos)[5] = r.z; /* Used for scaling */
+      (*pos)[3] = v.magnitude();  /* Speed for scaling */
       save_visualisation_arrays(step_idx);
     }
   }
@@ -918,8 +915,7 @@ void MD::save_visualisation_arrays(size_t dump_no) {
                       options.io_options.simulation_name + "xyz_data_" +
                       std::to_string(dump_no) + ".csv";
   std::ofstream out_xyz(fname, std::ofstream::trunc | std::ofstream::out);
-  logger.write_file(*pos, out_xyz,  // todo: make speed
-                    "x coord, y coord, z coord, x-pos, y-pos, z-pos");
+  logger.write_file(*pos, out_xyz, "x-pos, y-pos, z-pos, speed");
   out_xyz.close();
 }
 

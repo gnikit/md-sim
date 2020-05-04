@@ -1,7 +1,16 @@
 
+#include <iostream>
 #include <map>
 #include <string>
 #include <vector>
+
+/* Load Intel math lib if available */
+#if defined(__INTEL_COMPILER)
+#include <mathimf.h> /* Intel Math library */
+#define COMPILER "INTEL"
+#else
+#include <math.h>
+#endif
 
 using namespace std;
 
@@ -95,7 +104,8 @@ struct options_type {
   // options_type(const options_type &copy);
 };
 
-struct vector_3d {
+class vector_3d {
+ public:
   vector<double> x;
   vector<double> y;
   vector<double> z;
@@ -103,38 +113,18 @@ struct vector_3d {
   /* Overloads of existing vector routines for ease of use */
   /****************************************************************************/
 
-  void resize(size_t const& sz) {
-    x.resize(sz);
-    y.resize(sz);
-    z.resize(sz);
-  }
-
-  void resize(size_t const& sz, double val) {
-    x.resize(sz, val);
-    y.resize(sz, val);
-    z.resize(sz, val);
-  }
-
-  void resize(size_t const& szx, size_t const& szy, size_t const& szz) {
-    x.resize(szx);
-    y.resize(szy);
-    z.resize(szy);
-  }
+  void resize(size_t const& sz);
+  void resize(size_t const& sz, double val);
+  void resize(size_t const& szx, size_t const& szy, size_t const& szz);
 
   /****************************************************************************/
 
-  void reserve(size_t const& sz) {
-    x.reserve(sz);
-    y.reserve(sz);
-    z.reserve(sz);
-  }
+  void reserve(size_t const& sz);
+  void reserve(size_t const& szx, size_t const& szy, size_t const& szz);
 
-  void reserve(size_t const& szx, size_t const& szy, size_t const& szz) {
-    x.reserve(szx);
-    y.reserve(szy);
-    z.reserve(szy);
-  }
   /****************************************************************************/
+
+  std::vector<double> magnitude();
 };
 
 struct point_3d {

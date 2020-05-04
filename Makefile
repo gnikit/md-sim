@@ -59,7 +59,7 @@ test_examples: libmd
 	@cd examples/examplebin; for i in ./*; do echo $$i && ./$$i >> $$i.log; done
 
 clean:
-	$(RM) *.log *.txt		# TODO: this will cause an issue if/when we change to cmake
+	$(RM) *.log *.csv
 	@echo "Cleaning lib"
 	@cd lib && $(MAKE) clean
 	@echo "Cleaning MD src and bin"

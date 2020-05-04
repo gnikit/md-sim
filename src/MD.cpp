@@ -558,10 +558,9 @@ void MD::radial_distribution_function(double &rho, double &cut_off,
   double cor_rho = rho * (particles - 1) / particles;
   double dr = cut_off / bins;
 
-  fstream << "particles (N):," << particles << ",steps:," << options.steps
-          << ",rho:," << rho << ",bins:," << bins << ",cut_off (rg):,"
-          << cut_off << ",dr:," << dr << std::endl;
-  fstream << "Radius (r),Normalised,Unormalised" << std::endl;
+  fstream << "#bins:" << bins << ",cut_off (rg):" << cut_off << ",dr:" << dr
+          << std::endl;
+  fstream << "#Radius (r),Normalised,Unormalised" << std::endl;
 
   for (size_t i = 1; i < bins; ++i) {
     R = cut_off * i / bins;
@@ -992,7 +991,7 @@ void MD::file_output(stat_file &logger) {
 
   /* generate the correct header depending on io_options */
   std::vector<std::vector<double>> output_quantities = {density, temperature};
-  std::string header = "step,rho,T";
+  std::string header = "#step,rho,T";
 
   if (options.io_options.energies) {
     // todo: I should be passing the pointer to u_en rather than the values
@@ -1024,7 +1023,7 @@ void MD::file_output(stat_file &logger) {
   /* Saving Last Position */
   if (options.io_options.position) {
     logger.write_data_file(streams["position"],
-                           "particle,x,y,z,vx,vy,vz,ax,ay,az",
+                           "#particle,x,y,z,vx,vy,vz,ax,ay,az",
                            {r.x, r.y, r.z, v.x, v.y, v.z, f.x, f.y, f.z});
     // todo: for performance I think this should be 2D pointer of pointers
   }

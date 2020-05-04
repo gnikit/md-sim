@@ -182,9 +182,11 @@ class MD {
    * @param r: position vectors of particles
    * @param v: velocity vectors of particles
    * @param f: force vectors of particles
-   * @return double KE: kinetic energy (unormalised)
+   * @param step: timestep number (used for calculating rdf correctly)
+   * @return std::tuple<double, double, double> KE, U, PC
    */
-  double verlet(vector_3d &r, vector_3d &v, vector_3d &f);
+  std::tuple<double, double, double> verlet(vector_3d &r, vector_3d &v,
+                                            vector_3d &f, size_t &step);
 
   /**
    * @brief Iterative Velocity verlet algorithm.
@@ -193,9 +195,10 @@ class MD {
    * @param v: velocity vectors of particles
    * @param f: force vectors of particles
    * @param i: timestep number (used for calculating rdf correctly)
-   * @return double KE: kinetic energy (unormalised)
+   * @return std::tuple<double, double, double> KE, U, PC
    */
-  double velocity_verlet(vector_3d &r, vector_3d &v, vector_3d &f, size_t &i);
+  std::tuple<double, double, double> velocity_verlet(vector_3d &r, vector_3d &v,
+                                                     vector_3d &f, size_t &i);
 
   /**
    * @brief A Runge Kutta 4th order iterative algorithm
@@ -223,8 +226,7 @@ class MD {
   std::tuple<double, double, double> stepping_algorithm(vector_3d &r,
                                                         vector_3d &v,
                                                         vector_3d &f,
-                                                        size_t &step, bool msd,
-                                                        pair_potential_type &p);
+                                                        size_t &step, bool msd);
 
   /**
    * @brief Calculates the forces interactions of a given pair potential

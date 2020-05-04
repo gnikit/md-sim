@@ -413,8 +413,7 @@ void MD::mb_distribution(vector_3d &v, double TEMPERATURE) {
 }
 
 std::tuple<double, double, double> MD::stepping_algorithm(
-    vector_3d &r, vector_3d &v, vector_3d &f, size_t &step, bool msd,
-    pair_potential_type &p) {
+    vector_3d &r, vector_3d &v, vector_3d &f, size_t &step, bool msd) {
   size_t i;
   double U = 0;
   double KE = 0;
@@ -422,11 +421,11 @@ std::tuple<double, double, double> MD::stepping_algorithm(
 
   /*************************************************************************/
   if (options.iterative_method == "Verlet") {
-    std::tie(U, PC) = calculate_forces(r, f, step, p);
-    KE = verlet(r, v, f);
+    std::tie(KE, U, PC) = verlet(r, v, f, step);
 
   } else if (options.iterative_method == "VelocityVerlet") {
-    KE = velocity_verlet(r, v, f, step);
+    std::tie(KE, U, PC) = velocity_verlet(r, v, f, step);
+
   } else {
     std::cerr << "Iterative method: " << options.iterative_method
               << " has not been implemented. Aborting!" << std::endl;
@@ -488,10 +487,15 @@ void MD::apply_boundary_conditions(vector_3d &r, vector_3d &v, vector_3d &f) {
   }
 }
 
-double MD::verlet(vector_3d &r, vector_3d &v, vector_3d &f) {
+std::tuple<double, double, double> MD::verlet(vector_3d &r, vector_3d &v,
+                                              vector_3d &f, size_t &step) {
   size_t i;
   double KE = 0;
   double dt = options.dt;
+  pair_potential_type force = get_force_func(options.potential_type);
+
+  /* Calculate particle interactions based on input pair potential */
+  auto [U, PC] = calculate_forces(r, f, step, force);
 
   for (i = 0; i < options.N; ++i) {
     /* v^(n+1) = v^(n)*scaled_v + f^(n)*dt */
@@ -508,43 +512,38 @@ double MD::verlet(vector_3d &r, vector_3d &v, vector_3d &f) {
     KE += 0.5 * (v.x[i] * v.x[i] + v.y[i] * v.y[i] + v.z[i] * v.z[i]);
   }
 
-  return KE;
+  return std::make_tuple(KE, U, PC);
 }
 
-double MD::velocity_verlet(vector_3d &r, vector_3d &v, vector_3d &f,
-                           size_t &step) {
+std::tuple<double, double, double> MD::velocity_verlet(vector_3d &r,
+                                                       vector_3d &v,
+                                                       vector_3d &f,
+                                                       size_t &step) {
   double KE = 0;
   double dt = options.dt;
+  vector_3d f_n = f;
+  pair_potential_type force = get_force_func(options.potential_type);
+
   /* r^(n+1) = r^(n) + v^(n)*dt + f^(n)*(dt^2 * 0.5) */
   for (size_t i = 0; i < options.N; ++i) {
-    r.x[i] += v.x[i] * dt + 0.5 * f.x[i] * dt * dt;
-    r.y[i] += v.y[i] * dt + 0.5 * f.y[i] * dt * dt;
-    r.z[i] += v.z[i] * dt + 0.5 * f.z[i] * dt * dt;
+    r.x[i] += v.x[i] * dt + 0.5 * f_n.x[i] * dt * dt;
+    r.y[i] += v.y[i] * dt + 0.5 * f_n.y[i] * dt * dt;
+    r.z[i] += v.z[i] * dt + 0.5 * f_n.z[i] * dt * dt;
   }
 
-  pair_potential_type force = get_force_func(options.potential_type);
-  vector_3d f_n;  // todo: should swap this to be used first in the algo
-  f_n.resize(options.N, 0);
-
   /* f^(n+1) = calculate forces */
-  calculate_forces(r, f, step, force);
+  auto [U, PC] = calculate_forces(r, f, step, force);
 
   /* v^(n+1) = v^(n) + (f^(n)+f^(n+1))*(dt*0.5) */
   for (size_t i = 0; i < options.N; ++i) {
-    v.x[i] = v.x[i] * options.scale_v + (f.x[i] + f_n.x[i]) * (dt * 0.5);
-    v.y[i] = v.y[i] * options.scale_v + (f.y[i] + f_n.y[i]) * (dt * 0.5);
-    v.z[i] = v.z[i] * options.scale_v + (f.z[i] + f_n.z[i]) * (dt * 0.5);
+    v.x[i] = v.x[i] * options.scale_v + (f.x[i] + f.x[i]) * (dt * 0.5);
+    v.y[i] = v.y[i] * options.scale_v + (f.y[i] + f.y[i]) * (dt * 0.5);
+    v.z[i] = v.z[i] * options.scale_v + (f.z[i] + f.z[i]) * (dt * 0.5);
 
     KE += 0.5 * (v.x[i] * v.x[i] + v.y[i] * v.y[i] + v.z[i] * v.z[i]);
   }
 
-  for (size_t i = 0; i < options.N; ++i) {
-    f.x[i] = f_n.x[i];
-    f.y[i] = f_n.y[i];
-    f.z[i] = f_n.z[i];
-  }
-
-  return KE;
+  return std::make_tuple(KE, U, PC);
 }
 
 void MD::velocity_autocorrelation_function(vector_3d &Cv, vector_3d &v) {
@@ -737,10 +736,6 @@ void MD::simulation() {
                                      options.a_cst, options.potential_type)
             << std::endl;
 
-  /* Gets the pair potential for the simulation based on a map of the
-     initials of the pair potential and the pair potential itself. */
-  pair_potential_type force = get_force_func(options.potential_type);
-
   auto begin = std::chrono::high_resolution_clock::now();
 
   /* Initialise the simulation, lattice params and much more */
@@ -753,7 +748,7 @@ void MD::simulation() {
 
     double U, PC;
     std::tie(options.kinetic_energy, U, PC) =
-        stepping_algorithm(r, v, f, step_idx, options.io_options.msd, force);
+        stepping_algorithm(r, v, f, step_idx, options.io_options.msd);
 
     if (options.io_options.msd) mean_square_displacement(MSD, MSD_r);
 

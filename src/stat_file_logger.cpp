@@ -122,9 +122,9 @@ void stat_file::write_file(std::vector<std::vector<double>> &output_quantities,
   FileIO::Write2File<double>(output_quantities, fstream, del, header, format);
 }
 
-void stat_file::write_file(std::vector<std::vector<double>*> &output_quantities,
-                           std::ofstream &fstream, std::string const &header,
-                           size_t format) {
+void stat_file::write_file(
+    std::vector<std::vector<double> *> &output_quantities,
+    std::ofstream &fstream, std::string const &header, size_t format) {
   std::string del = ",";
   /* Write the 2D vector in a row major format, each vector is a row in file */
   FileIO::Write2File<double>(output_quantities, fstream, del, header, format);

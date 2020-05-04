@@ -1,9 +1,6 @@
 #include "MD.h"
-// TODO: create internal structures for quantities such as velocities, rs, fs,
 // todo: add logger https://github.com/gabime/spdlog
 // TODO: scale the box by Lx, Ly, Lz in a tensor form
-
-MD::MD() {}
 
 MD::MD(options_type &input_options) {
   /* Perform a shallow copy of the input_options to options */
@@ -24,9 +21,6 @@ MD::MD(options_type &input_options) {
     }
   }
 
-  /* Pass all io options */
-  options.io_options = input_options.io_options;
-
   std::cout << "Output directory set to: " << options.io_options.dir
             << std::endl;
 
@@ -37,29 +31,25 @@ MD::MD(options_type &input_options) {
   std::cout << "Simulation name: " << options.io_options.simulation_name
             << std::endl;
 
-  /* Save all the positions for the fluid */
+  /* Are we saving all the positions for the fluid */
   std::cout << "Particle visualisation: " << options.io_options.visualise
             << std::endl;
 
-  /* Pass stepping algorithm */
-  // todo: test string against availbale options
-  options.stepping_alg = input_options.stepping_alg;
+  /* Print stepping algorithm */
   std::cout << "Iterative algorithm: " << options.stepping_alg << std::endl;
 
-  /* Pass number of iterations */
-  options.steps = input_options.steps;
+  /* Print number of iterations */
   std::cout << "Number of steps: " << options.steps << std::endl;
 
-  /* Pass particles and lattice */
-  options.lattice = input_options.lattice;
+  /* Print particles and lattice */
   std::cout << "Initial lattice: " << options.lattice << std::endl;
 
-  /* Pass particles */
+  /* Check particles have been supplied in the correct form */
   try {
     if (input_options.particles.empty()) {
       throw "The supplied particles vector is empty";
     } else if (input_options.particles.size() < 3) {
-      throw "The supplied particles vector is of incorrect size";
+      throw "The supplied particles vector must be of size 3";
     } else if (std::find(input_options.particles.begin(),
                          input_options.particles.end(),
                          0) != input_options.particles.end()) {
@@ -70,14 +60,14 @@ MD::MD(options_type &input_options) {
 
   } catch (const char *msg) {
     std::cerr << "Error: " << msg << std::endl;
-    exit(1);
+    exit(-1);
   }
-  options.particles = input_options.particles;
 
   /* Calculate the total number of particles N based on the lattice */
   options.Nx = input_options.particles[0];
   options.Ny = input_options.particles[1];
   options.Nz = input_options.particles[2];
+
   if (input_options.lattice == "FCC") {
     options.N = options.Nx * options.Ny * options.Nz * 4;
   } else if (input_options.lattice == "BCC") {
@@ -88,30 +78,21 @@ MD::MD(options_type &input_options) {
   std::cout << "Number of particles: " << options.N << std::endl;
 
   /* Pass physical parameters */
-  /* Pass the pair potential */
-  options.potential_type = input_options.potential_type;
+  /* Print the pair potential */
   std::cout << "Pair potential: " << options.potential_type << std::endl;
 
-  if (input_options.density > 0)
-    options.density = input_options.density;
-  else {
+  if (input_options.density < 0) {
     std::cerr << "Error: Negative density supplied" << std::endl;
-    exit(1);
+    exit(-1);
   }
 
-  if (input_options.target_temperature > 0)
-    options.target_temperature = input_options.target_temperature;
-  else {
+  if (input_options.target_temperature < 0) {
     std::cerr << "Error: Negative temperature supplied" << std::endl;
-    exit(1);
+    exit(-1);
   }
-  options.power = input_options.power;
-
-  options.a_cst = input_options.a_cst;
 
   /* Initialise scaling variables */
-  options.dt =
-      0.005 / sqrt(options.target_temperature); /* todo: add to schema */
+  options.dt = 0.005 / sqrt(options.target_temperature);  // todo: add to schema
   /* Box length scaling */
   options.L = pow((options.N / options.density), 1.0 / 3.0);
   options.Lx = options.Ly = options.Lz = options.L;  // todo: questionable!
@@ -119,7 +100,6 @@ MD::MD(options_type &input_options) {
 
   /* cut_off definition */
   if (input_options.cut_off > 0) {
-    options.cut_off = input_options.cut_off;
     /* if cut-off is too large rescale it */
     if (options.cut_off > options.L / 2.0) {
       std::cerr << "Warning: cutoff was too large!\n"
@@ -137,16 +117,11 @@ MD::MD(options_type &input_options) {
   /* Set boundary conditions //todo */
 
   /* Accuracy of RDF */
-  options.rdf_options.rdf_bins = input_options.rdf_options.rdf_bins;
   std::cout << "RDF bins: " << options.rdf_options.rdf_bins << std::endl;
 
   /* Ensuring the number of steps is greater than the rdf equilibration period
    */
   try {
-    /* The number of iterations the data collection of RDF is postponed
-       in order to allow the fluid to lose its internal cubic lattice */
-    options.rdf_options.rdf_wait = input_options.rdf_options.rdf_wait;
-
     /* Substraction of size_ts if negative results into logic errors
        hence the use of an int temp; */
     int temp = options.steps - options.rdf_options.rdf_wait;
@@ -160,12 +135,11 @@ MD::MD(options_type &input_options) {
   }
   std::cout << "RDF equilibration period set to: "
             << options.rdf_options.rdf_wait << std::endl;
-  /* Pass testing options */
-  options.test_options.is_testing = input_options.test_options.is_testing;
+  /* Print testing options */
   std::cout << "Testing: " << options.test_options.is_testing << std::endl;
 
   /* Pass the options reference back to input_options to update the variable.
-   * Routines in the phase_transition class depend on this line*/
+   * Routines in the phase_transition class depend on this line */
   input_options = options;
 
   /* Visualisation vectors on the heap*/
@@ -325,7 +299,7 @@ void MD::simulation() {
       (*pos)[0] = r.x;
       (*pos)[1] = r.y;
       (*pos)[2] = r.z;
-      (*pos)[3] = v.magnitude();  /* Speed for scaling */
+      (*pos)[3] = v.magnitude(); /* Speed for scaling */
       save_visualisation_arrays(step_idx);
     }
   }

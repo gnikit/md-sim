@@ -74,7 +74,6 @@ class MD {
   stat_file logger;
 
  public:
-  MD();
   MD(options_type &input_options);
   MD(size_t step_number, std::vector<size_t> particles, std::string lattice);
   ~MD();

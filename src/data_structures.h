@@ -26,7 +26,7 @@ struct compression_options_type {
   size_t compress_count = 0;
 };
 
-struct boundary_contions_options_type {
+struct boundary_conditions_options {
   /**
    * @brief An array of boundaries where the map holds the type
    * of the boundary, e.g. Reflective, HardWall,
@@ -104,36 +104,8 @@ struct options_type {
   // options_type(const options_type &copy);
 };
 
-class vector_3d {
+class point_3d {
  public:
-  vector<double> x;
-  vector<double> y;
-  vector<double> z;
-
-  /* Overloads of existing vector routines for ease of use */
-  /****************************************************************************/
-
-  void resize(size_t const& sz);
-  void resize(size_t const& sz, double val);
-  void resize(size_t const& szx, size_t const& szy, size_t const& szz);
-
-  /****************************************************************************/
-
-  void reserve(size_t const& sz);
-  void reserve(size_t const& szx, size_t const& szy, size_t const& szz);
-
-  /****************************************************************************/
-
-  /**
-   * @brief Calculates the magnitude at each point of the vector_3d
-   * magnitude = sqrt(x^2 + y^2 + z^2)
-   * 
-   * @return std::vector<double> Magnitude
-   */
-  std::vector<double> magnitude();
-};
-
-struct point_3d {
   double x;
   double y;
   double z;
@@ -162,6 +134,33 @@ struct point_3d {
   inline point_3d operator/(const point_3d& a) const {
     return point_3d(x / a.x, y / a.y, z / a.z);
   }
+};
+
+class vector_3d {
+ public:
+  vector<double> x;
+  vector<double> y;
+  vector<double> z;
+
+  /* Overloads of existing vector routines for ease of use */
+  /****************************************************************************/
+
+  void resize(size_t const& sz);
+  void resize(size_t const& sz, double val);
+  void resize(size_t const& szx, size_t const& szy, size_t const& szz);
+
+  void reserve(size_t const& sz);
+  void reserve(size_t const& szx, size_t const& szy, size_t const& szz);
+
+  /****************************************************************************/
+
+  /**
+   * @brief Calculates the magnitude at each point of the vector_3d
+   * magnitude = sqrt(x^2 + y^2 + z^2)
+   *
+   * @return std::vector<double> Magnitude
+   */
+  std::vector<double> magnitude();
 };
 
 struct data_type {

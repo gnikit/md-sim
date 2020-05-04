@@ -223,12 +223,21 @@ expansions/compressions in the opposite direction of the phase diagram.</a:docum
   <define name="iterative_methods">
     <choice>
       <element name="iterative_method">
+        <a:documentation>Step through time using the explicit Verlet algorithm</a:documentation>
         <attribute name="name">
-          <value>VerletAlgorithm</value>
+          <value>Verlet</value>
         </attribute>
         <ref name="comment"/>
       </element>
       <element name="iterative_method">
+        <a:documentation>Step through time using the Velocity Verlet algorithm</a:documentation>
+        <attribute name="name">
+          <value>VelocityVerlet</value>
+        </attribute>
+        <ref name="comment"/>
+      </element>
+      <element name="iterative_method">
+        <a:documentation>Step through time using the Runge-Kuta 4th order algorithm</a:documentation>
         <attribute name="name">
           <value>RK4 </value>
         </attribute>

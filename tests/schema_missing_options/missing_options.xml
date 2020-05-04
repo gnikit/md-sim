@@ -8,7 +8,7 @@
       <integer_value rank="1" shape="3">8 8 8</integer_value>
     </particles>
     <lattice name="SC"/>
-    <iterative_method name="VerletAlgorithm"/>
+    <iterative_method name="Verlet"/>
   </setup>
   <io>
     <simulation_name>missing_options_</simulation_name>

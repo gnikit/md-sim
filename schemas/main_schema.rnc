@@ -213,7 +213,12 @@ iterative_methods =
 (
     ## Step through time using the explicit Verlet algorithm
     element iterative_method {
-        attribute name { "VerletAlgorithm" },
+        attribute name { "Verlet" },
+        comment
+    }|
+    ## Step through time using the Velocity Verlet algorithm
+    element iterative_method {
+        attribute name { "VelocityVerlet" },
         comment
     }|
     ## Step through time using the Runge-Kuta 4th order algorithm

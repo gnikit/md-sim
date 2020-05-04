@@ -412,18 +412,28 @@ void MD::mb_distribution(vector_3d &v, double TEMPERATURE) {
   }
 }
 
-double MD::stepping_algorithm(vector_3d &r, vector_3d &v, vector_3d &f,
-                              bool msd_io) {
+std::tuple<double, double, double> MD::stepping_algorithm(
+    vector_3d &r, vector_3d &v, vector_3d &f, size_t &step, bool msd,
+    pair_potential_type &p) {
   size_t i;
+  double U = 0;
   double KE = 0;
+  double PC = 0;
+
   /*************************************************************************/
-  if (options.iterative_method == "VerletAlgorithm")
-    KE = verlet_algorithm(r, v, f, msd_io);
+  if (options.iterative_method == "Verlet") {
+    std::tie(U, PC) = calculate_forces(r, f, step, p);
+    KE = verlet(r, v, f);
 
-  else if (options.iterative_method == "VelocityVerlet")
-    KE = velocity_verlet(r, v, f);
+  } else if (options.iterative_method == "VelocityVerlet") {
+    KE = velocity_verlet(r, v, f, step);
+  } else {
+    std::cerr << "Iterative method: " << options.iterative_method
+              << " has not been implemented. Aborting!" << std::endl;
+    abort();
+  }
 
-  if (msd_io) {
+  if (msd) {
     /* MSD stepping */
     for (i = 0; i < options.N; ++i) {
       MSD_r.x[i] += v.x[i] * options.dt;
@@ -435,7 +445,7 @@ double MD::stepping_algorithm(vector_3d &r, vector_3d &v, vector_3d &f,
 
   apply_boundary_conditions(r, v);
 
-  return KE;
+  return std::make_tuple(KE, U, PC);
 }
 
 void MD::apply_boundary_conditions(vector_3d &r, vector_3d &v) {
@@ -478,21 +488,21 @@ void MD::apply_boundary_conditions(vector_3d &r, vector_3d &v) {
   }
 }
 
-double MD::verlet_algorithm(vector_3d &r, vector_3d &v, vector_3d &f,
-                            bool sample_msd = true) {
+double MD::verlet(vector_3d &r, vector_3d &v, vector_3d &f) {
   size_t i;
   double KE = 0;
+  double dt = options.dt;
 
   for (i = 0; i < options.N; ++i) {
-    /* Step velocities forward in time */
-    v.x[i] = v.x[i] * options.scale_v + f.x[i] * options.dt;
-    v.y[i] = v.y[i] * options.scale_v + f.y[i] * options.dt;
-    v.z[i] = v.z[i] * options.scale_v + f.z[i] * options.dt;
+    /* v^(n+1) = v^(n)*scaled_v + f^(n)*dt */
+    v.x[i] = v.x[i] * options.scale_v + f.x[i] * dt;
+    v.y[i] = v.y[i] * options.scale_v + f.y[i] * dt;
+    v.z[i] = v.z[i] * options.scale_v + f.z[i] * dt;
 
-    /* Step positions forward in time */
-    r.x[i] = r.x[i] + v.x[i] * options.dt;
-    r.y[i] = r.y[i] + v.y[i] * options.dt;
-    r.z[i] = r.z[i] + v.z[i] * options.dt;
+    /* r^(n+1) = r^(n) + v^(n+1)*dt */
+    r.x[i] += v.x[i] * dt;
+    r.y[i] += v.y[i] * dt;
+    r.z[i] += v.z[i] * dt;
 
     /* Kinetic Energy Calculation */
     KE += 0.5 * (v.x[i] * v.x[i] + v.y[i] * v.y[i] + v.z[i] * v.z[i]);
@@ -501,31 +511,39 @@ double MD::verlet_algorithm(vector_3d &r, vector_3d &v, vector_3d &f,
   return KE;
 }
 
-double MD::velocity_verlet(vector_3d &r, vector_3d &v, vector_3d &f) {
+double MD::velocity_verlet(vector_3d &r, vector_3d &v, vector_3d &f,
+                           size_t &step) {
   double KE = 0;
+  double dt = options.dt;
+  /* r^(n+1) = r^(n) + v^(n)*dt + f^(n)*(dt^2 * 0.5) */
+  for (size_t i = 0; i < options.N; ++i) {
+    r.x[i] += v.x[i] * dt + 0.5 * f.x[i] * dt * dt;
+    r.y[i] += v.y[i] * dt + 0.5 * f.y[i] * dt * dt;
+    r.z[i] += v.z[i] * dt + 0.5 * f.z[i] * dt * dt;
+  }
+
+  pair_potential_type force = get_force_func(options.potential_type);
+  vector_3d f_n;  // todo: should swap this to be used first in the algo
+  f_n.resize(options.N, 0);
+
+  /* f^(n+1) = calculate forces */
+  calculate_forces(r, f, step, force);
+
+  /* v^(n+1) = v^(n) + (f^(n)+f^(n+1))*(dt*0.5) */
+  for (size_t i = 0; i < options.N; ++i) {
+    v.x[i] = v.x[i] * options.scale_v + (f.x[i] + f_n.x[i]) * (dt * 0.5);
+    v.y[i] = v.y[i] * options.scale_v + (f.y[i] + f_n.y[i]) * (dt * 0.5);
+    v.z[i] = v.z[i] * options.scale_v + (f.z[i] + f_n.z[i]) * (dt * 0.5);
+
+    KE += 0.5 * (v.x[i] * v.x[i] + v.y[i] * v.y[i] + v.z[i] * v.z[i]);
+  }
 
   for (size_t i = 0; i < options.N; ++i) {
-    r.x[i] += v.x[i] * options.dt + 0.5 * f.x[i] * options.dt * options.dt;
-    r.y[i] += v.y[i] * options.dt + 0.5 * f.y[i] * options.dt * options.dt;
-    r.z[i] += v.z[i] * options.dt + 0.5 * f.z[i] * options.dt * options.dt;
-
-    v.x[i] += 0.5 * f.x[i] * options.dt;
-    v.y[i] += 0.5 * f.y[i] * options.dt;
-    v.z[i] += 0.5 * f.z[i] * options.dt;
-
-    pair_potential_type force = get_force_func(options.potential_type);
-    size_t step = 0;
-    calculate_forces(step, force);
-
-    for (i = 0; i < options.N; ++i) {
-      v.x[i] += 0.5 * f.x[i] * options.dt;
-      v.y[i] += 0.5 * f.y[i] * options.dt;
-      v.z[i] += 0.5 * f.z[i] * options.dt;
-
-      /* Kinetic Energy Calculation */
-      KE += 0.5 * (v.x[i] * v.x[i] + v.y[i] * v.y[i] + v.z[i] * v.z[i]);
-    }
+    f.x[i] = f_n.x[i];
+    f.y[i] = f_n.y[i];
+    f.z[i] = f_n.z[i];
   }
+
   return KE;
 }
 
@@ -622,8 +640,9 @@ void MD::structure_factor(vector_3d &r) {
   sf.z.push_back(kz);
 }
 
-std::tuple<double, double> MD::calculate_forces(size_t &step_idx,
-                                                pair_potential_type force) {
+std::tuple<double, double> MD::calculate_forces(vector_3d &x, vector_3d &f,
+                                                size_t &step_idx,
+                                                pair_potential_type &p) {
   /* Resetting forces */
   std::fill(f.x.begin(), f.x.end(), 0);
   std::fill(f.y.begin(), f.y.end(), 0);
@@ -657,7 +676,7 @@ std::tuple<double, double> MD::calculate_forces(size_t &step_idx,
       /* Force loop */
       if (radius < options.cut_off) {
         /* Allows the user to choose different pair potentials */
-        auto [ff, temp_u] = force(radius, options.power, options.a_cst);
+        auto [ff, temp_u] = p(radius, options.power, options.a_cst);
 
         /* Average potential energy */
         if (options.io_options.energies) U += temp_u;
@@ -728,14 +747,13 @@ void MD::simulation() {
   options.kinetic_energy = initialise(r, v, options.target_temperature);
   size_t step_idx;
   for (step_idx = 0; step_idx < options.steps; ++step_idx) {
-    auto [U, PC] = calculate_forces(step_idx, force);
-
     /* Isothermal Calibration */
     /* using T & KE from prev timestep */
     options.scale_v = sqrt(options.target_temperature / options.temperature);
 
-    options.kinetic_energy =
-        stepping_algorithm(r, v, f, options.io_options.msd);
+    double U, PC;
+    std::tie(options.kinetic_energy, U, PC) =
+        stepping_algorithm(r, v, f, step_idx, options.io_options.msd, force);
 
     if (options.io_options.msd) mean_square_displacement(MSD, MSD_r);
 

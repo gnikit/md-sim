@@ -8,6 +8,7 @@
  * University: Royal Holloway University of London
  */
 #pragma once
+#include <stdlib.h>   /* abort */
 #include <algorithm>  /* std::find */
 #include <chrono>     /* CPU run-time */
 #include <ctime>      /* std::chrono */
@@ -180,56 +181,66 @@ class MD {
    *
    * @param r: position vectors of particles
    * @param v: velocity vectors of particles
-   * @param sample_msd: flag for calculating MSD, msd vectors are globally
-   *                    defined and not passed as arguments
-   * @return KE: kinetic energy (unormalised)
+   * @param f: force vectors of particles
+   * @return double KE: kinetic energy (unormalised)
    */
-  double verlet_algorithm(vector_3d &r, vector_3d &v, vector_3d &f, bool msd);
+  double verlet(vector_3d &r, vector_3d &v, vector_3d &f);
 
   /**
-   * @brief 
-   * 
-   * @param r 
-   * @param v 
-   * @param f 
-   * @return double 
-   */
-  double velocity_verlet(vector_3d &r, vector_3d &v, vector_3d &f);
-
-  /**
-   * @brief 
-   * 
-   * @param r 
-   * @param v 
-   * @param f 
-   * @param msd 
-   * @return double 
-   */
-  double rk4_algorithm(vector_3d &r, vector_3d &v, vector_3d &f, bool msd);
-
-  /**
-   * @brief Choose a stepping algorithm
-   * 
+   * @brief Iterative Velocity verlet algorithm.
+   *
    * @param r: position vectors of particles
    * @param v: velocity vectors of particles
-   * @param f 
-   * @param msd 
-   * @return double 
+   * @param f: force vectors of particles
+   * @param i: timestep number (used for calculating rdf correctly)
+   * @return double KE: kinetic energy (unormalised)
    */
-  double stepping_algorithm(vector_3d &r, vector_3d &v, vector_3d &f, bool msd);
+  double velocity_verlet(vector_3d &r, vector_3d &v, vector_3d &f, size_t &i);
+
+  /**
+   * @brief A Runge Kutta 4th order iterative algorithm
+   *
+   * @param r: position vectors of particles
+   * @param v: velocity vectors of particles
+   * @param f: force vectors of particles
+   * @return double KE: kinetic energy (unormalised)
+   */
+  double runge_kutta4(vector_3d &r, vector_3d &v, vector_3d &f);
+
+  /**
+   * @brief Iterate the particles with one of the listed algorithms:
+   *  - Explicit Verlet
+   *  - Velocity Verlet
+   *  - Runge Kutta 4th order
+   *
+   * @param r: position vectors of particles
+   * @param v: velocity vectors of particles
+   * @param f: force vectors of particles
+   * @param msd Flag set to true if calculating Mean Square Displacement.
+   *            MSD requires a copy of the particles where BCs are not applied.
+   * @return std::tuple<double, double, double> KE, U, PC
+   */
+  std::tuple<double, double, double> stepping_algorithm(vector_3d &r,
+                                                        vector_3d &v,
+                                                        vector_3d &f,
+                                                        size_t &step, bool msd,
+                                                        pair_potential_type &p);
 
   /**
    * @brief Calculates the forces interactions of a given pair potential
    * within the specified cutoff distance for a single step iteration
    *
+   * @param r: position vectors of particles
+   * @param f: force vectors of particles
    * @param step_index: The number of the current iteration. Only used to
    *                    determine if the sampling of the RDF should occur, if
    *                    an equilibration period has been supplied.
    * @param potential: Type of the pair potential
    * @return std::tuple<double, double> Potential Energy, Configuration Pressure
    */
-  std::tuple<double, double> calculate_forces(size_t &step_index,
-                                              pair_potential_type potential);
+  std::tuple<double, double> calculate_forces(vector_3d &x, vector_3d &f,
+                                              size_t &step_index,
+                                              pair_potential_type &potential);
 
   /**
    * @brief 

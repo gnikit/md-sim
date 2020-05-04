@@ -130,23 +130,7 @@ class MD {
   void enable_testing(bool is_testing);
 
  protected:
-  /**
-   * @brief Set the vector sizes. Resizes all vectors and containers
-   */
-  void set_vector_sizes();
-
-  /**
-   * @brief Outputs the positions r of the particles, based on the input
-   * lattice formation. The available lattice formations are
-   *    + Simple Cubic
-   *    + Face Centred Cubic
-   *    + Body Centred Cubic
-   *    + Random positions
-   *
-   * @param lattice: type of lattice
-   * @param r: particle positions
-   */
-  void choose_lattice_formation(std::string &lattice, vector_3d &r);
+  /*************************** INITIALISATION METHODS *************************/
 
   /**
    * @brief Initialises the:
@@ -164,6 +148,19 @@ class MD {
   double initialise(vector_3d &r, vector_3d &v, double TEMPERATURE);
 
   /**
+   * @brief Outputs the positions r of the particles, based on the input
+   * lattice formation. The available lattice formations are
+   *    + Simple Cubic
+   *    + Face Centred Cubic
+   *    + Body Centred Cubic
+   *    + Random positions
+   *
+   * @param lattice: type of lattice
+   * @param r: particle positions
+   */
+  void choose_lattice_formation(std::string &lattice, vector_3d &r);
+
+  /**
    * @brief
    * Generates velocities for based on the Maxwell Boltzmann distribution.
    * The MB dist in 3D is effectively the triple product of 3 Normal dist.
@@ -176,6 +173,25 @@ class MD {
    */
   void mb_distribution(vector_3d &v, double TEMPERATURE);
 
+  /**************************** ITERATIVE METHODS *****************************/
+
+  /**
+   * @brief Iterate the particles with one of the listed algorithms:
+   *  - Explicit Verlet
+   *  - Velocity Verlet
+   *  - Runge Kutta 4th order
+   *
+   * @param r: position vectors of particles
+   * @param v: velocity vectors of particles
+   * @param f: force vectors of particles
+   * @param msd Flag set to true if calculating Mean Square Displacement.
+   *            MSD requires a copy of the particles where BCs are not applied.
+   * @return std::tuple<double, double, double> KE, U, PC
+   */
+  std::tuple<double, double, double> stepping_algorithm(vector_3d &r,
+                                                        vector_3d &v,
+                                                        vector_3d &f,
+                                                        size_t &step, bool msd);
   /**
    * @brief An iterative leap-frog Verlet Algorithm.
    *
@@ -206,27 +222,11 @@ class MD {
    * @param r: position vectors of particles
    * @param v: velocity vectors of particles
    * @param f: force vectors of particles
-   * @return double KE: kinetic energy (unormalised)
-   */
-  double runge_kutta4(vector_3d &r, vector_3d &v, vector_3d &f);
-
-  /**
-   * @brief Iterate the particles with one of the listed algorithms:
-   *  - Explicit Verlet
-   *  - Velocity Verlet
-   *  - Runge Kutta 4th order
-   *
-   * @param r: position vectors of particles
-   * @param v: velocity vectors of particles
-   * @param f: force vectors of particles
-   * @param msd Flag set to true if calculating Mean Square Displacement.
-   *            MSD requires a copy of the particles where BCs are not applied.
+   * @param step: timestep number (used for calculating rdf correctly)
    * @return std::tuple<double, double, double> KE, U, PC
    */
-  std::tuple<double, double, double> stepping_algorithm(vector_3d &r,
-                                                        vector_3d &v,
-                                                        vector_3d &f,
-                                                        size_t &step, bool msd);
+  std::tuple<double, double, double> runge_kutta4(vector_3d &r, vector_3d &v,
+                                                  vector_3d &f, size_t &step);
 
   /**
    * @brief Calculates the forces interactions of a given pair potential
@@ -244,6 +244,8 @@ class MD {
                                               size_t &step_index,
                                               pair_potential_type &potential);
 
+  /**************************** BOUNDARY CONDITIONS ***************************/
+
   /**
    * @brief Applies the boundary conditions:
    *  - Periodic
@@ -254,6 +256,8 @@ class MD {
    * @param f: force vectors of particles
    */
   void apply_boundary_conditions(vector_3d &r, vector_3d &v, vector_3d &f);
+
+  /********************** STATISTICAL QUANTITIES METHODS **********************/
 
   /**
    * @brief
@@ -307,6 +311,8 @@ class MD {
    */
   void structure_factor(vector_3d &r);
 
+  /***************************** LOGGING METHODS ******************************/
+
   /**
    * @brief
    * Sets the internal class variables for the fluid according to
@@ -325,8 +331,11 @@ class MD {
 
   /**
    * @brief IO wrapper for saving into file the positions of the particles
-   * at each time step
+   * at a given timestep. The file is a CSV with the following structure
+   * for all particles.
+   * x-pos, y-pos, z-pos, ...
    *
+   * It relies on the flag options.io_options.visualise being set to true.
    */
   void save_visualisation_arrays(size_t dump_no);
 
@@ -360,4 +369,11 @@ class MD {
    * @return std::vector<double> run_stats
    */
   std::vector<double> get_run_stats();
+
+  /******************************* MISCELLANEOUS ******************************/
+
+  /**
+   * @brief Set the vector sizes. Resizes all vectors and containers
+   */
+  void set_vector_sizes();
 };

@@ -261,467 +261,6 @@ MD::~MD() {
   delete pos;
 }
 
-void MD::choose_lattice_formation(std::string &lattice, vector_3d &r) {
-  if (lattice == "FCC") {
-    /* Coordinates for the FCC lattice */
-    double x_c[4] = {0.25, 0.75, 0.75, 0.25};
-    double y_c[4] = {0.25, 0.75, 0.25, 0.75};
-    double z_c[4] = {0.25, 0.25, 0.75, 0.75};
-
-    /* Loop over the the corner coordinates of the FCC and then x, y, z */
-    for (size_t c = 0; c < 4; ++c) {
-      for (size_t i = 0; i < options.Nx; ++i) {
-        for (size_t j = 0; j < options.Ny; ++j) {
-          for (size_t k = 0; k < options.Nz; ++k) {
-            r.x.push_back((i + x_c[c]) * (options.Lx / options.Nx));
-            r.y.push_back((j + y_c[c]) * (options.Ly / options.Ny));
-            r.z.push_back((k + z_c[c]) * (options.Lz / options.Nz));
-          }
-        }
-      }
-    }
-  }
-
-  /* BCC lattice */
-  else if (lattice == "BCC") {
-    double x_c[2] = {0.25, 0.75};
-    double y_c[2] = {0.25, 0.75};
-    double z_c[2] = {0.25, 0.75};
-
-    for (size_t c = 0; c < 2; ++c) {
-      for (size_t i = 0; i < options.Nx; i++) {
-        for (size_t j = 0; j < options.Ny; j++) {
-          for (size_t k = 0; k < options.Nz; k++) {
-            r.x.push_back((i + x_c[c]) * (options.Lx / options.Nx));
-            r.y.push_back((j + y_c[c]) * (options.Ly / options.Ny));
-            r.z.push_back((k + z_c[c]) * (options.Lz / options.Nz));
-          }
-        }
-      }
-    }
-  }
-
-  else if (lattice == "RANDOM") {
-    r.x.resize(options.N);
-    r.y.resize(options.N);
-    r.z.resize(options.N);
-    // todo: test
-    mb_distribution(r, options.random_lattice_var);
-  }
-
-  /* Simple Cubic lattice */
-  else {
-    for (size_t i = 0; i < options.Nx; ++i) {
-      for (size_t j = 0; j < options.Ny; ++j) {
-        for (size_t k = 0; k < options.Nz; ++k) {
-          r.x.push_back((i + 0.5) * (options.Lx / options.Nx));
-          r.y.push_back((j + 0.5) * (options.Ly / options.Ny));
-          r.z.push_back((k + 0.5) * (options.Lz / options.Nz));
-        }
-      }
-    }
-  }
-}
-
-double MD::initialise(vector_3d &r, vector_3d &v, double TEMPERATURE) {
-  /* Initialise position matrix and velocity matrix from Cubic Centred Lattice
-   */
-  if (!options.compression_options.compression ||
-      (options.compression_options.compression &&
-       options.compression_options.compress_count == 0)) {
-    /* Select the lattice formation */
-    choose_lattice_formation(options.lattice, r);
-
-    /* Generates Maxwell-Boltzmann distribution */
-    mb_distribution(v, TEMPERATURE);
-  }
-
-  /* Calculate the average velocities */
-  double mean_vx = std::accumulate(v.x.begin(), v.x.end(), 0.0) / options.N;
-  double mean_vy = std::accumulate(v.y.begin(), v.y.end(), 0.0) / options.N;
-  double mean_vz = std::accumulate(v.z.begin(), v.z.end(), 0.0) / options.N;
-  /* Conserve the momentum of the fluid by subsracting the average velocities
-     using a lambda expression */
-  std::for_each(v.x.begin(), v.x.end(), [mean_vx](double &d) { d -= mean_vx; });
-  std::for_each(v.y.begin(), v.y.end(), [mean_vy](double &d) { d -= mean_vy; });
-  std::for_each(v.z.begin(), v.z.end(), [mean_vz](double &d) { d -= mean_vz; });
-
-  size_t i;
-  /* Temperature calculation, statistically */
-  double KE = 0;
-  for (i = 0; i < options.N; ++i) {
-    KE += 0.5 * (v.x[i] * v.x[i] + v.y[i] * v.y[i] + v.z[i] * v.z[i]);
-  }
-  options.temperature = KE / (1.5 * options.N);
-  options.scale_v =
-      sqrt(TEMPERATURE / options.temperature); /* scaling factor */
-
-  /* Velocity scaling */
-  for (i = 0; i < options.N; ++i) {
-    v.x[i] *= options.scale_v;
-    v.y[i] *= options.scale_v;
-    v.z[i] *= options.scale_v;
-  }
-
-  if (options.io_options.msd) {
-    /* A copy of the r vectors where the BC will not be applied */
-    MSD_r.x = r.x;
-    MSD_r.y = r.y;
-    MSD_r.z = r.z;
-
-    /* MSD initialisation, storing first positions of particles */
-    MSD.x = r.x;
-    MSD.y = r.y;
-    MSD.z = r.z;
-  }
-
-  if (options.io_options.vaf) {
-    /* VAF initialisation, storing first velocities of particles */
-    Cv.x = v.x;
-    Cv.y = v.y;
-    Cv.z = v.z;
-  }
-
-  return KE;
-}
-
-void MD::mb_distribution(vector_3d &v, double TEMPERATURE) {
-  double kb = 1.0;
-  double m = 1.0;
-
-  double var = sqrt(TEMPERATURE * kb / m);
-  double mean = 0;
-
-  /* Use current time as seed for random generator */
-  std::srand(std::time(nullptr));
-  int random_variable = std::rand();
-  if (options.test_options.is_testing)
-    random_variable = 666; /* Fixing it for testing */
-
-  std::default_random_engine generator;
-  generator.seed(random_variable);
-
-  std::normal_distribution<double> g_x(mean, var);
-  std::normal_distribution<double> g_y(mean, var);
-  std::normal_distribution<double> g_z(mean, var);
-
-  for (size_t i = 0; i < options.N; ++i) {
-    v.x.push_back(g_x(generator));
-    v.y.push_back(g_y(generator));
-    v.z.push_back(g_z(generator));
-  }
-}
-
-std::tuple<double, double, double> MD::stepping_algorithm(
-    vector_3d &r, vector_3d &v, vector_3d &f, size_t &step, bool msd) {
-  size_t i;
-  double U = 0;
-  double KE = 0;
-  double PC = 0;
-
-  /*************************************************************************/
-  if (options.iterative_method == "Verlet") {
-    std::tie(KE, U, PC) = verlet(r, v, f, step);
-
-  } else if (options.iterative_method == "VelocityVerlet") {
-    std::tie(KE, U, PC) = velocity_verlet(r, v, f, step);
-
-  } else {
-    std::cerr << "Iterative method: " << options.iterative_method
-              << " has not been implemented. Aborting!" << std::endl;
-    abort();
-  }
-
-  if (msd) {
-    /* MSD stepping */
-    for (i = 0; i < options.N; ++i) {
-      MSD_r.x[i] += v.x[i] * options.dt;
-      MSD_r.y[i] += v.y[i] * options.dt;
-      MSD_r.z[i] += v.z[i] * options.dt;
-    }
-  }
-  /**************************************************************************/
-
-  apply_boundary_conditions(r, v, f);
-
-  return std::make_tuple(KE, U, PC);
-}
-
-void MD::apply_boundary_conditions(vector_3d &r, vector_3d &v, vector_3d &f) {
-  /* Apply periodic boundary conditions to ensure particles remain
-   inside the box */
-  size_t i;
-  std::string boundary_condition = "Periodic";
-  if (boundary_condition == "Periodic") {
-    for (i = 0; i < options.N; ++i) {
-      if (r.x[i] > options.Lx) r.x[i] -= options.Lx;
-      if (r.x[i] < 0.0) r.x[i] += options.Lx;
-      if (r.y[i] > options.Ly) r.y[i] -= options.Ly;
-      if (r.y[i] < 0.0) r.y[i] += options.Ly;
-      if (r.z[i] > options.Lz) r.z[i] -= options.Lz;
-      if (r.z[i] < 0.0) r.z[i] += options.Lz;
-    }
-  } else if (boundary_condition == "HardWall") {
-    for (i = 0; i < options.N; ++i) {
-      // if (r.x[i] > options.Lx) r.x[i] = options.Lx - abs(r.x[i] -
-      // options.Lx);
-      if (r.x[i] > options.Lx) r.x[i] -= options.Lx;
-      if (r.x[i] > options.Lx) v.x[i] = -v.x[i];
-      // if (r.x[i] < 0.0) r.x[i] = abs(r.x[i]);
-      if (r.x[i] < 0.0) r.x[i] += options.Lx;
-      if (r.x[i] < 0.0) v.x[i] = -v.x[i];
-
-      // if (r.y[i] > options.Ly) r.y[i] = options.Ly - abs(r.y[i] -
-      // options.Ly);
-      if (r.y[i] > options.Ly) r.y[i] -= options.Ly;
-      if (r.y[i] > options.Ly) v.y[i] = -v.y[i];
-      // if (r.y[i] < 0.0) r.y[i] = abs(r.y[i]);
-      if (r.y[i] < 0.0) r.y[i] += options.Ly;
-      if (r.y[i] < 0.0) v.y[i] = -v.y[i];
-
-      if (r.z[i] > options.Lz) r.z[i] -= options.Lz;
-      if (r.z[i] > options.Lz) v.z[i] = -v.z[i];
-      if (r.z[i] < 0.0) r.z[i] += options.Lz;
-      if (r.z[i] < 0.0) v.z[i] = -v.z[i];
-    }
-  }
-}
-
-std::tuple<double, double, double> MD::verlet(vector_3d &r, vector_3d &v,
-                                              vector_3d &f, size_t &step) {
-  size_t i;
-  double KE = 0;
-  double dt = options.dt;
-  pair_potential_type force = get_force_func(options.potential_type);
-
-  /* Calculate particle interactions based on input pair potential */
-  auto [U, PC] = calculate_forces(r, f, step, force);
-
-  for (i = 0; i < options.N; ++i) {
-    /* v^(n+1) = v^(n)*scaled_v + f^(n)*dt */
-    v.x[i] = v.x[i] * options.scale_v + f.x[i] * dt;
-    v.y[i] = v.y[i] * options.scale_v + f.y[i] * dt;
-    v.z[i] = v.z[i] * options.scale_v + f.z[i] * dt;
-
-    /* r^(n+1) = r^(n) + v^(n+1)*dt */
-    r.x[i] += v.x[i] * dt;
-    r.y[i] += v.y[i] * dt;
-    r.z[i] += v.z[i] * dt;
-
-    /* Kinetic Energy Calculation */
-    KE += 0.5 * (v.x[i] * v.x[i] + v.y[i] * v.y[i] + v.z[i] * v.z[i]);
-  }
-
-  return std::make_tuple(KE, U, PC);
-}
-
-std::tuple<double, double, double> MD::velocity_verlet(vector_3d &r,
-                                                       vector_3d &v,
-                                                       vector_3d &f,
-                                                       size_t &step) {
-  double KE = 0;
-  double dt = options.dt;
-  vector_3d f_n = f;
-  pair_potential_type force = get_force_func(options.potential_type);
-
-  /* r^(n+1) = r^(n) + v^(n)*dt + f^(n)*(dt^2 * 0.5) */
-  for (size_t i = 0; i < options.N; ++i) {
-    r.x[i] += v.x[i] * dt + 0.5 * f_n.x[i] * dt * dt;
-    r.y[i] += v.y[i] * dt + 0.5 * f_n.y[i] * dt * dt;
-    r.z[i] += v.z[i] * dt + 0.5 * f_n.z[i] * dt * dt;
-  }
-
-  /* f^(n+1) = calculate forces */
-  auto [U, PC] = calculate_forces(r, f, step, force);
-
-  /* v^(n+1) = v^(n) + (f^(n)+f^(n+1))*(dt*0.5) */
-  for (size_t i = 0; i < options.N; ++i) {
-    v.x[i] = v.x[i] * options.scale_v + (f.x[i] + f.x[i]) * (dt * 0.5);
-    v.y[i] = v.y[i] * options.scale_v + (f.y[i] + f.y[i]) * (dt * 0.5);
-    v.z[i] = v.z[i] * options.scale_v + (f.z[i] + f.z[i]) * (dt * 0.5);
-
-    KE += 0.5 * (v.x[i] * v.x[i] + v.y[i] * v.y[i] + v.z[i] * v.z[i]);
-  }
-
-  return std::make_tuple(KE, U, PC);
-}
-
-void MD::velocity_autocorrelation_function(vector_3d &Cv, vector_3d &v) {
-  double cr_temp = 0; /* resets the sum every time step */
-  double m = 1.0;     /* particle mass */
-  size_t i;
-  /* The peak of the VAF is located at 3kb*T/m */
-  double norm = 3 * options.target_temperature / m;
-  for (i = 0; i < options.N; i++) {
-    cr_temp += (Cv.x[i] * v.x[i] + Cv.y[i] * v.y[i] + Cv.z[i] * v.z[i]);
-  }
-  Cr.push_back((cr_temp / options.N) / norm);
-}
-
-void MD::radial_distribution_function(double &rho, double &cut_off,
-                                      size_t &bins, size_t &particles,
-                                      std::ofstream &fstream) {
-  double R = 0;
-  double norm = 1;
-  /* Exclude the self particle interaction from the density */
-  double cor_rho = rho * (particles - 1) / particles;
-  double dr = cut_off / bins;
-
-  fstream << "#bins:" << bins << ",cut_off (rg):" << cut_off << ",dr:" << dr
-          << std::endl;
-  fstream << "#Radius (r),Normalised,Unormalised" << std::endl;
-
-  for (size_t i = 1; i < bins; ++i) {
-    R = cut_off * i / bins;
-    /* Volume between 2 spheres, accounting for double counting
-     hence the 2/3*pi*((R+dr)**3 - R**3)
-     Accounting for the rdf_wait time steps */
-    norm = cor_rho * (2.0 / 3.0 * PI * particles *
-                      (options.steps - options.rdf_options.rdf_wait) *
-                      (pow((R + (dr / 2.0)), 3) - pow((R - (dr / 2.0)), 3)));
-
-    fstream << R << ',' << rdf[i] / norm << ',' << rdf[i] << std::endl;
-  }
-}
-
-void MD::mean_square_displacement(vector_3d &MSD, vector_3d &MSD_r) {
-  double msd_temp = 0;
-
-  for (size_t i = 0; i < options.N; ++i) {
-    msd_temp +=
-        (pow((MSD_r.x[i] - MSD.x[i]), 2) + pow((MSD_r.y[i] - MSD.y[i]), 2) +
-         pow((MSD_r.z[i] - MSD.z[i]), 2));
-  }
-  msd.push_back(msd_temp / options.N);
-}
-
-void MD::structure_factor(vector_3d &r) {
-  double s = pow((options.N / options.density), (1.0 / 3.0));
-  double fkx1 = 2.0 * PI / (s / (2.0 * options.Nx));
-  double fky1 = 2.0 * PI / (s / (2.0 * options.Ny));
-  double fkz1 = 2.0 * PI / (s / (2.0 * options.Nz));
-  double sfcosx = 0, sfcosy = 0, sfcosz = 0;
-  double sfsinx = 0, sfsiny = 0, sfsinz = 0;
-
-  /* Try to calculate the structure factor at once for all axis
-     if the particles per axis are equal. Else simply do them individually */
-
-  if (options.Nx == options.Ny && options.Nx == options.Nz) {
-    for (size_t i = 0; i < r.x.size(); ++i) {
-      sfcosx += cos(fkx1 * r.x[i]);
-      sfsinx += sin(fkx1 * r.x[i]);
-      sfcosy += cos(fky1 * r.y[i]);
-      sfsiny += sin(fky1 * r.y[i]);
-      sfcosz += cos(fkz1 * r.z[i]);
-      sfsinz += sin(fkz1 * r.z[i]);
-    }
-  } else {
-    for (const auto &i : r.x) {
-      sfcosx += cos(fkx1 * i);
-      sfsinx += sin(fkx1 * i);
-    }
-    for (const auto &i : r.y) {
-      sfcosy += cos(fky1 * i);
-      sfsiny += sin(fky1 * i);
-    }
-    for (const auto &i : r.z) {
-      sfcosz += cos(fkz1 * i);
-      sfsinz += sin(fkz1 * i);
-    }
-  }
-
-  double kx = sqrt(pow(sfcosx / options.N, 2) + pow(sfsinx / options.N, 2));
-  double ky = sqrt(pow(sfcosy / options.N, 2) + pow(sfsiny / options.N, 2));
-  double kz = sqrt(pow(sfcosz / options.N, 2) + pow(sfsinz / options.N, 2));
-
-  sf.x.push_back(kx);
-  sf.y.push_back(ky);
-  sf.z.push_back(kz);
-}
-
-std::tuple<double, double> MD::calculate_forces(vector_3d &x, vector_3d &f,
-                                                size_t &step_idx,
-                                                pair_potential_type &p) {
-  /* Resetting forces */
-  std::fill(f.x.begin(), f.x.end(), 0);
-  std::fill(f.y.begin(), f.y.end(), 0);
-  std::fill(f.z.begin(), f.z.end(), 0);
-
-  /* Reseting <Potential> U to 0 */
-  double U = 0;  /* Potential Energy */
-  double PC = 0; /* Configurational Pressure */
-
-  size_t i, j, igr;
-  for (i = 0; i < options.N - 1; ++i) {
-    for (j = i + 1; j < options.N; ++j) {
-      /* distance between particle i and j */
-      double x = r.x[i] - r.x[j]; /* Separation distance */
-      double y = r.y[i] - r.y[j]; /* between particles i and j */
-      double z = r.z[i] - r.z[j]; /* in Cartesian */
-
-      /* Get the shortest image of the two particles
-         if the particles are near the periodic boundary,
-         this image is their reflection. */
-      if (x > (0.5 * options.L)) x -= options.L;
-      if (x < (-0.5 * options.L)) x += options.L;
-      if (y > (0.5 * options.L)) y -= options.L;
-      if (y < (-0.5 * options.L)) y += options.L;
-      if (z > (0.5 * options.L)) z -= options.L;
-      if (z < (-0.5 * options.L)) z += options.L;
-
-      /* Pair potential radius */
-      double radius = sqrt((x * x) + (y * y) + (z * z));
-
-      /* Force loop */
-      if (radius < options.cut_off) {
-        /* Allows the user to choose different pair potentials */
-        auto [ff, temp_u] = p(radius, options.power, options.a_cst);
-
-        /* Average potential energy */
-        if (options.io_options.energies) U += temp_u;
-
-        /* Configurational pressure */
-        if (options.io_options.pressure) PC += radius * ff;
-
-        /* Canceling the ij and ji pairs
-           Taking the lower triangular matrix */
-        f.x[i] += x * ff / radius;
-        f.x[j] -= x * ff / radius;
-        f.y[i] += y * ff / radius;
-        f.y[j] -= y * ff / radius;
-        f.z[i] += z * ff / radius;
-        f.z[j] -= z * ff / radius;
-
-        /* Radial Distribution
-           measured with a delay, since the system requires a few thousand
-           time-steps to reach equilibrium */
-        if (options.io_options.rdf && step_idx > options.rdf_options.rdf_wait) {
-          igr = round(options.rdf_options.rdf_bins * radius / options.cut_off);
-          rdf[igr] += 1;
-        }
-      }
-    }
-  }
-
-  return std::make_tuple(U, PC);
-}
-
-void MD::simulation(std::string simulation_name, double DENSITY,
-                    double TEMPERATURE, double POWER, double A_CST,
-                    std::string pp_type) {
-  /* NOTE: this is a legacy routine and it will be removed in the future
-     Initialise the variables with the input parameters
-     Name the simulation. This will be used as a prefix in the files */
-  options.io_options.simulation_name = simulation_name;
-  options.density = DENSITY;
-  options.target_temperature = TEMPERATURE;
-  options.power = POWER;
-  options.a_cst = A_CST;
-  options.potential_type = pp_type;
-
-  simulation();
-}
-
 void MD::simulation() {
   /* Preallocate storage space */
   set_vector_sizes();
@@ -816,6 +355,22 @@ void MD::simulation() {
   reset_values();
 }
 
+void MD::simulation(std::string simulation_name, double DENSITY,
+                    double TEMPERATURE, double POWER, double A_CST,
+                    std::string pp_type) {
+  /* NOTE: this is a legacy routine and it will be removed in the future
+     Initialise the variables with the input parameters
+     Name the simulation. This will be used as a prefix in the files */
+  options.io_options.simulation_name = simulation_name;
+  options.density = DENSITY;
+  options.target_temperature = TEMPERATURE;
+  options.power = POWER;
+  options.a_cst = A_CST;
+  options.potential_type = pp_type;
+
+  simulation();
+}
+
 void MD::reset_values(bool force_reset) {
   /*
     bc the stream might be closed and the user might then call reset_values
@@ -849,6 +404,467 @@ void MD::reset_values(bool force_reset) {
   Cr.clear();
   rdf.resize(options.rdf_options.rdf_bins + 1, 0); /* gr with Index igr */
 }
+
+void MD::enable_testing(bool is_testing) {
+  options.test_options.is_testing = is_testing;
+}
+
+/********************************** PROTECTED *********************************/
+
+/*************************** INITIALISATION METHODS ***************************/
+
+double MD::initialise(vector_3d &r, vector_3d &v, double TEMPERATURE) {
+  /* Initialise position matrix and velocity matrix from Cubic Centred Lattice
+   */
+  if (!options.compression_options.compression ||
+      (options.compression_options.compression &&
+       options.compression_options.compress_count == 0)) {
+    /* Select the lattice formation */
+    choose_lattice_formation(options.lattice, r);
+
+    /* Generates Maxwell-Boltzmann distribution */
+    mb_distribution(v, TEMPERATURE);
+  }
+
+  /* Calculate the average velocities */
+  double mean_vx = std::accumulate(v.x.begin(), v.x.end(), 0.0) / options.N;
+  double mean_vy = std::accumulate(v.y.begin(), v.y.end(), 0.0) / options.N;
+  double mean_vz = std::accumulate(v.z.begin(), v.z.end(), 0.0) / options.N;
+  /* Conserve the momentum of the fluid by subsracting the average velocities
+     using a lambda expression */
+  std::for_each(v.x.begin(), v.x.end(), [mean_vx](double &d) { d -= mean_vx; });
+  std::for_each(v.y.begin(), v.y.end(), [mean_vy](double &d) { d -= mean_vy; });
+  std::for_each(v.z.begin(), v.z.end(), [mean_vz](double &d) { d -= mean_vz; });
+
+  size_t i;
+  /* Temperature calculation, statistically */
+  double KE = 0;
+  for (i = 0; i < options.N; ++i) {
+    KE += 0.5 * (v.x[i] * v.x[i] + v.y[i] * v.y[i] + v.z[i] * v.z[i]);
+  }
+  options.temperature = KE / (1.5 * options.N);
+  options.scale_v =
+      sqrt(TEMPERATURE / options.temperature); /* scaling factor */
+
+  /* Velocity scaling */
+  for (i = 0; i < options.N; ++i) {
+    v.x[i] *= options.scale_v;
+    v.y[i] *= options.scale_v;
+    v.z[i] *= options.scale_v;
+  }
+
+  if (options.io_options.msd) {
+    /* A copy of the r vectors where the BC will not be applied */
+    MSD_r.x = r.x;
+    MSD_r.y = r.y;
+    MSD_r.z = r.z;
+
+    /* MSD initialisation, storing first positions of particles */
+    MSD.x = r.x;
+    MSD.y = r.y;
+    MSD.z = r.z;
+  }
+
+  if (options.io_options.vaf) {
+    /* VAF initialisation, storing first velocities of particles */
+    Cv.x = v.x;
+    Cv.y = v.y;
+    Cv.z = v.z;
+  }
+
+  return KE;
+}
+
+void MD::choose_lattice_formation(std::string &lattice, vector_3d &r) {
+  if (lattice == "FCC") {
+    /* Coordinates for the FCC lattice */
+    double x_c[4] = {0.25, 0.75, 0.75, 0.25};
+    double y_c[4] = {0.25, 0.75, 0.25, 0.75};
+    double z_c[4] = {0.25, 0.25, 0.75, 0.75};
+
+    /* Loop over the the corner coordinates of the FCC and then x, y, z */
+    for (size_t c = 0; c < 4; ++c) {
+      for (size_t i = 0; i < options.Nx; ++i) {
+        for (size_t j = 0; j < options.Ny; ++j) {
+          for (size_t k = 0; k < options.Nz; ++k) {
+            r.x.push_back((i + x_c[c]) * (options.Lx / options.Nx));
+            r.y.push_back((j + y_c[c]) * (options.Ly / options.Ny));
+            r.z.push_back((k + z_c[c]) * (options.Lz / options.Nz));
+          }
+        }
+      }
+    }
+  }
+
+  /* BCC lattice */
+  else if (lattice == "BCC") {
+    double x_c[2] = {0.25, 0.75};
+    double y_c[2] = {0.25, 0.75};
+    double z_c[2] = {0.25, 0.75};
+
+    for (size_t c = 0; c < 2; ++c) {
+      for (size_t i = 0; i < options.Nx; i++) {
+        for (size_t j = 0; j < options.Ny; j++) {
+          for (size_t k = 0; k < options.Nz; k++) {
+            r.x.push_back((i + x_c[c]) * (options.Lx / options.Nx));
+            r.y.push_back((j + y_c[c]) * (options.Ly / options.Ny));
+            r.z.push_back((k + z_c[c]) * (options.Lz / options.Nz));
+          }
+        }
+      }
+    }
+  }
+
+  else if (lattice == "RANDOM") {
+    r.x.resize(options.N);
+    r.y.resize(options.N);
+    r.z.resize(options.N);
+    // todo: test
+    mb_distribution(r, options.random_lattice_var);
+  }
+
+  /* Simple Cubic lattice */
+  else {
+    for (size_t i = 0; i < options.Nx; ++i) {
+      for (size_t j = 0; j < options.Ny; ++j) {
+        for (size_t k = 0; k < options.Nz; ++k) {
+          r.x.push_back((i + 0.5) * (options.Lx / options.Nx));
+          r.y.push_back((j + 0.5) * (options.Ly / options.Ny));
+          r.z.push_back((k + 0.5) * (options.Lz / options.Nz));
+        }
+      }
+    }
+  }
+}
+
+void MD::mb_distribution(vector_3d &v, double TEMPERATURE) {
+  double kb = 1.0;
+  double m = 1.0;
+
+  double var = sqrt(TEMPERATURE * kb / m);
+  double mean = 0;
+
+  /* Use current time as seed for random generator */
+  std::srand(std::time(nullptr));
+  int random_variable = std::rand();
+  if (options.test_options.is_testing)
+    random_variable = 666; /* Fixing it for testing */
+
+  std::default_random_engine generator;
+  generator.seed(random_variable);
+
+  std::normal_distribution<double> g_x(mean, var);
+  std::normal_distribution<double> g_y(mean, var);
+  std::normal_distribution<double> g_z(mean, var);
+
+  for (size_t i = 0; i < options.N; ++i) {
+    v.x.push_back(g_x(generator));
+    v.y.push_back(g_y(generator));
+    v.z.push_back(g_z(generator));
+  }
+}
+
+/***************************** ITERATIVE METHODS ******************************/
+
+std::tuple<double, double, double> MD::stepping_algorithm(
+    vector_3d &r, vector_3d &v, vector_3d &f, size_t &step, bool msd) {
+  size_t i;
+  double U = 0;
+  double KE = 0;
+  double PC = 0;
+
+  /*************************************************************************/
+  if (options.iterative_method == "Verlet") {
+    std::tie(KE, U, PC) = verlet(r, v, f, step);
+
+  } else if (options.iterative_method == "VelocityVerlet") {
+    std::tie(KE, U, PC) = velocity_verlet(r, v, f, step);
+
+  } else {
+    std::cerr << "Iterative method: " << options.iterative_method
+              << " has not been implemented. Aborting!" << std::endl;
+    abort();
+  }
+
+  if (msd) {
+    /* MSD stepping */
+    for (i = 0; i < options.N; ++i) {
+      MSD_r.x[i] += v.x[i] * options.dt;
+      MSD_r.y[i] += v.y[i] * options.dt;
+      MSD_r.z[i] += v.z[i] * options.dt;
+    }
+  }
+  /**************************************************************************/
+
+  apply_boundary_conditions(r, v, f);
+
+  return std::make_tuple(KE, U, PC);
+}
+
+std::tuple<double, double, double> MD::verlet(vector_3d &r, vector_3d &v,
+                                              vector_3d &f, size_t &step) {
+  size_t i;
+  double KE = 0;
+  double dt = options.dt;
+  pair_potential_type force = get_force_func(options.potential_type);
+
+  /* Calculate particle interactions based on input pair potential */
+  auto [U, PC] = calculate_forces(r, f, step, force);
+
+  for (i = 0; i < options.N; ++i) {
+    /* v^(n+1) = v^(n)*scaled_v + f^(n)*dt */
+    v.x[i] = v.x[i] * options.scale_v + f.x[i] * dt;
+    v.y[i] = v.y[i] * options.scale_v + f.y[i] * dt;
+    v.z[i] = v.z[i] * options.scale_v + f.z[i] * dt;
+
+    /* r^(n+1) = r^(n) + v^(n+1)*dt */
+    r.x[i] += v.x[i] * dt;
+    r.y[i] += v.y[i] * dt;
+    r.z[i] += v.z[i] * dt;
+
+    /* Kinetic Energy Calculation */
+    KE += 0.5 * (v.x[i] * v.x[i] + v.y[i] * v.y[i] + v.z[i] * v.z[i]);
+  }
+
+  return std::make_tuple(KE, U, PC);
+}
+
+std::tuple<double, double, double> MD::velocity_verlet(vector_3d &r,
+                                                       vector_3d &v,
+                                                       vector_3d &f,
+                                                       size_t &step) {
+  double KE = 0;
+  double dt = options.dt;
+  vector_3d f_n = f;
+  pair_potential_type force = get_force_func(options.potential_type);
+
+  /* r^(n+1) = r^(n) + v^(n)*dt + f^(n)*(dt^2 * 0.5) */
+  for (size_t i = 0; i < options.N; ++i) {
+    r.x[i] += v.x[i] * dt + 0.5 * f_n.x[i] * dt * dt;
+    r.y[i] += v.y[i] * dt + 0.5 * f_n.y[i] * dt * dt;
+    r.z[i] += v.z[i] * dt + 0.5 * f_n.z[i] * dt * dt;
+  }
+
+  /* f^(n+1) = calculate forces */
+  auto [U, PC] = calculate_forces(r, f, step, force);
+
+  /* v^(n+1) = v^(n) + (f^(n)+f^(n+1))*(dt*0.5) */
+  for (size_t i = 0; i < options.N; ++i) {
+    v.x[i] = v.x[i] * options.scale_v + (f.x[i] + f.x[i]) * (dt * 0.5);
+    v.y[i] = v.y[i] * options.scale_v + (f.y[i] + f.y[i]) * (dt * 0.5);
+    v.z[i] = v.z[i] * options.scale_v + (f.z[i] + f.z[i]) * (dt * 0.5);
+
+    KE += 0.5 * (v.x[i] * v.x[i] + v.y[i] * v.y[i] + v.z[i] * v.z[i]);
+  }
+
+  return std::make_tuple(KE, U, PC);
+}
+
+std::tuple<double, double> MD::calculate_forces(vector_3d &x, vector_3d &f,
+                                                size_t &step_idx,
+                                                pair_potential_type &p) {
+  /* Resetting forces */
+  std::fill(f.x.begin(), f.x.end(), 0);
+  std::fill(f.y.begin(), f.y.end(), 0);
+  std::fill(f.z.begin(), f.z.end(), 0);
+
+  /* Reseting <Potential> U to 0 */
+  double U = 0;  /* Potential Energy */
+  double PC = 0; /* Configurational Pressure */
+
+  size_t i, j, igr;
+  for (i = 0; i < options.N - 1; ++i) {
+    for (j = i + 1; j < options.N; ++j) {
+      /* distance between particle i and j */
+      double x = r.x[i] - r.x[j]; /* Separation distance */
+      double y = r.y[i] - r.y[j]; /* between particles i and j */
+      double z = r.z[i] - r.z[j]; /* in Cartesian */
+
+      /* Get the shortest image of the two particles
+         if the particles are near the periodic boundary,
+         this image is their reflection. */
+      if (x > (0.5 * options.L)) x -= options.L;
+      if (x < (-0.5 * options.L)) x += options.L;
+      if (y > (0.5 * options.L)) y -= options.L;
+      if (y < (-0.5 * options.L)) y += options.L;
+      if (z > (0.5 * options.L)) z -= options.L;
+      if (z < (-0.5 * options.L)) z += options.L;
+
+      /* Pair potential radius */
+      double radius = sqrt((x * x) + (y * y) + (z * z));
+
+      /* Force loop */
+      if (radius < options.cut_off) {
+        /* Allows the user to choose different pair potentials */
+        auto [ff, temp_u] = p(radius, options.power, options.a_cst);
+
+        /* Average potential energy */
+        if (options.io_options.energies) U += temp_u;
+
+        /* Configurational pressure */
+        if (options.io_options.pressure) PC += radius * ff;
+
+        /* Canceling the ij and ji pairs
+           Taking the lower triangular matrix */
+        f.x[i] += x * ff / radius;
+        f.x[j] -= x * ff / radius;
+        f.y[i] += y * ff / radius;
+        f.y[j] -= y * ff / radius;
+        f.z[i] += z * ff / radius;
+        f.z[j] -= z * ff / radius;
+
+        /* Radial Distribution
+           measured with a delay, since the system requires a few thousand
+           time-steps to reach equilibrium */
+        if (options.io_options.rdf && step_idx > options.rdf_options.rdf_wait) {
+          igr = round(options.rdf_options.rdf_bins * radius / options.cut_off);
+          rdf[igr] += 1;
+        }
+      }
+    }
+  }
+
+  return std::make_tuple(U, PC);
+}
+
+/***************************** BOUNDARY CONDITIONS ****************************/
+
+void MD::apply_boundary_conditions(vector_3d &r, vector_3d &v, vector_3d &f) {
+  /* Apply periodic boundary conditions to ensure particles remain
+   inside the box */
+  size_t i;
+  std::string boundary_condition = "Periodic";
+  if (boundary_condition == "Periodic") {
+    for (i = 0; i < options.N; ++i) {
+      if (r.x[i] > options.Lx) r.x[i] -= options.Lx;
+      if (r.x[i] < 0.0) r.x[i] += options.Lx;
+      if (r.y[i] > options.Ly) r.y[i] -= options.Ly;
+      if (r.y[i] < 0.0) r.y[i] += options.Ly;
+      if (r.z[i] > options.Lz) r.z[i] -= options.Lz;
+      if (r.z[i] < 0.0) r.z[i] += options.Lz;
+    }
+  } else if (boundary_condition == "HardWall") {
+    for (i = 0; i < options.N; ++i) {
+      // if (r.x[i] > options.Lx) r.x[i] = options.Lx - abs(r.x[i] -
+      // options.Lx);
+      if (r.x[i] > options.Lx) r.x[i] -= options.Lx;
+      if (r.x[i] > options.Lx) v.x[i] = -v.x[i];
+      // if (r.x[i] < 0.0) r.x[i] = abs(r.x[i]);
+      if (r.x[i] < 0.0) r.x[i] += options.Lx;
+      if (r.x[i] < 0.0) v.x[i] = -v.x[i];
+
+      // if (r.y[i] > options.Ly) r.y[i] = options.Ly - abs(r.y[i] -
+      // options.Ly);
+      if (r.y[i] > options.Ly) r.y[i] -= options.Ly;
+      if (r.y[i] > options.Ly) v.y[i] = -v.y[i];
+      // if (r.y[i] < 0.0) r.y[i] = abs(r.y[i]);
+      if (r.y[i] < 0.0) r.y[i] += options.Ly;
+      if (r.y[i] < 0.0) v.y[i] = -v.y[i];
+
+      if (r.z[i] > options.Lz) r.z[i] -= options.Lz;
+      if (r.z[i] > options.Lz) v.z[i] = -v.z[i];
+      if (r.z[i] < 0.0) r.z[i] += options.Lz;
+      if (r.z[i] < 0.0) v.z[i] = -v.z[i];
+    }
+  }
+}
+
+/*********************** STATISTICAL QUANTITIES METHODS ***********************/
+
+void MD::velocity_autocorrelation_function(vector_3d &Cv, vector_3d &v) {
+  double cr_temp = 0; /* resets the sum every time step */
+  double m = 1.0;     /* particle mass */
+  size_t i;
+  /* The peak of the VAF is located at 3kb*T/m */
+  double norm = 3 * options.target_temperature / m;
+  for (i = 0; i < options.N; i++) {
+    cr_temp += (Cv.x[i] * v.x[i] + Cv.y[i] * v.y[i] + Cv.z[i] * v.z[i]);
+  }
+  Cr.push_back((cr_temp / options.N) / norm);
+}
+
+void MD::radial_distribution_function(double &rho, double &cut_off,
+                                      size_t &bins, size_t &particles,
+                                      std::ofstream &fstream) {
+  double R = 0;
+  double norm = 1;
+  /* Exclude the self particle interaction from the density */
+  double cor_rho = rho * (particles - 1) / particles;
+  double dr = cut_off / bins;
+
+  fstream << "#bins:" << bins << ",cut_off (rg):" << cut_off << ",dr:" << dr
+          << std::endl;
+  fstream << "#Radius (r),Normalised,Unormalised" << std::endl;
+
+  for (size_t i = 1; i < bins; ++i) {
+    R = cut_off * i / bins;
+    /* Volume between 2 spheres, accounting for double counting
+     hence the 2/3*pi*((R+dr)**3 - R**3)
+     Accounting for the rdf_wait time steps */
+    norm = cor_rho * (2.0 / 3.0 * PI * particles *
+                      (options.steps - options.rdf_options.rdf_wait) *
+                      (pow((R + (dr / 2.0)), 3) - pow((R - (dr / 2.0)), 3)));
+
+    fstream << R << ',' << rdf[i] / norm << ',' << rdf[i] << std::endl;
+  }
+}
+
+void MD::mean_square_displacement(vector_3d &MSD, vector_3d &MSD_r) {
+  double msd_temp = 0;
+
+  for (size_t i = 0; i < options.N; ++i) {
+    msd_temp +=
+        (pow((MSD_r.x[i] - MSD.x[i]), 2) + pow((MSD_r.y[i] - MSD.y[i]), 2) +
+         pow((MSD_r.z[i] - MSD.z[i]), 2));
+  }
+  msd.push_back(msd_temp / options.N);
+}
+
+void MD::structure_factor(vector_3d &r) {
+  double s = pow((options.N / options.density), (1.0 / 3.0));
+  double fkx1 = 2.0 * PI / (s / (2.0 * options.Nx));
+  double fky1 = 2.0 * PI / (s / (2.0 * options.Ny));
+  double fkz1 = 2.0 * PI / (s / (2.0 * options.Nz));
+  double sfcosx = 0, sfcosy = 0, sfcosz = 0;
+  double sfsinx = 0, sfsiny = 0, sfsinz = 0;
+
+  /* Try to calculate the structure factor at once for all axis
+     if the particles per axis are equal. Else simply do them individually */
+
+  if (options.Nx == options.Ny && options.Nx == options.Nz) {
+    for (size_t i = 0; i < r.x.size(); ++i) {
+      sfcosx += cos(fkx1 * r.x[i]);
+      sfsinx += sin(fkx1 * r.x[i]);
+      sfcosy += cos(fky1 * r.y[i]);
+      sfsiny += sin(fky1 * r.y[i]);
+      sfcosz += cos(fkz1 * r.z[i]);
+      sfsinz += sin(fkz1 * r.z[i]);
+    }
+  } else {
+    for (const auto &i : r.x) {
+      sfcosx += cos(fkx1 * i);
+      sfsinx += sin(fkx1 * i);
+    }
+    for (const auto &i : r.y) {
+      sfcosy += cos(fky1 * i);
+      sfsiny += sin(fky1 * i);
+    }
+    for (const auto &i : r.z) {
+      sfcosz += cos(fkz1 * i);
+      sfsinz += sin(fkz1 * i);
+    }
+  }
+
+  double kx = sqrt(pow(sfcosx / options.N, 2) + pow(sfsinx / options.N, 2));
+  double ky = sqrt(pow(sfcosy / options.N, 2) + pow(sfsiny / options.N, 2));
+  double kz = sqrt(pow(sfcosz / options.N, 2) + pow(sfsinz / options.N, 2));
+
+  sf.x.push_back(kx);
+  sf.y.push_back(ky);
+  sf.z.push_back(kz);
+}
+
+/****************************** LOGGING METHODS *******************************/
 
 std::string MD::set_simulation_params(double &rho, double &T, double &power,
                                       double &a, std::string &pp_type) {
@@ -897,45 +913,12 @@ std::string MD::set_simulation_params(double &rho, double &T, double &power,
   return params;
 }
 
-void MD::enable_testing(bool is_testing) {
-  options.test_options.is_testing = is_testing;
-}
-
-void MD::set_vector_sizes() {
-  /* For efficiency, memory in the containers is reserved before use */
-  /* Positions */
-  r.reserve(options.N);
-  /* Velocities */
-  v.reserve(options.N);
-  /* RDF */
-  if (options.io_options.rdf)
-    rdf.resize(options.rdf_options.rdf_bins + 1, 0); /* gr with Index igr */
-  /* Forces/Acceleration */
-  f.resize(options.N, 0);
-
-  /* Observed Quantities */
-  if (options.io_options.sf) sf.reserve(options.N); /* Structure Factor */
-  if (options.io_options.vaf)
-    Cr.reserve(options.steps); /* Velocity Autocorrelation Function */
-  if (options.io_options.msd)
-    msd.reserve(options.steps); /* Mean Square Displacement */
-  if (options.io_options.energies) {
-    u_en.reserve(options.steps); /* Average Potential Energy */
-    k_en.reserve(options.steps); /* Average Kinetic Energy */
-  }
-  if (options.io_options.pressure) {
-    pc.reserve(options.steps); /* Configurational Pressure */
-    pk.reserve(options.steps); /* Kinetic Pressure */
-  }
-  temperature.reserve(options.steps);
-}
-
 void MD::save_visualisation_arrays(size_t dump_no) {
   std::string fname = options.io_options.dir + "/" +
                       options.io_options.simulation_name + "xyz_data_" +
                       std::to_string(dump_no) + ".csv";
   std::ofstream out_xyz(fname, std::ofstream::trunc | std::ofstream::out);
-  logger.write_file(*pos, out_xyz,
+  logger.write_file(*pos, out_xyz,  // todo: make speed
                     "x coord, y coord, z coord, x-pos, y-pos, z-pos");
   out_xyz.close();
 }
@@ -1078,3 +1061,34 @@ std::vector<double> MD::calculate_run_stats() {
 }
 
 std::vector<double> MD::get_run_stats() { return run_stats; }
+
+/******************************** MISCELLANEOUS *******************************/
+
+void MD::set_vector_sizes() {
+  /* For efficiency, memory in the containers is reserved before use */
+  /* Positions */
+  r.reserve(options.N);
+  /* Velocities */
+  v.reserve(options.N);
+  /* RDF */
+  if (options.io_options.rdf)
+    rdf.resize(options.rdf_options.rdf_bins + 1, 0); /* gr with Index igr */
+  /* Forces/Acceleration */
+  f.resize(options.N, 0);
+
+  /* Observed Quantities */
+  if (options.io_options.sf) sf.reserve(options.N); /* Structure Factor */
+  if (options.io_options.vaf)
+    Cr.reserve(options.steps); /* Velocity Autocorrelation Function */
+  if (options.io_options.msd)
+    msd.reserve(options.steps); /* Mean Square Displacement */
+  if (options.io_options.energies) {
+    u_en.reserve(options.steps); /* Average Potential Energy */
+    k_en.reserve(options.steps); /* Average Kinetic Energy */
+  }
+  if (options.io_options.pressure) {
+    pc.reserve(options.steps); /* Configurational Pressure */
+    pk.reserve(options.steps); /* Kinetic Pressure */
+  }
+  temperature.reserve(options.steps);
+}

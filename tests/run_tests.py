@@ -541,5 +541,58 @@ class TestCompression(unittest.TestCase):
         print(f'Exiting: {f_dir}')
 
 
+class TestIterativeAlgorithms(unittest.TestCase):
+
+    def setUp(self):
+        print('-'*80)
+
+    def tearDown(self):
+        call(['make', 'clean'])
+        os.chdir('..')
+        print('-'*80)
+
+    def test_velocity_verlet(self):
+        f_dir = 'velocity_verlet'
+        print(f'Entering: {f_dir}')
+
+        setup_ok = run_file(f_dir, 'verlet.xml')
+        self.assertTrue(setup_ok)
+
+        setup_ok = run_file(f_dir, 'velocity_verlet.xml')
+        self.assertTrue(setup_ok)
+
+        os.chdir(f_dir)
+        test_results = []
+
+        test_string = ('Data_step_5000_particles_512_rho_0.5000_T_1.0000.log')
+        sim_name = 'velocity_verlet_'
+
+        # Test variables
+        data = np.loadtxt(f'{sim_name}{test_string}', delimiter=',')
+
+        # Reference variables
+        data_ref = np.loadtxt(f'verlet_{test_string}', delimiter=',')
+
+        # BUG: potential bug I think these should also agree
+        skip_columns = [8, 9, 10, 11]  # skip VAF and SF
+        headers = ['step', 'rho', 'T', 'U', 'K', 'Pc',
+                   'Pk', 'MSD', 'VAF', 'SFx', 'SFy', 'SFz']
+        # Test for consistency
+        for j in range(len(data[0])):
+
+            if j in skip_columns:
+                print(f'  Skipping column {j}: {headers[j]}')
+                pass
+            else:
+                result = np.allclose(data[-1][j], data_ref[-1][j], rtol=1e-2)
+                print(f'  Testing velocity verlet data file column {j}: {headers[j]}'
+                      f' against results with explicit Verlet: {result}')
+                test_results.append(result)
+
+        self.assertTrue(get_test_result(test_results))
+
+        print(f'Exiting: {f_dir}')
+
+
 if __name__ == '__main__':
     unittest.main()

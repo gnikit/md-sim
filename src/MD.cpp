@@ -443,12 +443,12 @@ std::tuple<double, double, double> MD::stepping_algorithm(
   }
   /**************************************************************************/
 
-  apply_boundary_conditions(r, v);
+  apply_boundary_conditions(r, v, f);
 
   return std::make_tuple(KE, U, PC);
 }
 
-void MD::apply_boundary_conditions(vector_3d &r, vector_3d &v) {
+void MD::apply_boundary_conditions(vector_3d &r, vector_3d &v, vector_3d &f) {
   /* Apply periodic boundary conditions to ensure particles remain
    inside the box */
   size_t i;

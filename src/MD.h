@@ -18,7 +18,7 @@
 #include <random>     /* normal_dist */
 #include <sstream>    /* stringstream */
 #include <vector>     /* vectors */
-
+// todo: change vector to std::valarray
 #include "data_structures.h"
 #include "helper_functions.h"
 #include "md_pair_potentials.h"
@@ -243,11 +243,15 @@ class MD {
                                               pair_potential_type &potential);
 
   /**
-   * @brief 
-   * 
-   * @param r 
+   * @brief Applies the boundary conditions:
+   *  - Periodic
+   *  - Hard Wall
+   *
+   * @param r: position vectors of particles
+   * @param v: velocity vectors of particles
+   * @param f: force vectors of particles
    */
-  void apply_boundary_conditions(vector_3d &r, vector_3d &v);
+  void apply_boundary_conditions(vector_3d &r, vector_3d &v, vector_3d &f);
 
   /**
    * @brief

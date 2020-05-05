@@ -2,44 +2,56 @@ SHELL = /bin/bash
 include Makefile.variables
 
 RM := rm -rf
+SPUD_DIR := spud
+CURRENT_DIR := $(shell pwd)
 
-default: libmd
+default: libmd schema
 
-all: libmd examples schemas
+all: libmd examples schema
 
-examples: libmd
-	@echo "MAKE MD examples"
-	@cd examples && $(MAKE)
 
-libmd:
-	@mkdir -p include
-	@echo "MAKE lib"
-	@cd lib && $(MAKE)
+libmd: libspud
 	@echo "MAKE MD src"
 	@cd src && $(MAKE)
 
+libspud:
+	@echo "MAKE libspud"
+ifeq ("$(wildcard $(SPUD_DIR)/libspud.a)","")
+	@echo "Configuring and compiling libspud"
+	@cd $(SPUD_DIR) && ./configure --prefix= --disable-shared
+	$(MAKE) -C $(SPUD_DIR) -j
+	$(MAKE) -C $(SPUD_DIR) -j install-libspud DESTDIR=..
+	$(MAKE) -C $(SPUD_DIR) -j install-spudtools DESTDIR=..
+	$(MAKE) -C $(SPUD_DIR) -j install-diamond DESTDIR=../..
+	$(MAKE) -C $(SPUD_DIR) -j install-dxdiff DESTDIR=../..
+endif
+	$(MAKE) -C $(SPUD_DIR) -j
+	$(MAKE) -C $(SPUD_DIR) -j install-libspud DESTDIR=..
+	$(MAKE) -C $(SPUD_DIR) -j install-spudtools DESTDIR=..
+	$(MAKE) -C $(SPUD_DIR) -j install-diamond DESTDIR=../..
+	$(MAKE) -C $(SPUD_DIR) -j install-dxdiff DESTDIR=../..
+
+schema:
+	# This is a bug fix where because spud-preprocess does not look in the
+	# right place for the spud_base.rnc. It ignores the prefix
+	sed -i "s+cp /share+cp $(CURRENT_DIR)/share+g" ./bin/spud-preprocess
+	./bin/spud-preprocess ./schemas/main_schema.rnc
+
 debug_libmd:
 	@echo "DEBUG BUILD"
-	@mkdir -p include
-	@echo "MAKE lib"
-	@cd lib && $(MAKE)
 	@echo "MAKE MD src"
 	@cd src && $(MAKE) debug
 
 debug:
 	@echo "DEBUG BUILD"
-	@echo "MAKE lib"
-	@cd lib && $(MAKE)
 	@echo "MAKE MD src"
 	@cd src && $(MAKE) debug
 	@echo "MAKE examples"
 	@cd examples && $(MAKE) debug
 
-# TODO: this needs fixing, spud-preprocess has not been installed
-#		for that you need to run make install in spud
-schemas:
-	# If the user has installed libspud see fluidity project on github
-	spud-preprocess schemas/main_schema.rnc
+examples: libmd
+	@echo "MAKE MD examples"
+	@cd examples && $(MAKE)
 
 toolkit:
 	@echo "MAKE tools"
@@ -61,15 +73,20 @@ test_examples: libmd
 clean:
 	$(RM) *.log *.csv
 	@echo "Cleaning lib"
-	@cd lib && $(MAKE) clean
-	@echo "Cleaning MD src and bin"
+	$(RM) lib
+	@echo "Cleaning MD src"
 	@cd  src && $(MAKE) clean
 	@echo "Cleaning MD Examples src/examples"
 	@cd examples && $(MAKE) clean
 	@echo "Cleaning bin"
-	@cd bin && $(RM) *
+	$(RM) bin
+	@echo "Cleaning share"
+	$(RM) share
 	@echo "Cleaning include"
-	@cd include && $(RM) *.o
+	@cd include && $(RM) *.o *.mod spud
+
+distclean: clean
+	$(MAKE) -C spud distclean
 
 clean_keep_data:
 	@echo "Cleaning lib"

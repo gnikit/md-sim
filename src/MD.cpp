@@ -36,7 +36,7 @@ MD::MD(options_type &input_options) {
             << std::endl;
 
   /* Print stepping algorithm */
-  std::cout << "Iterative algorithm: " << options.stepping_alg << std::endl;
+  std::cout << "Iterative algorithm: " << options.iterative_method << std::endl;
 
   /* Print number of iterations */
   std::cout << "Number of steps: " << options.steps << std::endl;
@@ -714,28 +714,12 @@ void MD::apply_boundary_conditions(vector_3d &r, vector_3d &v, vector_3d &f) {
       if (r.z[i] > options.Lz) r.z[i] -= options.Lz;
       if (r.z[i] < 0.0) r.z[i] += options.Lz;
     }
-  } else if (boundary_condition == "HardWall") {
+  } else if (boundary_condition == "Reflective") {
     for (i = 0; i < options.N; ++i) {
-      // if (r.x[i] > options.Lx) r.x[i] = options.Lx - abs(r.x[i] -
-      // options.Lx);
-      if (r.x[i] > options.Lx) r.x[i] -= options.Lx;
-      if (r.x[i] > options.Lx) v.x[i] = -v.x[i];
-      // if (r.x[i] < 0.0) r.x[i] = abs(r.x[i]);
-      if (r.x[i] < 0.0) r.x[i] += options.Lx;
-      if (r.x[i] < 0.0) v.x[i] = -v.x[i];
-
-      // if (r.y[i] > options.Ly) r.y[i] = options.Ly - abs(r.y[i] -
-      // options.Ly);
-      if (r.y[i] > options.Ly) r.y[i] -= options.Ly;
-      if (r.y[i] > options.Ly) v.y[i] = -v.y[i];
-      // if (r.y[i] < 0.0) r.y[i] = abs(r.y[i]);
-      if (r.y[i] < 0.0) r.y[i] += options.Ly;
-      if (r.y[i] < 0.0) v.y[i] = -v.y[i];
-
-      if (r.z[i] > options.Lz) r.z[i] -= options.Lz;
-      if (r.z[i] > options.Lz) v.z[i] = -v.z[i];
-      if (r.z[i] < 0.0) r.z[i] += options.Lz;
-      if (r.z[i] < 0.0) v.z[i] = -v.z[i];
+      /* Flip the velocity sign */
+      if (r.x[i] > options.Lx && r.x[i] < 0.0) v.x[i] = -v.x[i];
+      if (r.y[i] > options.Ly && r.y[i] < 0.0) v.y[i] = -v.y[i];
+      if (r.z[i] > options.Lz && r.z[i] < 0.0) v.z[i] = -v.z[i];
     }
   }
 }

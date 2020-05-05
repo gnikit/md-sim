@@ -71,37 +71,32 @@ struct io_options_type {
 };
 
 struct options_type {
-  string simulation_type = "";     /* type of simulation e.g. NormalRun */
-  string potential_type = "";      /* pair potential type */
-  string stepping_alg = "";        /* iterative algorithm of particles */
-  string lattice = "";             /* lattice formation */
-  string iterative_method = "";    /* iterative algorithm of particles */
-  vector<size_t> particles;        /* number of particles in each axis */
-  double random_lattice_var = 0;   /* variance of dist for random lattice */
-  size_t steps = 2000;             /* number of total iterations */
-  size_t Nx, Ny, Nz, N = 0;        /* Particles in the x, y, z and total */
-  double Lx, Ly, Lz, L = 0;        /* Individual box lengths */
-  double volume = 0;               /* volume of the box */
-  double dt = 0.005;               /* timestep */
-  bool normalise_dt_w_temp = true; /* normalise the timestep with T0 */
-  double density = 0.5;            /* density */
-  double target_temperature = 0;   /* target/ Thermostat temperature */
-  double temperature = 0;          /* simulation temperature */
-  double power = 0;                /* pair potential intensity */
-  double a_cst = 0;                /* generic softening parameter */
-  double kinetic_energy = 0;       /* kinetic energy */
-  double cut_off = 0;              /* cut off radius of simulation */
-  double scale_v = 0;              /* velocity scaling */
+  string simulation_type = "";        /* type of simulation e.g. NormalRun */
+  string potential_type = "";         /* pair potential type */
+  string lattice = "SC";              /* lattice formation */
+  string iterative_method = "Verlet"; /* iterative algorithm of particles */
+  vector<size_t> particles;           /* number of particles in each axis */
+  double random_lattice_var = 0;      /* variance of dist for random lattice */
+  size_t steps = 2000;                /* number of total iterations */
+  size_t Nx, Ny, Nz, N = 0;           /* Particles in the x, y, z and total */
+  double Lx, Ly, Lz, L = 0;           /* Individual box lengths */
+  double volume = 0;                  /* volume of the box */
+  double dt = 0.005;                  /* timestep */
+  bool normalise_dt_w_temp = true;    /* normalise the timestep with T0 */
+  double density = 0.5;               /* density */
+  double target_temperature = 0;      /* target/ Thermostat temperature */
+  double temperature = 0;             /* simulation temperature */
+  double power = 0;                   /* pair potential intensity */
+  double a_cst = 0;                   /* generic softening parameter */
+  double kinetic_energy = 0;          /* kinetic energy */
+  double cut_off = 0;                 /* cut off radius of simulation */
+  double scale_v = 0;                 /* velocity scaling */
 
   io_options_type io_options;
   rdf_options_type rdf_options;
   compression_options_type compression_options;
   test_options_type test_options;
 
-  /* Default constructor */
-  // options_type();
-  // // Copy constructor
-  // options_type(const options_type &copy);
 };
 
 class point_3d {
@@ -172,15 +167,15 @@ struct data_type {
   vector_3d MSD;   /* MSD arrays */
   vector_3d sf;    /* Structure factor k-arrays */
 
-  vector<double> Cr;
-  vector<double> msd;
-  vector<double> u_en;
-  vector<double> k_en;
-  vector<double> pc;
-  vector<double> pk;
-  vector<double> temperature;
-  vector<double> density;
-  vector<double> rdf;
+  vector<double> Cr;          /* Velocity Autocorrelation Function*/
+  vector<double> msd;         /* Mean Square Displacement */
+  vector<double> u_en;        /*Potential Energy*/
+  vector<double> k_en;        /*Kinetic Energy*/
+  vector<double> pc;          /*Configurational Pressure*/
+  vector<double> pk;          /* Kinetic Pressure*/
+  vector<double> temperature; /*Temperature*/
+  vector<double> density;     /*Density*/
+  vector<double> rdf;         /*Radial distribution function*/
 
-  options_type options;
+  options_type options; /*Options variables*/
 };

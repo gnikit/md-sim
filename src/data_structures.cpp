@@ -37,6 +37,7 @@ std::vector<double> vector_3d::magnitude() {
     std::vector<double> magn(x.size());
 
     for (size_t i = 0; i < x.size(); ++i)
+      // todo: maybe use std::hypot
       magn[i] = sqrt(x[i] * x[i] + y[i] * y[i] + z[i] * z[i]);
 
     return magn;

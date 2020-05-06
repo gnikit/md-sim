@@ -66,16 +66,17 @@
 This in combination with the lattice formation will yield
 a total number of particles equal to:
 
-SC: particles **3
+SC: particles
 
-FCC: particles **3 *4
+FCC: particles *4
 
-BCC: particles **3 *2</a:documentation>
+BCC: particles *2</a:documentation>
         <ref name="integer_vector"/>
         <ref name="comment"/>
       </element>
       <ref name="lattice_type"/>
       <ref name="iterative_methods"/>
+      <ref name="boundary_conditions"/>
       <optional>
         <ref name="options"/>
       </optional>
@@ -240,6 +241,25 @@ expansions/compressions in the opposite direction of the phase diagram.</a:docum
         <a:documentation>Step through time using the Runge-Kuta 4th order algorithm</a:documentation>
         <attribute name="name">
           <value>RK4 </value>
+        </attribute>
+        <ref name="comment"/>
+      </element>
+    </choice>
+  </define>
+  <define name="boundary_conditions">
+    <choice>
+      <!-- TODO: the design of this will have to change if to consider mixed BCs -->
+      <element name="boundary_conditions">
+        <a:documentation>Periodic boundary conditions. Simulates an infinite cell.</a:documentation>
+        <attribute name="name">
+          <value>Periodic</value>
+        </attribute>
+        <ref name="comment"/>
+      </element>
+      <element name="boundary_conditions">
+        <a:documentation>Elastic collisions with a wall. Simulates a bounding box.</a:documentation>
+        <attribute name="name">
+          <value>Reflective</value>
         </attribute>
         <ref name="comment"/>
       </element>

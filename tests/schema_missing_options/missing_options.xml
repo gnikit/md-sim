@@ -9,6 +9,7 @@
     </particles>
     <lattice name="SC"/>
     <iterative_method name="Verlet"/>
+    <boundary_conditions name="Periodic"/>
   </setup>
   <io>
     <simulation_name>missing_options_</simulation_name>

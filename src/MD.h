@@ -256,6 +256,23 @@ class MD {
    */
   void apply_boundary_conditions(vector_3d &r, vector_3d &v, vector_3d &f);
 
+  /**
+   * @brief Applies a periodic boundary condition, which simulates
+   * an infinite volume of fluid.
+   *
+   * @param r: position vectors of particles
+   */
+  void periodic_boundary_conditions(vector_3d &r);
+
+  /**
+   * @brief Applies a reflective wall boundary condition, which is
+   * identical to having a hard wall boundary
+   *
+   * @param r: position vectors of particles
+   * @param v: velocity vectors of particles
+   */
+  void reflective_boundary_conditions(vector_3d const &r, vector_3d &v);
+
   /********************** STATISTICAL QUANTITIES METHODS **********************/
 
   /**

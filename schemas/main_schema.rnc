@@ -46,11 +46,11 @@ setup_sim =
         ## This in combination with the lattice formation will yield
         ## a total number of particles equal to:
         ##
-        ## SC: particles **3
+        ## SC: particles
         ##
-        ## FCC: particles **3 *4
+        ## FCC: particles *4
         ##
-        ## BCC: particles **3 *2
+        ## BCC: particles *2
         # element particles {
         #     attribute x { xsd:integer },
         #     attribute y { xsd:integer },
@@ -66,6 +66,8 @@ setup_sim =
         lattice_type,
 
         iterative_methods,
+
+        boundary_conditions,
 
         options?
     }
@@ -224,6 +226,22 @@ iterative_methods =
     ## Step through time using the Runge-Kuta 4th order algorithm
     element iterative_method {
         attribute name { "RK4 "},
+        comment
+    }
+)
+
+boundary_conditions =
+(
+    # TODO: the design of this will have to change if to consider mixed BCs
+
+    ## Periodic boundary conditions. Simulates an infinite cell.
+    element boundary_conditions {
+        attribute name { "Periodic" },
+        comment
+    }|
+    ## Elastic collisions with a wall. Simulates a bounding box.
+    element boundary_conditions {
+        attribute name { "Reflective" },
         comment
     }
 )

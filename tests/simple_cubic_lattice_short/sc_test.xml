@@ -9,6 +9,7 @@
     </particles>
     <lattice name="SC"/>
     <iterative_method name="Verlet"/>
+    <boundary_conditions name="Periodic"/>
     <rdf_bins>
       <integer_value rank="0">200</integer_value>
     </rdf_bins>

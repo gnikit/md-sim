@@ -114,7 +114,8 @@ MD::MD(options_type &input_options) {
     options.cut_off = options.L / 3.0;
   }
 
-  /* Set boundary conditions //todo */
+  /* Set boundary conditions */
+  std::cout << "Boundary conditions: " << options.bcs << std::endl;
 
   /* Accuracy of RDF */
   std::cout << "RDF bins: " << options.rdf_options.rdf_bins << std::endl;
@@ -701,26 +702,36 @@ std::tuple<double, double> MD::calculate_forces(vector_3d &x, vector_3d &f,
 /***************************** BOUNDARY CONDITIONS ****************************/
 
 void MD::apply_boundary_conditions(vector_3d &r, vector_3d &v, vector_3d &f) {
-  /* Apply periodic boundary conditions to ensure particles remain
-   inside the box */
-  size_t i;
-  std::string boundary_condition = "Periodic";
-  if (boundary_condition == "Periodic") {
-    for (i = 0; i < options.N; ++i) {
-      if (r.x[i] > options.Lx) r.x[i] -= options.Lx;
-      if (r.x[i] < 0.0) r.x[i] += options.Lx;
-      if (r.y[i] > options.Ly) r.y[i] -= options.Ly;
-      if (r.y[i] < 0.0) r.y[i] += options.Ly;
-      if (r.z[i] > options.Lz) r.z[i] -= options.Lz;
-      if (r.z[i] < 0.0) r.z[i] += options.Lz;
-    }
-  } else if (boundary_condition == "Reflective") {
-    for (i = 0; i < options.N; ++i) {
-      /* Flip the velocity sign */
-      if (r.x[i] > options.Lx && r.x[i] < 0.0) v.x[i] = -v.x[i];
-      if (r.y[i] > options.Ly && r.y[i] < 0.0) v.y[i] = -v.y[i];
-      if (r.z[i] > options.Lz && r.z[i] < 0.0) v.z[i] = -v.z[i];
-    }
+  if (options.bcs == "Periodic") {
+    periodic_boundary_conditions(r);
+
+  } else if (options.bcs == "Reflective") {
+    reflective_boundary_conditions(r, v);
+
+  } else {
+    std::cerr << "Supplied boundary condition: " << options.bcs
+              << " not implemented. Aboring!" << std::endl;
+    exit(-1);
+  }
+}
+
+void MD::periodic_boundary_conditions(vector_3d &r) {
+  for (size_t i = 0; i < options.N; ++i) {
+    if (r.x[i] > options.Lx) r.x[i] -= options.Lx;
+    if (r.x[i] < 0.0) r.x[i] += options.Lx;
+    if (r.y[i] > options.Ly) r.y[i] -= options.Ly;
+    if (r.y[i] < 0.0) r.y[i] += options.Ly;
+    if (r.z[i] > options.Lz) r.z[i] -= options.Lz;
+    if (r.z[i] < 0.0) r.z[i] += options.Lz;
+  }
+}
+
+void MD::reflective_boundary_conditions(vector_3d const &r, vector_3d &v) {
+  for (size_t i = 0; i < options.N; ++i) {
+    /* Flip the velocity sign */
+    if (r.x[i] > options.Lx || r.x[i] < 0.0) v.x[i] = -v.x[i];
+    if (r.y[i] > options.Ly || r.y[i] < 0.0) v.y[i] = -v.y[i];
+    if (r.z[i] > options.Lz || r.z[i] < 0.0) v.z[i] = -v.z[i];
   }
 }
 

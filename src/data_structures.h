@@ -75,6 +75,7 @@ struct options_type {
   string potential_type = "";         /* pair potential type */
   string lattice = "SC";              /* lattice formation */
   string iterative_method = "Verlet"; /* iterative algorithm of particles */
+  string bcs = "Periodic";            /* boundary conditions for whole box */
   vector<size_t> particles;           /* number of particles in each axis */
   double random_lattice_var = 0;      /* variance of dist for random lattice */
   size_t steps = 2000;                /* number of total iterations */
@@ -96,7 +97,6 @@ struct options_type {
   rdf_options_type rdf_options;
   compression_options_type compression_options;
   test_options_type test_options;
-
 };
 
 class point_3d {

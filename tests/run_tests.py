@@ -26,7 +26,7 @@ def run_file(test_dir, xml_input):
     if not os.path.isfile('../../bin/md'):
         print('-' * 80)
         print('Binary md not found in bin, calling make')
-        call(['make', '-C', '../..'])
+        call(['make', '-j8', '-C', '../..'])
 
     # See if the input test file exists
     try:
@@ -592,6 +592,52 @@ class TestIterativeAlgorithms(unittest.TestCase):
         self.assertTrue(get_test_result(test_results))
 
         print(f'Exiting: {f_dir}')
+
+
+# class TestBoundaryConditions(unittest.TestCase):
+
+#     def setUp(self):
+#         print('-'*80)
+
+#     def tearDown(self):
+#         call(['make', 'clean'])
+#         os.chdir('..')
+#         print('-'*80)
+
+#     def test_reflective_boundary(self):
+#         f_dir = 'reflective_boundary'
+#         print(f'Entering: {f_dir}')
+
+#         setup_ok = run_file(f_dir, 'reflective_bcs_test.xml')
+#         self.assertTrue(setup_ok)
+
+#         os.chdir(f_dir)
+#         test_results = []
+
+#         steps = 100
+#         sim_name = 'reflective_bcs_'
+
+#         # Test variables
+#         xyz_tracks = []
+#         xyz_tracks_ref = []
+#         for i in range(steps):
+
+#             # Load test data
+#             xyz_tracks.append(np.loadtxt(
+#                 f'{sim_name}xyz_data_{i}.csv', delimiter=',', skiprows=1))
+
+#             # Reference variables
+#             xyz_tracks_ref.append(np.loadtxt(
+#                 f'test_xyz_{i}.csv', delimiter=',', skiprows=1))
+
+#         # Test for consistency
+#         result = np.allclose(xyz_tracks, xyz_tracks_ref, rtol=1.0e-4)
+#         print(f'Testing x-axis tracking consistency with reference: {result}')
+#         test_results.append(result)
+
+#         self.assertTrue(get_test_result(test_results))
+
+#         print(f'Exiting: {f_dir}')
 
 
 if __name__ == '__main__':

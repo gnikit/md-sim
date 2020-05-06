@@ -46,11 +46,11 @@ setup_sim =
         ## This in combination with the lattice formation will yield
         ## a total number of particles equal to:
         ##
-        ## SC: particles **3
+        ## SC: particles
         ##
-        ## FCC: particles **3 *4
+        ## FCC: particles *4
         ##
-        ## BCC: particles **3 *2
+        ## BCC: particles *2
         # element particles {
         #     attribute x { xsd:integer },
         #     attribute y { xsd:integer },
@@ -65,18 +65,16 @@ setup_sim =
 
         lattice_type,
 
+        iterative_methods,
+
+        boundary_conditions,
+
         options?
     }
 )
 
 options =
 (
-    iterative_methods,
-
-    # ## Set the flag for incremental resizing of the simulation box.
-    # ## Set to true for phase transition studies else set to false.
-    # element compression { empty }?,
-
     ## Accuracy of the Radial Distribution Function (RDF).
     ## A large number of bins will result into a very accurate RDF,
     ## however if the simulation is short (small number of steps) the
@@ -215,13 +213,37 @@ simulation =
 
 iterative_methods =
 (
+    ## Step through time using the explicit Verlet algorithm
     element iterative_method {
-        attribute name { "VerletAlgorithm" }|
+        attribute name { "Verlet" },
+        comment
+    }|
+    ## Step through time using the Velocity Verlet algorithm
+    element iterative_method {
+        attribute name { "VelocityVerlet" },
+        comment
+    }|
+    ## Step through time using the Runge-Kuta 4th order algorithm
+    element iterative_method {
+        attribute name { "RK4 "},
+        comment
+    }
+)
 
-        attribute name { "RK4 "}
+boundary_conditions =
+(
+    # TODO: the design of this will have to change if to consider mixed BCs
 
-    },
-    comment
+    ## Periodic boundary conditions. Simulates an infinite cell.
+    element boundary_conditions {
+        attribute name { "Periodic" },
+        comment
+    }|
+    ## Elastic collisions with a wall. Simulates a bounding box.
+    element boundary_conditions {
+        attribute name { "Reflective" },
+        comment
+    }
 )
 
 start =

@@ -66,28 +66,24 @@
 This in combination with the lattice formation will yield
 a total number of particles equal to:
 
-SC: particles **3
+SC: particles
 
-FCC: particles **3 *4
+FCC: particles *4
 
-BCC: particles **3 *2</a:documentation>
+BCC: particles *2</a:documentation>
         <ref name="integer_vector"/>
         <ref name="comment"/>
       </element>
       <ref name="lattice_type"/>
+      <ref name="iterative_methods"/>
+      <ref name="boundary_conditions"/>
       <optional>
         <ref name="options"/>
       </optional>
     </element>
   </define>
   <define name="options">
-    <ref name="iterative_methods"/>
     <optional>
-      <!--
-        ## Set the flag for incremental resizing of the simulation box.
-        ## Set to true for phase transition studies else set to false.
-        element compression { empty }?,
-      -->
       <element name="rdf_bins">
         <a:documentation>Accuracy of the Radial Distribution Function (RDF).
 A large number of bins will result into a very accurate RDF,
@@ -226,17 +222,48 @@ expansions/compressions in the opposite direction of the phase diagram.</a:docum
     </choice>
   </define>
   <define name="iterative_methods">
-    <element name="iterative_method">
-      <choice>
+    <choice>
+      <element name="iterative_method">
+        <a:documentation>Step through time using the explicit Verlet algorithm</a:documentation>
         <attribute name="name">
-          <value>VerletAlgorithm</value>
+          <value>Verlet</value>
         </attribute>
+        <ref name="comment"/>
+      </element>
+      <element name="iterative_method">
+        <a:documentation>Step through time using the Velocity Verlet algorithm</a:documentation>
+        <attribute name="name">
+          <value>VelocityVerlet</value>
+        </attribute>
+        <ref name="comment"/>
+      </element>
+      <element name="iterative_method">
+        <a:documentation>Step through time using the Runge-Kuta 4th order algorithm</a:documentation>
         <attribute name="name">
           <value>RK4 </value>
         </attribute>
-      </choice>
-    </element>
-    <ref name="comment"/>
+        <ref name="comment"/>
+      </element>
+    </choice>
+  </define>
+  <define name="boundary_conditions">
+    <choice>
+      <!-- TODO: the design of this will have to change if to consider mixed BCs -->
+      <element name="boundary_conditions">
+        <a:documentation>Periodic boundary conditions. Simulates an infinite cell.</a:documentation>
+        <attribute name="name">
+          <value>Periodic</value>
+        </attribute>
+        <ref name="comment"/>
+      </element>
+      <element name="boundary_conditions">
+        <a:documentation>Elastic collisions with a wall. Simulates a bounding box.</a:documentation>
+        <attribute name="name">
+          <value>Reflective</value>
+        </attribute>
+        <ref name="comment"/>
+      </element>
+    </choice>
   </define>
   <start>
     <element name="input_variables">

@@ -22,7 +22,13 @@ void stat_file::write_data_file(
     std::ofstream &file_stream, std::string const &header,
     std::vector<std::vector<double>> const &all_output_vectors) {
   /* Write the timestamp and header to the stream */
-  time_stamp(file_stream, header);
+  /**
+   * @brief 
+   * If this is to be reabled I will have to add padding of deliters equal
+   *  to the number of columns-1, since numpy has a problem with jagged CSV rows
+   */
+  if (false) time_stamp(file_stream, header);
+  else file_stream << header << std::endl;
 
   file_stream.precision(14);
   file_stream << std::scientific;
@@ -116,9 +122,9 @@ void stat_file::write_file(std::vector<std::vector<double>> &output_quantities,
   FileIO::Write2File<double>(output_quantities, fstream, del, header, format);
 }
 
-void stat_file::write_file(std::vector<std::vector<double>*> &output_quantities,
-                           std::ofstream &fstream, std::string const &header,
-                           size_t format) {
+void stat_file::write_file(
+    std::vector<std::vector<double> *> &output_quantities,
+    std::ofstream &fstream, std::string const &header, size_t format) {
   std::string del = ",";
   /* Write the 2D vector in a row major format, each vector is a row in file */
   FileIO::Write2File<double>(output_quantities, fstream, del, header, format);

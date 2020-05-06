@@ -2,50 +2,54 @@ SHELL = /bin/bash
 include Makefile.variables
 
 RM := rm -rf
+SPUD_DIR := spud
+CURRENT_DIR := $(shell pwd)
 
-default: libmd
+default: libmd schema
 
-all: libmd examples schemas
+all: libmd examples schema
 
-examples: libmd
-	@echo "MAKE MD examples"
-	@cd examples && $(MAKE)
 
-libmd:
-	@mkdir -p include
-	@echo "MAKE lib"
-	@cd lib && $(MAKE)
+libmd: libspud
 	@echo "MAKE MD src"
-	@cd src && $(MAKE)
+	$(MAKE) -C src
 
-debug_libmd:
-	@echo "DEBUG BUILD"
-	@mkdir -p include
-	@echo "MAKE lib"
-	@cd lib && $(MAKE)
-	@echo "MAKE MD src"
-	@cd src && $(MAKE) debug
+libspud:
+ifeq ("$(wildcard $(SPUD_DIR)/libspud.a)","")
+	@echo "Configuring libspud"
+	@cd $(SPUD_DIR) && ./configure --prefix= --disable-shared
+endif
+	@echo "MAKE libspud"
+	$(MAKE) -C $(SPUD_DIR)
+	$(MAKE) -C $(SPUD_DIR) install-libspud DESTDIR=..
+	$(MAKE) -C $(SPUD_DIR) install-spudtools DESTDIR=..
+	$(MAKE) -C $(SPUD_DIR) install-diamond DESTDIR=../..
+	$(MAKE) -C $(SPUD_DIR) install-dxdiff DESTDIR=../..
+
+schema: libspud
+	# This is a bug fix where because spud-preprocess does not look in the
+	# right place for the spud_base.rnc. It ignores the prefix
+	sed -i "s+cp /share+cp $(CURRENT_DIR)/share+g" ./bin/spud-preprocess
+	./bin/spud-preprocess ./schemas/main_schema.rnc
+
+debug_libmd: debug_flag libmb
 
 debug:
 	@echo "DEBUG BUILD"
-	@echo "MAKE lib"
-	@cd lib && $(MAKE)
 	@echo "MAKE MD src"
-	@cd src && $(MAKE) debug
+	$(MAKE) -C src debug
 	@echo "MAKE examples"
-	@cd examples && $(MAKE) debug
+	$(MAKE) -C examples debug
 
-# TODO: this needs fixing, spud-preprocess has not been installed
-#		for that you need to run make install in spud
-schemas:
-	# If the user has installed libspud see fluidity project on github
-	spud-preprocess schemas/main_schema.rnc
+examples: libmd
+	@echo "MAKE MD examples"
+	$(MAKE) -C examples
 
 toolkit:
 	@echo "MAKE tools"
-	@cd tools && $(MAKE) scripts
+	$(MAKE) -C tools scripts
 
-python:
+python-md-tools:
 	@echo "MAKE python modules"
 	@cd tools/md-tools && pip3 install --user --upgrade -e .
 
@@ -59,22 +63,18 @@ test_examples: libmd
 	@cd examples/examplebin; for i in ./*; do echo $$i && ./$$i >> $$i.log; done
 
 clean:
-	$(RM) *.log *.txt		# TODO: this will cause an issue if/when we change to cmake
 	@echo "Cleaning lib"
-	@cd lib && $(MAKE) clean
-	@echo "Cleaning MD src and bin"
-	@cd  src && $(MAKE) clean
-	@echo "Cleaning MD Examples src/examples"
-	@cd examples && $(MAKE) clean
+	$(RM) lib
 	@echo "Cleaning bin"
-	@cd bin && $(RM) *
+	$(RM) bin
+	@echo "Cleaning share"
+	$(RM) share
+	@echo "Cleaning MD src"
+	$(MAKE) -C src clean
+	@echo "Cleaning examples"
+	$(MAKE) -C examples clean
 	@echo "Cleaning include"
-	@cd include && $(RM) *.o
+	@cd include && $(RM) *.o *.mod spud
 
-clean_keep_data:
-	@echo "Cleaning lib"
-	@cd lib && $(MAKE) clean
-	@echo "Cleaning MD src and bin"
-	@cd  src && $(MAKE) clean
-	@echo "Cleaning MD Examples src/examples"
-	@cd examples && $(MAKE) clean_keep_data
+distclean: clean
+	$(MAKE) -C spud distclean

@@ -2,7 +2,7 @@
 <input_variables>
   <setup>
     <steps>
-      <integer_value rank="0">2000</integer_value>
+      <integer_value rank="0">5000</integer_value>
     </steps>
     <particles>
       <integer_value rank="1" shape="3">8 8 8</integer_value>
@@ -11,14 +11,11 @@
     <iterative_method name="Verlet"/>
     <boundary_conditions name="Periodic"/>
     <rdf_bins>
-      <integer_value rank="0">200</integer_value>
+      <integer_value rank="0">100</integer_value>
     </rdf_bins>
-    <rdf_equilibrate>
-      <integer_value rank="0">300</integer_value>
-    </rdf_equilibrate>
   </setup>
   <io>
-    <simulation_name>bip_potential_test_</simulation_name>
+    <simulation_name>verlet_</simulation_name>
     <track_particles name="false"/>
     <energies name="true"/>
     <pressure name="true"/>
@@ -29,19 +26,13 @@
     <positions name="true"/>
   </io>
   <simulation_type name="NormalRun">
-    <pair_potential name="BoundedInversePower">
+    <pair_potential name="GaussianCoreModel">
       <density>
         <real_value rank="0">0.5</real_value>
       </density>
       <temperature>
         <real_value rank="0">1.0</real_value>
       </temperature>
-      <potential_strength>
-        <real_value rank="0">8</real_value>
-      </potential_strength>
-      <softening_parameter>
-        <real_value rank="0">0.5</real_value>
-      </softening_parameter>
     </pair_potential>
   </simulation_type>
   <enable_testing/>

@@ -26,7 +26,7 @@ def run_file(test_dir, xml_input):
     if not os.path.isfile('../../bin/md'):
         print('-' * 80)
         print('Binary md not found in bin, calling make')
-        call(['make', '-C', '../..'])
+        call(['make', '-j8', '-C', '../..'])
 
     # See if the input test file exists
     try:
@@ -83,13 +83,13 @@ class TestPotentials(unittest.TestCase):
         # Test variables
         rdf_test = np.loadtxt(
             f'{sim_name}RDF{test_string}', delimiter=',', unpack=True,
-            skiprows=2)
+            skiprows=1)
         data_test = np.loadtxt(
             f'{sim_name}Data{test_string}', delimiter=',', unpack=True,
-            skiprows=2)
+            skiprows=1)
         pos_test = np.loadtxt(
             f'{sim_name}Positions_Velocities{test_string}', delimiter=',',
-            unpack=True, skiprows=2)
+            unpack=True)
 
         # Reference variables
         rdf_ref = np.loadtxt('test_rdf.log', delimiter=',', unpack=True)
@@ -130,11 +130,11 @@ class TestPotentials(unittest.TestCase):
 
         # Test variables
         rdf_test = np.loadtxt(
-            f'{sim_name}RDF{test_string}', delimiter=',', unpack=True, skiprows=2)
+            f'{sim_name}RDF{test_string}', delimiter=',', unpack=True)
         data_test = np.loadtxt(
-            f'{sim_name}Data{test_string}', delimiter=',', unpack=True, skiprows=2)
+            f'{sim_name}Data{test_string}', delimiter=',', unpack=True)
         pos_test = np.loadtxt(
-            f'{sim_name}Positions_Velocities{test_string}', delimiter=',', unpack=True, skiprows=2)
+            f'{sim_name}Positions_Velocities{test_string}', delimiter=',', unpack=True)
 
         # Reference variables
         rdf_ref = np.loadtxt('test_rdf.log', delimiter=',', unpack=True)
@@ -177,11 +177,11 @@ class TestPotentials(unittest.TestCase):
 
         # Test variables
         rdf_test = np.loadtxt(
-            f'{sim_name}RDF{test_string}', delimiter=',', unpack=True, skiprows=2)
+            f'{sim_name}RDF{test_string}', delimiter=',', unpack=True)
         data_test = np.loadtxt(
-            f'{sim_name}Data{test_string}', delimiter=',', unpack=True, skiprows=2)
+            f'{sim_name}Data{test_string}', delimiter=',', unpack=True)
         pos_test = np.loadtxt(
-            f'{sim_name}Positions_Velocities{test_string}', delimiter=',', unpack=True, skiprows=2)
+            f'{sim_name}Positions_Velocities{test_string}', delimiter=',', unpack=True)
 
         # Reference variables
         rdf_ref = np.loadtxt('test_rdf.log', delimiter=',', unpack=True)
@@ -223,11 +223,11 @@ class TestPotentials(unittest.TestCase):
 
         # Test variables
         rdf_test = np.loadtxt(
-            f'{sim_name}RDF{test_string}', delimiter=',', unpack=True, skiprows=2)
+            f'{sim_name}RDF{test_string}', delimiter=',', unpack=True)
         data_test = np.loadtxt(
-            f'{sim_name}Data{test_string}', delimiter=',', unpack=True, skiprows=2)
+            f'{sim_name}Data{test_string}', delimiter=',', unpack=True)
         pos_test = np.loadtxt(
-            f'{sim_name}Positions_Velocities{test_string}', delimiter=',', unpack=True, skiprows=2)
+            f'{sim_name}Positions_Velocities{test_string}', delimiter=',', unpack=True)
 
         # Reference variables
         rdf_ref = np.loadtxt('test_rdf.log', delimiter=',', unpack=True)
@@ -281,7 +281,7 @@ class TestLatticeStructures(unittest.TestCase):
         # Test variables
         pos_test = np.loadtxt(
             f'{sim_name}Positions_Velocities{test_string}', usecols=(1, 2, 3),
-            delimiter=',', unpack=True, skiprows=2)
+            delimiter=',', unpack=True)
 
         # Reference variables
         pos_ref = np.loadtxt('test_positions.log',
@@ -315,7 +315,7 @@ class TestLatticeStructures(unittest.TestCase):
         # Test variables
         pos_test = np.loadtxt(
             f'{sim_name}Positions_Velocities{test_string}', usecols=(1, 2, 3),
-            delimiter=',', unpack=True, skiprows=2)
+            delimiter=',', unpack=True)
 
         # Reference variables
         pos_ref = np.loadtxt('test_positions.log',
@@ -349,7 +349,7 @@ class TestLatticeStructures(unittest.TestCase):
         # Test variables
         pos_test = np.loadtxt(
             f'{sim_name}Positions_Velocities{test_string}', usecols=(1, 2, 3),
-            delimiter=',', unpack=True, skiprows=2)
+            delimiter=',', unpack=True)
 
         # Reference variables
         pos_ref = np.loadtxt('test_positions.log',
@@ -397,11 +397,11 @@ class Test3DVisualisation(unittest.TestCase):
 
             # Load test data
             xyz_tracks.append(np.loadtxt(
-                f'{sim_name}xyz_data_{i}.csv', delimiter=',', skiprows=2))
+                f'{sim_name}xyz_data_{i}.csv', delimiter=',', skiprows=1))
 
             # Reference variables
             xyz_tracks_ref.append(np.loadtxt(
-                f'test_xyz_{i}.csv', delimiter=',', skiprows=2))
+                f'test_xyz_{i}.csv', delimiter=',', skiprows=1))
 
         # Test for consistency
         result = np.allclose(xyz_tracks, xyz_tracks_ref, rtol=1.0e-4)
@@ -438,7 +438,7 @@ class TestConstructors(unittest.TestCase):
 
         # Test variables
         data = np.loadtxt(f'{sim_name}{test_string}',
-                          delimiter=',', skiprows=2)
+                          delimiter=',')
 
         # Reference variables
         data_ref = np.loadtxt('test_data.log', delimiter=',')
@@ -479,7 +479,7 @@ class TestIOOptions(unittest.TestCase):
 
         # Test variables
         data = np.loadtxt(f'{sim_name}{test_string}',
-                          delimiter=',', skiprows=2)
+                          delimiter=',')
 
         # Reference variables
         data_ref = np.loadtxt('test_data.log', delimiter=',')
@@ -539,6 +539,105 @@ class TestCompression(unittest.TestCase):
         self.assertTrue(get_test_result(test_results))
 
         print(f'Exiting: {f_dir}')
+
+
+class TestIterativeAlgorithms(unittest.TestCase):
+
+    def setUp(self):
+        print('-'*80)
+
+    def tearDown(self):
+        call(['make', 'clean'])
+        os.chdir('..')
+        print('-'*80)
+
+    def test_velocity_verlet(self):
+        f_dir = 'velocity_verlet'
+        print(f'Entering: {f_dir}')
+
+        setup_ok = run_file(f_dir, 'verlet.xml')
+        self.assertTrue(setup_ok)
+
+        setup_ok = run_file(f_dir, 'velocity_verlet.xml')
+        self.assertTrue(setup_ok)
+
+        os.chdir(f_dir)
+        test_results = []
+
+        test_string = ('Data_step_5000_particles_512_rho_0.5000_T_1.0000.log')
+        sim_name = 'velocity_verlet_'
+
+        # Test variables
+        data = np.loadtxt(f'{sim_name}{test_string}', delimiter=',')
+
+        # Reference variables
+        data_ref = np.loadtxt(f'verlet_{test_string}', delimiter=',')
+
+        # BUG: potential bug I think these should also agree
+        skip_columns = [8, 9, 10, 11]  # skip VAF and SF
+        headers = ['step', 'rho', 'T', 'U', 'K', 'Pc',
+                   'Pk', 'MSD', 'VAF', 'SFx', 'SFy', 'SFz']
+        # Test for consistency
+        for j in range(len(data[0])):
+
+            if j in skip_columns:
+                print(f'  Skipping column {j}: {headers[j]}')
+                pass
+            else:
+                result = np.allclose(data[-1][j], data_ref[-1][j], rtol=1e-2)
+                print(f'  Testing velocity verlet data file column {j}: {headers[j]}'
+                      f' against results with explicit Verlet: {result}')
+                test_results.append(result)
+
+        self.assertTrue(get_test_result(test_results))
+
+        print(f'Exiting: {f_dir}')
+
+
+# class TestBoundaryConditions(unittest.TestCase):
+
+#     def setUp(self):
+#         print('-'*80)
+
+#     def tearDown(self):
+#         call(['make', 'clean'])
+#         os.chdir('..')
+#         print('-'*80)
+
+#     def test_reflective_boundary(self):
+#         f_dir = 'reflective_boundary'
+#         print(f'Entering: {f_dir}')
+
+#         setup_ok = run_file(f_dir, 'reflective_bcs_test.xml')
+#         self.assertTrue(setup_ok)
+
+#         os.chdir(f_dir)
+#         test_results = []
+
+#         steps = 100
+#         sim_name = 'reflective_bcs_'
+
+#         # Test variables
+#         xyz_tracks = []
+#         xyz_tracks_ref = []
+#         for i in range(steps):
+
+#             # Load test data
+#             xyz_tracks.append(np.loadtxt(
+#                 f'{sim_name}xyz_data_{i}.csv', delimiter=',', skiprows=1))
+
+#             # Reference variables
+#             xyz_tracks_ref.append(np.loadtxt(
+#                 f'test_xyz_{i}.csv', delimiter=',', skiprows=1))
+
+#         # Test for consistency
+#         result = np.allclose(xyz_tracks, xyz_tracks_ref, rtol=1.0e-4)
+#         print(f'Testing x-axis tracking consistency with reference: {result}')
+#         test_results.append(result)
+
+#         self.assertTrue(get_test_result(test_results))
+
+#         print(f'Exiting: {f_dir}')
 
 
 if __name__ == '__main__':

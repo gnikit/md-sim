@@ -1,5 +1,5 @@
 SHELL = /bin/bash
-include ../../Makefile.variables
+include ../../Makefile.variable
 LIB = ../../lib
 BIN = ../../bin
 SRC = ../../src
@@ -9,9 +9,6 @@ LN  = -L ../../lib -L ../../src -L ../../tools/FileIO
 LINKER = $(INC) $(LN) -lmd
 
 all: visualise_fluid
-			
-debug: CXXFLAGS = $(DCXXFLAGS)
-debug: visualise_fluid
 
 visualise_fluid: *.o $(LIB)/libmd.a
 	$(CXX) $(CXXFLAGS) *.o $(LINKER) -o visualise_fluid -lstdc++fs

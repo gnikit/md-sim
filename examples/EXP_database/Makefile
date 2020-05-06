@@ -1,5 +1,5 @@
 SHELL = /bin/bash
-include ../../Makefile.variables
+include ../../Makefile.variable
 LIB := ../../lib
 BIN := ../../bin
 SRC := ../../src
@@ -9,9 +9,6 @@ LN  := -L ../../lib
 LINKER = $(INC) $(LN) -lmd
 
 all: exp_database
-			
-debug: CXXFLAGS = $(DCXXFLAGS)
-debug: exp_database
 
 exp_database: *.o $(LIB)/libmd.a
 	$(CXX) $(CXXFLAGS) *.o $(LINKER) -o exp_database -lstdc++fs

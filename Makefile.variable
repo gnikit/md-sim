@@ -1,0 +1,28 @@
+SHELL = /bin/bash
+
+STD       := -std=c++1z
+CXXFLAGS  := $(STD) -pthread -Wall
+
+INC    := -I../include
+LN     := -L../lib
+LINKER := $(INC) $(LN) -lmd -lspud -lstdc++fs
+
+# Test if we have intel compilers in our PATH
+ifeq (, $(shell which icpc))
+	# GNU compiler
+	CXX = g++
+ifeq ($(debug),1)
+	CXXFLAGS += -g
+else
+	CXXFLAGS += -O3
+endif
+else
+	# INTEL compiler
+	CXX = icpc
+ifeq ($(debug),1)
+	CXXFLAGS += -g
+else
+	# Aggressive optimisations hurt our accuracy, hence some tests fail
+	CXXFLAGS += -Ofast -xHOST -m64 -use-intel-optimized-headers
+endif
+endif

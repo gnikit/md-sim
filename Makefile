@@ -1,16 +1,15 @@
 SHELL = /bin/bash
-include Makefile.variables
+include Makefile.variable
 
 RM := rm -rf
 SPUD_DIR := spud
 CURRENT_DIR := $(shell pwd)
 
-default: libmd schema
+default: libmd schemas
 
-all: libmd examples schema
+all: libmd examples schemas
 
-
-libmd: libspud
+libmd: libspud fileio
 	@echo "MAKE MD src"
 	$(MAKE) -C src
 
@@ -26,20 +25,16 @@ endif
 	$(MAKE) -C $(SPUD_DIR) install-diamond DESTDIR=../..
 	$(MAKE) -C $(SPUD_DIR) install-dxdiff DESTDIR=../..
 
-schema: libspud
+fileio:
+	cp tools/FileIO/FileIO.h include/
+
+schemas: libspud
 	# This is a bug fix where because spud-preprocess does not look in the
 	# right place for the spud_base.rnc. It ignores the prefix
 	sed -i "s+cp /share+cp $(CURRENT_DIR)/share+g" ./bin/spud-preprocess
 	./bin/spud-preprocess ./schemas/main_schema.rnc
 
-debug_libmd: debug_flag libmb
-
-debug:
-	@echo "DEBUG BUILD"
-	@echo "MAKE MD src"
-	$(MAKE) -C src debug
-	@echo "MAKE examples"
-	$(MAKE) -C examples debug
+.PHONY: scehmas
 
 examples: libmd
 	@echo "MAKE MD examples"

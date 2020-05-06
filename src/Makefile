@@ -1,5 +1,6 @@
 SHELL = /bin/bash
-include ../Makefile.variables
+include ../Makefile.variable
+
 LIB := ../lib
 BIN := ../bin
 INCLUDE := ../include
@@ -8,9 +9,6 @@ FILES := $(wildcard *.cpp)
 OBJS  := $(patsubst %.cpp, %.o, $(FILES))
 
 all: md libmd.a
-
-debug: CXXFLAGS = $(DCXXFLAGS)
-debug: md libmd.a
 
 md: libmd.a main.o 
 	$(CXX) $(CXXFLAGS) main.o $(LINKER) -o $(BIN)/md

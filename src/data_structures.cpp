@@ -1,5 +1,18 @@
 #include "data_structures.h"
 
+std::ostream& operator<<(std::ostream& out, vector_3d const& v) {
+  for (size_t i = 0; i < v.x.size(); ++i)
+    out << v.x[i] << ' ' << v.y[i] << ' ' << v.z[i] << std::endl;
+
+  return out;
+}
+
+size_t vector_3d::size() {
+  if (!(x.size() == y.size() && x.size() == z.size())) abort();
+
+  return x.size();
+}
+
 void vector_3d::resize(size_t const& sz) {
   x.resize(sz);
   y.resize(sz);

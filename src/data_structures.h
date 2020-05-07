@@ -1,4 +1,4 @@
-
+#pragma once
 #include <iostream>
 #include <map>
 #include <string>
@@ -133,12 +133,27 @@ class point_3d {
 
 class vector_3d {
  public:
+  vector_3d() {}
+  vector_3d(vector<double> X, vector<double> Y, vector<double> Z)
+      : x{X}, y{Y}, z{Z} {}
+
   vector<double> x;
   vector<double> y;
   vector<double> z;
 
+  /*************************** OPERATOR OVERLOADING ***************************/
+
+  friend std::ostream& operator<<(std::ostream& out, const vector_3d& v);
+
   /* Overloads of existing vector routines for ease of use */
   /****************************************************************************/
+
+  /**
+   * @brief Returns x.size() assuming x.size() == y.size() == z.size()
+   *
+   * @return size_t vector size
+   */
+  size_t size();
 
   void resize(size_t const& sz);
   void resize(size_t const& sz, double val);

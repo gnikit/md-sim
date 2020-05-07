@@ -48,13 +48,13 @@ namespace fs = std::experimental::filesystem;
 
 class MD {
  protected:
-  vector_3d r;     /* Position Arrays */
-  vector_3d v;     /* Velocity Arrays */
-  vector_3d f;     /* Force arrays */
-  vector_3d Cv;    /* VAF arrays */
-  vector_3d MSD_r; /* used in MSD calculation */
-  vector_3d MSD;   /* MSD arrays */
-  vector_3d sf;    /* Structure factor k-arrays */
+  vector_3d<double> r;     /* Position Arrays */
+  vector_3d<double> v;     /* Velocity Arrays */
+  vector_3d<double> f;     /* Force arrays */
+  vector_3d<double> Cv;    /* VAF arrays */
+  vector_3d<double> MSD_r; /* used in MSD calculation */
+  vector_3d<double> MSD;   /* MSD arrays */
+  vector_3d<double> sf;    /* Structure factor k-arrays */
 
   /* Statistical quantity vectors, VAF, MSD, Energies and pressures */
   std::vector<double> Cr, msd, u_en, k_en, pc, pk, temperature, density, rdf,
@@ -144,7 +144,8 @@ class MD {
    * @param TEMPERATURE: Thermostat target temperature
    * @return kinetic energy (normalised)
    */
-  double initialise(vector_3d &r, vector_3d &v, double TEMPERATURE);
+  double initialise(vector_3d<double> &r, vector_3d<double> &v,
+                    double TEMPERATURE);
 
   /**
    * @brief Outputs the positions r of the particles, based on the input
@@ -157,7 +158,7 @@ class MD {
    * @param lattice: type of lattice
    * @param r: particle positions
    */
-  void choose_lattice_formation(std::string &lattice, vector_3d &r);
+  void choose_lattice_formation(std::string &lattice, vector_3d<double> &r);
 
   /**
    * @brief
@@ -170,7 +171,7 @@ class MD {
    * @param v: velocity vectors of particles
    * @param TEMPERATURE: Temperature of the MB distribution
    */
-  void mb_distribution(vector_3d &v, double TEMPERATURE);
+  void mb_distribution(vector_3d<double> &v, double TEMPERATURE);
 
   /**************************** ITERATIVE METHODS *****************************/
 
@@ -187,9 +188,9 @@ class MD {
    *            MSD requires a copy of the particles where BCs are not applied.
    * @return std::tuple<double, double, double> KE, U, PC
    */
-  std::tuple<double, double, double> stepping_algorithm(vector_3d &r,
-                                                        vector_3d &v,
-                                                        vector_3d &f,
+  std::tuple<double, double, double> stepping_algorithm(vector_3d<double> &r,
+                                                        vector_3d<double> &v,
+                                                        vector_3d<double> &f,
                                                         size_t &step, bool msd);
   /**
    * @brief An iterative leap-frog Verlet Algorithm.
@@ -200,8 +201,9 @@ class MD {
    * @param step: timestep number (used for calculating rdf correctly)
    * @return std::tuple<double, double, double> KE, U, PC
    */
-  std::tuple<double, double, double> verlet(vector_3d &r, vector_3d &v,
-                                            vector_3d &f, size_t &step);
+  std::tuple<double, double, double> verlet(vector_3d<double> &r,
+                                            vector_3d<double> &v,
+                                            vector_3d<double> &f, size_t &step);
 
   /**
    * @brief Iterative Velocity verlet algorithm.
@@ -212,8 +214,10 @@ class MD {
    * @param i: timestep number (used for calculating rdf correctly)
    * @return std::tuple<double, double, double> KE, U, PC
    */
-  std::tuple<double, double, double> velocity_verlet(vector_3d &r, vector_3d &v,
-                                                     vector_3d &f, size_t &i);
+  std::tuple<double, double, double> velocity_verlet(vector_3d<double> &r,
+                                                     vector_3d<double> &v,
+                                                     vector_3d<double> &f,
+                                                     size_t &i);
 
   /**
    * @brief A Runge Kutta 4th order iterative algorithm
@@ -224,8 +228,10 @@ class MD {
    * @param step: timestep number (used for calculating rdf correctly)
    * @return std::tuple<double, double, double> KE, U, PC
    */
-  std::tuple<double, double, double> runge_kutta4(vector_3d &r, vector_3d &v,
-                                                  vector_3d &f, size_t &step);
+  std::tuple<double, double, double> runge_kutta4(vector_3d<double> &r,
+                                                  vector_3d<double> &v,
+                                                  vector_3d<double> &f,
+                                                  size_t &step);
 
   /**
    * @brief Calculates the forces interactions of a given pair potential
@@ -239,7 +245,8 @@ class MD {
    * @param potential: Type of the pair potential
    * @return std::tuple<double, double> Potential Energy, Configuration Pressure
    */
-  std::tuple<double, double> calculate_forces(vector_3d &x, vector_3d &f,
+  std::tuple<double, double> calculate_forces(vector_3d<double> &x,
+                                              vector_3d<double> &f,
                                               size_t &step_index,
                                               pair_potential_type &potential);
 
@@ -254,7 +261,8 @@ class MD {
    * @param v: velocity vectors of particles
    * @param f: force vectors of particles
    */
-  void apply_boundary_conditions(vector_3d &r, vector_3d &v, vector_3d &f);
+  void apply_boundary_conditions(vector_3d<double> &r, vector_3d<double> &v,
+                                 vector_3d<double> &f);
 
   /**
    * @brief Applies a periodic boundary condition, which simulates
@@ -262,7 +270,7 @@ class MD {
    *
    * @param r: position vectors of particles
    */
-  void periodic_boundary_conditions(vector_3d &r);
+  void periodic_boundary_conditions(vector_3d<double> &r);
 
   /**
    * @brief Applies a reflective wall boundary condition, which is
@@ -271,7 +279,8 @@ class MD {
    * @param r: position vectors of particles
    * @param v: velocity vectors of particles
    */
-  void reflective_boundary_conditions(vector_3d const &r, vector_3d &v);
+  void reflective_boundary_conditions(vector_3d<double> const &r,
+                                      vector_3d<double> &v);
 
   /********************** STATISTICAL QUANTITIES METHODS **********************/
 
@@ -284,7 +293,8 @@ class MD {
    * @param Cv: holds the particle velocities at t = 0
    * @param v: velocity vectors of particles
    */
-  void velocity_autocorrelation_function(vector_3d &Cv, vector_3d &v);
+  void velocity_autocorrelation_function(vector_3d<double> &Cv,
+                                         vector_3d<double> &v);
 
   /**
    * @brief
@@ -316,7 +326,8 @@ class MD {
    * @param MSD: vectors containing the particle positions at t = 0
    * @param MSD_r: position vectors of particles, with no boundaries
    */
-  void mean_square_displacement(vector_3d &MSD, vector_3d &MSD_r);
+  void mean_square_displacement(vector_3d<double> &MSD,
+                                vector_3d<double> &MSD_r);
 
   /**
    * @brief
@@ -325,7 +336,7 @@ class MD {
    *
    * @param r: position vectors of particles
    */
-  void structure_factor(vector_3d &r);
+  void structure_factor(vector_3d<double> &r);
 
   /***************************** LOGGING METHODS ******************************/
 

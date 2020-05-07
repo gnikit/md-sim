@@ -389,7 +389,8 @@ void MD::enable_testing(bool is_testing) {
 
 /*************************** INITIALISATION METHODS ***************************/
 
-double MD::initialise(vector_3d &r, vector_3d &v, double TEMPERATURE) {
+double MD::initialise(vector_3d<double> &r, vector_3d<double> &v,
+                      double TEMPERATURE) {
   /* Initialise position matrix and velocity matrix from Cubic Centred Lattice
    */
   if (!options.compression_options.compression ||
@@ -451,7 +452,7 @@ double MD::initialise(vector_3d &r, vector_3d &v, double TEMPERATURE) {
   return KE;
 }
 
-void MD::choose_lattice_formation(std::string &lattice, vector_3d &r) {
+void MD::choose_lattice_formation(std::string &lattice, vector_3d<double> &r) {
   if (lattice == "FCC") {
     /* Coordinates for the FCC lattice */
     double x_c[4] = {0.25, 0.75, 0.75, 0.25};
@@ -513,7 +514,7 @@ void MD::choose_lattice_formation(std::string &lattice, vector_3d &r) {
   }
 }
 
-void MD::mb_distribution(vector_3d &v, double TEMPERATURE) {
+void MD::mb_distribution(vector_3d<double> &v, double TEMPERATURE) {
   double kb = 1.0;
   double m = 1.0;
 
@@ -542,8 +543,11 @@ void MD::mb_distribution(vector_3d &v, double TEMPERATURE) {
 
 /***************************** ITERATIVE METHODS ******************************/
 
-std::tuple<double, double, double> MD::stepping_algorithm(
-    vector_3d &r, vector_3d &v, vector_3d &f, size_t &step, bool msd) {
+std::tuple<double, double, double> MD::stepping_algorithm(vector_3d<double> &r,
+                                                          vector_3d<double> &v,
+                                                          vector_3d<double> &f,
+                                                          size_t &step,
+                                                          bool msd) {
   size_t i;
   double U = 0;
   double KE = 0;
@@ -577,8 +581,10 @@ std::tuple<double, double, double> MD::stepping_algorithm(
   return std::make_tuple(KE, U, PC);
 }
 
-std::tuple<double, double, double> MD::verlet(vector_3d &r, vector_3d &v,
-                                              vector_3d &f, size_t &step) {
+std::tuple<double, double, double> MD::verlet(vector_3d<double> &r,
+                                              vector_3d<double> &v,
+                                              vector_3d<double> &f,
+                                              size_t &step) {
   size_t i;
   double KE = 0;
   double dt = options.dt;
@@ -605,13 +611,13 @@ std::tuple<double, double, double> MD::verlet(vector_3d &r, vector_3d &v,
   return std::make_tuple(KE, U, PC);
 }
 
-std::tuple<double, double, double> MD::velocity_verlet(vector_3d &r,
-                                                       vector_3d &v,
-                                                       vector_3d &f,
+std::tuple<double, double, double> MD::velocity_verlet(vector_3d<double> &r,
+                                                       vector_3d<double> &v,
+                                                       vector_3d<double> &f,
                                                        size_t &step) {
   double KE = 0;
   double dt = options.dt;
-  vector_3d f_n = f;
+  vector_3d<double> f_n = f;
   pair_potential_type force = get_force_func(options.potential_type);
 
   /* r^(n+1) = r^(n) + v^(n)*dt + f^(n)*(dt^2 * 0.5) */
@@ -636,7 +642,8 @@ std::tuple<double, double, double> MD::velocity_verlet(vector_3d &r,
   return std::make_tuple(KE, U, PC);
 }
 
-std::tuple<double, double> MD::calculate_forces(vector_3d &x, vector_3d &f,
+std::tuple<double, double> MD::calculate_forces(vector_3d<double> &x,
+                                                vector_3d<double> &f,
                                                 size_t &step_idx,
                                                 pair_potential_type &p) {
   /* Resetting forces */
@@ -705,7 +712,8 @@ std::tuple<double, double> MD::calculate_forces(vector_3d &x, vector_3d &f,
 
 /***************************** BOUNDARY CONDITIONS ****************************/
 
-void MD::apply_boundary_conditions(vector_3d &r, vector_3d &v, vector_3d &f) {
+void MD::apply_boundary_conditions(vector_3d<double> &r, vector_3d<double> &v,
+                                   vector_3d<double> &f) {
   if (options.bcs == "Periodic") {
     periodic_boundary_conditions(r);
 
@@ -719,7 +727,7 @@ void MD::apply_boundary_conditions(vector_3d &r, vector_3d &v, vector_3d &f) {
   }
 }
 
-void MD::periodic_boundary_conditions(vector_3d &r) {
+void MD::periodic_boundary_conditions(vector_3d<double> &r) {
   for (size_t i = 0; i < options.N; ++i) {
     if (r.x[i] > options.Lx) r.x[i] -= options.Lx;
     if (r.x[i] < 0.0) r.x[i] += options.Lx;
@@ -730,7 +738,8 @@ void MD::periodic_boundary_conditions(vector_3d &r) {
   }
 }
 
-void MD::reflective_boundary_conditions(vector_3d const &r, vector_3d &v) {
+void MD::reflective_boundary_conditions(vector_3d<double> const &r,
+                                        vector_3d<double> &v) {
   for (size_t i = 0; i < options.N; ++i) {
     /* Flip the velocity sign */
     if (r.x[i] > options.Lx || r.x[i] < 0.0) v.x[i] = -v.x[i];
@@ -741,7 +750,8 @@ void MD::reflective_boundary_conditions(vector_3d const &r, vector_3d &v) {
 
 /*********************** STATISTICAL QUANTITIES METHODS ***********************/
 
-void MD::velocity_autocorrelation_function(vector_3d &Cv, vector_3d &v) {
+void MD::velocity_autocorrelation_function(vector_3d<double> &Cv,
+                                           vector_3d<double> &v) {
   double cr_temp = 0; /* resets the sum every time step */
   double m = 1.0;     /* particle mass */
   size_t i;
@@ -779,7 +789,8 @@ void MD::radial_distribution_function(double &rho, double &cut_off,
   }
 }
 
-void MD::mean_square_displacement(vector_3d &MSD, vector_3d &MSD_r) {
+void MD::mean_square_displacement(vector_3d<double> &MSD,
+                                  vector_3d<double> &MSD_r) {
   double msd_temp = 0;
 
   for (size_t i = 0; i < options.N; ++i) {
@@ -790,7 +801,7 @@ void MD::mean_square_displacement(vector_3d &MSD, vector_3d &MSD_r) {
   msd.push_back(msd_temp / options.N);
 }
 
-void MD::structure_factor(vector_3d &r) {
+void MD::structure_factor(vector_3d<double> &r) {
   double s = pow((options.N / options.density), (1.0 / 3.0));
   double fkx1 = 2.0 * PI / (s / (2.0 * options.Nx));
   double fky1 = 2.0 * PI / (s / (2.0 * options.Ny));

@@ -12,6 +12,7 @@
 #include <math.h>
 #endif
 
+#include "vector_3d.h"
 #include "vector_arithmetic_operators.h"
 
 using namespace std;
@@ -133,86 +134,14 @@ class point_3d {
   }
 };
 
-/**
- * @brief Class which holds data for x, y, z data.
- * The default (implicit) operator= and copy constructors are being used.
- *
- */
-class vector_3d {
- private:
-  bool xyz_same_size = true;
-
- public:
-  vector<double> x, y, z;
-
-  /******************************* CONSTRUCTORS *******************************/
-
-  vector_3d();
-  vector_3d(vector<double> X, vector<double> Y, vector<double> Z);
-
-  /*************************** OPERATOR OVERLOADING ***************************/
-
-  vector_3d& operator+=(vector_3d const& rhs);
-  vector_3d& operator+=(double const& rhs);
-
-  vector_3d& operator-=(vector_3d const& rhs);
-  vector_3d& operator-=(double const& rhs);
-
-  vector_3d& operator*=(vector_3d const& rhs);
-  vector_3d& operator*=(double const& rhs);
-
-  vector_3d& operator/=(vector_3d const& rhs);
-  vector_3d& operator/=(double const& rhs);
-
-  friend vector_3d& operator+(vector_3d const& lhs, vector_3d const& rhs);
-  friend vector_3d& operator+(vector_3d const& lhs, double const& rhs);
-
-  friend vector_3d& operator-(vector_3d const& lhs, vector_3d const& rhs);
-  friend vector_3d& operator-(vector_3d const& lhs, double const& rhs);
-
-  friend vector_3d& operator*(vector_3d const& lhs, vector_3d const& rhs);
-  friend vector_3d& operator*(vector_3d const& lhs, double const& rhs);
-
-  friend vector_3d& operator/(vector_3d const& lhs, vector_3d const& rhs);
-  friend vector_3d& operator/(vector_3d const& lhs, double const& rhs);
-
-  friend std::ostream& operator<<(std::ostream& out, const vector_3d& v);
-
-  /*************************** METHODS OVERLOADING ****************************/
-
-  /**
-   * @brief Returns x.size() assuming x.size() == y.size() == z.size()
-   *
-   * @return size_t vector size
-   */
-  size_t size();
-
-  void resize(size_t const& sz);
-  void resize(size_t const& sz, double val);
-  void resize(size_t const& szx, size_t const& szy, size_t const& szz);
-
-  void reserve(size_t const& sz);
-  void reserve(size_t const& szx, size_t const& szy, size_t const& szz);
-
-  /********************************* METHODS **********************************/
-
-  /**
-   * @brief Calculates the magnitude at each point of the vector_3d
-   * magnitude = sqrt(x^2 + y^2 + z^2)
-   *
-   * @return std::vector<double> Magnitude
-   */
-  std::vector<double> magnitude();
-};
-
 struct data_type {
-  vector_3d r;     /* Position Arrays */
-  vector_3d v;     /* Velocity Arrays */
-  vector_3d f;     /* Force arrays */
-  vector_3d Cv;    /* VAF arrays */
-  vector_3d MSD_r; /* used in MSD calculation */
-  vector_3d MSD;   /* MSD arrays */
-  vector_3d sf;    /* Structure factor k-arrays */
+  vector_3d<double> r;     /* Position Arrays */
+  vector_3d<double> v;     /* Velocity Arrays */
+  vector_3d<double> f;     /* Force arrays */
+  vector_3d<double> Cv;    /* VAF arrays */
+  vector_3d<double> MSD_r; /* used in MSD calculation */
+  vector_3d<double> MSD;   /* MSD arrays */
+  vector_3d<double> sf;    /* Structure factor k-arrays */
 
   vector<double> Cr;          /* Velocity Autocorrelation Function*/
   vector<double> msd;         /* Mean Square Displacement */

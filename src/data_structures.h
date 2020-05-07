@@ -12,6 +12,8 @@
 #include <math.h>
 #endif
 
+#include "vector_arithmetic_operators.h"
+
 using namespace std;
 
 struct rdf_options_type {
@@ -131,22 +133,52 @@ class point_3d {
   }
 };
 
+/**
+ * @brief Class which holds data for x, y, z data.
+ * The default (implicit) operator= and copy constructors are being used.
+ *
+ */
 class vector_3d {
- public:
-  vector_3d() {}
-  vector_3d(vector<double> X, vector<double> Y, vector<double> Z)
-      : x{X}, y{Y}, z{Z} {}
+ private:
+  bool xyz_same_size = true;
 
-  vector<double> x;
-  vector<double> y;
-  vector<double> z;
+ public:
+  vector<double> x, y, z;
+
+  /******************************* CONSTRUCTORS *******************************/
+
+  vector_3d();
+  vector_3d(vector<double> X, vector<double> Y, vector<double> Z);
 
   /*************************** OPERATOR OVERLOADING ***************************/
 
+  vector_3d& operator+=(vector_3d const& rhs);
+  vector_3d& operator+=(double const& rhs);
+
+  vector_3d& operator-=(vector_3d const& rhs);
+  vector_3d& operator-=(double const& rhs);
+
+  vector_3d& operator*=(vector_3d const& rhs);
+  vector_3d& operator*=(double const& rhs);
+
+  vector_3d& operator/=(vector_3d const& rhs);
+  vector_3d& operator/=(double const& rhs);
+
+  friend vector_3d& operator+(vector_3d const& lhs, vector_3d const& rhs);
+  friend vector_3d& operator+(vector_3d const& lhs, double const& rhs);
+
+  friend vector_3d& operator-(vector_3d const& lhs, vector_3d const& rhs);
+  friend vector_3d& operator-(vector_3d const& lhs, double const& rhs);
+
+  friend vector_3d& operator*(vector_3d const& lhs, vector_3d const& rhs);
+  friend vector_3d& operator*(vector_3d const& lhs, double const& rhs);
+
+  friend vector_3d& operator/(vector_3d const& lhs, vector_3d const& rhs);
+  friend vector_3d& operator/(vector_3d const& lhs, double const& rhs);
+
   friend std::ostream& operator<<(std::ostream& out, const vector_3d& v);
 
-  /* Overloads of existing vector routines for ease of use */
-  /****************************************************************************/
+  /*************************** METHODS OVERLOADING ****************************/
 
   /**
    * @brief Returns x.size() assuming x.size() == y.size() == z.size()
@@ -162,7 +194,7 @@ class vector_3d {
   void reserve(size_t const& sz);
   void reserve(size_t const& szx, size_t const& szy, size_t const& szz);
 
-  /****************************************************************************/
+  /********************************* METHODS **********************************/
 
   /**
    * @brief Calculates the magnitude at each point of the vector_3d

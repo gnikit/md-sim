@@ -2,6 +2,8 @@
 // todo: add logger https://github.com/gabime/spdlog
 // TODO: scale the box by Lx, Ly, Lz in a tensor form
 
+MD::MD() {}
+
 MD::MD(options_type &input_options) {
   /* Perform a shallow copy of the input_options to options */
   options = input_options;
@@ -17,7 +19,7 @@ MD::MD(options_type &input_options) {
 
     } catch (const char *msg) {
       std::cerr << "Error: " << msg << std::endl;
-      exit(1);
+      exit(-1);
     }
   }
 
@@ -233,7 +235,9 @@ MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
 
 MD::~MD() {
   /* Destroy the vectors allocated on the heap */
-  delete pos;
+  /* There is no pointer to delete if there are no particles*/
+  // todo: use vector of smart pointers
+  if (options.N != 0) delete pos;
 }
 
 void MD::simulation() {

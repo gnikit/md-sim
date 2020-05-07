@@ -14,6 +14,7 @@
 #include <ctime>      /* std::chrono */
 #include <functional> /* funciton pointers */
 #include <iomanip>    /* setprecision */
+#include <memory>     /* unique_ptr */
 #include <numeric>    /* accumulate */
 #include <random>     /* normal_dist */
 #include <sstream>    /* stringstream */
@@ -63,10 +64,8 @@ class MD {
   options_type options;
 
   /* Visualisation vectors, initialised in constructor */
+  // todo: use vector of smart_pointers
   std::vector<std::vector<double>> *pos;
-  // todo: remove or make default
-  // std::vector<std::vector<double>*> pos = {&r.x, &r.y, &r.z, &r.x, &r.y,
-  // &r.z};
 
  private:
   double const PI = acos(-1.0);
@@ -74,6 +73,7 @@ class MD {
   stat_file logger;
 
  public:
+  MD();
   MD(options_type &input_options);
   MD(size_t step_number, std::vector<size_t> particles, std::string lattice);
   ~MD();

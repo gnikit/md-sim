@@ -26,9 +26,8 @@ std::vector<T> operator+(std::vector<T> const& lhs, std::vector<T> const& rhs) {
 
   return tmp;
 }
-
 template <typename T>
-T operator+(std::vector<T> const& lhs, T const& rhs) {
+std::vector<T> operator+(std::vector<T> const& lhs, T const& rhs) {
   std::vector<T> tmp(lhs);
   try {
     for (size_t i = 0; i < tmp.size(); ++i) tmp[i] += rhs;
@@ -51,9 +50,8 @@ std::vector<T> operator-(std::vector<T> const& lhs, std::vector<T> const& rhs) {
 
   return tmp;
 }
-
 template <typename T>
-T operator-(std::vector<T> const& lhs, T const& rhs) {
+std::vector<T> operator-(std::vector<T> const& lhs, T const& rhs) {
   std::vector<T> tmp(lhs);
   try {
     for (size_t i = 0; i < tmp.size(); ++i) tmp[i] -= rhs;
@@ -75,9 +73,8 @@ std::vector<T> operator*(std::vector<T> const& lhs, std::vector<T> const& rhs) {
   }
   return tmp;
 }
-
 template <typename T>
-T operator*(std::vector<T> const& lhs, T const& rhs) {
+std::vector<T> operator*(std::vector<T> const& lhs, T const& rhs) {
   std::vector<T> tmp(lhs);
   try {
     for (size_t i = 0; i < tmp.size(); ++i) tmp[i] *= rhs;
@@ -101,7 +98,7 @@ std::vector<T> operator/(std::vector<T> const& lhs, std::vector<T> const& rhs) {
   return tmp;
 }
 template <typename T>
-T operator/(std::vector<T> const& lhs, T const& rhs) {
+std::vector<T> operator/(std::vector<T> const& lhs, T const& rhs) {
   std::vector<T> tmp(lhs);
   try {
     for (size_t i = 0; i < tmp.size(); ++i) tmp[i] /= rhs;

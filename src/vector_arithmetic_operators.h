@@ -15,97 +15,134 @@
 #include <vector>    /* std::vector */
 
 template <typename T>
-std::vector<T> operator+(std::vector<T> const& lhs, std::vector<T> const& rhs) {
-  std::vector<T> tmp(lhs);
+std::vector<T>& operator+=(std::vector<T>& lhs, std::vector<T> const& rhs) {
   try {
-    for (size_t i = 0; i < tmp.size(); ++i) tmp[i] += rhs[i];
+    for (size_t i = 0; i < lhs.size(); ++i) lhs[i] += rhs[i];
   } catch (const std::out_of_range& oor) {
     std::cerr << "Out of Range error: " << oor.what() << std::endl;
     exit(-1);
   }
+
+  return lhs;
+}
+template <typename T>
+std::vector<T>& operator+=(std::vector<T>& lhs, T const& rhs) {
+  for (size_t i = 0; i < lhs.size(); ++i) lhs[i] += rhs;
+
+  return lhs;
+}
+
+template <typename T>
+std::vector<T>& operator-=(std::vector<T>& lhs, std::vector<T> const& rhs) {
+  try {
+    for (size_t i = 0; i < lhs.size(); ++i) lhs[i] -= rhs[i];
+  } catch (const std::out_of_range& oor) {
+    std::cerr << "Out of Range error: " << oor.what() << std::endl;
+    exit(-1);
+  }
+
+  return lhs;
+}
+template <typename T>
+std::vector<T>& operator-=(std::vector<T>& lhs, T const& rhs) {
+  for (size_t i = 0; i < lhs.size(); ++i) lhs[i] -= rhs;
+
+  return lhs;
+}
+
+template <typename T>
+std::vector<T>& operator*=(std::vector<T>& lhs, std::vector<T> const& rhs) {
+  try {
+    for (size_t i = 0; i < lhs.size(); ++i) lhs[i] *= rhs[i];
+  } catch (const std::out_of_range& oor) {
+    std::cerr << "Out of Range error: " << oor.what() << std::endl;
+    exit(-1);
+  }
+
+  return lhs;
+}
+template <typename T>
+std::vector<T>& operator*=(std::vector<T>& lhs, T const& rhs) {
+  for (size_t i = 0; i < lhs.size(); ++i) lhs[i] *= rhs;
+
+  return lhs;
+}
+
+template <typename T>
+std::vector<T>& operator/=(std::vector<T>& lhs, std::vector<T> const& rhs) {
+  try {
+    for (size_t i = 0; i < lhs.size(); ++i) lhs[i] /= rhs[i];
+  } catch (const std::out_of_range& oor) {
+    std::cerr << "Out of Range error: " << oor.what() << std::endl;
+    exit(-1);
+  }
+
+  return lhs;
+}
+template <typename T>
+std::vector<T>& operator/=(std::vector<T>& lhs, T const& rhs) {
+  for (size_t i = 0; i < lhs.size(); ++i) lhs[i] /= rhs;
+
+  return lhs;
+}
+
+template <typename T>
+std::vector<T> operator+(std::vector<T> const& lhs, std::vector<T> const& rhs) {
+  std::vector<T> tmp(lhs);
+  tmp += rhs;
 
   return tmp;
 }
 template <typename T>
 std::vector<T> operator+(std::vector<T> const& lhs, T const& rhs) {
   std::vector<T> tmp(lhs);
-  try {
-    for (size_t i = 0; i < tmp.size(); ++i) tmp[i] += rhs;
-  } catch (const std::out_of_range& oor) {
-    std::cerr << "Out of Range error: " << oor.what() << std::endl;
-    exit(-1);
-  }
+  tmp += rhs;
+
   return tmp;
 }
 
 template <typename T>
 std::vector<T> operator-(std::vector<T> const& lhs, std::vector<T> const& rhs) {
   std::vector<T> tmp(lhs);
-  try {
-    for (size_t i = 0; i < tmp.size(); ++i) tmp[i] -= rhs[i];
-  } catch (const std::out_of_range& oor) {
-    std::cerr << "Out of Range error: " << oor.what() << std::endl;
-    exit(-1);
-  }
+  tmp -= rhs;
 
   return tmp;
 }
 template <typename T>
 std::vector<T> operator-(std::vector<T> const& lhs, T const& rhs) {
   std::vector<T> tmp(lhs);
-  try {
-    for (size_t i = 0; i < tmp.size(); ++i) tmp[i] -= rhs;
-  } catch (const std::out_of_range& oor) {
-    std::cerr << "Out of Range error: " << oor.what() << std::endl;
-    exit(-1);
-  }
+  tmp -= rhs;
+
   return tmp;
 }
 
 template <typename T>
 std::vector<T> operator*(std::vector<T> const& lhs, std::vector<T> const& rhs) {
   std::vector<T> tmp(lhs);
-  try {
-    for (size_t i = 0; i < tmp.size(); ++i) tmp[i] *= rhs[i];
-  } catch (const std::out_of_range& oor) {
-    std::cerr << "Out of Range error: " << oor.what() << std::endl;
-    exit(-1);
-  }
+  tmp *= rhs;
+
   return tmp;
 }
 template <typename T>
 std::vector<T> operator*(std::vector<T> const& lhs, T const& rhs) {
   std::vector<T> tmp(lhs);
-  try {
-    for (size_t i = 0; i < tmp.size(); ++i) tmp[i] *= rhs;
-  } catch (const std::out_of_range& oor) {
-    std::cerr << "Out of Range error: " << oor.what() << std::endl;
-    exit(-1);
-  }
+  tmp *= rhs;
+
   return tmp;
 }
 
 template <typename T>
 std::vector<T> operator/(std::vector<T> const& lhs, std::vector<T> const& rhs) {
   std::vector<T> tmp(lhs);
+  tmp /= rhs;
 
-  try {
-    for (size_t i = 0; i < tmp.size(); ++i) tmp[i] /= rhs[i];
-  } catch (const std::out_of_range& oor) {
-    std::cerr << "Out of Range error: " << oor.what() << std::endl;
-    exit(-1);
-  }
   return tmp;
 }
 template <typename T>
 std::vector<T> operator/(std::vector<T> const& lhs, T const& rhs) {
   std::vector<T> tmp(lhs);
-  try {
-    for (size_t i = 0; i < tmp.size(); ++i) tmp[i] /= rhs;
-  } catch (const std::out_of_range& oor) {
-    std::cerr << "Out of Range error: " << oor.what() << std::endl;
-    exit(-1);
-  }
+  tmp /= rhs;
+
   return tmp;
 }
 

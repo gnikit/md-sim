@@ -357,18 +357,12 @@ void MD::reset_values(bool force_reset) {
      in the case where the fluid is being compressed */
   if (!options.compression_options.compression || force_reset) {
     /* Clear values, size, but reserve capacity */
-    r.x.clear();
-    r.y.clear();
-    r.z.clear();
-    v.x.clear();
-    v.y.clear();
-    v.z.clear();
+    r.clear();
+    v.clear();
     options.compression_options.compress_count = 0;
   }
   /* Reset the MSD initial vectors */
-  MSD_r.x.clear();
-  MSD_r.y.clear();
-  MSD_r.z.clear();
+  MSD_r.clear();
   /* Clear monitored quantities */
   density.clear();
   temperature.clear();
@@ -430,24 +424,12 @@ double MD::initialise(vector_3d<double> &r, vector_3d<double> &v,
     v.z[i] *= options.scale_v;
   }
 
-  if (options.io_options.msd) {
-    /* A copy of the r vectors where the BC will not be applied */
-    MSD_r.x = r.x;
-    MSD_r.y = r.y;
-    MSD_r.z = r.z;
+  /* A copy of the r vectors where the BC will not be applied */
+  /* MSD initialisation, storing first positions of particles */
+  if (options.io_options.msd) MSD_r = MSD = r;
 
-    /* MSD initialisation, storing first positions of particles */
-    MSD.x = r.x;
-    MSD.y = r.y;
-    MSD.z = r.z;
-  }
-
-  if (options.io_options.vaf) {
-    /* VAF initialisation, storing first velocities of particles */
-    Cv.x = v.x;
-    Cv.y = v.y;
-    Cv.z = v.z;
-  }
+  /* VAF initialisation, storing first velocities of particles */
+  if (options.io_options.vaf) Cv = v;
 
   return KE;
 }
@@ -493,9 +475,7 @@ void MD::choose_lattice_formation(std::string &lattice, vector_3d<double> &r) {
   }
 
   else if (lattice == "RANDOM") {
-    r.x.resize(options.N);
-    r.y.resize(options.N);
-    r.z.resize(options.N);
+    r.resize(options.N);
     // todo: test
     mb_distribution(r, options.random_lattice_var);
   }
@@ -548,7 +528,6 @@ std::tuple<double, double, double> MD::stepping_algorithm(vector_3d<double> &r,
                                                           vector_3d<double> &f,
                                                           size_t &step,
                                                           bool msd) {
-  size_t i;
   double U = 0;
   double KE = 0;
   double PC = 0;
@@ -566,14 +545,8 @@ std::tuple<double, double, double> MD::stepping_algorithm(vector_3d<double> &r,
     abort();
   }
 
-  if (msd) {
-    /* MSD stepping */
-    for (i = 0; i < options.N; ++i) {
-      MSD_r.x[i] += v.x[i] * options.dt;
-      MSD_r.y[i] += v.y[i] * options.dt;
-      MSD_r.z[i] += v.z[i] * options.dt;
-    }
-  }
+  /* MSD stepping uses operator overlads */
+  if (msd) MSD_r += v * options.dt;
   /**************************************************************************/
 
   apply_boundary_conditions(r, v, f);

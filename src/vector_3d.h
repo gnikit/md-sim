@@ -56,6 +56,8 @@ class vector_3d {
    */
   size_t size();
 
+  void clear();
+
   void resize(size_t const& sz);
   void resize(size_t const& sz, T val);
   void resize(size_t const& szx, size_t const& szy, size_t const& szz);
@@ -71,7 +73,7 @@ class vector_3d {
    *
    * @return std::vector<T> Magnitude
    */
-  std::vector<T> magnitude();
+  vector<T> magnitude();
 };
 
 template <typename T>
@@ -95,7 +97,7 @@ template <typename T>
 vector_3d<T> operator/(vector_3d<T> const& lhs, T const& rhs);
 
 template <typename T>
-std::ostream& operator<<(std::ostream& out, const vector_3d<T>& v);
+ostream& operator<<(ostream& out, const vector_3d<T>& v);
 
 /*******************************************************************************
  * "vector_3d.cpp" code follows
@@ -138,7 +140,7 @@ vector_3d<T>& vector_3d<T>::operator+=(T const& rhs) {
       this->z[i] += rhs;
     }
   } else {
-    std::cerr << "Need to overload '=' for vector, T" << std::endl;
+    cerr << "Need to overload '=' for vector, T" << endl;
     exit(-1);
   }
 
@@ -170,7 +172,7 @@ vector_3d<T>& vector_3d<T>::operator-=(T const& rhs) {
       this->z[i] -= rhs;
     }
   } else {
-    std::cerr << "Need to overload '=' for vector, T" << std::endl;
+    cerr << "Need to overload '=' for vector, T" << endl;
     exit(-1);
   }
 
@@ -202,7 +204,7 @@ vector_3d<T>& vector_3d<T>::operator*=(T const& rhs) {
       this->z[i] *= rhs;
     }
   } else {
-    std::cerr << "Need to overload '=' for vector, T" << std::endl;
+    cerr << "Need to overload '=' for vector, T" << endl;
     exit(-1);
   }
 
@@ -234,7 +236,7 @@ vector_3d<T>& vector_3d<T>::operator/=(T const& rhs) {
       this->z[i] /= rhs;
     }
   } else {
-    std::cerr << "Need to overload '=' for vector, T" << std::endl;
+    cerr << "Need to overload '=' for vector, T" << endl;
     exit(-1);
   }
 
@@ -248,6 +250,13 @@ size_t vector_3d<T>::size() {
   if (!(x.size() == y.size() && x.size() == z.size())) abort();
 
   return x.size();
+}
+
+template <typename T>
+void vector_3d<T>::clear() {
+  x.clear();
+  y.clear();
+  z.clear();
 }
 
 template <typename T>
@@ -290,20 +299,20 @@ void vector_3d<T>::reserve(size_t const& szx, size_t const& szy,
 /********************************** METHODS ***********************************/
 
 template <typename T>
-std::vector<T> vector_3d<T>::magnitude() {
+vector<T> vector_3d<T>::magnitude() {
   try {
-    std::vector<T> magn(x.size());
+    vector<T> magn(x.size());
 
     for (size_t i = 0; i < x.size(); ++i)
-      // todo: maybe use std::hypot
+      // todo: maybe use hypot
       magn[i] = sqrt(x[i] * x[i] + y[i] * y[i] + z[i] * z[i]);
 
     return magn;
 
-  } catch (const std::out_of_range& e) {
-    std::cerr << "Out of range exception in magnitude calculation.\n"
-              << "This probably means that x,y,z are not te same size!\n"
-              << "Error message: " << e.what() << std::endl;
+  } catch (const out_of_range& e) {
+    cerr << "Out of range exception in magnitude calculation.\n"
+         << "This probably means that x,y,z are not te same size!\n"
+         << "Error message: " << e.what() << endl;
     exit(-1);
   }
 }
@@ -367,9 +376,9 @@ vector_3d<T> operator/(vector_3d<T> const& lhs, T const& rhs) {
 }
 
 template <typename T>
-std::ostream& operator<<(std::ostream& out, vector_3d<T> const& v) {
+ostream& operator<<(ostream& out, vector_3d<T> const& v) {
   for (size_t i = 0; i < v.x.size(); ++i)
-    out << v.x[i] << ", " << v.y[i] << ", " << v.z[i] << std::endl;
+    out << v.x[i] << ", " << v.y[i] << ", " << v.z[i] << endl;
 
   return out;
 }

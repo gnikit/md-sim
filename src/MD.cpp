@@ -258,7 +258,7 @@ void MD::simulation() {
 
   /* Initialise the simulation, lattice params and much more */
   options.kinetic_energy = initialise(r, v, options.target_temperature);
-  size_t step_idx;
+
   for (step_idx = 0; step_idx < options.steps; ++step_idx) {
     /* Isothermal Calibration */
     /* using T & KE from prev timestep */
@@ -266,7 +266,7 @@ void MD::simulation() {
 
     double U, PC;
     std::tie(options.kinetic_energy, U, PC) =
-        stepping_algorithm(r, v, f, step_idx, options.io_options.msd);
+        stepping_algorithm(r, v, f, options.io_options.msd);
 
     if (options.io_options.msd) mean_square_displacement(MSD, MSD_r);
 
@@ -526,7 +526,6 @@ void MD::mb_distribution(vector_3d<double> &v, double TEMPERATURE) {
 std::tuple<double, double, double> MD::stepping_algorithm(vector_3d<double> &r,
                                                           vector_3d<double> &v,
                                                           vector_3d<double> &f,
-                                                          size_t &step,
                                                           bool msd) {
   double U = 0;
   double KE = 0;
@@ -534,10 +533,10 @@ std::tuple<double, double, double> MD::stepping_algorithm(vector_3d<double> &r,
 
   /*************************************************************************/
   if (options.iterative_method == "Verlet") {
-    std::tie(KE, U, PC) = verlet(r, v, f, step);
+    std::tie(KE, U, PC) = verlet(r, v, f);
 
   } else if (options.iterative_method == "VelocityVerlet") {
-    std::tie(KE, U, PC) = velocity_verlet(r, v, f, step);
+    std::tie(KE, U, PC) = velocity_verlet(r, v, f);
 
   } else {
     std::cerr << "Iterative method: " << options.iterative_method
@@ -556,15 +555,14 @@ std::tuple<double, double, double> MD::stepping_algorithm(vector_3d<double> &r,
 
 std::tuple<double, double, double> MD::verlet(vector_3d<double> &r,
                                               vector_3d<double> &v,
-                                              vector_3d<double> &f,
-                                              size_t &step) {
+                                              vector_3d<double> &f) {
   size_t i;
   double KE = 0;
   double dt = options.dt;
   pair_potential_type force = get_force_func(options.potential_type);
 
   /* Calculate particle interactions based on input pair potential */
-  auto [U, PC] = calculate_forces(r, f, step, force);
+  auto [U, PC] = calculate_forces(r, f, force);
 
   for (i = 0; i < options.N; ++i) {
     /* v^(n+1) = v^(n)*scaled_v + f^(n)*dt */
@@ -586,8 +584,7 @@ std::tuple<double, double, double> MD::verlet(vector_3d<double> &r,
 
 std::tuple<double, double, double> MD::velocity_verlet(vector_3d<double> &r,
                                                        vector_3d<double> &v,
-                                                       vector_3d<double> &f,
-                                                       size_t &step) {
+                                                       vector_3d<double> &f) {
   double KE = 0;
   double dt = options.dt;
   vector_3d<double> f_n = f;
@@ -601,7 +598,7 @@ std::tuple<double, double, double> MD::velocity_verlet(vector_3d<double> &r,
   }
 
   /* f^(n+1) = calculate forces */
-  auto [U, PC] = calculate_forces(r, f, step, force);
+  auto [U, PC] = calculate_forces(r, f, force);
 
   /* v^(n+1) = v^(n) + (f^(n)+f^(n+1))*(dt*0.5) */
   for (size_t i = 0; i < options.N; ++i) {
@@ -617,7 +614,6 @@ std::tuple<double, double, double> MD::velocity_verlet(vector_3d<double> &r,
 
 std::tuple<double, double> MD::calculate_forces(vector_3d<double> &x,
                                                 vector_3d<double> &f,
-                                                size_t &step_idx,
                                                 pair_potential_type &p) {
   /* Resetting forces */
   std::fill(f.x.begin(), f.x.end(), 0);

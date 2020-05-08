@@ -46,7 +46,7 @@ void stat_file::write_data_file(
     file_stream << (i + 1);
     for (size_t vec = 0; vec < all_output_vectors.size(); ++vec) {
       try {
-        file_stream << del << all_output_vectors.at(vec).at(i);
+        file_stream << del << all_output_vectors[vec][i];
       }
       /* if the array goes out of bounds then just add 0s */
       catch (const std::out_of_range &e) {

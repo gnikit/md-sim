@@ -69,6 +69,7 @@ class MD {
 
  private:
   double const PI = acos(-1.0);
+  size_t step_idx = 0;
   /* Variables for storing inside the object the file ID */
   stat_file logger;
 
@@ -191,19 +192,18 @@ class MD {
   std::tuple<double, double, double> stepping_algorithm(vector_3d<double> &r,
                                                         vector_3d<double> &v,
                                                         vector_3d<double> &f,
-                                                        size_t &step, bool msd);
+                                                        bool msd);
   /**
    * @brief An iterative leap-frog Verlet Algorithm.
    *
    * @param r: position vectors of particles
    * @param v: velocity vectors of particles
    * @param f: force vectors of particles
-   * @param step: timestep number (used for calculating rdf correctly)
    * @return std::tuple<double, double, double> KE, U, PC
    */
   std::tuple<double, double, double> verlet(vector_3d<double> &r,
                                             vector_3d<double> &v,
-                                            vector_3d<double> &f, size_t &step);
+                                            vector_3d<double> &f);
 
   /**
    * @brief Iterative Velocity verlet algorithm.
@@ -211,13 +211,11 @@ class MD {
    * @param r: position vectors of particles
    * @param v: velocity vectors of particles
    * @param f: force vectors of particles
-   * @param i: timestep number (used for calculating rdf correctly)
    * @return std::tuple<double, double, double> KE, U, PC
    */
   std::tuple<double, double, double> velocity_verlet(vector_3d<double> &r,
                                                      vector_3d<double> &v,
-                                                     vector_3d<double> &f,
-                                                     size_t &i);
+                                                     vector_3d<double> &f);
 
   /**
    * @brief A Runge Kutta 4th order iterative algorithm
@@ -225,13 +223,11 @@ class MD {
    * @param r: position vectors of particles
    * @param v: velocity vectors of particles
    * @param f: force vectors of particles
-   * @param step: timestep number (used for calculating rdf correctly)
    * @return std::tuple<double, double, double> KE, U, PC
    */
   std::tuple<double, double, double> runge_kutta4(vector_3d<double> &r,
                                                   vector_3d<double> &v,
-                                                  vector_3d<double> &f,
-                                                  size_t &step);
+                                                  vector_3d<double> &f);
 
   /**
    * @brief Calculates the forces interactions of a given pair potential
@@ -239,15 +235,11 @@ class MD {
    *
    * @param r: position vectors of particles
    * @param f: force vectors of particles
-   * @param step_index: The number of the current iteration. Only used to
-   *                    determine if the sampling of the RDF should occur, if
-   *                    an equilibration period has been supplied.
    * @param potential: Type of the pair potential
    * @return std::tuple<double, double> Potential Energy, Configuration Pressure
    */
   std::tuple<double, double> calculate_forces(vector_3d<double> &x,
                                               vector_3d<double> &f,
-                                              size_t &step_index,
                                               pair_potential_type &potential);
 
   /**************************** BOUNDARY CONDITIONS ***************************/

@@ -75,24 +75,24 @@ class vector_3d {
 };
 
 template <typename T>
-vector_3d<T>& operator+(vector_3d<T> const& lhs, vector_3d<T> const& rhs);
+vector_3d<T> operator+(vector_3d<T> const& lhs, vector_3d<T> const& rhs);
 template <typename T>
-vector_3d<T>& operator+(vector_3d<T> const& lhs, T const& rhs);
+vector_3d<T> operator+(vector_3d<T> const& lhs, T const& rhs);
 
 template <typename T>
-vector_3d<T>& operator-(vector_3d<T> const& lhs, vector_3d<T> const& rhs);
+vector_3d<T> operator-(vector_3d<T> const& lhs, vector_3d<T> const& rhs);
 template <typename T>
-vector_3d<T>& operator-(vector_3d<T> const& lhs, T const& rhs);
+vector_3d<T> operator-(vector_3d<T> const& lhs, T const& rhs);
 
 template <typename T>
-vector_3d<T>& operator*(vector_3d<T> const& lhs, vector_3d<T> const& rhs);
+vector_3d<T> operator*(vector_3d<T> const& lhs, vector_3d<T> const& rhs);
 template <typename T>
-vector_3d<T>& operator*(vector_3d<T> const& lhs, T const& rhs);
+vector_3d<T> operator*(vector_3d<T> const& lhs, T const& rhs);
 
 template <typename T>
-vector_3d<T>& operator/(vector_3d<T> const& lhs, vector_3d<T> const& rhs);
+vector_3d<T> operator/(vector_3d<T> const& lhs, vector_3d<T> const& rhs);
 template <typename T>
-vector_3d<T>& operator/(vector_3d<T> const& lhs, T const& rhs);
+vector_3d<T> operator/(vector_3d<T> const& lhs, T const& rhs);
 
 template <typename T>
 std::ostream& operator<<(std::ostream& out, const vector_3d<T>& v);
@@ -311,56 +311,56 @@ std::vector<T> vector_3d<T>::magnitude() {
 /************************ GLOBAL OPERATOR OVERLOADS ***************************/
 
 template <typename T>
-vector_3d<T>& operator+(vector_3d<T> const& lhs, vector_3d<T> const& rhs) {
+vector_3d<T> operator+(vector_3d<T> const& lhs, vector_3d<T> const& rhs) {
   /* Call the IMPLICITLY generated copy constructor of the compiler */
   vector_3d<T> tmp(lhs);
   tmp += rhs;
   return tmp;
 }
 template <typename T>
-vector_3d<T>& operator+(vector_3d<T> const& lhs, T const& rhs) {
+vector_3d<T> operator+(vector_3d<T> const& lhs, T const& rhs) {
   vector_3d<T> tmp(lhs);
   tmp += rhs;
   return tmp;
 }
 
 template <typename T>
-vector_3d<T>& operator-(vector_3d<T> const& lhs, vector_3d<T> const& rhs) {
+vector_3d<T> operator-(vector_3d<T> const& lhs, vector_3d<T> const& rhs) {
   /* Call the IMPLICITLY generated copy constructor of the compiler */
   vector_3d<T> tmp(lhs);
   tmp -= rhs;
   return tmp;
 }
 template <typename T>
-vector_3d<T>& operator-(vector_3d<T> const& lhs, T const& rhs) {
+vector_3d<T> operator-(vector_3d<T> const& lhs, T const& rhs) {
   vector_3d<T> tmp(lhs);
   tmp -= rhs;
   return tmp;
 }
 
 template <typename T>
-vector_3d<T>& operator*(vector_3d<T> const& lhs, vector_3d<T> const& rhs) {
+vector_3d<T> operator*(vector_3d<T> const& lhs, vector_3d<T> const& rhs) {
   /* Call the IMPLICITLY generated copy constructor of the compiler */
   vector_3d<T> tmp(lhs);
   tmp *= rhs;
   return tmp;
 }
 template <typename T>
-vector_3d<T>& operator*(vector_3d<T> const& lhs, T const& rhs) {
+vector_3d<T> operator*(vector_3d<T> const& lhs, T const& rhs) {
   vector_3d<T> tmp(lhs);
   tmp *= rhs;
   return tmp;
 }
 
 template <typename T>
-vector_3d<T>& operator/(vector_3d<T> const& lhs, vector_3d<T> const& rhs) {
+vector_3d<T> operator/(vector_3d<T> const& lhs, vector_3d<T> const& rhs) {
   /* Call the IMPLICITLY generated copy constructor of the compiler */
   vector_3d<T> tmp(lhs);
   tmp /= rhs;
   return tmp;
 }
 template <typename T>
-vector_3d<T>& operator/(vector_3d<T> const& lhs, T const& rhs) {
+vector_3d<T> operator/(vector_3d<T> const& lhs, T const& rhs) {
   vector_3d<T> tmp(lhs);
   tmp /= rhs;
   return tmp;

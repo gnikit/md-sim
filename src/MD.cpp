@@ -97,7 +97,18 @@ MD::MD(options_type &input_options) {
   options.dt = 0.005 / sqrt(options.target_temperature);  // todo: add to schema
   /* Box length scaling */
   options.L = pow((options.N / options.density), 1.0 / 3.0);
-  options.Lx = options.Ly = options.Lz = options.L;  // todo: questionable!
+  options.Lx = options.Ly = options.Lz = options.L;
+  // The below commented out lines calculate the equivelent box length.
+  // The problem with that is calculating the cutoff.
+  // I think the only correct thing is to use a vector for x,y,z since no
+  // projection of the lengths can ensure that the resulting projected length
+  // will be smaller than the smaller dimension. Also using the min length as
+  // cutoff is also not a good way to set this up. All this approaches will have
+  // to somehow deal with the the value of cut_off used in the RDF calculation
+  // options.Lx = options.Nx / pow(options.density, 1.0/3.0);
+  // options.Ly = options.Ny / pow(options.density, 1.0/3.0);
+  // options.Lz = options.Nz / pow(options.density, 1.0/3.0);
+
   options.volume = options.N / options.density;
 
   /* cut_off definition */
@@ -331,9 +342,9 @@ void MD::simulation() {
   reset_values();
 }
 
-void MD::simulation(std::string simulation_name, double DENSITY,
-                    double TEMPERATURE, double POWER, double A_CST,
-                    std::string pp_type) {
+void MD::simulation(std::string const simulation_name, double const DENSITY,
+                    double const TEMPERATURE, double POWER, double const A_CST,
+                    std::string const pp_type) {
   /* NOTE: this is a legacy routine and it will be removed in the future
      Initialise the variables with the input parameters
      Name the simulation. This will be used as a prefix in the files */
@@ -384,7 +395,7 @@ void MD::enable_testing(bool is_testing) {
 /*************************** INITIALISATION METHODS ***************************/
 
 double MD::initialise(vector_3d<double> &r, vector_3d<double> &v,
-                      double TEMPERATURE) {
+                      double const TEMPERATURE) {
   /* Initialise position matrix and velocity matrix from Cubic Centred Lattice
    */
   if (!options.compression_options.compression ||
@@ -434,7 +445,8 @@ double MD::initialise(vector_3d<double> &r, vector_3d<double> &v,
   return KE;
 }
 
-void MD::choose_lattice_formation(std::string &lattice, vector_3d<double> &r) {
+void MD::choose_lattice_formation(std::string const &lattice,
+                                  vector_3d<double> &r) {
   if (lattice == "FCC") {
     /* Coordinates for the FCC lattice */
     double x_c[4] = {0.25, 0.75, 0.75, 0.25};
@@ -494,7 +506,7 @@ void MD::choose_lattice_formation(std::string &lattice, vector_3d<double> &r) {
   }
 }
 
-void MD::mb_distribution(vector_3d<double> &v, double TEMPERATURE) {
+void MD::mb_distribution(vector_3d<double> &v, double const TEMPERATURE) {
   double kb = 1.0;
   double m = 1.0;
 
@@ -816,8 +828,9 @@ void MD::structure_factor(vector_3d<double> &r) {
 
 /****************************** LOGGING METHODS *******************************/
 
-std::string MD::set_simulation_params(double &rho, double &T, double &power,
-                                      double &a, std::string &pp_type) {
+std::string MD::set_simulation_params(double const &rho, double const &T,
+                                      double const &power, double const &a,
+                                      std::string const &pp_type) {
   std::string params =
       "Fluid parameters: rho: " + stat_file::convert_to_string(rho, 4) +
       " T: " + stat_file::convert_to_string(T, 4);

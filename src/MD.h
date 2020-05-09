@@ -107,9 +107,9 @@ class MD {
    *                 modelling. Options are "BoundedInversePower",
    *                 "GaussianCoreModel", "Exponential", "LennardJones"
    */
-  void simulation(std::string simulation_name, double DENSITY,
-                  double TEMPERATURE, double POWER, double A_CST,
-                  std::string pp_type);
+  void simulation(std::string const simulation_name, double const DENSITY,
+                  double const TEMPERATURE, double POWER, double const A_CST,
+                  std::string const pp_type);
 
   /**
    * @brief
@@ -146,7 +146,7 @@ class MD {
    * @return kinetic energy (normalised)
    */
   double initialise(vector_3d<double> &r, vector_3d<double> &v,
-                    double TEMPERATURE);
+                    double const TEMPERATURE);
 
   /**
    * @brief Outputs the positions r of the particles, based on the input
@@ -159,7 +159,8 @@ class MD {
    * @param lattice: type of lattice
    * @param r: particle positions
    */
-  void choose_lattice_formation(std::string &lattice, vector_3d<double> &r);
+  void choose_lattice_formation(std::string const &lattice,
+                                vector_3d<double> &r);
 
   /**
    * @brief
@@ -172,7 +173,7 @@ class MD {
    * @param v: velocity vectors of particles
    * @param TEMPERATURE: Temperature of the MB distribution
    */
-  void mb_distribution(vector_3d<double> &v, double TEMPERATURE);
+  void mb_distribution(vector_3d<double> &v, double const TEMPERATURE);
 
   /**************************** ITERATIVE METHODS *****************************/
 
@@ -345,8 +346,9 @@ class MD {
    * @param pp_type: pair potential type
    * @return string containing simulation run parameters
    */ //todo: pass options type
-  std::string set_simulation_params(double &rho, double &T, double &power,
-                                    double &a, std::string &pp_type);
+  std::string set_simulation_params(double const &rho, double const &T,
+                                    double const &power, double const &a,
+                                    std::string const &pp_type);
 
   /**
    * @brief IO wrapper for saving into file the positions of the particles

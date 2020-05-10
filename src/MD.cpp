@@ -1,6 +1,7 @@
 #include "MD.h"
 // todo: add logger https://github.com/gabime/spdlog
 // TODO: scale the box by Lx, Ly, Lz in a tensor form
+// todo: change all T const to const T
 
 MD::MD() {}
 
@@ -487,9 +488,22 @@ void MD::choose_lattice_formation(std::string const &lattice,
   }
 
   else if (lattice == "RANDOM") {
-    r.resize(options.N);
-    // todo: test
-    mb_distribution(r, options.random_lattice_var);
+    /* used to obtain a seed for the random number engine */
+    std::random_device seed;
+    // Standard mersenne_twister_engine seeded with rd()
+    std::mt19937 gen(seed());
+    if (options.test_options.is_testing) gen.seed(666);
+
+    std::uniform_real_distribution<double> dis_x(0, options.Lx);
+    std::uniform_real_distribution<double> dis_y(0, options.Lz);
+    std::uniform_real_distribution<double> dis_z(0, options.Lz);
+
+    for (size_t i = 0; i < options.N; ++i) {
+      r.x.push_back(dis_x(gen));
+      r.y.push_back(dis_y(gen));
+      r.z.push_back(dis_z(gen));
+    }
+
   }
 
   /* Simple Cubic lattice */
@@ -506,22 +520,22 @@ void MD::choose_lattice_formation(std::string const &lattice,
   }
 }
 
-void MD::mb_distribution(vector_3d<double> &v, double const TEMPERATURE) {
-  double kb = 1.0;
-  double m = 1.0;
-
-  double var = sqrt(TEMPERATURE * kb / m);
-  double mean = 0;
+void MD::mb_distribution(vector_3d<double> &v, double const TEMPERATURE,
+                         double const mean) {
+  double const kb = 1.0;
+  double const m = 1.0;
+  double const var = sqrt(TEMPERATURE * kb / m);
 
   /* Use current time as seed for random generator */
   std::srand(std::time(nullptr));
   int random_variable = std::rand();
   if (options.test_options.is_testing)
-    random_variable = 666; /* Fixing it for testing */
+    random_variable = 666; /* Fixing seed for testing */
 
   std::default_random_engine generator;
   generator.seed(random_variable);
 
+  // todo: mean would have to change to x,y,z vals if options.L is deprecated
   std::normal_distribution<double> g_x(mean, var);
   std::normal_distribution<double> g_y(mean, var);
   std::normal_distribution<double> g_z(mean, var);

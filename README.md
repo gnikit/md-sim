@@ -74,6 +74,7 @@ To run the test regression tests run:
 
 ```bash
 make test
+make unit-tests
 ```
 
 To add tests look into the tests folder.

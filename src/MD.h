@@ -19,7 +19,7 @@
 #include <random>     /* normal_dist */
 #include <sstream>    /* stringstream */
 #include <vector>     /* vectors */
-// todo: change vector to std::valarray
+
 #include "data_structures.h"
 #include "helper_functions.h"
 #include "md_pair_potentials.h"
@@ -172,8 +172,10 @@ class MD {
    *
    * @param v: velocity vectors of particles
    * @param TEMPERATURE: Temperature of the MB distribution
+   * @param mean: Optional mean value of distribution, default is 0
    */
-  void mb_distribution(vector_3d<double> &v, double const TEMPERATURE);
+  void mb_distribution(vector_3d<double> &v, double const TEMPERATURE,
+                       double const mean = 0);
 
   /**************************** ITERATIVE METHODS *****************************/
 

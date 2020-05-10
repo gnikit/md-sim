@@ -52,6 +52,11 @@ test: libmd
 	@echo "Running regression test"
 	@cd tests; python3 run_tests.py
 
+unit-tests: libmd
+	@echo "Running unit tests"
+	$(MAKE) -C src/tests
+	./bin/tests-main -s -d yes
+
 test_examples: libmd
 	# Do not run the database files
 	$(RM) examples/examplebin/*database*

@@ -1056,8 +1056,11 @@ void MD::set_vector_sizes() {
   if (options.io_options.sf) sf.reserve(options.N); /* Structure Factor */
   if (options.io_options.vaf)
     Cr.reserve(options.steps); /* Velocity Autocorrelation Function */
-  if (options.io_options.msd)
+  if (options.io_options.msd) {
     msd.reserve(options.steps); /* Mean Square Displacement */
+    MSD.reserve(options.steps);
+    MSD_r.reserve(options.steps);
+  }
   if (options.io_options.energies) {
     u_en.reserve(options.steps); /* Average Potential Energy */
     k_en.reserve(options.steps); /* Average Kinetic Energy */

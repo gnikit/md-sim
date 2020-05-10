@@ -1,4 +1,14 @@
-
+/**
+ * @file md_pair_potentials.h
+ * @author your name (you@domain.com)
+ * @brief Contais the different pair potentials availble and their derivatives
+ * for the calculation of the forces.
+ * @version 0.1
+ * @date 2020-05-10
+ *
+ * @copyright Copyright (c) 2020
+ *
+ */
 #pragma once
 #include <iostream>
 #include <map>
@@ -12,7 +22,9 @@
 #include <math.h>
 #endif
 
-/* *NOTE: currently the pair potentials are limited to a 3 argument parameters.
+/**
+ * @brief Currently limited to pair potentials using at max 3 input parameters
+ *
  */
 using pair_potential_type = std::tuple<double, double> (*)(double &, double,
                                                            double);
@@ -28,16 +40,49 @@ using pair_potential_type = std::tuple<double, double> (*)(double &, double,
  * EXP or Exponential: Exponential potential
  * LJ or LennardJones:  Lennard-Jones potential
  */
-
 class MD_tools {
  public:
+  /**
+   * @brief
+   * Generates the force of a Bounded Inverse Power potential
+   * and its potential energy.
+   *
+   * @param r Separation distance between two particles
+   * @param n Pair potential strength
+   * @param a Softening parameter
+   * @return std::tuple<double, double>: <Force, Potential energy>
+   */
   static std::tuple<double, double> BIP_force(double &r, double n, double a);
+  /**
+   * @brief
+   * Generates the force of a Gaussian Core Model potential
+   * and its potential energy.
+   *
+   * @param r Separation distance between two particles
+   * @return std::tuple<double, double> <Force, Potential energy>
+   */
   static std::tuple<double, double> GCM_force(double &r);
+  /**
+   * @brief Exponential pair potential, similar to the GCM.
+   * If used use a smaller cut-off 1.5 ~ 2.0.
+   * Also it is more convinient to use multipliers of e as the C constant
+   *
+   * @param r Separation distance between two particles
+   * @param m Exponential parameter
+   * @param C Scaling parameters
+   * @return std::tuple<double, double>
+   */
   static std::tuple<double, double> Exp_force(double &r, double m, double C);
+  /**
+   * @brief Lennard-Jones force calculation.
+   *
+   * @param r
+   * @return std::tuple<double, double>
+   */
   static std::tuple<double, double> LJ_force(double &r);
 };
 
-/* **********************  Pair potential wrappers  ************************ */
+/*************************  Pair potential classes  ***************************/
 
 class BIP_pp {
  public:
@@ -59,4 +104,13 @@ class LJ_pp {
   static std::tuple<double, double> get_force(double &r, double m, double C);
 };
 
+/**************  Query Function for Pair Potential Hash Table *****************/
+
+/**
+ * @brief Get the force function for a given pair potential. It queries a local
+ * (available only in md_pair_potentials.cpp) hash table to fetch the results.
+ *
+ * @param pp_type a string containing the pair potential name
+ * @return pair_potential_type a tuple with pair potential quantities
+ */
 pair_potential_type get_force_func(std::string pp_type);

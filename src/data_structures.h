@@ -43,6 +43,7 @@ struct test_options_type {
 };
 
 struct io_options_type {
+  size_t verbosity = 0;          /* how verbose the standard output is */
   bool msd = true;               /* mean square displacement output */
   bool rdf = true;               /* radial distribution function output */
   bool vaf = true;               /* velocity autocorrelation output */
@@ -55,22 +56,6 @@ struct io_options_type {
   string dir = ".";              /* file output directory */
   string simulation_name = "";   /* simulation prefix/ name */
 
-  io_options_type() {}
-  io_options_type& operator=(io_options_type const& rhs) {
-    msd = rhs.msd;
-    rdf = rhs.rdf;
-    vaf = rhs.vaf;
-    energies = rhs.energies;
-    pressure = rhs.pressure;
-    position = rhs.position;
-    sf = rhs.sf;
-    visualise = rhs.visualise;
-    compression_stats = rhs.compression_stats;
-    dir = rhs.dir;
-    simulation_name = rhs.simulation_name;
-
-    return *this;
-  }
 };
 
 struct options_type {

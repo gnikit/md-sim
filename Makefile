@@ -71,6 +71,8 @@ clean:
 	$(RM) share
 	@echo "Cleaning MD src"
 	$(MAKE) -C src clean
+	@echo "Cleaning src unit tests"
+	$(MAKE) -C src/tests clean
 	@echo "Cleaning examples"
 	$(MAKE) -C examples clean
 	@echo "Cleaning include"

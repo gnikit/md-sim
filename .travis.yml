@@ -38,4 +38,4 @@ script:
   - make -j
   - make examples
   - make unit-tests
-  - make test -j
+  - make tests -j

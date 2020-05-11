@@ -73,7 +73,7 @@ make -j
 To run the test regression tests run:
 
 ```bash
-make test
+make tests
 make unit-tests
 ```
 

@@ -48,16 +48,16 @@ python-md-tools:
 	@echo "MAKE python modules"
 	@cd tools/md-tools && pip3 install --user --upgrade -e .
 
-test: libmd
-	@echo "Running regression test"
-	@cd tests; python3 run_tests.py
+tests: libmd
+	@echo "Running regression tests"
+	@cd tests; pytest -v -rA --capture=sys run_tests.py
 
 unit-tests: libmd
 	@echo "Running unit tests"
 	$(MAKE) -C src/tests
 	./bin/tests-main -s -d yes
 
-test_examples: libmd
+tests-examples: libmd
 	# Do not run the database files
 	$(RM) examples/examplebin/*database*
 	@cd examples/examplebin; for i in ./*; do echo $$i && ./$$i >> $$i.log; done

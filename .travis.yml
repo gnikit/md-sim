@@ -25,6 +25,7 @@ before_install:
   - $PY_CMD -m pip install --user --upgrade pip wheel setuptools
 install:
   - $PY_CMD -m pip install --user --upgrade pytest
+  - $PY_CMD -m pip install pytest-xdist
   - $PY_CMD -m pip install --user --upgrade lxml
   - $PY_CMD -m pip install --user --upgrade numpy
   - $PY_CMD -m pip install --user --upgrade matplotlib

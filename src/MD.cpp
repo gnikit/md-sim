@@ -4,7 +4,6 @@
 // todo: change all T const to const T
 
 MD::MD() {
-
   /* Intel compiler does not like emptying empty pointers */
   pos = new std::vector<std::vector<double>>(4);
   for (size_t i = 0; i < (*pos).size(); ++i) (*pos)[i].reserve(options.N);
@@ -771,6 +770,9 @@ void MD::radial_distribution_function(double &rho, double &cut_off,
   /* Exclude the self particle interaction from the density */
   double cor_rho = rho * (particles - 1) / particles;
   double dr = cut_off / bins;
+
+  fstream.precision(14);
+  fstream << std::scientific;
 
   fstream << "#bins:" << bins << ",cut_off (rg):" << cut_off << ",dr:" << dr
           << std::endl;

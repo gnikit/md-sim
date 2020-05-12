@@ -22,10 +22,7 @@ lattice_type =
     ## RANDOM: Randomise the positions of the particles in the lattice
     element lattice {
         attribute name {"RANDOM"},
-        ## Variance of the normal distributions
-        element variance {real},
-        ## Fix the seed of the normal distribution
-        element fixed_seed {"true" | "false"}
+        comment
     }
 )
 

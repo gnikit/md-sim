@@ -65,7 +65,6 @@ struct options_type {
   string iterative_method = "Verlet"; /* iterative algorithm of particles */
   string bcs = "Periodic";            /* boundary conditions for whole box */
   vector<size_t> particles;           /* number of particles in each axis */
-  double random_lattice_var = 0;      /* variance of dist for random lattice */
   size_t steps = 2000;                /* number of total iterations */
   size_t Nx, Ny, Nz, N = 0;           /* Particles in the x, y, z and total */
   double Lx, Ly, Lz, L = 0;           /* Individual box lengths */

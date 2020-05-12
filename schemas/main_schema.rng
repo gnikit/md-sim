@@ -32,17 +32,7 @@
         <attribute name="name">
           <value>RANDOM</value>
         </attribute>
-        <element name="variance">
-          <a:documentation>Variance of the normal distributions</a:documentation>
-          <ref name="real"/>
-        </element>
-        <element name="fixed_seed">
-          <a:documentation>Fix the seed of the normal distribution</a:documentation>
-          <choice>
-            <value>true</value>
-            <value>false</value>
-          </choice>
-        </element>
+        <ref name="comment"/>
       </element>
     </choice>
   </define>

@@ -8,7 +8,7 @@ INCLUDE := ../include
 FILES := $(wildcard *.cpp)
 OBJS  := $(patsubst %.cpp, %.o, $(FILES))
 
-all: md libmd.a
+all: md
 
 md: libmd.a main.o 
 	$(CXX) $(CXXFLAGS) main.o $(LINKER) -o $(BIN)/md

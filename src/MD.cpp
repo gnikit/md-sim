@@ -3,7 +3,12 @@
 // TODO: scale the box by Lx, Ly, Lz in a tensor form
 // todo: change all T const to const T
 
-MD::MD() {}
+MD::MD() {
+
+  /* Intel compiler does not like emptying empty pointers */
+  pos = new std::vector<std::vector<double>>(4);
+  for (size_t i = 0; i < (*pos).size(); ++i) (*pos)[i].reserve(options.N);
+}
 
 MD::MD(options_type &input_options) {
   /* Perform a shallow copy of the input_options to options */

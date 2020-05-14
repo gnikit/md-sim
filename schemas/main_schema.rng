@@ -52,7 +52,6 @@
       <element name="steps">
         <a:documentation>Number of iteration steps the MD algorithm should run for.</a:documentation>
         <ref name="integer"/>
-        <ref name="comment"/>
       </element>
       <element name="particles">
         <a:documentation>Number of particles per axis (x y z).
@@ -65,7 +64,6 @@ FCC: particles *4
 
 BCC: particles *2</a:documentation>
         <ref name="integer_dim_vector"/>
-        <ref name="comment"/>
       </element>
       <ref name="lattice_type"/>
       <ref name="iterative_methods"/>

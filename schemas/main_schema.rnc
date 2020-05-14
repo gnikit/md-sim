@@ -43,9 +43,7 @@ setup_sim =
         ## Number of iteration steps the MD algorithm should run for.
         element steps {
 
-            integer,
-
-            comment
+            integer
         },
 
         ## Number of particles per axis (x y z).
@@ -59,9 +57,8 @@ setup_sim =
         ## BCC: particles *2
         element particles {
 
-            integer_dim_vector,
+            integer_dim_vector
 
-            comment
         },
 
         lattice_type,

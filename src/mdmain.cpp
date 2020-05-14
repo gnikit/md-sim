@@ -199,22 +199,13 @@ int md_options_interface::load_simulation_options(options_type& opts) {
     assert(error == SPUD_NO_ERROR);
   }
 
-  if (have_option(pp_path + "/dt")) {
-    /* The default value can only be supplied as a string, so check for it */
-    std::string dt_str = "";
-    error = get_option(pp_path + "/dt/name", dt_str);
-    /* In case we have supplied a user defined timestep */
-    if (error == SPUD_KEY_ERROR) {
-      error = get_option(pp_path + "/dt/value", dt_str);
-    }
-    opts.dt = atof(dt_str.c_str());
-    assert(error == SPUD_NO_ERROR);
+  error = get_option(pp_path + "/dt", opts.dt);
+  assert(error == SPUD_NO_ERROR);
 
-    if (have_option(pp_path + "/dt/normalise_with_temperature"))
-      opts.normalise_dt_w_temp = true;
-    else
-      opts.normalise_dt_w_temp = false;
-  }
+  if (have_option(pp_path + "/dt/normalise_with_temperature"))
+    opts.normalise_dt_w_temp = true;
+  else
+    opts.normalise_dt_w_temp = false;
 
   if (have_option(path + "/final_density")) {
     error = get_option(path + "/final_density",

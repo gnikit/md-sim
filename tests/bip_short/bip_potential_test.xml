@@ -39,7 +39,8 @@
       <temperature>
         <real_value rank="0">1.0</real_value>
       </temperature>
-      <dt name="0.005">
+      <dt>
+        <real_value rank="0">0.005</real_value>
         <normalise_with_temperature/>
       </dt>
       <potential_strength>

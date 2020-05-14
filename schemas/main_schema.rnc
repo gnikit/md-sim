@@ -161,14 +161,21 @@ timestep =
 (
     ## Default time step set to 0.005 time units
     element dt {
-        attribute name { "0.005" },
+        element real_value {
+            attribute rank { "0" },
+                ("0.005")
+            },
         ## Normalise the timetep by dividing it by the thermostat temperature. 
         ## Esnures the simulation captures most of the esential dynamics.
         element normalise_with_temperature { empty }
     }|
     ## Time step
     element dt {
-        attribute value { xsd:float },
+        # attribute value { xsd:float },
+        element real_value {
+            attribute rank { "0" },
+                (xsd:float)
+            },
         ## Normalise the timetep by dividing it by the thermostat temperature. 
         ## Esnures the simulation captures most of the esential dynamics.
         element normalise_with_temperature { empty }?

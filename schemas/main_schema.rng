@@ -161,9 +161,12 @@ The simulation is only run within this radius of the box</a:documentation>
     <choice>
       <element name="dt">
         <a:documentation>Default time step set to 0.005 time units</a:documentation>
-        <attribute name="name">
+        <element name="real_value">
+          <attribute name="rank">
+            <value>0</value>
+          </attribute>
           <value>0.005</value>
-        </attribute>
+        </element>
         <element name="normalise_with_temperature">
           <a:documentation>Normalise the timetep by dividing it by the thermostat temperature. 
 Esnures the simulation captures most of the esential dynamics.</a:documentation>
@@ -172,9 +175,13 @@ Esnures the simulation captures most of the esential dynamics.</a:documentation>
       </element>
       <element name="dt">
         <a:documentation>Time step</a:documentation>
-        <attribute name="value">
+        <!-- attribute value { xsd:float }, -->
+        <element name="real_value">
+          <attribute name="rank">
+            <value>0</value>
+          </attribute>
           <data type="float"/>
-        </attribute>
+        </element>
         <optional>
           <element name="normalise_with_temperature">
             <a:documentation>Normalise the timetep by dividing it by the thermostat temperature. 

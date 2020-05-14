@@ -1,11 +1,14 @@
 <?xml version='1.0' encoding='utf-8'?>
 <input_variables>
   <setup>
+    <dimension>
+      <integer_value rank="0">3</integer_value>
+    </dimension>
     <steps>
       <integer_value rank="0">2000</integer_value>
     </steps>
     <particles>
-      <integer_value rank="1" shape="3">8 8 8</integer_value>
+      <integer_value rank="1" dim1="dim" shape="3">8 8 8</integer_value>
     </particles>
     <lattice name="SC"/>
     <iterative_method name="Verlet"/>
@@ -37,6 +40,9 @@
       <temperature>
         <real_value rank="0">1.0</real_value>
       </temperature>
+      <dt name="0.005">
+        <normalise_with_temperature/>
+      </dt>
     </pair_potential>
   </simulation_type>
   <enable_testing/>

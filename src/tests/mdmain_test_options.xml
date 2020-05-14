@@ -5,25 +5,28 @@
       <integer_value rank="0">3</integer_value>
     </dimension>
     <steps>
-      <integer_value rank="0">2000</integer_value>
+      <integer_value rank="0">100</integer_value>
     </steps>
     <particles>
-      <integer_value rank="1" dim1="dim" shape="3">8 8 8</integer_value>
+      <integer_value rank="1" dim1="dim" shape="3">2 2 2</integer_value>
     </particles>
-    <lattice name="SC"/>
+    <lattice name="FCC"/>
     <iterative_method name="Verlet"/>
     <boundary_conditions name="Periodic"/>
     <rdf_bins>
-      <integer_value rank="0">200</integer_value>
+      <integer_value rank="0">100</integer_value>
     </rdf_bins>
     <rdf_equilibrate>
-      <integer_value rank="0">300</integer_value>
+      <integer_value rank="0">10</integer_value>
     </rdf_equilibrate>
+    <fix_box_dimensions>
+      <real_value rank="1" dim1="dim" shape="3">1.0 1.5 2.0</real_value>
+    </fix_box_dimensions>
   </setup>
   <io>
-    <simulation_name>exp_potential_test_</simulation_name>
+    <simulation_name>test_</simulation_name>
     <output_dir>.</output_dir>
-    <track_particles name="false"/>
+    <track_particles name="true"/>
     <energies name="true"/>
     <pressure name="true"/>
     <msd name="true"/>
@@ -31,23 +34,27 @@
     <sf name="true"/>
     <rdf name="true"/>
     <positions name="true"/>
+    <compression_summary_stats name="true"/>
   </io>
   <simulation_type name="NormalRun">
-    <pair_potential name="Exponential">
+    <pair_potential name="BoundedInversePower">
       <density>
         <real_value rank="0">0.5</real_value>
       </density>
       <temperature>
         <real_value rank="0">1.0</real_value>
       </temperature>
-      <dt name="0.005">
+      <dt value="0.1">
         <normalise_with_temperature/>
       </dt>
+      <cut_off>
+        <real_value rank="0">2.0</real_value>
+      </cut_off>
       <potential_strength>
-        <real_value rank="0">8</real_value>
+        <real_value rank="0">6.0</real_value>
       </potential_strength>
       <softening_parameter>
-        <real_value rank="0">0.5</real_value>
+        <real_value rank="0">1.0</real_value>
       </softening_parameter>
     </pair_potential>
   </simulation_type>

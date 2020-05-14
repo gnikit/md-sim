@@ -27,3 +27,4 @@ test: clean tests-main.o
 
 clean:
 	$(RM) $(OBJS) tests-main
+	$(RM) *.gcda *.gcno *.gcov

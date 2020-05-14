@@ -23,4 +23,5 @@ libmd.a: $(OBJS)
 
 clean:
 	$(RM) $(OBJS) $(BIN)/md $(LIB)/libmd.a
+	$(RM) *.gcda *.gcno *.gcov
 

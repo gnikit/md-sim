@@ -2,6 +2,7 @@
 // todo: add logger https://github.com/gabime/spdlog
 // TODO: scale the box by Lx, Ly, Lz in a tensor form
 // todo: change all T const to const T
+// todo: pass box dimensions
 
 MD::MD() {
   /* Intel compiler does not like emptying empty pointers */
@@ -99,7 +100,9 @@ MD::MD(options_type &input_options) {
   }
 
   /* Initialise scaling variables */
-  options.dt = 0.005 / sqrt(options.target_temperature);  // todo: add to schema
+  // if (options.normalise_dt_w_temp)
+  options.dt = 0.005 / sqrt(options.target_temperature);
+
   /* Box length scaling */
   options.L = pow((options.N / options.density), 1.0 / 3.0);
   options.Lx = options.Ly = options.Lz = options.L;

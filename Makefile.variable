@@ -14,7 +14,11 @@ ifeq (, $(shell which icpc))
 ifeq ($(debug),1)
 	CXXFLAGS += -g
 else
+ifeq ($(coverage),1)
+	CXXFLAGS += -g -O0 -fprofile-arcs -ftest-coverage --coverage
+else
 	CXXFLAGS += -O3
+endif
 endif
 else
 	# INTEL compiler
@@ -22,7 +26,11 @@ else
 ifeq ($(debug),1)
 	CXXFLAGS += -g
 else
+ifeq ($(coverage),1)
+	CXXFLAGS += -g -O0 -fprofile-arcs -ftest-coverage
+else
 	# Aggressive optimisations hurt our accuracy, hence some tests fail
 	CXXFLAGS += -Ofast -xHOST -m64 -use-intel-optimized-headers
+endif
 endif
 endif

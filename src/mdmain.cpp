@@ -42,6 +42,11 @@ int md_options_interface::load_setup_options(options_type& options) {
 
   int temp;
   std::vector<int> temp_v;
+  std::vector<double> temp_v_d;
+
+  error = get_option(path + "/dimension", temp);
+  assert(error == SPUD_NO_ERROR);
+  options.dimension = static_cast<size_t>(temp);
 
   error = get_option(path + "/steps", temp);
   assert(error == SPUD_NO_ERROR);
@@ -72,8 +77,14 @@ int md_options_interface::load_setup_options(options_type& options) {
     options.rdf_options.rdf_wait = static_cast<size_t>(temp);
   }
 
-  if (have_option(path + "/track_particles"))
-    options.io_options.visualise = true;
+  if (have_option(path + "/fix_box_dimensions")) {
+    options.fix_box_lengths = true;
+    error = get_option(path + "/fix_box_dimensions", temp_v_d);
+    assert(error == SPUD_NO_ERROR);
+    options.Lx = temp_v_d[0];
+    options.Ly = temp_v_d[1];
+    options.Lz = temp_v_d[2];
+  }
 
   return 0;
 }
@@ -189,13 +200,21 @@ int md_options_interface::load_simulation_options(options_type& opts) {
   }
 
   if (have_option(pp_path + "/dt")) {
-    error = get_option(pp_path + "/dt", opts.dt);
+    /* The default value can only be supplied as a string, so check for it */
+    std::string dt_str = "";
+    error = get_option(pp_path + "/dt/name", dt_str);
+    /* In case we have supplied a user defined timestep */
+    if (error == SPUD_KEY_ERROR) {
+      error = get_option(pp_path + "/dt/value", dt_str);
+    }
+    opts.dt = atof(dt_str.c_str());
     assert(error == SPUD_NO_ERROR);
 
     if (have_option(pp_path + "/dt/normalise_with_temperature"))
       opts.normalise_dt_w_temp = true;
-  } else
-    opts.normalise_dt_w_temp = false;
+    else
+      opts.normalise_dt_w_temp = false;
+  }
 
   if (have_option(path + "/final_density")) {
     error = get_option(path + "/final_density",
@@ -205,7 +224,7 @@ int md_options_interface::load_simulation_options(options_type& opts) {
 
   if (have_option(pp_path + "/cut_off")) {
     error = get_option(pp_path + "/cut_off", opts.cut_off);
-    assert(error = SPUD_NO_ERROR);
+    assert(error == SPUD_NO_ERROR);
   }
 
   if (have_option(path + "/density_increment")) {

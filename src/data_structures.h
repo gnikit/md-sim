@@ -55,10 +55,10 @@ struct io_options_type {
   bool compression_stats = true; /* create a separate log file with stats */
   string dir = ".";              /* file output directory */
   string simulation_name = "";   /* simulation prefix/ name */
-
 };
 
 struct options_type {
+  size_t dimension = 3;               /* geometrical dimension */
   string simulation_type = "";        /* type of simulation e.g. NormalRun */
   string potential_type = "";         /* pair potential type */
   string lattice = "SC";              /* lattice formation */
@@ -72,13 +72,14 @@ struct options_type {
   double dt = 0.005;                  /* timestep */
   bool normalise_dt_w_temp = true;    /* normalise the timestep with T0 */
   double density = 0.5;               /* density */
-  double target_temperature = 0;      /* target/ Thermostat temperature */
-  double temperature = 0;             /* simulation temperature */
+  double target_temperature = 1.0;    /* target/ Thermostat temperature */
+  double temperature = 1.0;           /* simulation temperature */
   double power = 0;                   /* pair potential intensity */
   double a_cst = 0;                   /* generic softening parameter */
   double kinetic_energy = 0;          /* kinetic energy */
   double cut_off = 0;                 /* cut off radius of simulation */
   double scale_v = 0;                 /* velocity scaling */
+  bool fix_box_lengths = false;       /* Whether or not the MD cell has fix L */
 
   io_options_type io_options;
   rdf_options_type rdf_options;

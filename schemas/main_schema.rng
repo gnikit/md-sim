@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<grammar xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns="http://relaxng.org/ns/structure/1.0">
+<grammar xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <!-- The SPUD base schema -->
   <include href="spud_base.rng"/>
   <include href="io.rng"/>
@@ -39,18 +39,21 @@
   <define name="setup_sim">
     <element name="setup">
       <a:documentation>setup initialisation for MD or phase_transition objects.</a:documentation>
+      <element name="dimension">
+        <a:documentation>Dimension of the problem.
+&lt;b&gt;This can only be set once&lt;/b&gt;</a:documentation>
+        <element name="integer_value">
+          <attribute name="rank">
+            <value>0</value>
+          </attribute>
+          <value>3</value>
+        </element>
+      </element>
       <element name="steps">
         <a:documentation>Number of iteration steps the MD algorithm should run for.</a:documentation>
         <ref name="integer"/>
         <ref name="comment"/>
       </element>
-      <!--
-        element particles {
-            attribute x { xsd:integer },
-            attribute y { xsd:integer },
-            attribute z { xsd:integer }
-        },
-      -->
       <element name="particles">
         <a:documentation>Number of particles per axis (x y z).
 This in combination with the lattice formation will yield
@@ -61,15 +64,13 @@ SC: particles
 FCC: particles *4
 
 BCC: particles *2</a:documentation>
-        <ref name="integer_vector"/>
+        <ref name="integer_dim_vector"/>
         <ref name="comment"/>
       </element>
       <ref name="lattice_type"/>
       <ref name="iterative_methods"/>
       <ref name="boundary_conditions"/>
-      <optional>
-        <ref name="options"/>
-      </optional>
+      <ref name="options"/>
     </element>
   </define>
   <define name="options">
@@ -88,6 +89,15 @@ results will be dominated by statistical noise.</a:documentation>
 The RDF will begin to be collected rdf_equilibrate steps
 from the start of the simulation.</a:documentation>
         <ref name="integer"/>
+      </element>
+    </optional>
+    <optional>
+      <element name="fix_box_dimensions">
+        <a:documentation>Normaly the length of the MD cell for each spatial dimension is
+calculated by L[x,y,z] = (particles in the axis) / (rho^ 1.0/3.0).
+This options disables that and allows for the user to supply
+fixed lengths for the x, y, z axis of the MD cell. </a:documentation>
+        <ref name="real_dim_vector"/>
       </element>
     </optional>
   </define>
@@ -138,17 +148,7 @@ from the start of the simulation.</a:documentation>
       <a:documentation>Fluid temperature (unitless).</a:documentation>
       <ref name="real"/>
     </element>
-    <optional>
-      <element name="dt">
-        <a:documentation>Time step</a:documentation>
-        <ref name="real"/>
-        <optional>
-          <element name="normalise_with_temperature">
-            <empty/>
-          </element>
-        </optional>
-      </element>
-    </optional>
+    <ref name="timestep"/>
     <optional>
       <element name="cut_off">
         <a:documentation>Radius cut-off
@@ -156,6 +156,34 @@ The simulation is only run within this radius of the box</a:documentation>
         <ref name="real"/>
       </element>
     </optional>
+  </define>
+  <define name="timestep">
+    <choice>
+      <element name="dt">
+        <a:documentation>Default time step set to 0.005 time units</a:documentation>
+        <attribute name="name">
+          <value>0.005</value>
+        </attribute>
+        <element name="normalise_with_temperature">
+          <a:documentation>Normalise the timetep by dividing it by the thermostat temperature. 
+Esnures the simulation captures most of the esential dynamics.</a:documentation>
+          <empty/>
+        </element>
+      </element>
+      <element name="dt">
+        <a:documentation>Time step</a:documentation>
+        <attribute name="value">
+          <data type="float"/>
+        </attribute>
+        <optional>
+          <element name="normalise_with_temperature">
+            <a:documentation>Normalise the timetep by dividing it by the thermostat temperature. 
+Esnures the simulation captures most of the esential dynamics.</a:documentation>
+            <empty/>
+          </element>
+        </optional>
+      </element>
+    </choice>
   </define>
   <define name="pair_potential_parameters">
     <element name="potential_strength">

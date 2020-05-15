@@ -18,7 +18,6 @@ all: test
 
 test: clean tests-main.o
 	$(CXX) $(CXXFLAGS) tests-main.o $(LINKER) -o tests-main
-	cp tests-main $(BIN)
 
 %.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) $(LINKER) $< -o $@

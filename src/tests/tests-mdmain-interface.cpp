@@ -7,7 +7,7 @@ using namespace Spud;
 using namespace Catch::literals;
 
 SCENARIO("MD XML interface", "[xml] [MD] [constructor]") {
-  load_options("mdmain_test_options.xml");
+  load_options("./data/mdmain_test_options.xml");
   options_type opts;
 
   GIVEN("setup options") {

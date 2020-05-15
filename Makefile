@@ -62,7 +62,7 @@ tests: libmd
 unit-tests: libmd
 	@echo "Running unit tests"
 	$(MAKE) -C src/tests
-	./bin/tests-main -s -d yes
+	@cd src/tests && ./tests-main -s -d yes
 
 tests-examples: libmd
 	# Do not run the database files

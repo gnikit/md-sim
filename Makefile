@@ -9,6 +9,13 @@ default: libmd schemas
 
 all: libmd examples schemas
 
+debug:
+	$(MAKE) debug=1
+
+coverage:
+	$(MAKE) coverage=1
+	$(MAKE) unit-tests coverage=1
+
 libmd: libspud fileio
 	@echo "MAKE MD src"
 	$(MAKE) -C src

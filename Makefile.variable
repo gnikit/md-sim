@@ -15,7 +15,7 @@ ifeq ($(debug),1)
 	CXXFLAGS += -g
 else
 ifeq ($(coverage),1)
-	CXXFLAGS += -g -O0 -fprofile-arcs -ftest-coverage --coverage
+	CXXFLAGS += -g -O0 --coverage
 else
 	CXXFLAGS += -O3
 endif
@@ -27,7 +27,7 @@ ifeq ($(debug),1)
 	CXXFLAGS += -g
 else
 ifeq ($(coverage),1)
-	CXXFLAGS += -g -O0 -fprofile-arcs -ftest-coverage
+	CXXFLAGS += -g -O0 --coverage
 else
 	# Aggressive optimisations hurt our accuracy, hence some tests fail
 	CXXFLAGS += -Ofast -xHOST -m64 -use-intel-optimized-headers

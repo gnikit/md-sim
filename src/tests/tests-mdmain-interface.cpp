@@ -1,7 +1,7 @@
 #pragma once
 #include <catch.hpp>
 
-#include "../mdmain.h"
+#include "mdmain.h"
 
 using namespace Spud;
 using namespace Catch::literals;

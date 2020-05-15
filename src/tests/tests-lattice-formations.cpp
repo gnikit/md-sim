@@ -2,7 +2,7 @@
 #include <catch.hpp>
 
 #define protected public
-#include "../MD.h"
+#include "MD.h"
 
 using Catch::Matchers::Approx;
 

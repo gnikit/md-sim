@@ -2,7 +2,7 @@
 #include <catch.hpp>
 #include <vector>
 
-#include "../vector_3d.h"
+#include "vector_3d.h"
 
 SCENARIO("vector_3d can get populated", "[vector_3d], [data-structures]") {
   using Catch::Matchers::Approx;

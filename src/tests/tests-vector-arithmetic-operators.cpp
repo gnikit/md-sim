@@ -1,6 +1,6 @@
 #pragma once
 #include <catch.hpp>
-#include "../vector_arithmetic_operators.h"
+#include "vector_arithmetic_operators.h"
 
 using namespace std;
 

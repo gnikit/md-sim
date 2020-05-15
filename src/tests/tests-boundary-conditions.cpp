@@ -2,7 +2,7 @@
 #include <catch.hpp>
 
 #define protected public
-#include "../MD.h"
+#include "MD.h"
 
 SCENARIO("Boundary conditions", "[bcs]") {
   GIVEN("Periodic boundaries") {

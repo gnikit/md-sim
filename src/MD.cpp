@@ -625,9 +625,9 @@ std::tuple<double, double, double> MD::velocity_verlet(vector_3d<double> &r,
 
   /* r^(n+1) = r^(n) + v^(n)*dt + f^(n)*(dt^2 * 0.5) */
   for (size_t i = 0; i < options.N; ++i) {
-    r.x[i] += v.x[i] * dt + 0.5 * f_n.x[i] * dt * dt;
-    r.y[i] += v.y[i] * dt + 0.5 * f_n.y[i] * dt * dt;
-    r.z[i] += v.z[i] * dt + 0.5 * f_n.z[i] * dt * dt;
+    r.x[i] += v.x[i] * dt + 0.5 * f_n.x[i] * (dt * dt);
+    r.y[i] += v.y[i] * dt + 0.5 * f_n.y[i] * (dt * dt);
+    r.z[i] += v.z[i] * dt + 0.5 * f_n.z[i] * (dt * dt);
   }
 
   /* f^(n+1) = calculate forces */

@@ -39,7 +39,6 @@ Examples where the MD class is used as part of a C++ file can be found under
 * Multiple choices for iterative algorithms:
   * Explicit Verlet
   * Velocity Verlet
-  * Runge Kutta 4th Order
 * Statistical quantities calculation:
   * Mean Square Displacement (MSD)
   * Velocity Autocorrelation Function (VAF)

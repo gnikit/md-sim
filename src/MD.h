@@ -221,18 +221,6 @@ class MD {
                                                      vector_3d<double> &f);
 
   /**
-   * @brief A Runge Kutta 4th order iterative algorithm
-   *
-   * @param r: position vectors of particles
-   * @param v: velocity vectors of particles
-   * @param f: force vectors of particles
-   * @return std::tuple<double, double, double> KE, U, PC
-   */
-  std::tuple<double, double, double> runge_kutta4(vector_3d<double> &r,
-                                                  vector_3d<double> &v,
-                                                  vector_3d<double> &f);
-
-  /**
    * @brief Calculates the forces interactions of a given pair potential
    * within the specified cutoff distance for a single step iteration
    *

@@ -59,9 +59,12 @@ tests: libmd
 	@echo "Running regression tests"
 	@cd tests; pytest -v -rA --capture=sys run_tests.py
 
-unit-tests: libmd
-	@echo "Running unit tests"
+unit-tests-build: libmd
+	@echo "Building unit tests"
 	$(MAKE) -C src/tests
+
+unit-tests: unit-tests-build
+	@echo "Running unit tests"
 	@cd src/tests && ./tests-main -s -d yes
 
 tests-examples: libmd

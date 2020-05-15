@@ -1,7 +1,7 @@
 SHELL = /bin/bash
 
 STD       := -std=c++17
-CXXFLAGS  := $(STD) -pthread -Wall
+CXXFLAGS  := $(STD) -Wall -fPIC -pthread
 
 INC    := -I../include
 LN     := -L../lib

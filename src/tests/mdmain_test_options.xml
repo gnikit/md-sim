@@ -44,7 +44,8 @@
       <temperature>
         <real_value rank="0">1.0</real_value>
       </temperature>
-      <dt value="0.1">
+      <dt>
+        <real_value rank="0">0.1</real_value>
         <normalise_with_temperature/>
       </dt>
       <cut_off>

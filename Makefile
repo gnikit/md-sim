@@ -23,7 +23,7 @@ libmd: libspud fileio
 libspud:
 ifeq ("$(wildcard $(SPUD_DIR)/libspud.a)","")
 	@echo "Configuring libspud"
-	@cd $(SPUD_DIR) && ./configure --prefix= --disable-shared
+	@cd $(SPUD_DIR) && ./configure --prefix= --disable-shared CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)"
 endif
 	@echo "MAKE libspud"
 	$(MAKE) -C $(SPUD_DIR)

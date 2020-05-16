@@ -29,8 +29,8 @@
 // TODO: in future C++ versions, rm fs:: from global scope and mv in constructor
 #if __cplusplus <= 201103L
 #error This library requires at least C++17 compiler support
-/* If C++ version C++2a or above use */
-#elif __cplusplus >= 201709
+/* If C++ version C++2a or above or If GNU compilers of version 8 and greater */
+#elif __cplusplus >= 201709 || __GNUC__ >= 8
 #include <filesystem>
 namespace fs = std::filesystem;
 #else

@@ -14,11 +14,12 @@
 #include <ctime>      /* std::chrono */
 #include <functional> /* funciton pointers */
 #include <iomanip>    /* setprecision */
+#include <memory>     /* unique_ptr */
 #include <numeric>    /* accumulate */
 #include <random>     /* normal_dist */
 #include <sstream>    /* stringstream */
 #include <vector>     /* vectors */
-// todo: change vector to std::valarray
+
 #include "data_structures.h"
 #include "helper_functions.h"
 #include "md_pair_potentials.h"
@@ -28,8 +29,8 @@
 // TODO: in future C++ versions, rm fs:: from global scope and mv in constructor
 #if __cplusplus <= 201103L
 #error This library requires at least C++17 compiler support
-/* If C++ version C++2a or above use */
-#elif __cplusplus >= 201709
+/* If C++ version C++2a or above or If GNU compilers of version 8 and greater */
+#elif __cplusplus >= 201709 || __GNUC__ >= 8
 #include <filesystem>
 namespace fs = std::filesystem;
 #else
@@ -47,13 +48,13 @@ namespace fs = std::experimental::filesystem;
 
 class MD {
  protected:
-  vector_3d r;     /* Position Arrays */
-  vector_3d v;     /* Velocity Arrays */
-  vector_3d f;     /* Force arrays */
-  vector_3d Cv;    /* VAF arrays */
-  vector_3d MSD_r; /* used in MSD calculation */
-  vector_3d MSD;   /* MSD arrays */
-  vector_3d sf;    /* Structure factor k-arrays */
+  vector_3d<double> r;     /* Position Arrays */
+  vector_3d<double> v;     /* Velocity Arrays */
+  vector_3d<double> f;     /* Force arrays */
+  vector_3d<double> Cv;    /* VAF arrays */
+  vector_3d<double> MSD_r; /* used in MSD calculation */
+  vector_3d<double> MSD;   /* MSD arrays */
+  vector_3d<double> sf;    /* Structure factor k-arrays */
 
   /* Statistical quantity vectors, VAF, MSD, Energies and pressures */
   std::vector<double> Cr, msd, u_en, k_en, pc, pk, temperature, density, rdf,
@@ -63,17 +64,17 @@ class MD {
   options_type options;
 
   /* Visualisation vectors, initialised in constructor */
+  // todo: use vector of smart_pointers
   std::vector<std::vector<double>> *pos;
-  // todo: remove or make default
-  // std::vector<std::vector<double>*> pos = {&r.x, &r.y, &r.z, &r.x, &r.y,
-  // &r.z};
 
  private:
   double const PI = acos(-1.0);
+  size_t step_idx = 0;
   /* Variables for storing inside the object the file ID */
   stat_file logger;
 
  public:
+  MD();
   MD(options_type &input_options);
   MD(size_t step_number, std::vector<size_t> particles, std::string lattice);
   ~MD();
@@ -106,9 +107,9 @@ class MD {
    *                 modelling. Options are "BoundedInversePower",
    *                 "GaussianCoreModel", "Exponential", "LennardJones"
    */
-  void simulation(std::string simulation_name, double DENSITY,
-                  double TEMPERATURE, double POWER, double A_CST,
-                  std::string pp_type);
+  void simulation(std::string const simulation_name, double const DENSITY,
+                  double const TEMPERATURE, double POWER, double const A_CST,
+                  std::string const pp_type);
 
   /**
    * @brief
@@ -144,7 +145,8 @@ class MD {
    * @param TEMPERATURE: Thermostat target temperature
    * @return kinetic energy (normalised)
    */
-  double initialise(vector_3d &r, vector_3d &v, double TEMPERATURE);
+  double initialise(vector_3d<double> &r, vector_3d<double> &v,
+                    double const TEMPERATURE);
 
   /**
    * @brief Outputs the positions r of the particles, based on the input
@@ -157,7 +159,8 @@ class MD {
    * @param lattice: type of lattice
    * @param r: particle positions
    */
-  void choose_lattice_formation(std::string &lattice, vector_3d &r);
+  void choose_lattice_formation(std::string const &lattice,
+                                vector_3d<double> &r);
 
   /**
    * @brief
@@ -169,8 +172,10 @@ class MD {
    *
    * @param v: velocity vectors of particles
    * @param TEMPERATURE: Temperature of the MB distribution
+   * @param mean: Optional mean value of distribution, default is 0
    */
-  void mb_distribution(vector_3d &v, double TEMPERATURE);
+  void mb_distribution(vector_3d<double> &v, double const TEMPERATURE,
+                       double const mean = 0);
 
   /**************************** ITERATIVE METHODS *****************************/
 
@@ -187,21 +192,21 @@ class MD {
    *            MSD requires a copy of the particles where BCs are not applied.
    * @return std::tuple<double, double, double> KE, U, PC
    */
-  std::tuple<double, double, double> stepping_algorithm(vector_3d &r,
-                                                        vector_3d &v,
-                                                        vector_3d &f,
-                                                        size_t &step, bool msd);
+  std::tuple<double, double, double> stepping_algorithm(vector_3d<double> &r,
+                                                        vector_3d<double> &v,
+                                                        vector_3d<double> &f,
+                                                        bool msd);
   /**
    * @brief An iterative leap-frog Verlet Algorithm.
    *
    * @param r: position vectors of particles
    * @param v: velocity vectors of particles
    * @param f: force vectors of particles
-   * @param step: timestep number (used for calculating rdf correctly)
    * @return std::tuple<double, double, double> KE, U, PC
    */
-  std::tuple<double, double, double> verlet(vector_3d &r, vector_3d &v,
-                                            vector_3d &f, size_t &step);
+  std::tuple<double, double, double> verlet(vector_3d<double> &r,
+                                            vector_3d<double> &v,
+                                            vector_3d<double> &f);
 
   /**
    * @brief Iterative Velocity verlet algorithm.
@@ -209,23 +214,11 @@ class MD {
    * @param r: position vectors of particles
    * @param v: velocity vectors of particles
    * @param f: force vectors of particles
-   * @param i: timestep number (used for calculating rdf correctly)
    * @return std::tuple<double, double, double> KE, U, PC
    */
-  std::tuple<double, double, double> velocity_verlet(vector_3d &r, vector_3d &v,
-                                                     vector_3d &f, size_t &i);
-
-  /**
-   * @brief A Runge Kutta 4th order iterative algorithm
-   *
-   * @param r: position vectors of particles
-   * @param v: velocity vectors of particles
-   * @param f: force vectors of particles
-   * @param step: timestep number (used for calculating rdf correctly)
-   * @return std::tuple<double, double, double> KE, U, PC
-   */
-  std::tuple<double, double, double> runge_kutta4(vector_3d &r, vector_3d &v,
-                                                  vector_3d &f, size_t &step);
+  std::tuple<double, double, double> velocity_verlet(vector_3d<double> &r,
+                                                     vector_3d<double> &v,
+                                                     vector_3d<double> &f);
 
   /**
    * @brief Calculates the forces interactions of a given pair potential
@@ -233,14 +226,11 @@ class MD {
    *
    * @param r: position vectors of particles
    * @param f: force vectors of particles
-   * @param step_index: The number of the current iteration. Only used to
-   *                    determine if the sampling of the RDF should occur, if
-   *                    an equilibration period has been supplied.
    * @param potential: Type of the pair potential
    * @return std::tuple<double, double> Potential Energy, Configuration Pressure
    */
-  std::tuple<double, double> calculate_forces(vector_3d &x, vector_3d &f,
-                                              size_t &step_index,
+  std::tuple<double, double> calculate_forces(vector_3d<double> &x,
+                                              vector_3d<double> &f,
                                               pair_potential_type &potential);
 
   /**************************** BOUNDARY CONDITIONS ***************************/
@@ -254,7 +244,8 @@ class MD {
    * @param v: velocity vectors of particles
    * @param f: force vectors of particles
    */
-  void apply_boundary_conditions(vector_3d &r, vector_3d &v, vector_3d &f);
+  void apply_boundary_conditions(vector_3d<double> &r, vector_3d<double> &v,
+                                 vector_3d<double> &f);
 
   /**
    * @brief Applies a periodic boundary condition, which simulates
@@ -262,7 +253,7 @@ class MD {
    *
    * @param r: position vectors of particles
    */
-  void periodic_boundary_conditions(vector_3d &r);
+  void periodic_boundary_conditions(vector_3d<double> &r);
 
   /**
    * @brief Applies a reflective wall boundary condition, which is
@@ -271,7 +262,8 @@ class MD {
    * @param r: position vectors of particles
    * @param v: velocity vectors of particles
    */
-  void reflective_boundary_conditions(vector_3d const &r, vector_3d &v);
+  void reflective_boundary_conditions(vector_3d<double> const &r,
+                                      vector_3d<double> &v);
 
   /********************** STATISTICAL QUANTITIES METHODS **********************/
 
@@ -284,7 +276,8 @@ class MD {
    * @param Cv: holds the particle velocities at t = 0
    * @param v: velocity vectors of particles
    */
-  void velocity_autocorrelation_function(vector_3d &Cv, vector_3d &v);
+  void velocity_autocorrelation_function(vector_3d<double> &Cv,
+                                         vector_3d<double> &v);
 
   /**
    * @brief
@@ -316,7 +309,8 @@ class MD {
    * @param MSD: vectors containing the particle positions at t = 0
    * @param MSD_r: position vectors of particles, with no boundaries
    */
-  void mean_square_displacement(vector_3d &MSD, vector_3d &MSD_r);
+  void mean_square_displacement(vector_3d<double> &MSD,
+                                vector_3d<double> &MSD_r);
 
   /**
    * @brief
@@ -325,7 +319,7 @@ class MD {
    *
    * @param r: position vectors of particles
    */
-  void structure_factor(vector_3d &r);
+  void structure_factor(vector_3d<double> &r);
 
   /***************************** LOGGING METHODS ******************************/
 
@@ -342,8 +336,9 @@ class MD {
    * @param pp_type: pair potential type
    * @return string containing simulation run parameters
    */ //todo: pass options type
-  std::string set_simulation_params(double &rho, double &T, double &power,
-                                    double &a, std::string &pp_type);
+  std::string set_simulation_params(double const &rho, double const &T,
+                                    double const &power, double const &a,
+                                    std::string const &pp_type);
 
   /**
    * @brief IO wrapper for saving into file the positions of the particles

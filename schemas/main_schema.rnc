@@ -22,10 +22,7 @@ lattice_type =
     ## RANDOM: Randomise the positions of the particles in the lattice
     element lattice {
         attribute name {"RANDOM"},
-        ## Variance of the normal distributions
-        element variance {real},
-        ## Fix the seed of the normal distribution
-        element fixed_seed {"true" | "false"}
+        comment
     }
 )
 
@@ -34,12 +31,19 @@ setup_sim =
     ## setup initialisation for MD or phase_transition objects.
     element setup {
 
+        ## Dimension of the problem.
+        ## <b>This can only be set once</b>
+        element dimension {
+            element integer_value {
+                attribute rank {"0"},
+                ("3")
+            }
+        },
+
         ## Number of iteration steps the MD algorithm should run for.
         element steps {
 
-            integer,
-
-            comment
+            integer
         },
 
         ## Number of particles per axis (x y z).
@@ -51,16 +55,10 @@ setup_sim =
         ## FCC: particles *4
         ##
         ## BCC: particles *2
-        # element particles {
-        #     attribute x { xsd:integer },
-        #     attribute y { xsd:integer },
-        #     attribute z { xsd:integer }
-        # },
         element particles {
 
-            integer_vector,
+            integer_dim_vector
 
-            comment
         },
 
         lattice_type,
@@ -69,7 +67,7 @@ setup_sim =
 
         boundary_conditions,
 
-        options?
+        options
     }
 )
 
@@ -84,7 +82,13 @@ options =
     ## An equilibration period for the RDF in time step units.
     ## The RDF will begin to be collected rdf_equilibrate steps
     ## from the start of the simulation.
-    element rdf_equilibrate { integer }?
+    element rdf_equilibrate { integer }?,
+
+    ## Normaly the length of the MD cell for each spatial dimension is
+    ## calculated by L[x,y,z] = (particles in the axis) / (rho^ 1.0/3.0).
+    ## This options disables that and allows for the user to supply
+    ## fixed lengths for the x, y, z axis of the MD cell. 
+    element fix_box_dimensions { real_dim_vector }?
 )
 
 potentials =
@@ -143,15 +147,36 @@ simulation_parameters =
     ## Fluid temperature (unitless).
     element temperature { real },
 
-    ## Time step
-    element dt {
-        real,
-        element normalise_with_temperature { empty }?
-    }?,
+    timestep,
 
     ## Radius cut-off
     ## The simulation is only run within this radius of the box
     element cut_off { real }?
+)
+
+timestep =
+(
+    ## Default time step set to 0.005 time units
+    element dt {
+        element real_value {
+            attribute rank { "0" },
+                ("0.005")
+            },
+        ## Normalise the timetep by dividing it by the thermostat temperature. 
+        ## Esnures the simulation captures most of the esential dynamics.
+        element normalise_with_temperature { empty }
+    }|
+    ## Time step
+    element dt {
+        # attribute value { xsd:float },
+        element real_value {
+            attribute rank { "0" },
+                (xsd:float)
+            },
+        ## Normalise the timetep by dividing it by the thermostat temperature. 
+        ## Esnures the simulation captures most of the esential dynamics.
+        element normalise_with_temperature { empty }?
+    }
 )
 
 pair_potential_parameters =

@@ -17,6 +17,9 @@ __pycache__*
 # Ignore everything in bin
 bin/*
 
+# Ignore everything in build
+build/*
+
 # Ignore header files in include
 include/*.h
 

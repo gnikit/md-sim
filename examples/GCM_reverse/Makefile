@@ -1,5 +1,5 @@
 SHELL = /bin/bash
-include ../../Makefile.variables
+include ../../Makefile.variable
 LIB := ../../lib
 BIN := ../../bin
 SRC := ../../src
@@ -9,9 +9,6 @@ LN  := -L ../../lib
 LINKER = $(INC) $(LN) -lmd
 
 all: gcm_reverse
-			
-debug: CXXFLAGS = $(DCXXFLAGS)
-debug: gcm_reverse
 
 gcm_reverse: gcm_reverse.o $(LIB)/libmd.a
 	$(CXX) $(CXXFLAGS) gcm_reverse.o $(LINKER) -o gcm_reverse -lstdc++fs

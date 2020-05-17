@@ -1,5 +1,5 @@
 SHELL = /bin/bash
-include ../../Makefile.variables
+include ../../Makefile.variable
 LIB := ../../lib
 BIN := ../../bin
 SRC := ../../src
@@ -9,9 +9,6 @@ LN  := -L ../../lib
 LINKER = $(INC) $(LN) -lmd
 
 all: bip_database
-			
-debug: CXXFLAGS = $(DCXXFLAGS)
-debug: bip_database
 
 bip_database: *.o $(LIB)/libmd.a
 	$(CXX) $(CXXFLAGS) *.o $(LINKER) -o bip_database -lstdc++fs

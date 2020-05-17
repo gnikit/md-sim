@@ -39,7 +39,6 @@ Examples where the MD class is used as part of a C++ file can be found under
 * Multiple choices for iterative algorithms:
   * Explicit Verlet
   * Velocity Verlet
-  * Runge Kutta 4th Order
 * Statistical quantities calculation:
   * Mean Square Displacement (MSD)
   * Velocity Autocorrelation Function (VAF)
@@ -73,7 +72,8 @@ make -j
 To run the test regression tests run:
 
 ```bash
-make test
+make tests
+make unit-tests
 ```
 
 To add tests look into the tests folder.

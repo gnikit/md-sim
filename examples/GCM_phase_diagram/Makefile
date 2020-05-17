@@ -1,5 +1,5 @@
 SHELL = /bin/bash
-include ../../Makefile.variables
+include ../../Makefile.variable
 LIB := ../../lib
 BIN := ../../bin
 SRC := ../../src
@@ -9,9 +9,6 @@ LN  := -L ../../lib
 LINKER = $(INC) $(LN) -lmd
 
 all: gcm_compression
-			
-debug: CXXFLAGS = $(DCXXFLAGS)
-debug: gcm_compression
 
 gcm_compression: gcm_compression.o $(LIB)/libmd.a
 	$(CXX) $(CXXFLAGS) gcm_compression.o $(LINKER) -o gcm_compression -lstdc++fs

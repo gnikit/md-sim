@@ -1,11 +1,14 @@
 <?xml version='1.0' encoding='utf-8'?>
 <input_variables>
   <setup>
+    <dimension>
+      <integer_value rank="0">3</integer_value>
+    </dimension>
     <steps>
       <integer_value rank="0">1</integer_value>
     </steps>
     <particles>
-      <integer_value rank="1" shape="3">8 8 8</integer_value>
+      <integer_value rank="1" dim1="dim" shape="3">8 8 8</integer_value>
     </particles>
     <lattice name="BCC"/>
     <iterative_method name="Verlet"/>
@@ -37,6 +40,10 @@
       <temperature>
         <real_value rank="0">1.0</real_value>
       </temperature>
+      <dt>
+        <real_value rank="0">0.005</real_value>
+        <normalise_with_temperature/>
+      </dt>
       <potential_strength>
         <real_value rank="0">8</real_value>
       </potential_strength>

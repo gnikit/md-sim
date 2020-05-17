@@ -1,23 +1,29 @@
 SHELL = /bin/bash
-include Makefile.variables
+include Makefile.variable
 
 RM := rm -rf
 SPUD_DIR := spud
 CURRENT_DIR := $(shell pwd)
 
-default: libmd schema
+default: libmd schemas
 
-all: libmd examples schema
+all: libmd examples schemas
 
+debug:
+	$(MAKE) debug=1
 
-libmd: libspud
+coverage:
+	$(MAKE) coverage=1
+	$(MAKE) unit-tests coverage=1
+
+libmd: libspud fileio
 	@echo "MAKE MD src"
 	$(MAKE) -C src
 
 libspud:
 ifeq ("$(wildcard $(SPUD_DIR)/libspud.a)","")
 	@echo "Configuring libspud"
-	@cd $(SPUD_DIR) && ./configure --prefix= --disable-shared
+	@cd $(SPUD_DIR) && ./configure --prefix= --disable-shared CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)"
 endif
 	@echo "MAKE libspud"
 	$(MAKE) -C $(SPUD_DIR)
@@ -26,20 +32,16 @@ endif
 	$(MAKE) -C $(SPUD_DIR) install-diamond DESTDIR=../..
 	$(MAKE) -C $(SPUD_DIR) install-dxdiff DESTDIR=../..
 
-schema: libspud
+fileio:
+	cp tools/FileIO/FileIO.h include/
+
+schemas: libspud
 	# This is a bug fix where because spud-preprocess does not look in the
 	# right place for the spud_base.rnc. It ignores the prefix
 	sed -i "s+cp /share+cp $(CURRENT_DIR)/share+g" ./bin/spud-preprocess
 	./bin/spud-preprocess ./schemas/main_schema.rnc
 
-debug_libmd: debug_flag libmb
-
-debug:
-	@echo "DEBUG BUILD"
-	@echo "MAKE MD src"
-	$(MAKE) -C src debug
-	@echo "MAKE examples"
-	$(MAKE) -C examples debug
+.PHONY: scehmas
 
 examples: libmd
 	@echo "MAKE MD examples"
@@ -53,11 +55,19 @@ python-md-tools:
 	@echo "MAKE python modules"
 	@cd tools/md-tools && pip3 install --user --upgrade -e .
 
-test: libmd
-	@echo "Running regression test"
-	@cd tests; python3 run_tests.py
+tests: libmd
+	@echo "Running regression tests"
+	@cd tests; pytest -v -rA --capture=sys run_tests.py
 
-test_examples: libmd
+unit-tests-build: libmd
+	@echo "Building unit tests"
+	$(MAKE) -C src/tests
+
+unit-tests: unit-tests-build
+	@echo "Running unit tests"
+	@cd src/tests && ./tests-main -s -d yes
+
+tests-examples: libmd
 	# Do not run the database files
 	$(RM) examples/examplebin/*database*
 	@cd examples/examplebin; for i in ./*; do echo $$i && ./$$i >> $$i.log; done
@@ -71,6 +81,8 @@ clean:
 	$(RM) share
 	@echo "Cleaning MD src"
 	$(MAKE) -C src clean
+	@echo "Cleaning src unit tests"
+	$(MAKE) -C src/tests clean
 	@echo "Cleaning examples"
 	$(MAKE) -C examples clean
 	@echo "Cleaning include"

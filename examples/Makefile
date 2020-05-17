@@ -1,6 +1,6 @@
 SHELL = /bin/bash
 
-include ../Makefile.variables
+include ../Makefile.variable
 LIB := ../lib
 BIN := ../bin
 INCLUDE := ../include

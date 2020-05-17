@@ -1,5 +1,5 @@
 SHELL = /bin/bash
-include ../../Makefile.variables
+include ../../Makefile.variable
 LIB := ../../lib
 BIN := ../../bin
 SRC := ../../src
@@ -9,9 +9,6 @@ LN  := -L ../../lib
 LINKER = $(INC) $(LN) -lmd
 
 all: isomorph_line
-			
-debug: CXXFLAGS = $(DCXXFLAGS)
-debug: isomorph_line
 
 isomorph_line: *.o $(LIB)/libmd.a
 	$(CXX) $(CXXFLAGS) *.o $(LINKER) -o isomorph_line -lstdc++fs

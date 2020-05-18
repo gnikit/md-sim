@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='utf-8'?>
+<input_variables>
+  <setup>
+    <dimension>
+      <integer_value rank="0">3</integer_value>
+    </dimension>
+    <steps>
+      <integer_value rank="0">5000</integer_value>
+    </steps>
+    <particles>
+      <integer_value rank="1" dim1="dim" shape="3">2 2 2</integer_value>
+    </particles>
+    <lattice name="BCC"/>
+    <iterative_method name="Verlet"/>
+    <boundary_conditions name="Periodic"/>
+    <rdf_bins>
+      <integer_value rank="0">50</integer_value>
+    </rdf_bins>
+    <rdf_equilibrate>
+      <integer_value rank="0">0</integer_value>
+    </rdf_equilibrate>
+  </setup>
+  <io>
+    <simulation_name>crystallisation_bip_</simulation_name>
+    <track_particles name="false"/>
+    <energies name="true"/>
+    <pressure name="true"/>
+    <msd name="true"/>
+    <vaf name="true"/>
+    <sf name="true"/>
+    <rdf name="true"/>
+    <positions name="true"/>
+    <compression_summary_stats name="true"/>
+  </io>
+  <simulation_type name="CompressionRun">
+    <pair_potential name="BoundedInversePower">
+      <density>
+        <real_value rank="0">0.1</real_value>
+      </density>
+      <temperature>
+        <real_value rank="0">0.010</real_value>
+      </temperature>
+      <dt>
+        <real_value rank="0">0.005</real_value>
+        <normalise_with_temperature/>
+      </dt>
+      <potential_strength>
+        <real_value rank="0">6.0</real_value>
+      </potential_strength>
+      <softening_parameter>
+        <real_value rank="0">1.0</real_value>
+      </softening_parameter>
+    </pair_potential>
+    <final_density>
+      <real_value rank="0">4.1</real_value>
+    </final_density>
+    <density_increment>
+      <real_value rank="0">1.0</real_value>
+    </density_increment>
+  </simulation_type>
+  <enable_testing/>
+</input_variables>

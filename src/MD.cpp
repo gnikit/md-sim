@@ -378,6 +378,7 @@ void MD::reset_values(bool force_reset) {
     /* Clear values, size, but reserve capacity */
     r.clear();
     v.clear();
+    f.clear();
     options.compression_options.compress_count = 0;
   }
   /* Reset the MSD initial vectors */
@@ -1082,3 +1083,7 @@ void MD::set_vector_sizes() {
   }
   temperature.reserve(options.steps);
 }
+
+void MD::set_options(const options_type &new_options) { options = new_options; }
+
+options_type MD::get_options() { return options; }

@@ -387,4 +387,20 @@ class MD {
    * @brief Set the vector sizes. Resizes all vectors and containers
    */
   void set_vector_sizes();
+
+  /**
+   * @brief Set the options object. To be used when one wants to update the
+   * internal options of an MD type object
+   *
+   * @note This does not check for validity of the options like the
+   * MD constructor does.
+   */
+  void set_options(const options_type &new_options);
+
+  /**
+   * @brief Get the options object of the MD class
+   *
+   * @return options_type
+   */
+  options_type get_options();
 };

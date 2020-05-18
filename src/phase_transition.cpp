@@ -92,7 +92,7 @@ void phase_transition::crystallisation(options_type &options) {
     }
 
     /* Holds the box length of the previous simulation just run */
-    old_box_length = options.N;
+    old_box_length = options.L;
 
     /* Density incrementation */
     current_rho += options.compression_options.density_inc;
@@ -101,7 +101,8 @@ void phase_transition::crystallisation(options_type &options) {
        the updated current_rho can generate the new box length
        This value gets recalculated in the next Simulation */
     options.L = pow((options.N / current_rho), 1.0 / 3.0);
-    double box_length_ratio = options.N / old_box_length;
+    options.Lx = options.Ly = options.Lz = options.L;
+    double box_length_ratio = options.L / old_box_length;
 
     /* Rescalling the positional vectors */
     for (size_t i = 0; i < options.N; ++i) {

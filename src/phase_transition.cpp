@@ -4,10 +4,11 @@ phase_transition::phase_transition(options_type &input_options)
     : MD(input_options) {}
 
 void phase_transition::crystallisation(options_type &options) {
-  set_compression_flag(true);
+  options.compression_options.compression = true;
 
   double current_rho = options.density;
   double old_box_length = 0;
+  const std::string original_sim_name = options.io_options.simulation_name;
 
   try {
     if (options.compression_options.density_final > options.density &&
@@ -76,11 +77,12 @@ void phase_transition::crystallisation(options_type &options) {
     std::cout << "Runing MD::simulation " << comp_step + 1 << "/"
               << total_comp_steps << std::endl;
 
-    std::string prefix =
-        options.io_options.simulation_name + std::to_string(comp_step) + "_";
+    std::string prefix = original_sim_name + std::to_string(comp_step) + "_";
 
-    simulation(prefix, current_rho, options.target_temperature, options.power,
-               options.a_cst, options.potential_type);
+    options.io_options.simulation_name = prefix;
+    options.density = current_rho;
+    MD::set_options(options);
+    simulation();
 
     /* Write a summary of the stats of the simulation run */
     if (options.io_options.compression_stats) {

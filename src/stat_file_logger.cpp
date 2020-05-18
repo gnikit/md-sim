@@ -23,21 +23,28 @@ void stat_file::write_data_file(
     std::vector<std::vector<double>> const &all_output_vectors) {
   /* Write the timestamp and header to the stream */
   /**
-   * @brief 
+   * @brief
    * If this is to be reabled I will have to add padding of deliters equal
    *  to the number of columns-1, since numpy has a problem with jagged CSV rows
    */
-  if (false) time_stamp(file_stream, header);
-  else file_stream << header << std::endl;
+  if (false)
+    time_stamp(file_stream, header);
+  else
+    file_stream << header << std::endl;
 
   file_stream.precision(14);
   file_stream << std::scientific;
   /* Delimiter string */
   std::string del = ",";
-  /* Find the largest size vector in all our vectors */
+  /* Check if the matrix is rectangular */
   size_t rows = all_output_vectors[0].size();
-  for (auto const &i : all_output_vectors)
-    if (i.size() > rows) rows = i.size();
+  for (size_t i = 0; i < all_output_vectors.size(); ++i) {
+    if (all_output_vectors[i].size() > rows) {
+      std::cerr << "Uneven size all_output_vectors with index: " << i
+                << std::endl;
+      exit(-1);
+    }
+  }
 
   /* This accesses the all_output_vectors with a column major ordering,
      not the best for performance */

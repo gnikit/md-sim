@@ -6,8 +6,6 @@ phase_transition::phase_transition(options_type &input_options)
 void phase_transition::crystallisation(options_type &options) {
   set_compression_flag(true);
 
-  // todo: many features do not work at this moment like particle tracking
-  // todo: the POS << time_stamp stream will be a mess, same with RDF
   double current_rho = options.density;
   double old_box_length = 0;
 

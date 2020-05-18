@@ -391,6 +391,7 @@ void MD::reset_values(bool force_reset) {
   pk.clear();
   msd.clear();
   Cr.clear();
+  sf.clear();
   rdf.resize(options.rdf_options.rdf_bins + 1, 0); /* gr with Index igr */
 }
 

@@ -510,6 +510,36 @@ class TestCompression(unittest.TestCase):
         os.chdir('..')
         print('-'*80)
 
+    def test_crystallisation(self):
+        f_dir = 'crystallisation'
+        print(f'Entering: {f_dir}')
+
+        setup_ok = run_file(f_dir, 'test_crystallisation.xml')
+        self.assertTrue(setup_ok)
+
+        os.chdir(f_dir)
+        test_results = []
+        # TODO: I should be testing more quantities although not sure if correct
+        test_string = ('Compression_statistics_step_5000_'
+                       'particles_16_rho_0.1000_T_0.0100_n_6.00_A_1.00000.log')
+        sim_name = 'crystallisation_bip_'
+
+        # Test variables
+        data = np.loadtxt(f'{sim_name}{test_string}', delimiter=',')
+
+        # Reference variables
+        data_ref = np.loadtxt('test_data.log', delimiter=',')
+
+        # Test for consistency
+        result = np.allclose(data, data_ref)
+        print(f'Testing Data file consistency with reference: {result}')
+
+        test_results.append(result)
+
+        self.assertTrue(get_test_result(test_results))
+
+        print(f'Exiting: {f_dir}')
+
     def test_compression_summary_stats(self):
         f_dir = 'compress_summary_stats'
         print(f'Entering: {f_dir}')

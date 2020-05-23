@@ -58,7 +58,8 @@ void phase_transition::crystallisation(options_type &options) {
     std::string header = "# compress_step,rho";
     if (options.io_options.msd)
       header += ",min(MSD),max(MSD),av(MSD),l2norm(MSD),rms(MSD)";
-    if (options.io_options.vaf) header += ",VAF";
+    if (options.io_options.vaf)
+      header += ",min(VAF),max(VAF),av(VAF),l2norm(VAF),rms(VAF)";
     if (options.io_options.sf) {
       header += ",min(SFx),max(SFx),av(SFx),l2norm(SFx),rms(SFx)";
       header += ",min(SFy),max(SFy),av(SFy),l2norm(SFy),rms(SFy)";

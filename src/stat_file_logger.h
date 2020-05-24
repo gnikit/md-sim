@@ -30,18 +30,6 @@ class stat_file {
       std::vector<std::string> const &file_names);
 
   /**
-   * @brief Writes all the output vectors to a file using an existing
-   * and open stream. An optional header for the file can be included.
-   *
-   * @param file_stream: A open out filestream
-   * @param header: header string for the file
-   * @param all_output_vectors: a vector of vectors containing all the data
-   */
-  static void write_data_file(
-      std::ofstream &file_stream, std::string const &header,
-      std::vector<std::vector<double>> const &all_output_vectors);
-
-  /**
    * @brief
    * Dates the file and allows the input of a header
    * Input a file stream to write and string of characters to display as
@@ -89,14 +77,24 @@ class stat_file {
    * @param output_quantities: a 2D vector
    * @param fstream: the file stream
    * @param header: an optional header for the file
+   * @param format: 0 for row major output, 1 for column major
+   * @param index: set to true to include a row index in the output at column 0
    */
   void write_file(std::vector<std::vector<double>> &output_quantities,
                   std::ofstream &fstream, std::string const &header,
-                  size_t format = 1);
-
+                  size_t format = 1, bool index = false);
+  /**
+   * @brief a wrapper for the FileIO::Write2File method
+   *
+   * @param output_quantities: a 2D vector
+   * @param fstream: the file stream
+   * @param header: an optional header for the file
+   * @param format: 0 for row major output, 1 for column major
+   * @param index: set to true to include a row index in the output at column 0
+   */
   void write_file(std::vector<std::vector<double> *> &output_quantities,
                   std::ofstream &fstream, std::string const &header,
-                  size_t format = 1);
+                  size_t format = 1, bool index = false);
 
   /**
    * @brief Write the output_line vector as a line to fstream (ends the line

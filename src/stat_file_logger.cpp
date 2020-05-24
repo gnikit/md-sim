@@ -84,32 +84,29 @@ std::string stat_file::file_naming(std::string const &prefix,
   rho_stream << std::fixed << std::setprecision(4) << DENSITY;    // 4 decimals
   T_stream << std::fixed << std::setprecision(4) << TEMPERATURE;  // 4 decimals
 
-  _step_to_str = "_step_" + std::to_string(STEPS);
-  _particles_to_str = "_particles_" + std::to_string(N);
-  _rho_to_str = "_rho_" + rho_stream.str();
-  _T_to_str = "_T_" + T_stream.str();
+  __step2str = "_step_" + std::to_string(STEPS);
+  __particles2str = "_particles_" + std::to_string(N);
+  __rho2str = "_rho_" + rho_stream.str();
+  __T2str = "_T_" + T_stream.str();
 
   /* Do not add an A parameter or a potential strength in case they are NAN */
   if (isnan(POWER))
-    _n_to_str = "";
+    __n2str = "";
   else
-    _n_to_str = "_n_" + convert_to_string(POWER, 2);
+    __n2str = "_n_" + convert_to_string(POWER, 2);
 
   if (isnan(A_cst))
-    _A_to_str = "";
+    __a2str = "";
   else {
     A_stream << std::fixed << std::setprecision(5) << A_cst; /* 5 decimals */
-    _A_to_str = "_A_" + A_stream.str();
+    __a2str = "_A_" + A_stream.str();
   }
 
-  _FILE_ID = _step_to_str + _particles_to_str + _rho_to_str + _T_to_str +
-             _n_to_str + _A_to_str;
-
-  /* Explicit defitions */
-  std::string _FILE_EXT = ".log";
+  __file_id =
+      __step2str + __particles2str + __rho2str + __T2str + __n2str + __a2str;
 
   /* Path addition */
-  return prefix + _FILE_ID + _FILE_EXT;
+  return prefix + __file_id + __file_ext;
 }
 
 std::string stat_file::convert_to_string(const double &x,

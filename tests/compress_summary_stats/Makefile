@@ -4,5 +4,5 @@ default: clean
 	cp data/* .
 
 clean:
-	rm -f *.log
+	rm -f *.log *.csv
 	rm -f *.txt

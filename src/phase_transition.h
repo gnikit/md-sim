@@ -42,5 +42,13 @@ class phase_transition : public MD {
 
   void detect_transition();
 
+  /**
+   * @brief Check the input options for any errors and either exit or
+   * throw a warning, fix the problem and continue.
+   * 
+   * @param options 
+   */
+  void error_check_options(options_type &options);
+
   void set_compression_flag(bool is_compressing);
 };

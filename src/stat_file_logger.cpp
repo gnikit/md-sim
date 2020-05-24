@@ -18,52 +18,6 @@ std::vector<std::ofstream> stat_file::open_files(
   return file_streams;
 }
 
-void stat_file::write_data_file(
-    std::ofstream &file_stream, std::string const &header,
-    std::vector<std::vector<double>> const &all_output_vectors) {
-  /* Write the timestamp and header to the stream */
-  /**
-   * @brief
-   * If this is to be reabled I will have to add padding of deliters equal
-   *  to the number of columns-1, since numpy has a problem with jagged CSV rows
-   */
-  if (false)
-    time_stamp(file_stream, header);
-  else
-    file_stream << header << std::endl;
-
-  file_stream.precision(14);
-  file_stream << std::scientific;
-  /* Delimiter string */
-  std::string del = ",";
-  /* Check if the matrix is rectangular */
-  size_t rows = all_output_vectors[0].size();
-  for (size_t i = 0; i < all_output_vectors.size(); ++i) {
-    if (all_output_vectors[i].size() > rows) {
-      std::cerr << "Uneven size all_output_vectors with index: " << i
-                << std::endl;
-      exit(-1);
-    }
-  }
-
-  /* This accesses the all_output_vectors with a column major ordering,
-     not the best for performance */
-  for (size_t i = 0; i < rows; ++i) {
-    /* The main data file is always the first entry in the vector of streams */
-    file_stream << (i + 1);
-    for (size_t vec = 0; vec < all_output_vectors.size(); ++vec) {
-      try {
-        file_stream << del << all_output_vectors[vec][i];
-      }
-      /* if the array goes out of bounds then just add 0s */
-      catch (const std::out_of_range &e) {
-        file_stream << del << -666;
-      }
-    }
-    file_stream << std::endl;
-  }
-}
-
 void stat_file::time_stamp(std::ofstream &file_stream,
                            std::string const &variables) {
   std::chrono::time_point<std::chrono::system_clock> instance;
@@ -84,32 +38,29 @@ std::string stat_file::file_naming(std::string const &prefix,
   rho_stream << std::fixed << std::setprecision(4) << DENSITY;    // 4 decimals
   T_stream << std::fixed << std::setprecision(4) << TEMPERATURE;  // 4 decimals
 
-  _step_to_str = "_step_" + std::to_string(STEPS);
-  _particles_to_str = "_particles_" + std::to_string(N);
-  _rho_to_str = "_rho_" + rho_stream.str();
-  _T_to_str = "_T_" + T_stream.str();
+  __step2str = "_step_" + std::to_string(STEPS);
+  __particles2str = "_particles_" + std::to_string(N);
+  __rho2str = "_rho_" + rho_stream.str();
+  __T2str = "_T_" + T_stream.str();
 
   /* Do not add an A parameter or a potential strength in case they are NAN */
   if (isnan(POWER))
-    _n_to_str = "";
+    __n2str = "";
   else
-    _n_to_str = "_n_" + convert_to_string(POWER, 2);
+    __n2str = "_n_" + convert_to_string(POWER, 2);
 
   if (isnan(A_cst))
-    _A_to_str = "";
+    __a2str = "";
   else {
     A_stream << std::fixed << std::setprecision(5) << A_cst; /* 5 decimals */
-    _A_to_str = "_A_" + A_stream.str();
+    __a2str = "_A_" + A_stream.str();
   }
 
-  _FILE_ID = _step_to_str + _particles_to_str + _rho_to_str + _T_to_str +
-             _n_to_str + _A_to_str;
-
-  /* Explicit defitions */
-  std::string _FILE_EXT = ".log";
+  __file_id =
+      __step2str + __particles2str + __rho2str + __T2str + __n2str + __a2str;
 
   /* Path addition */
-  return prefix + _FILE_ID + _FILE_EXT;
+  return prefix + __file_id + __file_ext;
 }
 
 std::string stat_file::convert_to_string(const double &x,
@@ -123,18 +74,45 @@ std::string stat_file::convert_to_string(const double &x,
 
 void stat_file::write_file(std::vector<std::vector<double>> &output_quantities,
                            std::ofstream &fstream, std::string const &header,
-                           size_t format) {
+                           size_t format, bool index) {
+  fstream.precision(14);
+  fstream << std::scientific;
+  /* Delimiter string */
   std::string del = ",";
+  /* Check if the matrix is rectangular */
+  size_t rows = output_quantities[0].size();
+  for (size_t i = 0; i < output_quantities.size(); ++i) {
+    if (output_quantities[i].size() > rows) {
+      std::cerr << "Uneven size output_quantities with index: " << i
+                << std::endl;
+      exit(-1);
+    }
+  }
   /* Write the 2D vector in a row major format, each vector is a row in file */
-  FileIO::Write2File<double>(output_quantities, fstream, del, header, format);
+  FileIO::Write2File<double>(output_quantities, fstream, del, header, format,
+                             index);
 }
 
 void stat_file::write_file(
     std::vector<std::vector<double> *> &output_quantities,
-    std::ofstream &fstream, std::string const &header, size_t format) {
+    std::ofstream &fstream, std::string const &header, size_t format,
+    bool index) {
+  fstream.precision(14);
+  fstream << std::scientific;
+  /* Delimiter string */
   std::string del = ",";
+  /* Check if the matrix is rectangular */
+  size_t rows = output_quantities[0]->size();
+  for (size_t i = 0; i < output_quantities.size(); ++i) {
+    if (output_quantities[i]->size() > rows) {
+      std::cerr << "Uneven size output_quantities with index: " << i
+                << std::endl;
+      exit(-1);
+    }
+  }
   /* Write the 2D vector in a row major format, each vector is a row in file */
-  FileIO::Write2File<double>(output_quantities, fstream, del, header, format);
+  FileIO::Write2File<double>(output_quantities, fstream, del, header, format,
+                             index);
 }
 
 void stat_file::write_file_line(std::vector<double> const &output_line,

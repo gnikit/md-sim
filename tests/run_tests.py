@@ -77,7 +77,7 @@ class TestPotentials(unittest.TestCase):
         test_results = []
 
         test_string = '_step_2000_particles_512_rho_0.5000_T_1.0000' \
-            + '_n_8.00_A_0.50000.log'
+            + '_n_8.00_A_0.50000.csv'
         sim_name = 'bip_potential_test_'
 
         # Test variables
@@ -92,9 +92,9 @@ class TestPotentials(unittest.TestCase):
             unpack=True)
 
         # Reference variables
-        rdf_ref = np.loadtxt('test_rdf.log', delimiter=',', unpack=True)
-        data_ref = np.loadtxt('test_data.log', delimiter=',', unpack=True)
-        pos_ref = np.loadtxt('test_positions.log', delimiter=',', unpack=True)
+        rdf_ref = np.loadtxt('test_rdf.csv', delimiter=',', unpack=True)
+        data_ref = np.loadtxt('test_data.csv', delimiter=',', unpack=True)
+        pos_ref = np.loadtxt('test_positions.csv', delimiter=',', unpack=True)
 
         # Test data for consistency
         result = np.allclose(rdf_ref, rdf_test)
@@ -125,7 +125,7 @@ class TestPotentials(unittest.TestCase):
         os.chdir(f_dir)
         test_results = []
 
-        test_string = '_step_2000_particles_512_rho_0.5000_T_1.0000.log'
+        test_string = '_step_2000_particles_512_rho_0.5000_T_1.0000.csv'
         sim_name = 'lj_potential_test_'
 
         # Test variables
@@ -137,9 +137,9 @@ class TestPotentials(unittest.TestCase):
             f'{sim_name}Positions_Velocities{test_string}', delimiter=',', unpack=True)
 
         # Reference variables
-        rdf_ref = np.loadtxt('test_rdf.log', delimiter=',', unpack=True)
-        data_ref = np.loadtxt('test_data.log', delimiter=',', unpack=True)
-        pos_ref = np.loadtxt('test_positions.log', delimiter=',', unpack=True)
+        rdf_ref = np.loadtxt('test_rdf.csv', delimiter=',', unpack=True)
+        data_ref = np.loadtxt('test_data.csv', delimiter=',', unpack=True)
+        pos_ref = np.loadtxt('test_positions.csv', delimiter=',', unpack=True)
 
         # Test data for consistency
         result = np.allclose(rdf_ref, rdf_test)
@@ -172,7 +172,7 @@ class TestPotentials(unittest.TestCase):
         test_results = []
 
         test_string = '_step_2000_particles_512_rho_0.5000_T_1.0000' \
-            + '_n_8.00_A_0.50000.log'
+            + '_n_8.00_A_0.50000.csv'
         sim_name = 'exp_potential_test_'
 
         # Test variables
@@ -184,9 +184,9 @@ class TestPotentials(unittest.TestCase):
             f'{sim_name}Positions_Velocities{test_string}', delimiter=',', unpack=True)
 
         # Reference variables
-        rdf_ref = np.loadtxt('test_rdf.log', delimiter=',', unpack=True)
-        data_ref = np.loadtxt('test_data.log', delimiter=',', unpack=True)
-        pos_ref = np.loadtxt('test_positions.log', delimiter=',', unpack=True)
+        rdf_ref = np.loadtxt('test_rdf.csv', delimiter=',', unpack=True)
+        data_ref = np.loadtxt('test_data.csv', delimiter=',', unpack=True)
+        pos_ref = np.loadtxt('test_positions.csv', delimiter=',', unpack=True)
 
         # Test data for consistency
         result = np.allclose(rdf_ref, rdf_test)
@@ -218,7 +218,7 @@ class TestPotentials(unittest.TestCase):
         os.chdir(f_dir)
         test_results = []
 
-        test_string = '_step_2000_particles_512_rho_0.5000_T_1.0000.log'
+        test_string = '_step_2000_particles_512_rho_0.5000_T_1.0000.csv'
         sim_name = 'gcm_potential_test_'
 
         # Test variables
@@ -230,9 +230,9 @@ class TestPotentials(unittest.TestCase):
             f'{sim_name}Positions_Velocities{test_string}', delimiter=',', unpack=True)
 
         # Reference variables
-        rdf_ref = np.loadtxt('test_rdf.log', delimiter=',', unpack=True)
-        data_ref = np.loadtxt('test_data.log', delimiter=',', unpack=True)
-        pos_ref = np.loadtxt('test_positions.log', delimiter=',', unpack=True)
+        rdf_ref = np.loadtxt('test_rdf.csv', delimiter=',', unpack=True)
+        data_ref = np.loadtxt('test_data.csv', delimiter=',', unpack=True)
+        pos_ref = np.loadtxt('test_positions.csv', delimiter=',', unpack=True)
 
         # Test data for consistency
         result = np.allclose(rdf_ref, rdf_test)
@@ -275,7 +275,7 @@ class TestLatticeStructures(unittest.TestCase):
         test_results = []
 
         test_string = '_step_1_particles_512_rho_0.5000_T_1.0000' \
-            + '_n_8.00_A_0.50000.log'
+            + '_n_8.00_A_0.50000.csv'
         sim_name = 'sc_test_'
 
         # Test variables
@@ -284,7 +284,7 @@ class TestLatticeStructures(unittest.TestCase):
             delimiter=',', unpack=True)
 
         # Reference variables
-        pos_ref = np.loadtxt('test_positions.log',
+        pos_ref = np.loadtxt('test_positions.csv',
                              usecols=(1, 2, 3), delimiter=',', unpack=True)
 
         # Test data for consistency
@@ -309,7 +309,7 @@ class TestLatticeStructures(unittest.TestCase):
         test_results = []
 
         test_string = '_step_1_particles_2048_rho_0.5000_T_1.0000' \
-            + '_n_8.00_A_0.50000.log'
+            + '_n_8.00_A_0.50000.csv'
         sim_name = 'fcc_test_'
 
         # Test variables
@@ -318,7 +318,7 @@ class TestLatticeStructures(unittest.TestCase):
             delimiter=',', unpack=True)
 
         # Reference variables
-        pos_ref = np.loadtxt('test_positions.log',
+        pos_ref = np.loadtxt('test_positions.csv',
                              usecols=(1, 2, 3), delimiter=',', unpack=True)
 
         # Test data for consistency
@@ -343,7 +343,7 @@ class TestLatticeStructures(unittest.TestCase):
         test_results = []
 
         test_string = '_step_1_particles_1024_rho_0.5000_T_1.0000' \
-            + '_n_8.00_A_0.50000.log'
+            + '_n_8.00_A_0.50000.csv'
         sim_name = 'bcc_test_'
 
         # Test variables
@@ -352,7 +352,7 @@ class TestLatticeStructures(unittest.TestCase):
             delimiter=',', unpack=True)
 
         # Reference variables
-        pos_ref = np.loadtxt('test_positions.log',
+        pos_ref = np.loadtxt('test_positions.csv',
                              usecols=(1, 2, 3), delimiter=',', unpack=True)
 
         # Test data for consistency
@@ -433,7 +433,7 @@ class TestConstructors(unittest.TestCase):
         os.chdir(f_dir)
         test_results = []
 
-        test_string = 'Data_step_100_particles_512_rho_0.5000_T_0.5000.log'
+        test_string = 'Data_step_100_particles_512_rho_0.5000_T_0.5000.csv'
         sim_name = 'missing_options_'
 
         # Test variables
@@ -441,7 +441,7 @@ class TestConstructors(unittest.TestCase):
                           delimiter=',')
 
         # Reference variables
-        data_ref = np.loadtxt('test_data.log', delimiter=',')
+        data_ref = np.loadtxt('test_data.csv', delimiter=',')
 
         # Test for consistency
         result = np.allclose(data, data_ref)
@@ -474,7 +474,7 @@ class TestIOOptions(unittest.TestCase):
         os.chdir(f_dir)
         test_results = []
 
-        test_string = 'Data_step_100_particles_125_rho_1.0000_T_1.0000.log'
+        test_string = 'Data_step_100_particles_125_rho_1.0000_T_1.0000.csv'
         sim_name = 'disable_all_io_'
 
         # Test variables
@@ -482,7 +482,7 @@ class TestIOOptions(unittest.TestCase):
                           delimiter=',')
 
         # Reference variables
-        data_ref = np.loadtxt('test_data.log', delimiter=',')
+        data_ref = np.loadtxt('test_data.csv', delimiter=',')
 
         # Test for consistency
         result = np.allclose(data, data_ref)
@@ -492,7 +492,7 @@ class TestIOOptions(unittest.TestCase):
 
         # Test if an RDF file has been generated in the output dir
         files = os.listdir('./')
-        result = not 'disable_all_io_RDF_step_100_particles_125_rho_1.0000_T_1.0000.log' in files
+        result = not 'disable_all_io_RDF_step_100_particles_125_rho_1.0000_T_1.0000.csv' in files
         test_results.append(result)
 
         self.assertTrue(get_test_result(test_results))
@@ -521,14 +521,14 @@ class TestCompression(unittest.TestCase):
         test_results = []
         # TODO: I should be testing more quantities although not sure if correct
         test_string = ('Compression_statistics_step_5000_'
-                       'particles_16_rho_0.1000_T_0.0100_n_6.00_A_1.00000.log')
+                       'particles_16_rho_0.1000_T_0.0100_n_6.00_A_1.00000.csv')
         sim_name = 'crystallisation_bip_'
 
         # Test variables
         data = np.loadtxt(f'{sim_name}{test_string}', delimiter=',')
 
         # Reference variables
-        data_ref = np.loadtxt('test_data.log', delimiter=',')
+        data_ref = np.loadtxt('test_data.csv', delimiter=',')
 
         # Test for consistency
         result = np.allclose(data, data_ref)
@@ -551,14 +551,14 @@ class TestCompression(unittest.TestCase):
         test_results = []
 
         test_string = ('Compression_statistics_step_10_particles_64'
-                       '_rho_0.5000_T_0.5000_n_0.00_A_0.00000.log')
+                       '_rho_0.5000_T_0.5000_n_0.00_A_0.00000.csv')
         sim_name = 'compress_stats_test_'
 
         # Test variables
         data = np.loadtxt(f'{sim_name}{test_string}', delimiter=',')
 
         # Reference variables
-        data_ref = np.loadtxt('test_data.log', delimiter=',')
+        data_ref = np.loadtxt('test_data.csv', delimiter=',')
 
         # Test for consistency
         result = np.allclose(data, data_ref)
@@ -594,7 +594,7 @@ class TestIterativeAlgorithms(unittest.TestCase):
         os.chdir(f_dir)
         test_results = []
 
-        test_string = ('Data_step_5000_particles_512_rho_0.5000_T_1.0000.log')
+        test_string = ('Data_step_5000_particles_512_rho_0.5000_T_1.0000.csv')
         sim_name = 'velocity_verlet_'
 
         # Test variables

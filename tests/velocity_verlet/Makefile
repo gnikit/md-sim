@@ -4,5 +4,5 @@ default:
 	@echo "Calling make"
 
 clean:
-	rm -f *.log
+	rm -f *.log *.csv
 	rm -f *.txt

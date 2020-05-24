@@ -8,10 +8,12 @@
 #include <vector>
 
 class stat_file {
+ protected:
+  const std::string __file_ext = ".csv";
+  std::string _dir, __file_id;
+  std::string __step2str, __particles2str, __rho2str, __T2str, __n2str, __a2str;
+
  public:
-  std::string _step_to_str, _particles_to_str, _rho_to_str, _T_to_str;
-  std::string _n_to_str, _A_to_str;
-  std::string _dir, _FILE_ID;
   std::vector<std::string> file_names;
 
   /* Initialise them before doing any IO operations */
@@ -26,18 +28,6 @@ class stat_file {
    */
   static std::vector<std::ofstream> open_files(
       std::vector<std::string> const &file_names);
-
-  /**
-   * @brief Writes all the output vectors to a file using an existing
-   * and open stream. An optional header for the file can be included.
-   *
-   * @param file_stream: A open out filestream
-   * @param header: header string for the file
-   * @param all_output_vectors: a vector of vectors containing all the data
-   */
-  static void write_data_file(
-      std::ofstream &file_stream, std::string const &header,
-      std::vector<std::vector<double>> const &all_output_vectors);
 
   /**
    * @brief
@@ -64,7 +54,7 @@ class stat_file {
    * @param A_cst: Softening parameter constant
    *
    * @return: string structured as follows
-   *          INPUT_DIR/prefix_step_#_particles_#_rho_#_T_#_n_#_A_#.log
+   *          INPUT_DIR/prefix_step_#_particles_#_rho_#_T_#_n_#_A_#.csv
    */
   std::string file_naming(std::string const &prefix, size_t const &STEPS,
                           size_t const &N, double const &DENSITY,
@@ -87,14 +77,24 @@ class stat_file {
    * @param output_quantities: a 2D vector
    * @param fstream: the file stream
    * @param header: an optional header for the file
+   * @param format: 0 for row major output, 1 for column major
+   * @param index: set to true to include a row index in the output at column 0
    */
   void write_file(std::vector<std::vector<double>> &output_quantities,
                   std::ofstream &fstream, std::string const &header,
-                  size_t format = 1);
-
-  void write_file(std::vector<std::vector<double>*> &output_quantities,
+                  size_t format = 1, bool index = false);
+  /**
+   * @brief a wrapper for the FileIO::Write2File method
+   *
+   * @param output_quantities: a 2D vector
+   * @param fstream: the file stream
+   * @param header: an optional header for the file
+   * @param format: 0 for row major output, 1 for column major
+   * @param index: set to true to include a row index in the output at column 0
+   */
+  void write_file(std::vector<std::vector<double> *> &output_quantities,
                   std::ofstream &fstream, std::string const &header,
-                  size_t format = 1);
+                  size_t format = 1, bool index = false);
 
   /**
    * @brief Write the output_line vector as a line to fstream (ends the line

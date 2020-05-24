@@ -984,13 +984,14 @@ void MD::file_output(stat_file &logger) {
     output_quantities.push_back(sf.z);
     header += ",SFx,SFy,SFz";
   }
-  logger.write_data_file(streams["data"], header, output_quantities);
+  logger.write_file(output_quantities, streams["data"], header, 1, true);
 
   /* Saving Last Position */
   if (options.io_options.position) {
-    logger.write_data_file(streams["position"],
-                           "#particle,x,y,z,vx,vy,vz,ax,ay,az",
-                           {r.x, r.y, r.z, v.x, v.y, v.z, f.x, f.y, f.z});
+    std::vector<std::vector<double>> checkpoint_positions = {
+        r.x, r.y, r.z, v.x, v.y, v.z, f.x, f.y, f.z};
+    logger.write_file(checkpoint_positions, streams["position"],
+                      "#particle,x,y,z,vx,vy,vz,ax,ay,az", 1, true);
     // todo: for performance I think this should be 2D pointer of pointers
   }
 

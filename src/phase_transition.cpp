@@ -83,6 +83,7 @@ void phase_transition::crystallisation(options_type &options) {
     options.L = pow((options.N / current_rho), 1.0 / 3.0);
     options.Lx = options.Ly = options.Lz = options.L;
     double box_length_ratio = options.L / old_box_length;
+    options.cut_off *= box_length_ratio;
 
     /* Rescalling the positional vectors */
     for (size_t i = 0; i < options.N; ++i) {

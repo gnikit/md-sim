@@ -1,8 +1,6 @@
 #include "MD.h"
 // todo: add logger https://github.com/gabime/spdlog
-// TODO: scale the box by Lx, Ly, Lz in a tensor form
 // todo: change all T const to const T
-// todo: pass box dimensions
 
 MD::MD() {
   /* Intel compiler does not like emptying empty pointers */

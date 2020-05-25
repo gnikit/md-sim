@@ -11,240 +11,20 @@ MD::MD() {
 }
 
 MD::MD(options_type &input_options) {
-  /* Perform a shallow copy of the input_options to options */
-  options = input_options;
-
-  /* Test whether the input directory exists */
-  if (!input_options.io_options.dir.empty()) {
-    try {
-      if (!fs::exists(input_options.io_options.dir)) {
-        throw
-          "input out_directory in MD constructor does not exist.\n"
-          "Use a valid directory for output files to be saved";
-      }
-
-    } catch (const char *msg) {
-      std::cerr << "Error: " << msg << std::endl;
-      exit(-1);
-    }
-  }
-
-  std::cout << "Output directory set to: " << options.io_options.dir
-            << std::endl;
-
-  /* Print type of simulation */
-  std::cout << "Simulation type: " << options.simulation_type << std::endl;
-
-  /* Print simulation name if any */
-  std::cout << "Simulation name: " << options.io_options.simulation_name
-            << std::endl;
-
-  /* Are we saving all the positions for the fluid */
-  std::cout << "Particle visualisation: " << options.io_options.visualise
-            << std::endl;
-
-  /* Print stepping algorithm */
-  std::cout << "Iterative algorithm: " << options.iterative_method << std::endl;
-
-  /* Print number of iterations */
-  std::cout << "Number of steps: " << options.steps << std::endl;
-
-  /* Print particles and lattice */
-  std::cout << "Initial lattice: " << options.lattice << std::endl;
-
-  /* Check particles have been supplied in the correct form */
-  try {
-    if (input_options.particles.empty()) {
-      throw "The supplied particles vector is empty";
-    } else if (input_options.particles.size() < 3) {
-      throw "The supplied particles vector must be of size 3";
-    } else if (std::find(input_options.particles.begin(),
-                         input_options.particles.end(),
-                         0) != input_options.particles.end()) {
-      throw
-            "The supplied particles vector contains a 0\n"
-            "particles cannot be 0 in x, y or z";
-    }
-
-  } catch (const char *msg) {
-    std::cerr << "Error: " << msg << std::endl;
-    exit(-1);
-  }
-
-  /* Calculate the total number of particles N based on the lattice */
-  options.Nx = input_options.particles[0];
-  options.Ny = input_options.particles[1];
-  options.Nz = input_options.particles[2];
-
-  if (input_options.lattice == "FCC") {
-    options.N = options.Nx * options.Ny * options.Nz * 4;
-  } else if (input_options.lattice == "BCC") {
-    options.N = options.Nx * options.Ny * options.Nz * 2;
-  } else {
-    options.N = options.Nx * options.Ny * options.Nz;
-  }
-  std::cout << "Number of particles: " << options.N << std::endl;
-
-  /* Pass physical parameters */
-  /* Print the pair potential */
-  std::cout << "Pair potential: " << options.potential_type << std::endl;
-
-  if (input_options.density < 0) {
-    std::cerr << "Error: Negative density supplied" << std::endl;
-    exit(-1);
-  }
-
-  if (input_options.target_temperature < 0) {
-    std::cerr << "Error: Negative temperature supplied" << std::endl;
-    exit(-1);
-  }
-
-  /* Initialise scaling variables */
-  // if (options.normalise_dt_w_temp)
-  options.dt = 0.005 / sqrt(options.target_temperature);
-
-  /* Box length scaling */
-  options.L = pow((options.N / options.density), 1.0 / 3.0);
-  options.Lx = options.Ly = options.Lz = options.L;
-  // The below commented out lines calculate the equivelent box length.
-  // The problem with that is calculating the cutoff.
-  // I think the only correct thing is to use a vector for x,y,z since no
-  // projection of the lengths can ensure that the resulting projected length
-  // will be smaller than the smaller dimension. Also using the min length as
-  // cutoff is also not a good way to set this up. All this approaches will have
-  // to somehow deal with the the value of cut_off used in the RDF calculation
-  // options.Lx = options.Nx / pow(options.density, 1.0/3.0);
-  // options.Ly = options.Ny / pow(options.density, 1.0/3.0);
-  // options.Lz = options.Nz / pow(options.density, 1.0/3.0);
-
-  options.volume = options.N / options.density;
-
-  /* cut_off definition */
-  if (input_options.cut_off > 0) {
-    /* if cut-off is too large rescale it */
-    if (options.cut_off > options.L / 2.0) {
-      std::cerr << "Warning: cutoff was too large!\n"
-                   "Setting cut-off to half the length box\n"
-                   "cut-off: "
-                << options.L / 2.0 << std::endl;
-      options.cut_off = options.L / 2.0;
-    }
-  } else {
-    /* Hard coded into 1/3 of the box length */
-    /* NOTE: Large cut offs increase the runtime exponentially */
-    options.cut_off = options.L / 3.0;
-  }
-
-  /* Set boundary conditions */
-  std::cout << "Boundary conditions: " << options.bcs << std::endl;
-
-  /* Accuracy of RDF */
-  std::cout << "RDF bins: " << options.rdf_options.rdf_bins << std::endl;
-
-  /* Ensuring the number of steps is greater than the rdf equilibration period
-   */
-  try {
-    /* Substraction of size_ts if negative results into logic errors
-       hence the use of an int temp; */
-    int temp = options.steps - options.rdf_options.rdf_wait;
-    if (temp < 0) {
-      throw "collect_rdf_after is greater than the step_number";
-    }
-  } catch (const char *msg) {
-    std::cerr << "Warning: " << msg << std::endl;
-    std::cerr << "         rdf_wait is set to 0" << std::endl;
-    options.rdf_options.rdf_wait = 0;
-  }
-  std::cout << "RDF equilibration period set to: "
-            << options.rdf_options.rdf_wait << std::endl;
-  /* Print testing options */
-  std::cout << "Testing: " << options.test_options.is_testing << std::endl;
+  load_options(input_options);
 
   /* Pass the options reference back to input_options to update the variable.
    * Routines in the phase_transition class depend on this line */
   input_options = options;
-
-  /* Visualisation vectors on the heap*/
-  pos = new std::vector<std::vector<double>>(4);
-  for (size_t i = 0; i < (*pos).size(); ++i) (*pos)[i].reserve(options.N);
 }
 
 MD::MD(size_t step_number, std::vector<size_t> particles, std::string lattice) {
   /* Assign number of iterations of the MD algorithm */
   options.steps = step_number;
-  std::cout << "Number of steps: " << options.steps << std::endl;
-
-  /* Assign the type of lattice */
+  options.particles = particles;
   options.lattice = lattice;
-  std::cout << "Lattice type: " << options.lattice << std::endl;
 
-  try {
-    if (particles.empty()) {
-      throw "The supplied particles vector is empty";
-    } else if (particles.size() < 3) {
-      throw "The supplied particles vector is of incorrect size";
-    } else if (std::find(particles.begin(), particles.end(), 0) !=
-               particles.end()) {
-      throw
-                  "The supplied particles vector contains a 0\n"
-                  "particles cannot be 0 in x, y or z";
-    }
-
-  } catch (const char *msg) {
-    std::cerr << "Error: " << msg << std::endl;
-    exit(1);
-  }
-
-  /* Calculate the total number of particles N based on the lattice */
-  options.Nx = particles[0];
-  options.Ny = particles[1];
-  options.Nz = particles[2];
-  if (lattice == "FCC") {
-    options.N = options.Nx * options.Ny * options.Nz * 4;
-  } else if (lattice == "BCC") {
-    options.N = options.Nx * options.Ny * options.Nz * 2;
-  } else {
-    options.N = options.Nx * options.Ny * options.Nz;
-  }
-  std::cout << "Number of particles: " << options.N << std::endl;
-
-  options.io_options.dir = ".";
-
-  /* If compress is true, then STEPS = steps_per_compression */
-  options.compression_options.compression = false;
-
-  /* Save all the positions for the fluid */
-  options.io_options.visualise = false;
-
-  /* Accuracy of RDF */
-  options.rdf_options.rdf_bins = 500;
-
-  options.rdf_options.rdf_wait = 0;
-
-  /* For efficiency, memory in the containers is reserved before use */
-  /* Positions */
-  r.reserve(options.N);
-  /* Velocities */
-  v.reserve(options.N);
-  /* RDF */
-  rdf.resize(options.rdf_options.rdf_bins + 1, 0); /* gr with Index igr */
-  /* Forces/Acceleration */
-  f.resize(options.N, 0);
-  /* Structure factor k-arrays */
-  sf.reserve(options.N);
-  /* Observed Quantities */
-  Cr.reserve(options.steps);   /* Velocity Autocorrelation Function */
-  msd.reserve(options.steps);  /* Mean Square Displacement */
-  u_en.reserve(options.steps); /* Average Potential Energy */
-  k_en.reserve(options.steps); /* Average Kinetic Energy */
-  pc.reserve(options.steps);   /* Configurational Pressure */
-  pk.reserve(options.steps);   /* Kinetic Pressure */
-  temperature.reserve(options.steps);
-
-  /* Visualisation vectors on the heap*/
-  pos = new std::vector<std::vector<double>>(4);
-  for (size_t i = 0; i < (*pos).size(); ++i) (*pos)[i].reserve(options.N);
-  options.test_options.is_testing = false;
+  load_options(options);
 }
 
 /* Delegating constructors with reduced number of arguments
@@ -422,8 +202,7 @@ double MD::initialise(vector_3d<double> &r, vector_3d<double> &v,
   double mean_vx = std::accumulate(v.x.begin(), v.x.end(), 0.0) / options.N;
   double mean_vy = std::accumulate(v.y.begin(), v.y.end(), 0.0) / options.N;
   double mean_vz = std::accumulate(v.z.begin(), v.z.end(), 0.0) / options.N;
-  /* Conserve the momentum of the fluid by subsracting the average velocities
-     using a lambda expression */
+  /* Conserve the momentum of the fluid by subsracting the average velocities */
   std::for_each(v.x.begin(), v.x.end(), [mean_vx](double &d) { d -= mean_vx; });
   std::for_each(v.y.begin(), v.y.end(), [mean_vy](double &d) { d -= mean_vy; });
   std::for_each(v.z.begin(), v.z.end(), [mean_vz](double &d) { d -= mean_vz; });
@@ -1088,3 +867,158 @@ void MD::set_vector_sizes() {
 void MD::set_options(const options_type &new_options) { options = new_options; }
 
 options_type MD::get_options() { return options; }
+
+void MD::load_options(options_type &input_options) {
+  /* Perform a shallow copy of the input_options to options */
+  options = input_options;
+
+  /* Test whether the input directory exists */
+  if (!input_options.io_options.dir.empty()) {
+    try {
+      if (!fs::exists(input_options.io_options.dir)) {
+        throw
+          "input out_directory in MD constructor does not exist.\n"
+          "Use a valid directory for output files to be saved";
+      }
+
+    } catch (const char *msg) {
+      std::cerr << "Error: " << msg << std::endl;
+      exit(-1);
+    }
+  }
+
+  std::cout << "Output directory set to: " << options.io_options.dir
+            << std::endl;
+
+  /* Print type of simulation */
+  std::cout << "Simulation type: " << options.simulation_type << std::endl;
+
+  /* Print simulation name if any */
+  std::cout << "Simulation name: " << options.io_options.simulation_name
+            << std::endl;
+
+  /* Are we saving all the positions for the fluid */
+  std::cout << "Particle visualisation: " << options.io_options.visualise
+            << std::endl;
+
+  /* Print stepping algorithm */
+  std::cout << "Iterative algorithm: " << options.iterative_method << std::endl;
+
+  /* Print number of iterations */
+  std::cout << "Number of steps: " << options.steps << std::endl;
+
+  /* Print particles and lattice */
+  std::cout << "Initial lattice: " << options.lattice << std::endl;
+
+  /* Check particles have been supplied in the correct form */
+  try {
+    if (input_options.particles.empty()) {
+      throw "The supplied particles vector is empty";
+    } else if (input_options.particles.size() < 3) {
+      throw "The supplied particles vector must be of size 3";
+    } else if (std::find(input_options.particles.begin(),
+                         input_options.particles.end(),
+                         0) != input_options.particles.end()) {
+      throw
+            "The supplied particles vector contains a 0\n"
+            "particles cannot be 0 in x, y or z";
+    }
+
+  } catch (const char *msg) {
+    std::cerr << "Error: " << msg << std::endl;
+    exit(-1);
+  }
+
+  /* Calculate the total number of particles N based on the lattice */
+  options.Nx = input_options.particles[0];
+  options.Ny = input_options.particles[1];
+  options.Nz = input_options.particles[2];
+
+  if (input_options.lattice == "FCC") {
+    options.N = options.Nx * options.Ny * options.Nz * 4;
+  } else if (input_options.lattice == "BCC") {
+    options.N = options.Nx * options.Ny * options.Nz * 2;
+  } else {
+    options.N = options.Nx * options.Ny * options.Nz;
+  }
+  std::cout << "Number of particles: " << options.N << std::endl;
+
+  /* Pass physical parameters */
+  /* Print the pair potential */
+  std::cout << "Pair potential: " << options.potential_type << std::endl;
+
+  if (input_options.density < 0) {
+    std::cerr << "Error: Negative density supplied" << std::endl;
+    exit(-1);
+  }
+
+  if (input_options.target_temperature < 0) {
+    std::cerr << "Error: Negative temperature supplied" << std::endl;
+    exit(-1);
+  }
+
+  /* Initialise scaling variables */
+  // if (options.normalise_dt_w_temp)
+  options.dt = 0.005 / sqrt(options.target_temperature);
+
+  /* Box length scaling */
+  options.L = pow((options.N / options.density), 1.0 / 3.0);
+  options.Lx = options.Ly = options.Lz = options.L;
+  // The below commented out lines calculate the equivelent box length.
+  // The problem with that is calculating the cutoff.
+  // I think the only correct thing is to use a vector for x,y,z since no
+  // projection of the lengths can ensure that the resulting projected length
+  // will be smaller than the smaller dimension. Also using the min length as
+  // cutoff is also not a good way to set this up. All this approaches will have
+  // to somehow deal with the the value of cut_off used in the RDF calculation
+  // options.Lx = options.Nx / pow(options.density, 1.0/3.0);
+  // options.Ly = options.Ny / pow(options.density, 1.0/3.0);
+  // options.Lz = options.Nz / pow(options.density, 1.0/3.0);
+
+  options.volume = options.N / options.density;
+
+  /* cut_off definition */
+  if (input_options.cut_off > 0) {
+    /* if cut-off is too large rescale it */
+    if (options.cut_off > options.L / 2.0) {
+      std::cerr << "Warning: cutoff was too large!\n"
+                   "Setting cut-off to half the length box\n"
+                   "cut-off: "
+                << options.L / 2.0 << std::endl;
+      options.cut_off = options.L / 2.0;
+    }
+  } else {
+    /* Hard coded into 1/3 of the box length */
+    /* NOTE: Large cut offs increase the runtime exponentially */
+    options.cut_off = options.L / 3.0;
+  }
+
+  /* Set boundary conditions */
+  std::cout << "Boundary conditions: " << options.bcs << std::endl;
+
+  /* Accuracy of RDF */
+  std::cout << "RDF bins: " << options.rdf_options.rdf_bins << std::endl;
+
+  /* Ensuring the number of steps is greater than the rdf equilibration period
+   */
+  try {
+    /* Substraction of size_ts if negative results into logic errors
+       hence the use of an int temp; */
+    int temp = options.steps - options.rdf_options.rdf_wait;
+    if (temp < 0) {
+      throw "collect_rdf_after is greater than the step_number";
+    }
+  } catch (const char *msg) {
+    std::cerr << "Warning: " << msg << std::endl;
+    std::cerr << "         rdf_wait is set to 0" << std::endl;
+    options.rdf_options.rdf_wait = 0;
+  }
+  std::cout << "RDF equilibration period set to: "
+            << options.rdf_options.rdf_wait << std::endl;
+  /* Print testing options */
+  std::cout << "Testing: " << options.test_options.is_testing << std::endl;
+
+  /* Visualisation vectors on the heap*/
+  pos = new std::vector<std::vector<double>>(4);
+  for (size_t i = 0; i < (*pos).size(); ++i) (*pos)[i].reserve(options.N);
+}

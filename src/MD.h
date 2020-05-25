@@ -403,4 +403,12 @@ class MD {
    * @return options_type
    */
   options_type get_options();
+
+ private:
+ /**
+  * @brief Handles the parsing of the options from the schema to the MD object
+  * 
+  * @param input_options Options to parse
+  */
+  void load_options(options_type &input_options);
 };

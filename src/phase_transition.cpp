@@ -10,28 +10,7 @@ void phase_transition::crystallisation(options_type &options) {
   double old_box_length = 0;
   const std::string original_sim_name = options.io_options.simulation_name;
 
-  try {
-    if (options.compression_options.density_final > options.density &&
-        options.compression_options.density_inc > 0) {
-      std::runtime_error(
-          "You are attempting to compress the fluid:"
-          "Final density has to be smaller than initial density");
-    }
-    if (options.compression_options.density_final < options.density &&
-        options.compression_options.density_inc < 0) {
-      std::runtime_error(
-          "You are attempting to melt the crystal:"
-          "Final density has to be larger than initial density");
-    }
-    if (options.compression_options.density_inc >
-        options.compression_options.density_final) {
-      std::runtime_error(
-          "Density increment has to be smaller than final density");
-    }
-  } catch (const std::exception &msg) {
-    std::cerr << "Error: " << msg.what() << std::endl;
-    exit(1);
-  }
+  error_check_options(options);
 
   /* Number of compressions to occur */
   size_t total_comp_steps =
@@ -168,6 +147,63 @@ void phase_transition::two_way_compression(options_type &options) {
                "** Finished Backward Run: **\n"
                "*****************************\n"
             << std::endl;
+}
+
+void phase_transition::error_check_options(options_type &options) {
+  /**************************** WARNINGS **************************************/
+  try {
+    if (options.compression_options.density_final > options.density) {
+      std::cout << "Starting fluid compression" << std::endl;
+
+      if (options.compression_options.density_inc < 0) {
+        std::string warning =
+            "Compressing the fluid requires a positive density increment to be "
+            "passed. The input increment: " +
+            std::to_string(options.compression_options.density_inc) +
+            " will be replaced by: " +
+            std::to_string(-options.compression_options.density_inc);
+
+        // Change the sign of the density increment
+        options.compression_options.density_inc =
+            -options.compression_options.density_inc;
+
+        throw std::runtime_error(warning);
+      }
+    } else if (options.compression_options.density_final < options.density) {
+      std::cout << "Starting fluid decompression/ crystal melting" << std::endl;
+
+      if (options.compression_options.density_inc > 0) {
+        std::string warning =
+            "Decompressing the fluid requires a negative density increment to "
+            "be passed. The input increment: " +
+            std::to_string(options.compression_options.density_inc) +
+            " will be replaced by: " +
+            std::to_string(-options.compression_options.density_inc);
+
+        // Change the sign of the density increment
+        options.compression_options.density_inc =
+            -options.compression_options.density_inc;
+
+        throw std::runtime_error(warning);
+      }
+    }
+  } catch (const std::exception &msg) {
+    std::cerr << "Warning: " << msg.what() << std::endl;
+  }
+
+  /****************************** ERRORS **************************************/
+  try {
+    if (options.compression_options.density_inc >
+        options.compression_options.density_final) {
+      throw std::runtime_error(
+          "Density increment has to be smaller than final density");
+    }
+  } catch (const std::exception &msg) {
+    std::cerr << "Error: " << msg.what() << std::endl;
+    exit(-1);
+  }
+
+  /****************************************************************************/
 }
 
 void phase_transition::set_compression_flag(bool is_compressing) {

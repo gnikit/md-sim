@@ -134,6 +134,9 @@ potentials =
 
         pair_potential_parameters,
 
+        ## Parameter q for BIP, default value is 2
+        element q { real }?,
+
         comment
 
     }

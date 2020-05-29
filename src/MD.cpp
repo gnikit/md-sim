@@ -460,7 +460,7 @@ std::tuple<double, double> MD::calculate_forces(vector_3d<double> &x,
       /* Force loop */
       if (radius < options.cut_off) {
         /* Allows the user to choose different pair potentials */
-        auto [ff, temp_u] = p(radius, options.power, options.a_cst);
+        auto [ff, temp_u] = p(radius, options.power, options.a_cst, options.q);
 
         /* Average potential energy */
         if (options.io_options.energies) U += temp_u;

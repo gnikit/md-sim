@@ -1,9 +1,21 @@
 #include "md_pair_potentials.h"
 
-std::tuple<double, double> MD_tools::BIP_force(double &r, double n, double a) {
+std::tuple<double, double> MD_tools::BIP_force(double &r, double n, double a,
+                                               double q) {
   /* Force for particles separated a distance r */
-  double ff = (n)*r * pow(sqrt(r * r + a * a), ((-n - 2.0)));
-  double u = pow(sqrt(r * r + a * a), (-n));
+
+  double ar, ff, u;
+  // The sqrt function is blazing fast there is no reason to not use it if q=2
+  if (abs(q - 2.0) <= std::numeric_limits<double>::epsilon()) {
+    ar = sqrt(r * r + a * a);
+    ff = n * r * pow(ar, (-n - 2.0));
+    u = pow(ar, -n);
+
+  } else {
+    ar = pow(r, q) + pow(a, q);
+    ff = n * pow(r, q - 1.0) * pow(ar, (-n / q - 1.0));
+    u = pow(ar, (-n / q));
+  }
   return std::make_tuple(ff, u);
 }
 
@@ -29,24 +41,25 @@ std::tuple<double, double> MD_tools::LJ_force(double &r) {
 /*************************  Pair potential classes  ***************************/
 
 std::tuple<double, double> BIP_pp::get_force(double &r, double power,
-                                             double a_cst) {
-  auto [ff, u] = MD_tools::BIP_force(r, power, a_cst);
+                                             double a_cst, double q) {
+  auto [ff, u] = MD_tools::BIP_force(r, power, a_cst, q);
   return std::make_tuple(ff, u);
 }
 
-std::tuple<double, double> GCM_pp::get_force(double &r, double m = NAN,
-                                             double C = NAN) {
+std::tuple<double, double> GCM_pp::get_force(double &r, double m, double C,
+                                             double q) {
   auto [ff, u] = MD_tools::GCM_force(r);
   return std::make_tuple(ff, u);
 }
 
-std::tuple<double, double> Exp_pp::get_force(double &r, double m, double C) {
+std::tuple<double, double> Exp_pp::get_force(double &r, double m, double C,
+                                             double q) {
   auto [ff, u] = MD_tools::Exp_force(r, m, C);
   return std::make_tuple(ff, u);
 }
 
-std::tuple<double, double> LJ_pp::get_force(double &r, double m = NAN,
-                                            double C = NAN) {
+std::tuple<double, double> LJ_pp::get_force(double &r, double m, double C,
+                                            double q) {
   auto [ff, u] = MD_tools::LJ_force(r);
   return std::make_tuple(ff, u);
 }

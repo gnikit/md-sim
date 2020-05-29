@@ -76,6 +76,7 @@ struct options_type {
   double temperature = 1.0;           /* simulation temperature */
   double power = 0;                   /* pair potential intensity */
   double a_cst = 0;                   /* generic softening parameter */
+  double q = 2.0;                     /* Parameter q for BIP */
   double kinetic_energy = 0;          /* kinetic energy */
   double cut_off = 0;                 /* cut off radius of simulation */
   double scale_v = 0;                 /* velocity scaling */

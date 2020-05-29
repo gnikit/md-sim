@@ -23,11 +23,11 @@
 #endif
 
 /**
- * @brief Currently limited to pair potentials using at max 3 input parameters
+ * @brief Currently limited to pair potentials using at max 4 input parameters
  *
  */
 using pair_potential_type = std::tuple<double, double> (*)(double &, double,
-                                                           double);
+                                                           double, double);
 
 /**
  * @brief
@@ -47,12 +47,24 @@ class MD_tools {
    * Generates the force of a Bounded Inverse Power potential
    * and its potential energy.
    *
+   * @f[
+   *  \phi(r) = \frac{1}{r^{q} + a^{q}}^{n/q}
+   * @f]
+   *
+   * @f[
+   *  F(r) = - \frac{\partial \phi}{\partial r} =
+   *       n r^{q-1} (r^{q} + a^{q})^{-n/q - 1}
+   * @f]
+   *
    * @param r Separation distance between two particles
    * @param n Pair potential strength
    * @param a Softening parameter
+   * @param q Moderating pair potential strength (generalised form)
    * @return std::tuple<double, double>: <Force, Potential energy>
    */
-  static std::tuple<double, double> BIP_force(double &r, double n, double a);
+  static std::tuple<double, double> BIP_force(double &r, double n, double a,
+                                              double q);
+
   /**
    * @brief
    * Generates the force of a Gaussian Core Model potential
@@ -62,6 +74,7 @@ class MD_tools {
    * @return std::tuple<double, double> <Force, Potential energy>
    */
   static std::tuple<double, double> GCM_force(double &r);
+
   /**
    * @brief Exponential pair potential, similar to the GCM.
    * If used use a smaller cut-off 1.5 ~ 2.0.
@@ -73,6 +86,7 @@ class MD_tools {
    * @return std::tuple<double, double>
    */
   static std::tuple<double, double> Exp_force(double &r, double m, double C);
+
   /**
    * @brief Lennard-Jones force calculation.
    *
@@ -86,22 +100,26 @@ class MD_tools {
 
 class BIP_pp {
  public:
-  static std::tuple<double, double> get_force(double &r, double n, double a);
+  static std::tuple<double, double> get_force(double &r, double n, double a,
+                                              double q = 2);
 };
 
 class GCM_pp {
  public:
-  static std::tuple<double, double> get_force(double &r, double m, double C);
+  static std::tuple<double, double> get_force(double &r, double m = NAN,
+                                              double C = NAN, double q = NAN);
 };
 
 class Exp_pp {
  public:
-  static std::tuple<double, double> get_force(double &r, double m, double C);
+  static std::tuple<double, double> get_force(double &r, double m, double C,
+                                              double q = NAN);
 };
 
 class LJ_pp {
  public:
-  static std::tuple<double, double> get_force(double &r, double m, double C);
+  static std::tuple<double, double> get_force(double &r, double m = NAN,
+                                              double C = NAN, double q = NAN);
 };
 
 /**************  Query Function for Pair Potential Hash Table *****************/

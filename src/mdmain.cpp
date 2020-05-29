@@ -199,6 +199,11 @@ int md_options_interface::load_simulation_options(options_type& opts) {
     assert(error == SPUD_NO_ERROR);
   }
 
+  if (have_option(pp_path + "/q")) {
+    error = get_option(pp_path + "/q", opts.q);
+    assert(error == SPUD_NO_ERROR);
+  }
+
   error = get_option(pp_path + "/dt", opts.dt);
   assert(error == SPUD_NO_ERROR);
 

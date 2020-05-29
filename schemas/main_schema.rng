@@ -133,6 +133,12 @@ fixed lengths for the x, y, z axis of the MD cell. </a:documentation>
         </attribute>
         <ref name="simulation_parameters"/>
         <ref name="pair_potential_parameters"/>
+        <optional>
+          <element name="q">
+            <a:documentation>Parameter q for BIP, default value is 2</a:documentation>
+            <ref name="real"/>
+          </element>
+        </optional>
         <ref name="comment"/>
       </element>
     </choice>

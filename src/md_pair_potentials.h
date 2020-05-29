@@ -26,8 +26,10 @@
  * @brief Currently limited to pair potentials using at max 4 input parameters
  *
  */
-using pair_potential_type = std::tuple<double, double> (*)(double &, double,
-                                                           double, double);
+using pair_potential_type = std::tuple<double, double> (*)(const double &,
+                                                           const double,
+                                                           const double,
+                                                           const double);
 
 /**
  * @brief
@@ -62,8 +64,8 @@ class MD_tools {
    * @param q Moderating pair potential strength (generalised form)
    * @return std::tuple<double, double>: <Force, Potential energy>
    */
-  static std::tuple<double, double> BIP_force(double &r, double n, double a,
-                                              double q);
+  static std::tuple<double, double> BIP_force(const double &r, const double n,
+                                              const double a, const double q);
 
   /**
    * @brief
@@ -73,7 +75,7 @@ class MD_tools {
    * @param r Separation distance between two particles
    * @return std::tuple<double, double> <Force, Potential energy>
    */
-  static std::tuple<double, double> GCM_force(double &r);
+  static std::tuple<double, double> GCM_force(const double &r);
 
   /**
    * @brief Exponential pair potential, similar to the GCM.
@@ -85,7 +87,8 @@ class MD_tools {
    * @param C Scaling parameters
    * @return std::tuple<double, double>
    */
-  static std::tuple<double, double> Exp_force(double &r, double m, double C);
+  static std::tuple<double, double> Exp_force(const double &r, const double m,
+                                              const double C);
 
   /**
    * @brief Lennard-Jones force calculation.
@@ -93,33 +96,39 @@ class MD_tools {
    * @param r
    * @return std::tuple<double, double>
    */
-  static std::tuple<double, double> LJ_force(double &r);
+  static std::tuple<double, double> LJ_force(const double &r);
 };
 
 /*************************  Pair potential classes  ***************************/
 
 class BIP_pp {
  public:
-  static std::tuple<double, double> get_force(double &r, double n, double a,
-                                              double q = 2);
+  static std::tuple<double, double> get_force(const double &r, const double n,
+                                              const double a,
+                                              const double q = 2);
 };
 
 class GCM_pp {
  public:
-  static std::tuple<double, double> get_force(double &r, double m = NAN,
-                                              double C = NAN, double q = NAN);
+  static std::tuple<double, double> get_force(const double &r,
+                                              const double m = NAN,
+                                              const double C = NAN,
+                                              const double q = NAN);
 };
 
 class Exp_pp {
  public:
-  static std::tuple<double, double> get_force(double &r, double m, double C,
-                                              double q = NAN);
+  static std::tuple<double, double> get_force(const double &r, const double m,
+                                              const double C,
+                                              const double q = NAN);
 };
 
 class LJ_pp {
  public:
-  static std::tuple<double, double> get_force(double &r, double m = NAN,
-                                              double C = NAN, double q = NAN);
+  static std::tuple<double, double> get_force(const double &r,
+                                              const double m = NAN,
+                                              const double C = NAN,
+                                              const double q = NAN);
 };
 
 /**************  Query Function for Pair Potential Hash Table *****************/
@@ -131,4 +140,4 @@ class LJ_pp {
  * @param pp_type a string containing the pair potential name
  * @return pair_potential_type a tuple with pair potential quantities
  */
-pair_potential_type get_force_func(std::string pp_type);
+pair_potential_type get_force_func(const std::string pp_type);

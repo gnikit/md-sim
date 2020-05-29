@@ -27,7 +27,9 @@ io_options =
 
         save_last_positions_io,
 
-        compression_summary_stats?
+        compression_summary_stats?,
+
+        compression_visualise_same_index
 
     }
 )
@@ -114,4 +116,15 @@ compression_summary_stats =
     ## The statistics involve min, max, average, l2norm and rms.
     ## <b> This makes sense only in a compression run </b>
     element compression_summary_stats { attribute name { "true" } }
+)
+
+compression_visualise_same_index =
+(
+    ## This options is to be used when performing a compression/melting run.
+    ## If the options is set, it will use an increasing index, instead
+    ## of the normal file naming nomeclature to name the visualisation files
+    ## to allow for easier use with ParaView.
+    ## More specifically the index be the simulation_name_{index}.csv
+    ## where the index is incremented at every timestep of every compression.
+    element compression_visualise_continuous_index { empty }?
 )

@@ -102,7 +102,16 @@ void MD::simulation() {
       (*pos)[1] = r.y;
       (*pos)[2] = r.z;
       (*pos)[3] = v.magnitude(); /* Speed for scaling */
-      save_visualisation_arrays(step_idx);
+
+      size_t dump_no = step_idx;
+      /* In case we are doing a compression run we might want to label all
+         the output positions with a continuous index to allow for easier
+         loading in ParaView */
+      if (options.io_options.compression_visualise_continuous_index) {
+        dump_no = options.io_options.absolute_compression_step;
+        ++options.io_options.absolute_compression_step;
+      }
+      save_visualisation_arrays(dump_no);
     }
   }
   /****************************************************************************/

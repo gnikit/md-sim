@@ -185,4 +185,17 @@ The statistics involve min, max, average, l2norm and rms.
       </element>
     </choice>
   </define>
+  <define name="compression_visualise_same_index">
+    <optional>
+      <element name="compression_visualise_continuous_index">
+        <a:documentation>This options is to be used when performing a compression/melting run.
+If the options is set, it will use an increasing index, instead
+of the normal file naming nomeclature to name the visualisation files
+to allow for easier use with ParaView.
+More specifically the index be the simulation_name_{index}.csv
+where the index is incremented at every timestep of every compression.</a:documentation>
+        <empty/>
+      </element>
+    </optional>
+  </define>
 </grammar>

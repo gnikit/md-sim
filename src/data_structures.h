@@ -55,6 +55,11 @@ struct io_options_type {
   bool compression_stats = true; /* create a separate log file with stats */
   string dir = ".";              /* file output directory */
   string simulation_name = "";   /* simulation prefix/ name */
+  bool compression_visualise_continuous_index = false;
+  /**
+   * used for indexing the visualisation files if
+   * compression_visualise_continuous_index is true*/
+  size_t absolute_compression_step = 0;
 };
 
 struct options_type {

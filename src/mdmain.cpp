@@ -104,11 +104,14 @@ int md_options_interface::load_io_options(io_options_type& io) {
     assert(error == SPUD_NO_ERROR);
   }
 
-  error = get_option(path + "/track_particles/name", temp);
+  error = get_option(path + "/visualise_particles/name", temp);
   assert(error == SPUD_NO_ERROR);
-  if (temp == "true")
+  if (temp == "true") {
     io.visualise = true;
-  else
+
+    if (have_option(path + "/compression_visualise_continuous_index"))
+      io.compression_visualise_continuous_index = true;
+  } else
     io.visualise = false;
 
   error = get_option(path + "/energies/name", temp);

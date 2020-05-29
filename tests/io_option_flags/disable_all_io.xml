@@ -16,7 +16,7 @@
   </setup>
   <io>
     <simulation_name>disable_all_io_</simulation_name>
-    <track_particles name="false"/>
+    <visualise_particles name="false"/>
     <energies name="false"/>
     <pressure name="false"/>
     <msd name="false"/>

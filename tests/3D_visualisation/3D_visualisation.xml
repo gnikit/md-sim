@@ -23,7 +23,7 @@
   <io>
     <simulation_name>visual_</simulation_name>
     <output_dir>.</output_dir>
-    <track_particles name="true"/>
+    <visualise_particles name="true"/>
     <energies name="true"/>
     <pressure name="true"/>
     <msd name="true"/>

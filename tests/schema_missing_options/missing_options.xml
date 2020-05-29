@@ -16,7 +16,7 @@
   </setup>
   <io>
     <simulation_name>missing_options_</simulation_name>
-    <track_particles name="false"/>
+    <visualise_particles name="false"/>
     <energies name="true"/>
     <pressure name="true"/>
     <msd name="true"/>

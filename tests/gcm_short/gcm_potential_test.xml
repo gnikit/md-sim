@@ -23,7 +23,7 @@
   <io>
     <simulation_name>gcm_potential_test_</simulation_name>
     <output_dir>.</output_dir>
-    <track_particles name="false"/>
+    <visualise_particles name="false"/>
     <energies name="true"/>
     <pressure name="true"/>
     <msd name="true"/>

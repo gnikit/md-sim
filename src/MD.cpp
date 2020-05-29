@@ -682,6 +682,7 @@ std::string MD::set_simulation_params(double const &rho, double const &T,
               << "Defaulting to BIP potential" << std::endl;
     params = "Potential: BIP, " + params;
     params += " n: " + stat_file::convert_to_string(power, 4);
+    params += " q: " + stat_file::convert_to_string(options.q, 4);
     params += " A: " + stat_file::convert_to_string(a, 4);
   }
 

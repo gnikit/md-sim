@@ -93,7 +93,7 @@ options =
 
 potentials =
 (
-    ## LJ: Lennard-Jones Potential, 1/r**12 - 1/r**6
+    ## LJ: Lennard-Jones Potential, 1/r^12 - 1/r^6
     element pair_potential {
 
         attribute name { "LennardJones" },
@@ -103,7 +103,7 @@ potentials =
         comment
 
     }|
-    ## GCM: Gaussian Core Model, exp(-r**2)
+    ## GCM: Gaussian Core Model, exp(-r^2)
     element pair_potential {
 
         attribute name { "GaussianCoreModel" },
@@ -113,7 +113,7 @@ potentials =
         comment
 
     }|
-    ## EXP: Exponential Potential, A * exp(-r**n)
+    ## EXP: Exponential Potential, A * exp(-r^n)
     element pair_potential {
 
         attribute name { "Exponential" },
@@ -125,7 +125,9 @@ potentials =
         comment
 
     }|
-    ## BIP: Bounded Inverse Power, 1/(r**2 + a**2)**n
+    ## BIP: Bounded Inverse Power, 1/(r^q + a^q)^(n/q)
+    ##
+    ## default value q = 2
     element pair_potential {
 
         attribute name { "BoundedInversePower" },

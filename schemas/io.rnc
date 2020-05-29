@@ -11,7 +11,7 @@ io_options =
         ## Output directory for the files to be produced during a simulation.
         element output_dir { string }?,
 
-        track_particles,
+        visualise_particles,
 
         data_io,
 
@@ -29,23 +29,23 @@ io_options =
 
         compression_summary_stats?,
 
-        compression_visualise_same_index
+        compression_visualise_continuous_index
 
     }
 )
 
-track_particles =
+visualise_particles =
 (
     ## If enabled will save in ASCII format the positions of all the
     ## particles for the entire simulation.
     ## The datafiles can then be viewed with the python tools.
     ## NOTE: For large simulations this will be slow.
-    element track_particles { attribute name { "false" } }|
+    element visualise_particles { attribute name { "false" } }|
     ## If enabled will save in ASCII format the positions of all the
     ## particles for the entire simulation.
     ## The datafiles can then be viewed with the python tools.
     ## NOTE: For large simulations this will be slow.
-    element track_particles { attribute name { "true" } }
+    element visualise_particles { attribute name { "true" } }
 )
 
 msd_io =
@@ -118,7 +118,7 @@ compression_summary_stats =
     element compression_summary_stats { attribute name { "true" } }
 )
 
-compression_visualise_same_index =
+compression_visualise_continuous_index =
 (
     ## This options is to be used when performing a compression/melting run.
     ## If the options is set, it will use an increasing index, instead

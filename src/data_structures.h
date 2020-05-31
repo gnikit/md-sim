@@ -60,6 +60,13 @@ struct io_options_type {
    * used for indexing the visualisation files if
    * compression_visualise_continuous_index is true*/
   size_t absolute_compression_step = 0;
+  /**
+   * used for naming just the compression particle visualisation files 
+   * with the original simulation name that does not include the compression
+   * increment at its end.
+   */
+    string simulation_name_cst = "";
+
 };
 
 struct options_type {

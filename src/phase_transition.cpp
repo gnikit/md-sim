@@ -61,6 +61,8 @@ void phase_transition::crystallisation(options_type &options) {
 
     options.io_options.simulation_name = prefix;
     options.density = current_rho;
+    if (options.io_options.compression_visualise_continuous_index)
+      options.io_options.absolute_compression_step = comp_step * options.steps;
     MD::set_options(options);
     simulation();
 

@@ -96,6 +96,7 @@ int md_options_interface::load_io_options(io_options_type& io) {
 
   if (have_option(path + "/simulation_name")) {
     error = get_option(path + "/simulation_name", io.simulation_name);
+    io.simulation_name_cst = io.simulation_name;
     assert(error == SPUD_NO_ERROR);
   }
 

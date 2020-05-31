@@ -690,9 +690,14 @@ std::string MD::set_simulation_params(double const &rho, double const &T,
 }
 
 void MD::save_visualisation_arrays(size_t dump_no) {
-  std::string fname = options.io_options.dir + "/" +
-                      options.io_options.simulation_name + "xyz_data_" +
-                      std::to_string(dump_no) + ".csv";
+  std::string fname = options.io_options.dir + "/";
+
+  if (options.io_options.compression_visualise_continuous_index)
+    fname += options.io_options.simulation_name_cst;
+  else
+    fname += options.io_options.simulation_name;
+
+  fname += "xyz_data_" + std::to_string(dump_no) + ".csv";
   std::ofstream out_xyz(fname, std::ofstream::trunc | std::ofstream::out);
   logger.write_file(*pos, out_xyz, "x-pos, y-pos, z-pos, speed");
   out_xyz.close();

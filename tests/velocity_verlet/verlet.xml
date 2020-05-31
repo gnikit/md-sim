@@ -19,7 +19,7 @@
   </setup>
   <io>
     <simulation_name>verlet_</simulation_name>
-    <track_particles name="false"/>
+    <visualise_particles name="false"/>
     <energies name="true"/>
     <pressure name="true"/>
     <msd name="true"/>

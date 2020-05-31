@@ -96,6 +96,7 @@ int md_options_interface::load_io_options(io_options_type& io) {
 
   if (have_option(path + "/simulation_name")) {
     error = get_option(path + "/simulation_name", io.simulation_name);
+    io.simulation_name_cst = io.simulation_name;
     assert(error == SPUD_NO_ERROR);
   }
 
@@ -104,11 +105,14 @@ int md_options_interface::load_io_options(io_options_type& io) {
     assert(error == SPUD_NO_ERROR);
   }
 
-  error = get_option(path + "/track_particles/name", temp);
+  error = get_option(path + "/visualise_particles/name", temp);
   assert(error == SPUD_NO_ERROR);
-  if (temp == "true")
+  if (temp == "true") {
     io.visualise = true;
-  else
+
+    if (have_option(path + "/compression_visualise_continuous_index"))
+      io.compression_visualise_continuous_index = true;
+  } else
     io.visualise = false;
 
   error = get_option(path + "/energies/name", temp);
@@ -196,6 +200,11 @@ int md_options_interface::load_simulation_options(options_type& opts) {
 
   if (have_option(pp_path + "/softening_parameter")) {
     error = get_option(pp_path + "/softening_parameter", opts.a_cst);
+    assert(error == SPUD_NO_ERROR);
+  }
+
+  if (have_option(pp_path + "/q")) {
+    error = get_option(pp_path + "/q", opts.q);
     assert(error == SPUD_NO_ERROR);
   }
 

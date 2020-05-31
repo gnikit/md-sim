@@ -102,7 +102,7 @@ fixed lengths for the x, y, z axis of the MD cell. </a:documentation>
   <define name="potentials">
     <choice>
       <element name="pair_potential">
-        <a:documentation>LJ: Lennard-Jones Potential, 1/r**12 - 1/r**6</a:documentation>
+        <a:documentation>LJ: Lennard-Jones Potential, 1/r^12 - 1/r^6</a:documentation>
         <attribute name="name">
           <value>LennardJones</value>
         </attribute>
@@ -110,7 +110,7 @@ fixed lengths for the x, y, z axis of the MD cell. </a:documentation>
         <ref name="comment"/>
       </element>
       <element name="pair_potential">
-        <a:documentation>GCM: Gaussian Core Model, exp(-r**2)</a:documentation>
+        <a:documentation>GCM: Gaussian Core Model, exp(-r^2)</a:documentation>
         <attribute name="name">
           <value>GaussianCoreModel</value>
         </attribute>
@@ -118,7 +118,7 @@ fixed lengths for the x, y, z axis of the MD cell. </a:documentation>
         <ref name="comment"/>
       </element>
       <element name="pair_potential">
-        <a:documentation>EXP: Exponential Potential, A * exp(-r**n)</a:documentation>
+        <a:documentation>EXP: Exponential Potential, A * exp(-r^n)</a:documentation>
         <attribute name="name">
           <value>Exponential</value>
         </attribute>
@@ -127,12 +127,20 @@ fixed lengths for the x, y, z axis of the MD cell. </a:documentation>
         <ref name="comment"/>
       </element>
       <element name="pair_potential">
-        <a:documentation>BIP: Bounded Inverse Power, 1/(r**2 + a**2)**n</a:documentation>
+        <a:documentation>BIP: Bounded Inverse Power, 1/(r^q + a^q)^(n/q)
+
+default value q = 2</a:documentation>
         <attribute name="name">
           <value>BoundedInversePower</value>
         </attribute>
         <ref name="simulation_parameters"/>
         <ref name="pair_potential_parameters"/>
+        <optional>
+          <element name="q">
+            <a:documentation>Parameter q for BIP, default value is 2</a:documentation>
+            <ref name="real"/>
+          </element>
+        </optional>
         <ref name="comment"/>
       </element>
     </choice>

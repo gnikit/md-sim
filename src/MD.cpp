@@ -102,7 +102,16 @@ void MD::simulation() {
       (*pos)[1] = r.y;
       (*pos)[2] = r.z;
       (*pos)[3] = v.magnitude(); /* Speed for scaling */
-      save_visualisation_arrays(step_idx);
+
+      size_t dump_no = step_idx;
+      /* In case we are doing a compression run we might want to label all
+         the output positions with a continuous index to allow for easier
+         loading in ParaView */
+      if (options.io_options.compression_visualise_continuous_index) {
+        dump_no = options.io_options.absolute_compression_step;
+        ++options.io_options.absolute_compression_step;
+      }
+      save_visualisation_arrays(dump_no);
     }
   }
   /****************************************************************************/
@@ -460,7 +469,7 @@ std::tuple<double, double> MD::calculate_forces(vector_3d<double> &x,
       /* Force loop */
       if (radius < options.cut_off) {
         /* Allows the user to choose different pair potentials */
-        auto [ff, temp_u] = p(radius, options.power, options.a_cst);
+        auto [ff, temp_u] = p(radius, options.power, options.a_cst, options.q);
 
         /* Average potential energy */
         if (options.io_options.energies) U += temp_u;
@@ -673,6 +682,7 @@ std::string MD::set_simulation_params(double const &rho, double const &T,
               << "Defaulting to BIP potential" << std::endl;
     params = "Potential: BIP, " + params;
     params += " n: " + stat_file::convert_to_string(power, 4);
+    params += " q: " + stat_file::convert_to_string(options.q, 4);
     params += " A: " + stat_file::convert_to_string(a, 4);
   }
 
@@ -680,9 +690,14 @@ std::string MD::set_simulation_params(double const &rho, double const &T,
 }
 
 void MD::save_visualisation_arrays(size_t dump_no) {
-  std::string fname = options.io_options.dir + "/" +
-                      options.io_options.simulation_name + "xyz_data_" +
-                      std::to_string(dump_no) + ".csv";
+  std::string fname = options.io_options.dir + "/";
+
+  if (options.io_options.compression_visualise_continuous_index)
+    fname += options.io_options.simulation_name_cst;
+  else
+    fname += options.io_options.simulation_name;
+
+  fname += "xyz_data_" + std::to_string(dump_no) + ".csv";
   std::ofstream out_xyz(fname, std::ofstream::trunc | std::ofstream::out);
   logger.write_file(*pos, out_xyz, "x-pos, y-pos, z-pos, speed");
   out_xyz.close();

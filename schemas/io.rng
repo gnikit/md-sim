@@ -16,7 +16,7 @@
           <data type="string"/>
         </element>
       </optional>
-      <ref name="track_particles"/>
+      <ref name="visualise_particles"/>
       <ref name="data_io"/>
       <ref name="pressure_io"/>
       <ref name="msd_io"/>
@@ -27,11 +27,12 @@
       <optional>
         <ref name="compression_summary_stats"/>
       </optional>
+      <ref name="compression_visualise_continuous_index"/>
     </element>
   </define>
-  <define name="track_particles">
+  <define name="visualise_particles">
     <choice>
-      <element name="track_particles">
+      <element name="visualise_particles">
         <a:documentation>If enabled will save in ASCII format the positions of all the
 particles for the entire simulation.
 The datafiles can then be viewed with the python tools.
@@ -40,7 +41,7 @@ NOTE: For large simulations this will be slow.</a:documentation>
           <value>false</value>
         </attribute>
       </element>
-      <element name="track_particles">
+      <element name="visualise_particles">
         <a:documentation>If enabled will save in ASCII format the positions of all the
 particles for the entire simulation.
 The datafiles can then be viewed with the python tools.
@@ -184,5 +185,18 @@ The statistics involve min, max, average, l2norm and rms.
         </attribute>
       </element>
     </choice>
+  </define>
+  <define name="compression_visualise_continuous_index">
+    <optional>
+      <element name="compression_visualise_continuous_index">
+        <a:documentation>This options is to be used when performing a compression/melting run.
+If the options is set, it will use an increasing index, instead
+of the normal file naming nomeclature to name the visualisation files
+to allow for easier use with ParaView.
+More specifically the index be the simulation_name_{index}.csv
+where the index is incremented at every timestep of every compression.</a:documentation>
+        <empty/>
+      </element>
+    </optional>
   </define>
 </grammar>

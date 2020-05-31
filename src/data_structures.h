@@ -55,6 +55,18 @@ struct io_options_type {
   bool compression_stats = true; /* create a separate log file with stats */
   string dir = ".";              /* file output directory */
   string simulation_name = "";   /* simulation prefix/ name */
+  bool compression_visualise_continuous_index = false;
+  /**
+   * used for indexing the visualisation files if
+   * compression_visualise_continuous_index is true*/
+  size_t absolute_compression_step = 0;
+  /**
+   * used for naming just the compression particle visualisation files 
+   * with the original simulation name that does not include the compression
+   * increment at its end.
+   */
+    string simulation_name_cst = "";
+
 };
 
 struct options_type {
@@ -76,6 +88,7 @@ struct options_type {
   double temperature = 1.0;           /* simulation temperature */
   double power = 0;                   /* pair potential intensity */
   double a_cst = 0;                   /* generic softening parameter */
+  double q = 2.0;                     /* Parameter q for BIP */
   double kinetic_energy = 0;          /* kinetic energy */
   double cut_off = 0;                 /* cut off radius of simulation */
   double scale_v = 0;                 /* velocity scaling */
